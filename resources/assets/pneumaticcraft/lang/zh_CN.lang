@@ -21,7 +21,7 @@ tile.flyingFlower.name=飞行花
 tile.chopperPlant.name=直升机草
 tile.chargingStation.name=充能站
 tile.elevatorBase.name=电梯基座
-tile.elevatorFrame.name=电梯框架Gauge
+tile.elevatorFrame.name=电梯框架
 tile.pressureChamberInterface.name=压力室界面
 tile.vacuumPump.name=真空泵
 tile.pneumaticDoorBase.name=气压门基座
@@ -49,6 +49,8 @@ tile.programmer.name=编程器
 tile.droneInterface.name=无人机界面
 tile.creativeCompressor.name=创造模式压缩机
 tile.wheatHarvester.plasticPlants.name=塑料植物采集机
+tile.pressureChamberWall.wall.name=压力室墙体
+tile.pressureChamberWall.window.name=压力室视窗
 
 tile.monsterStoneEgg.name=蠹虫
 
@@ -248,6 +250,7 @@ gui.tooltip.plasticPlant=来源: %s
 
 # Misc
 itemGroup.tabPneumaticCraft=气压工艺
+message.date.ironman=今天钢铁侠首映了!
 
 # Death Messages
 death.attack.pressure1=%1$s和煎饼一样薄！
