@@ -1,7 +1,9 @@
 Contributing using Eclipse
 ==================
+a HowTo by [DarkStarDS9](https://github.com/DarkStarDS9)
 
 If you're not quite up to speed with Eclipse, Gradle or Forge, this should get you started.
+
 
 =======
 Eclipse
@@ -70,4 +72,4 @@ Wrapping Up
 
 Whatever way you chose, you should now be able to select your run-Configuration when you click the little arrow on the run-button. Do this now - you should now have 17 mods loaded. Create a new world. Have fun :o)
 
-Thanks to skyboy (Thermal Expansion) who pointed me (Rainer, aka DarkStar_DS9) in the right direction when I first tried to get a mod to compile and run.
+Thanks to skyboy (Thermal Expansion) who pointed me in the right direction when I first tried to get a mod to compile and run.
