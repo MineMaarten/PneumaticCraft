@@ -25,3 +25,7 @@ environment.properties
 .settings/
 /sounds
 gradle.properties
+/minecraft
+
+*.ipr
+*.iws
