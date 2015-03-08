@@ -6,3 +6,5 @@ This will make the Drone pick up items that are within the specified area. The D
 You can apply an item filter. With a filter, only items that are allowed by the filter will be picked up.
 
 The program is done when none of the (by the item filter allowed) items laying on the ground can fit in the Drone's inventory or when there are no items left to pick up.
+
+The drone can hold one type of item at a time. Be careful if items are already present in the drone's inventory, as in this case the drone can only pick up items of the same type.
