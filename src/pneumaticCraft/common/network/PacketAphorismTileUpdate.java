@@ -3,8 +3,8 @@ package pneumaticCraft.common.network;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import pneumaticCraft.common.tileentity.TileEntityAphorismTile;
-import cpw.mods.fml.common.network.ByteBufUtils;
 
 public class PacketAphorismTileUpdate extends LocationIntPacket<PacketAphorismTileUpdate>{
 
@@ -13,7 +13,7 @@ public class PacketAphorismTileUpdate extends LocationIntPacket<PacketAphorismTi
     public PacketAphorismTileUpdate(){}
 
     public PacketAphorismTileUpdate(TileEntityAphorismTile tile){
-        super(tile.xCoord, tile.yCoord, tile.zCoord);
+        super(tile.getPos());
         text = tile.getTextLines();
     }
 
@@ -41,7 +41,7 @@ public class PacketAphorismTileUpdate extends LocationIntPacket<PacketAphorismTi
 
     @Override
     public void handleServerSide(PacketAphorismTileUpdate message, EntityPlayer player){
-        TileEntity te = player.worldObj.getTileEntity(message.x, message.y, message.z);
+        TileEntity te = message.getTileEntity(player.worldObj);
         if(te instanceof TileEntityAphorismTile) {
             ((TileEntityAphorismTile)te).setTextLines(message.text);
         }

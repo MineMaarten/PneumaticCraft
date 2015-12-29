@@ -6,6 +6,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import pneumaticCraft.common.inventory.ContainerPneumaticBase;
 import pneumaticCraft.common.inventory.SyncedField;
 import pneumaticCraft.common.inventory.SyncedField.SyncedBoolean;
@@ -16,7 +17,6 @@ import pneumaticCraft.common.inventory.SyncedField.SyncedFluidTank;
 import pneumaticCraft.common.inventory.SyncedField.SyncedInt;
 import pneumaticCraft.common.inventory.SyncedField.SyncedItemStack;
 import pneumaticCraft.common.inventory.SyncedField.SyncedString;
-import cpw.mods.fml.common.network.ByteBufUtils;
 
 public class PacketUpdateGui extends AbstractPacket<PacketUpdateGui>{
     private int syncId;

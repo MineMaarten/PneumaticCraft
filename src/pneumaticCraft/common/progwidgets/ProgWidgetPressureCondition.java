@@ -1,9 +1,9 @@
 package pneumaticCraft.common.progwidgets;
 
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
-import net.minecraftforge.common.util.ForgeDirection;
 import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.api.tileentity.IPneumaticMachine;
 import pneumaticCraft.common.ai.DroneAIBlockCondition;
@@ -27,12 +27,12 @@ public class ProgWidgetPressureCondition extends ProgWidgetCondition{
         return new DroneAIBlockCondition(drone, (ProgWidgetAreaItemBase)widget){
 
             @Override
-            protected boolean evaluate(ChunkPosition pos){
-                TileEntity te = drone.getWorld().getTileEntity(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+            protected boolean evaluate(BlockPos pos){
+                TileEntity te = drone.getWorld().getTileEntity(pos);
                 if(te instanceof IPneumaticMachine) {
                     IAirHandler airHandler = ((IPneumaticMachine)te).getAirHandler();
                     float pressure = Float.MIN_VALUE;
-                    for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
+                    for(EnumFacing d : EnumFacing.VALUES) {
                         if(getSides()[d.ordinal()]) {
                             pressure = Math.max(airHandler.getPressure(d), pressure);
                         }

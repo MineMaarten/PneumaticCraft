@@ -5,15 +5,15 @@ import java.util.Set;
 
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetCoordinate;
 import pneumaticCraft.common.ai.DroneAIManager;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetCoordinate extends ProgWidget implements IVariableWidget{
 
@@ -60,7 +60,7 @@ public class ProgWidgetCoordinate extends ProgWidget implements IVariableWidget{
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.CREEPER_PLANT_DAMAGE;
+        return ItemPlastic.CREEPER_PLANT_DAMAGE;
     }
 
     @Override
@@ -98,7 +98,7 @@ public class ProgWidgetCoordinate extends ProgWidget implements IVariableWidget{
         this.aiManager = aiManager;
     }
 
-    public ChunkPosition getCoordinate(){
+    public BlockPos getCoordinate(){
         if(useVariable) {
             return aiManager.getCoordinate(variable);
         } else {
@@ -106,15 +106,15 @@ public class ProgWidgetCoordinate extends ProgWidget implements IVariableWidget{
         }
     }
 
-    public ChunkPosition getRawCoordinate(){
-        return new ChunkPosition(x, y, z);
+    public BlockPos getRawCoordinate(){
+        return new BlockPos(x, y, z);
     }
 
-    public void setCoordinate(ChunkPosition pos){
+    public void setCoordinate(BlockPos pos){
         if(pos != null) {
-            x = pos.chunkPosX;
-            y = pos.chunkPosY;
-            z = pos.chunkPosZ;
+            x = pos.getX();
+            y = pos.getY();
+            z = pos.getZ();
         } else {
             x = y = z = 0;
         }

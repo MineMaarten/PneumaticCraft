@@ -1,8 +1,9 @@
 package pneumaticCraft.api.block;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * Should be implemented by any block or FMP that allows to be rotated by a Pneumatic Wrench. It uses almost the same
@@ -10,5 +11,5 @@ import net.minecraftforge.common.util.ForgeDirection;
  */
 public interface IPneumaticWrenchable{
 
-    public boolean rotateBlock(World world, EntityPlayer player, int x, int y, int z, ForgeDirection side);
+    public boolean rotateBlock(World world, EntityPlayer player, BlockPos pos, EnumFacing side);
 }

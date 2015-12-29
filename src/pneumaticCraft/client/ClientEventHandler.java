@@ -12,18 +12,18 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderBiped;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import org.lwjgl.opengl.GL11;
 
@@ -41,22 +41,10 @@ import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.minigun.Minigun;
 import pneumaticCraft.common.progwidgets.IProgWidget;
 import pneumaticCraft.common.tileentity.TileEntityProgrammer;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
 
 public class ClientEventHandler{
     public static float playerRenderPartialTick;
-    private static boolean firstTick = true;
     private final RenderProgressingLine minigunFire = new RenderProgressingLine().setProgress(1);
-
-    @SubscribeEvent
-    public void onPlayerJoin(TickEvent.PlayerTickEvent event){
-        if(Config.shouldDisplayChangeNotification && firstTick && event.player.worldObj.isRemote && event.player == FMLClientHandler.instance().getClientPlayerEntity()) {
-            event.player.addChatComponentMessage(new ChatComponentText(EnumChatFormatting.GREEN + "[PneumaticCraft] Disabled world generation of plants and plant mob drops in your config automatically, oil is turned on as replacement. This is only done once, you can change it as you wish now."));
-            firstTick = false;
-        }
-    }
 
     @SubscribeEvent
     public void onItemTooltip(ItemTooltipEvent event){
@@ -111,31 +99,31 @@ public class ClientEventHandler{
 
     private void setRenderHead(EntityLivingBase entity, boolean setRender){
         if(entity.getEquipmentInSlot(4) != null && entity.getEquipmentInSlot(4).getItem() == Itemss.pneumaticHelmet && (Config.useHelmetModel || DateEventHandler.isIronManEvent())) {
-            Render renderer = RenderManager.instance.getEntityRenderObject(entity);
+            Render renderer = Minecraft.getMinecraft().getRenderManager().getEntityRenderObject(entity);
             if(renderer instanceof RenderBiped) {
                 ((RenderBiped)renderer).modelBipedMain.bipedHead.showModel = setRender;
             }
         }
     }
 
-    @SubscribeEvent
-    public void onPlayerRender(RenderPlayerEvent.Pre event){
-        playerRenderPartialTick = event.partialRenderTick;
-        if(!Config.useHelmetModel && !DateEventHandler.isIronManEvent() || event.entityPlayer.getCurrentArmor(3) == null || event.entityPlayer.getCurrentArmor(3).getItem() != Itemss.pneumaticHelmet) return;
-        event.renderer.modelBipedMain.bipedHead.showModel = false;
-    }
+    /* TODO 1.8 @SubscribeEvent
+      public void onPlayerRender(RenderPlayerEvent.Pre event){
+          playerRenderPartialTick = event.partialRenderTick;
+          if(!Config.useHelmetModel && !DateEventHandler.isIronManEvent() || event.entityPlayer.getCurrentArmor(3) == null || event.entityPlayer.getCurrentArmor(3).getItem() != Itemss.pneumaticHelmet) return;
+          event.renderer.modelBipedMain.bipedHead.showModel = false;
+      }
 
-    @SubscribeEvent
-    public void onPlayerRender(RenderPlayerEvent.Post event){
-        event.renderer.modelBipedMain.bipedHead.showModel = true;
-    }
+      @SubscribeEvent
+      public void onPlayerRender(RenderPlayerEvent.Post event){
+          event.renderer.modelBipedMain.bipedHead.showModel = true;
+      }*/
 
     @SubscribeEvent
     public void tickEnd(TickEvent.RenderTickEvent event){
         if(event.phase == TickEvent.Phase.END && FMLClientHandler.instance().getClient().inGameHasFocus && PneumaticCraft.proxy.getPlayer().worldObj != null && (ModuleRegulatorTube.inverted || !ModuleRegulatorTube.inLine)) {
             Minecraft mc = FMLClientHandler.instance().getClient();
-            ScaledResolution sr = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
-            FontRenderer fontRenderer = FMLClientHandler.instance().getClient().fontRenderer;
+            ScaledResolution sr = new ScaledResolution(mc);
+            FontRenderer fontRenderer = FMLClientHandler.instance().getClient().fontRendererObj;
             String warning = EnumChatFormatting.RED + I18n.format("gui.regulatorTube.hudMessage." + (ModuleRegulatorTube.inverted ? "inverted" : "notInLine"));
             fontRenderer.drawStringWithShadow(warning, sr.getScaledWidth() / 2 - fontRenderer.getStringWidth(warning) / 2, sr.getScaledHeight() / 2 + 30, 0xFFFFFFFF);
         }
@@ -152,7 +140,7 @@ public class ClientEventHandler{
         GL11.glPushMatrix();
         GL11.glTranslated(-playerX, -playerY, -playerZ);
 
-        for(EntityPlayer player : (List<EntityPlayer>)Minecraft.getMinecraft().theWorld.playerEntities) {
+        for(EntityPlayer player : Minecraft.getMinecraft().theWorld.playerEntities) {
             if(thisPlayer == player && Minecraft.getMinecraft().gameSettings.thirdPersonView == 0) continue;
             ItemStack curItem = player.getCurrentEquippedItem();
             if(curItem != null && curItem.getItem() == Itemss.minigun) {
@@ -170,10 +158,10 @@ public class ClientEventHandler{
                     for(int i = 0; i < 5; i++) {
 
                         Vec3 directionVec = player.getLookVec().normalize();
-                        Vec3 vec = Vec3.createVectorHelper(directionVec.xCoord, 0, directionVec.zCoord).normalize();
-                        vec.rotateAroundY((float)Math.toRadians(-15 + (player.rotationYawHead - player.renderYawOffset)));
+                        Vec3 vec = new Vec3(directionVec.xCoord, 0, directionVec.zCoord).normalize();
+                        vec.rotateYaw((float)Math.toRadians(-15 + (player.rotationYawHead - player.renderYawOffset)));
                         minigunFire.startX = vec.xCoord * gunRadius;
-                        minigunFire.startY = vec.yCoord * gunRadius - player.yOffset;
+                        minigunFire.startY = vec.yCoord * gunRadius - player.getYOffset();
                         minigunFire.startZ = vec.zCoord * gunRadius;
                         minigunFire.endX = directionVec.xCoord * 20 + player.getRNG().nextDouble() - 0.5;
                         minigunFire.endY = directionVec.yCoord * 20 + player.getRNG().nextDouble() - 0.5;

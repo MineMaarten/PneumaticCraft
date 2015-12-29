@@ -3,7 +3,7 @@ package pneumaticCraft.common.progwidgets;
 import java.util.List;
 
 import net.minecraft.util.ResourceLocation;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
 
 public class ProgWidgetStart extends ProgWidget{
@@ -45,7 +45,7 @@ public class ProgWidgetStart extends ProgWidget{
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.REPULSION_PLANT_DAMAGE;
+        return ItemPlastic.REPULSION_PLANT_DAMAGE;
     }
 
     @Override

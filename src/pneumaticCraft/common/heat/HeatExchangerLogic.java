@@ -8,8 +8,9 @@ import java.util.Set;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.tileentity.HeatBehaviour;
 import pneumaticCraft.common.heat.behaviour.HeatBehaviourManager;
@@ -27,17 +28,17 @@ public class HeatExchangerLogic implements IHeatExchangerLogic{
     private static boolean isAddingOrRemovingLogic;
 
     @Override
-    public void initializeAsHull(World world, int x, int y, int z, ForgeDirection... validSides){
+    public void initializeAsHull(World world, BlockPos pos, EnumFacing... validSides){
         if(world.isRemote) return;
         for(IHeatExchangerLogic logic : hullExchangers) {
             removeConnectedExchanger(logic);
         }
         hullExchangers.clear();
         newBehaviours = new ArrayList<HeatBehaviour>();
-        for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
+        for(EnumFacing d : EnumFacing.VALUES) {
             if(isSideValid(validSides, d)) {
-                HeatBehaviourManager.getInstance().addHeatBehaviours(world, x + d.offsetX, y + d.offsetY, z + d.offsetZ, this, newBehaviours);
-                IHeatExchangerLogic logic = HeatExchangerManager.getInstance().getLogic(world, x + d.offsetX, y + d.offsetY, z + d.offsetZ, d.getOpposite());
+                HeatBehaviourManager.getInstance().addHeatBehaviours(world, pos.offset(d), this, newBehaviours);
+                IHeatExchangerLogic logic = HeatExchangerManager.getInstance().getLogic(world, pos.offset(d), d.getOpposite());
                 if(logic != null) {
                     hullExchangers.add(logic);
                     addConnectedExchanger(logic);
@@ -46,9 +47,9 @@ public class HeatExchangerLogic implements IHeatExchangerLogic{
         }
     }
 
-    private boolean isSideValid(ForgeDirection[] validSides, ForgeDirection side){
+    private boolean isSideValid(EnumFacing[] validSides, EnumFacing side){
         if(validSides.length == 0) return true;
-        for(ForgeDirection d : validSides) {
+        for(EnumFacing d : validSides) {
             if(d == side) return true;
         }
         return false;

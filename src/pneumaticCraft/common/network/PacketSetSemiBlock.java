@@ -2,10 +2,10 @@ package pneumaticCraft.common.network;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import pneumaticCraft.common.semiblock.ISemiBlock;
 import pneumaticCraft.common.semiblock.SemiBlockManager;
-import cpw.mods.fml.common.network.ByteBufUtils;
 
 public class PacketSetSemiBlock extends LocationIntPacket<PacketSetSemiBlock>{
 
@@ -17,8 +17,8 @@ public class PacketSetSemiBlock extends LocationIntPacket<PacketSetSemiBlock>{
         this(semiBlock.getPos(), semiBlock);
     }
 
-    public PacketSetSemiBlock(ChunkPosition pos, ISemiBlock semiBlock){
-        super(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+    public PacketSetSemiBlock(BlockPos pos, ISemiBlock semiBlock){
+        super(pos);
         if(semiBlock != null) {
             id = SemiBlockManager.getKeyForSemiBlock(semiBlock);
         } else {
@@ -40,7 +40,7 @@ public class PacketSetSemiBlock extends LocationIntPacket<PacketSetSemiBlock>{
 
     @Override
     public void handleClientSide(PacketSetSemiBlock message, EntityPlayer player){
-        SemiBlockManager.getInstance(player.worldObj).setSemiBlock(player.worldObj, message.x, message.y, message.z, message.id.equals("") ? null : SemiBlockManager.getSemiBlockForKey(message.id));
+        SemiBlockManager.getInstance(player.worldObj).setSemiBlock(player.worldObj, message.pos, message.id.equals("") ? null : SemiBlockManager.getSemiBlockForKey(message.id));
     }
 
     @Override

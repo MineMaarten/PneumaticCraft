@@ -7,7 +7,7 @@ import net.minecraftforge.common.MinecraftForge;
 import pneumaticCraft.api.drone.DroneSuicideEvent;
 import pneumaticCraft.common.ai.IDroneBase;
 import pneumaticCraft.common.entity.living.EntityDrone;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
 
 public class ProgWidgetSuicide extends ProgWidget{
@@ -44,7 +44,7 @@ public class ProgWidgetSuicide extends ProgWidget{
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.REPULSION_PLANT_DAMAGE;
+        return ItemPlastic.REPULSION_PLANT_DAMAGE;
     }
 
     @Override

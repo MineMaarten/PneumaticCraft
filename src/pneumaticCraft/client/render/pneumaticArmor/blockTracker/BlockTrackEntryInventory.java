@@ -4,14 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import pneumaticCraft.api.client.pneumaticHelmet.IBlockTrackEntry;
 import pneumaticCraft.api.client.pneumaticHelmet.InventoryTrackEvent;
 import pneumaticCraft.client.render.pneumaticArmor.HUDHandler;
@@ -20,7 +22,6 @@ import pneumaticCraft.common.network.PacketDescriptionPacketRequest;
 import pneumaticCraft.common.util.IOHelper;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.Log;
-import cpw.mods.fml.relauncher.ReflectionHelper;
 
 public class BlockTrackEntryInventory implements IBlockTrackEntry{
 
@@ -29,13 +30,13 @@ public class BlockTrackEntryInventory implements IBlockTrackEntry{
 
     public static void addTileEntityToBlackList(TileEntity te, Throwable e){
         e.printStackTrace();
-        String title = te.getWorldObj().getBlock(te.xCoord, te.yCoord, te.zCoord).getLocalizedName();
+        String title = te.getWorld().getBlockState(te.getPos()).getBlock().getLocalizedName();
         HUDHandler.instance().addMessage("Block tracking failed for " + title + "! A stacktrace can be found in the log.", new ArrayList<String>(), 60, 0xFFFF0000);
         invBlackList.add((String)BlockTrackEntryInventory.tileEntityClassToNameMapping.get(te.getClass()));
     }
 
     @Override
-    public boolean shouldTrackWithThisEntry(IBlockAccess world, int x, int y, int z, Block block, TileEntity te){
+    public boolean shouldTrackWithThisEntry(IBlockAccess world, BlockPos pos, IBlockState state, TileEntity te){
         if(tileEntityClassToNameMapping == null) {
             try {
                 tileEntityClassToNameMapping = (Map)ReflectionHelper.findField(TileEntity.class, "field_145853_j", "classToNameMap").get(null);
@@ -55,8 +56,8 @@ public class BlockTrackEntryInventory implements IBlockTrackEntry{
     public boolean shouldBeUpdatedFromServer(TileEntity te){
         if(te instanceof TileEntityChest) {
             TileEntityChest chest = (TileEntityChest)te;
-            if(chest.adjacentChestXPos != null) NetworkHandler.sendToServer(new PacketDescriptionPacketRequest(chest.adjacentChestXPos.xCoord, chest.adjacentChestXPos.yCoord, chest.adjacentChestXPos.zCoord));
-            if(chest.adjacentChestZPos != null) NetworkHandler.sendToServer(new PacketDescriptionPacketRequest(chest.adjacentChestZPos.xCoord, chest.adjacentChestZPos.yCoord, chest.adjacentChestZPos.zCoord));
+            if(chest.adjacentChestXPos != null) NetworkHandler.sendToServer(new PacketDescriptionPacketRequest(chest.adjacentChestXPos.getPos()));
+            if(chest.adjacentChestZPos != null) NetworkHandler.sendToServer(new PacketDescriptionPacketRequest(chest.adjacentChestZPos.getPos()));
         }
         return true;
     }
@@ -67,7 +68,7 @@ public class BlockTrackEntryInventory implements IBlockTrackEntry{
     }
 
     @Override
-    public void addInformation(World world, int x, int y, int z, TileEntity te, List<String> infoList){
+    public void addInformation(World world, BlockPos pos, TileEntity te, List<String> infoList){
         IInventory inventory = IOHelper.getInventoryForTE(te);
         if(inventory != null) {
             boolean empty = true;

@@ -1,12 +1,12 @@
 package pneumaticCraft.common.tileentity;
 
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityHeatSink extends TileEntityCompressedIronBlock implements IHeatExchanger{
 
@@ -18,8 +18,8 @@ public class TileEntityHeatSink extends TileEntityCompressedIronBlock implements
     }
 
     @Override
-    public IHeatExchangerLogic getHeatExchangerLogic(ForgeDirection side){
-        return side == ForgeDirection.UNKNOWN || side == getRotation() ? super.getHeatExchangerLogic(side) : null;
+    public IHeatExchangerLogic getHeatExchangerLogic(EnumFacing side){
+        return side == null || side == getRotation() ? super.getHeatExchangerLogic(side) : null;
     }
 
     /**
@@ -27,8 +27,8 @@ public class TileEntityHeatSink extends TileEntityCompressedIronBlock implements
      * @return
      */
     @Override
-    protected ForgeDirection[] getConnectedHeatExchangerSides(){
-        return new ForgeDirection[]{getRotation()};
+    protected EnumFacing[] getConnectedHeatExchangerSides(){
+        return new EnumFacing[]{getRotation()};
     }
 
     @Override
@@ -37,8 +37,8 @@ public class TileEntityHeatSink extends TileEntityCompressedIronBlock implements
     }
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
         airExchanger.update();
         airExchanger.setTemperature(295);
     }
@@ -51,7 +51,7 @@ public class TileEntityHeatSink extends TileEntityCompressedIronBlock implements
     @Override
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox(){
-        return AxisAlignedBB.getBoundingBox(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 1, zCoord + 1);
+        return new AxisAlignedBB(getPos().getX(), getPos().getY(), getPos().getZ(), getPos().getX() + 1, getPos().getY() + 1, getPos().getZ() + 1);
     }
 
 }

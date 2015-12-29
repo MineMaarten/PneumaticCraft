@@ -3,7 +3,7 @@ package pneumaticCraft.common.tileentity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.api.recipe.AssemblyRecipe;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.recipes.programs.AssemblyProgram;
@@ -16,10 +16,10 @@ public class TileEntityAssemblyLaser extends TileEntityAssemblyRobot{
     private static final float ITEM_SIZE = 10F;
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
         if(laserStep > 0) {
-            ForgeDirection[] platformDirection = getPlatformDirection();
+            EnumFacing[] platformDirection = getPlatformDirection();
             if(platformDirection == null) {
                 laserStep = 105;
             }
@@ -78,7 +78,7 @@ public class TileEntityAssemblyLaser extends TileEntityAssemblyRobot{
     }
 
     @Override
-    public boolean gotoNeighbour(ForgeDirection primaryDir, ForgeDirection secondaryDir){
+    public boolean gotoNeighbour(EnumFacing primaryDir, EnumFacing secondaryDir){
         boolean diagonal = super.gotoNeighbour(primaryDir, secondaryDir);
         targetAngles[EnumAngles.TURN.ordinal()] -= ITEM_SIZE * 0.45D;
         return diagonal;

@@ -1,12 +1,14 @@
 package pneumaticCraft.common.tileentity;
 
+import java.util.Arrays;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.GuiSynced;
@@ -31,18 +33,18 @@ public class TileEntityElectrostaticCompressor extends TileEntityPneumaticBase i
     }
 
     @Override
-    public void updateEntity(){
+    public void update(){
         /*
          * Most of the Electrostatic Compressor's logic can be found in TickHandlerPneumaticCraft#handleElectrostaticGeneration().
          */
         if(worldObj.getTotalWorldTime() % 40 == 0) {
             for(ironBarsBeneath = 0; ironBarsBeneath < 128; ironBarsBeneath++) {
-                if(worldObj.getBlock(xCoord, yCoord - ironBarsBeneath - 1, zCoord) != Blocks.iron_bars) {
+                if(worldObj.getBlockState(getPos().offset(EnumFacing.DOWN, ironBarsBeneath + 1)).getBlock() != Blocks.iron_bars) {
                     break;
                 }
             }
         }
-        super.updateEntity();
+        super.update();
         if(!worldObj.isRemote) {
             if(lastRedstoneState != shouldEmitRedstone()) {
                 lastRedstoneState = !lastRedstoneState;
@@ -54,8 +56,8 @@ public class TileEntityElectrostaticCompressor extends TileEntityPneumaticBase i
     }
 
     @Override
-    public boolean isConnectedTo(ForgeDirection dir){
-        return dir != ForgeDirection.UP;
+    public boolean isConnectedTo(EnumFacing dir){
+        return dir != EnumFacing.UP;
     }
 
     public boolean shouldEmitRedstone(){
@@ -70,10 +72,10 @@ public class TileEntityElectrostaticCompressor extends TileEntityPneumaticBase i
 
     public void onStruckByLightning(){
         struckByLightningCooldown = 10;
-        if(getPressure(ForgeDirection.UNKNOWN) > PneumaticValues.DANGER_PRESSURE_ELECTROSTATIC_COMPRESSOR) {
+        if(getPressure(null) > PneumaticValues.DANGER_PRESSURE_ELECTROSTATIC_COMPRESSOR) {
             int maxRedirection = PneumaticValues.MAX_REDIRECTION_PER_IRON_BAR * ironBarsBeneath;
-            int tooMuchAir = (int)((getPressure(ForgeDirection.UNKNOWN) - PneumaticValues.DANGER_PRESSURE_ELECTROSTATIC_COMPRESSOR) * volume);
-            addAir(-Math.min(maxRedirection, tooMuchAir), ForgeDirection.UNKNOWN);
+            int tooMuchAir = (int)((getPressure(null) - PneumaticValues.DANGER_PRESSURE_ELECTROSTATIC_COMPRESSOR) * volume);
+            addAir(-Math.min(maxRedirection, tooMuchAir), null);
         }
     }
 
@@ -122,7 +124,7 @@ public class TileEntityElectrostaticCompressor extends TileEntityPneumaticBase i
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
 
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
@@ -141,7 +143,7 @@ public class TileEntityElectrostaticCompressor extends TileEntityPneumaticBase i
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
 
         return Blockss.electrostaticCompressor.getUnlocalizedName();
     }
@@ -153,10 +155,10 @@ public class TileEntityElectrostaticCompressor extends TileEntityPneumaticBase i
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
 
     @Override
     public void readFromNBT(NBTTagCompound nbtTagCompound){
@@ -200,8 +202,13 @@ public class TileEntityElectrostaticCompressor extends TileEntityPneumaticBase i
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
+    }
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
     }
 
     @Override

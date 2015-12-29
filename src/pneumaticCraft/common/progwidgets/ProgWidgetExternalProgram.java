@@ -4,14 +4,14 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetExternalProgram;
 import pneumaticCraft.common.ai.DroneAIExternalProgram;
 import pneumaticCraft.common.ai.IDroneBase;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetExternalProgram extends ProgWidgetAreaItemBase{
     public boolean shareVariables;
@@ -23,7 +23,7 @@ public class ProgWidgetExternalProgram extends ProgWidgetAreaItemBase{
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.ENDER_PLANT_DAMAGE;
+        return ItemPlastic.ENDER_PLANT_DAMAGE;
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import pneumaticCraft.api.client.pneumaticHelmet.IBlockTrackEntry;
 import pneumaticCraft.client.gui.widget.GuiKeybindCheckBox;
@@ -22,10 +23,10 @@ public class BlockTrackEntryList{
         trackList.add(new BlockTrackEntrySimple());
     }
 
-    public List<IBlockTrackEntry> getEntriesForCoordinate(IBlockAccess blockAccess, int x, int y, int z, TileEntity te){
+    public List<IBlockTrackEntry> getEntriesForCoordinate(IBlockAccess blockAccess, BlockPos pos, TileEntity te){
         List<IBlockTrackEntry> blockTrackers = new ArrayList<IBlockTrackEntry>();
         for(IBlockTrackEntry entry : trackList) {
-            if(GuiKeybindCheckBox.trackedCheckboxes.get(entry.getEntryName()).checked && entry.shouldTrackWithThisEntry(blockAccess, x, y, z, blockAccess.getBlock(x, y, z), te)) blockTrackers.add(entry);
+            if(GuiKeybindCheckBox.trackedCheckboxes.get(entry.getEntryName()).checked && entry.shouldTrackWithThisEntry(blockAccess, pos, blockAccess.getBlockState(pos), te)) blockTrackers.add(entry);
         }
         return blockTrackers;
     }

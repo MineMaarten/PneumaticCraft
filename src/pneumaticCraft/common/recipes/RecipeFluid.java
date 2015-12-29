@@ -2,13 +2,12 @@ package pneumaticCraft.common.recipes;
 
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
-public class RecipeFluid implements IRecipe{
+public class RecipeFluid extends AbstractRecipe{
 
     private final ShapedOreRecipe recipe;
     private final int fluidIndex;

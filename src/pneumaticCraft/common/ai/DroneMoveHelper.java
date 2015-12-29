@@ -19,7 +19,6 @@ public class DroneMoveHelper extends EntityMoveHelper{
 
     @Override
     public void setMoveTo(double x, double y, double z, double speed){
-
         double newY = y + 0.5 - 0.17;
         if(x != this.x || newY != this.y || z != this.z) {
             this.x = x;

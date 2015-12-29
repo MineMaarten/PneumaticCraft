@@ -3,8 +3,10 @@ package pneumaticCraft.common.progwidgets;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetCondition;
 import pneumaticCraft.client.gui.widget.GuiCheckBox;
@@ -14,8 +16,6 @@ import pneumaticCraft.common.ai.DroneAIDig;
 import pneumaticCraft.common.ai.IDroneBase;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetBlockCondition extends ProgWidgetCondition{
     private boolean checkingForAir;
@@ -36,9 +36,9 @@ public class ProgWidgetBlockCondition extends ProgWidgetCondition{
         return new DroneAIBlockCondition(drone, (ProgWidgetAreaItemBase)widget){
 
             @Override
-            protected boolean evaluate(ChunkPosition pos){
-                if(checkingForAir && drone.getWorld().isAirBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ)) return true;
-                if(checkingForLiquids && PneumaticCraftUtils.isBlockLiquid(drone.getWorld().getBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ))) return true;
+            protected boolean evaluate(BlockPos pos){
+                if(checkingForAir && drone.getWorld().isAirBlock(pos)) return true;
+                if(checkingForLiquids && PneumaticCraftUtils.isBlockLiquid(drone.getWorld().getBlockState(pos).getBlock())) return true;
                 if(!checkingForAir && !checkingForLiquids || getConnectedParameters()[1] != null) {
                     return DroneAIDig.isBlockValidForFilter(drone.getWorld(), drone, pos, widget);
                 } else {

@@ -3,9 +3,6 @@ package pneumaticCraft.common.item;
 import java.util.List;
 
 import net.minecraft.client.model.ModelBiped;
-import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.entity.RenderPlayer;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -16,49 +13,28 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.world.World;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.api.item.IPressurizable;
-import pneumaticCraft.client.render.item.RenderItemPneumaticHelmet;
 import pneumaticCraft.client.render.pneumaticArmor.RenderCoordWireframe;
 import pneumaticCraft.common.DateEventHandler;
 import pneumaticCraft.common.NBTUtil;
 import pneumaticCraft.common.config.Config;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
-import pneumaticCraft.lib.Log;
-import pneumaticCraft.lib.ModIds;
 import pneumaticCraft.lib.PneumaticValues;
 import pneumaticCraft.lib.Textures;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
-import thaumcraft.api.IGoggles;
-import thaumcraft.api.IRepairable;
-import thaumcraft.api.IVisDiscountGear;
-import thaumcraft.api.aspects.Aspect;
-import thaumcraft.api.nodes.IRevealer;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.common.Optional.Interface;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-@Optional.InterfaceList({@Interface(iface = "thaumcraft.api.IRepairable", modid = ModIds.THAUMCRAFT), @Interface(iface = "thaumcraft.api.IGoggles", modid = ModIds.THAUMCRAFT), @Interface(iface = "thaumcraft.api.IVisDiscountGear", modid = ModIds.THAUMCRAFT), @Interface(iface = "thaumcraft.api.nodes.IRevealer", modid = ModIds.THAUMCRAFT)})
-public class ItemPneumaticArmor extends ItemArmor implements IPressurizable, IChargingStationGUIHolderItem,
-        IRepairable, IRevealer, IGoggles, IVisDiscountGear{
-    private final String textureLocation;
-    private final int volume;
+//TODO 1.8 Thaumcraft dep @Optional.InterfaceList({@Interface(iface = "thaumcraft.api.IRepairable", modid = ModIds.THAUMCRAFT), @Interface(iface = "thaumcraft.api.IGoggles", modid = ModIds.THAUMCRAFT), @Interface(iface = "thaumcraft.api.IVisDiscountGear", modid = ModIds.THAUMCRAFT), @Interface(iface = "thaumcraft.api.nodes.IRevealer", modid = ModIds.THAUMCRAFT)})
+public class ItemPneumaticArmor extends ItemArmor implements IPressurizable, IChargingStationGUIHolderItem/*,
+IRepairable, IRevealer, IGoggles, IVisDiscountGear*/{
 
-    public ItemPneumaticArmor(String textureLocation, ItemArmor.ArmorMaterial par2EnumArmorMaterial, int par3,
-            int par4, int volume, int maxAir){
-        super(par2EnumArmorMaterial, par3, par4);
-        this.textureLocation = textureLocation;
-        this.volume = volume;
+    public ItemPneumaticArmor(ItemArmor.ArmorMaterial par2EnumArmorMaterial, int renderIndex, int armorType, int maxAir){
+        super(par2EnumArmorMaterial, renderIndex, armorType);
         setMaxDamage(maxAir);
         setCreativeTab(PneumaticCraft.tabPneumaticCraft);
-    }
-
-    @Override
-    public void registerIcons(IIconRegister register){
-        itemIcon = register.registerIcon(Textures.ICON_LOCATION + textureLocation);
     }
 
     @Override
@@ -106,7 +82,7 @@ public class ItemPneumaticArmor extends ItemArmor implements IPressurizable, ICh
             if(coordHandler != null) {
                 for(int i = 0; i < textList.size(); i++) {
                     if(((String)textList.get(i)).contains("Coordinate Tracker")) {
-                        textList.set(i, textList.get(i) + " (tracking " + coordHandler.x + ", " + coordHandler.y + ", " + coordHandler.z + " in " + coordHandler.worldObj.provider.getDimensionName() + ")");
+                        textList.set(i, textList.get(i) + " (tracking " + coordHandler.pos.getX() + ", " + coordHandler.pos.getY() + ", " + coordHandler.pos.getZ() + " in " + coordHandler.worldObj.provider.getDimensionName() + ")");
                         break;
                     }
                 }
@@ -163,8 +139,8 @@ public class ItemPneumaticArmor extends ItemArmor implements IPressurizable, ICh
     public static RenderCoordWireframe getCoordTrackLocation(ItemStack helmetStack){
         if(helmetStack == null || !NBTUtil.hasTag(helmetStack, "CoordTracker")) return null;
         NBTTagCompound tag = NBTUtil.getCompoundTag(helmetStack, "CoordTracker");
-        if(tag.getInteger("y") == -1 || FMLClientHandler.instance().getClient().theWorld.provider.dimensionId != tag.getInteger("dimID")) return null;
-        return new RenderCoordWireframe(FMLClientHandler.instance().getClient().theWorld, tag.getInteger("x"), tag.getInteger("y"), tag.getInteger("z"));
+        if(tag.getInteger("y") == -1 || FMLClientHandler.instance().getClient().theWorld.provider.getDimensionId() != tag.getInteger("dimID")) return null;
+        return new RenderCoordWireframe(FMLClientHandler.instance().getClient().theWorld, NBTUtil.getPos(tag));
     }
 
     @SideOnly(Side.CLIENT)
@@ -230,51 +206,34 @@ public class ItemPneumaticArmor extends ItemArmor implements IPressurizable, ICh
     @SideOnly(Side.CLIENT)
     public ModelBiped getArmorModel(EntityLivingBase entityLiving, ItemStack itemStack, int armorSlot){
         if(armorSlot == 0 && (Config.useHelmetModel || DateEventHandler.isIronManEvent())) {
-            RenderItemPneumaticHelmet.INSTANCE.render(entityLiving);
+            /*RenderItemPneumaticHelmet.INSTANCE.render(entityLiving);
 
-            RenderPlayer render = (RenderPlayer)RenderManager.instance.entityRenderMap.get(EntityPlayer.class);
+            RenderPlayer render = (RenderPlayer)Minecraft.getMinecraft().getRenderManager().entityRenderMap.get(EntityPlayer.class);
             ModelBiped model = armorSlot == 2 ? render.modelArmor : render.modelArmorChestplate;
             model.bipedHead.showModel = false;
-            return model;
+            return model;*///TODO 1.8 fix
         }
         return null;
     }
 
-    private boolean hasThaumcraftUpgradeAndPressure(ItemStack stack){
+    /*private boolean hasThaumcraftUpgradeAndPressure(ItemStack stack){
         return hasSufficientPressure(stack) && getUpgrades(ItemMachineUpgrade.UPGRADE_THAUMCRAFT, stack) > 0;
     }
 
-    @Override
-    @Optional.Method(modid = ModIds.THAUMCRAFT)
-    public int getVisDiscount(ItemStack stack, EntityPlayer player, Aspect aspect){
-        return hasThaumcraftUpgradeAndPressure(stack) ? 5 : 0;
-    }
+      @Override
+      @Optional.Method(modid = ModIds.THAUMCRAFT)
+      public int getVisDiscount(ItemStack stack, EntityPlayer player, Aspect aspect){
+          return hasThaumcraftUpgradeAndPressure(stack) ? 5 : 0;
+      }
 
-    @Override
-    public boolean showIngamePopups(ItemStack itemstack, EntityLivingBase player){
-        return hasThaumcraftUpgradeAndPressure(itemstack);
-    }
+      @Override
+      public boolean showIngamePopups(ItemStack itemstack, EntityLivingBase player){
+          return hasThaumcraftUpgradeAndPressure(itemstack);
+      }
 
-    @Override
-    public boolean showNodes(ItemStack itemstack, EntityLivingBase player){
-        return hasThaumcraftUpgradeAndPressure(itemstack);
-    }
-
-    /**
-     * Called to tick armor in the armor slot. Override to do something
-     *
-     * @param world
-     * @param player
-     * @param itemStack
-     */
-    @Override
-    public void onArmorTick(World world, EntityPlayer player, ItemStack iStack){
-        super.onArmorTick(world, player, iStack);
-        if(!world.isRemote && NBTUtil.hasTag(iStack, "Inventory") && iStack.getTagCompound().getTag("Inventory") instanceof NBTTagCompound) {
-            Log.info("Converting 'Inventory' tag to 'UpgradeInventory' in Pneumatic items");
-            iStack.getTagCompound().setTag("UpgradeInventory", iStack.getTagCompound().getTag("Inventory"));
-            iStack.getTagCompound().removeTag("Inventory");
-        }
-    }
+      @Override
+      public boolean showNodes(ItemStack itemstack, EntityLivingBase player){
+          return hasThaumcraftUpgradeAndPressure(itemstack);
+      }*/
 
 }

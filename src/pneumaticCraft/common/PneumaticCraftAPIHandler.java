@@ -10,6 +10,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
@@ -124,7 +125,7 @@ public class PneumaticCraftAPIHandler implements IPneumaticCraftInterface{
             List<IHackableEntity> hackables = hackingProps.getCurrentHacks();
             if(hackables != null) return hackables;
         } else {
-            Log.warning("Extended entity props HackingEntityProperties couldn't be found in the entity " + entity.getCommandSenderName());
+            Log.warning("Extended entity props HackingEntityProperties couldn't be found in the entity " + entity.getName());
         }
         return new ArrayList<IHackableEntity>();
     }
@@ -142,9 +143,9 @@ public class PneumaticCraftAPIHandler implements IPneumaticCraftInterface{
     }
 
     @Override
-    public int getProtectingSecurityStations(World world, int x, int y, int z, EntityPlayer player, boolean showRangeLines){
+    public int getProtectingSecurityStations(World world, BlockPos pos, EntityPlayer player, boolean showRangeLines){
         if(world.isRemote) throw new IllegalArgumentException("This method can only be called from the server side!");
-        return PneumaticCraftUtils.getProtectingSecurityStations(world, x, y, z, player, showRangeLines, false);
+        return PneumaticCraftUtils.getProtectingSecurityStations(world, pos, player, showRangeLines, false);
     }
 
     @Override
@@ -199,23 +200,23 @@ public class PneumaticCraftAPIHandler implements IPneumaticCraftInterface{
     }
 
     @Override
-    public EntityCreature deliverItemsAmazonStyle(World world, int x, int y, int z, ItemStack... deliveredStacks){
-        return ProgrammedDroneUtils.deliverItemsAmazonStyle(world, x, y, z, deliveredStacks);
+    public EntityCreature deliverItemsAmazonStyle(World world, BlockPos pos, ItemStack... deliveredStacks){
+        return ProgrammedDroneUtils.deliverItemsAmazonStyle(world, pos, deliveredStacks);
     }
 
     @Override
-    public EntityCreature retrieveItemsAmazonStyle(World world, int x, int y, int z, ItemStack... queriedStacks){
-        return ProgrammedDroneUtils.retrieveItemsAmazonStyle(world, x, y, z, queriedStacks);
+    public EntityCreature retrieveItemsAmazonStyle(World world, BlockPos pos, ItemStack... queriedStacks){
+        return ProgrammedDroneUtils.retrieveItemsAmazonStyle(world, pos, queriedStacks);
     }
 
     @Override
-    public EntityCreature deliverFluidAmazonStyle(World world, int x, int y, int z, FluidStack deliveredFluid){
-        return ProgrammedDroneUtils.deliverFluidAmazonStyle(world, x, y, z, deliveredFluid);
+    public EntityCreature deliverFluidAmazonStyle(World world, BlockPos pos, FluidStack deliveredFluid){
+        return ProgrammedDroneUtils.deliverFluidAmazonStyle(world, pos, deliveredFluid);
     }
 
     @Override
-    public EntityCreature retrieveFluidAmazonStyle(World world, int x, int y, int z, FluidStack queriedFluid){
-        return ProgrammedDroneUtils.retrieveFluidAmazonStyle(world, x, y, z, queriedFluid);
+    public EntityCreature retrieveFluidAmazonStyle(World world, BlockPos pos, FluidStack queriedFluid){
+        return ProgrammedDroneUtils.retrieveFluidAmazonStyle(world, pos, queriedFluid);
     }
 
     @Override

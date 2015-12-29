@@ -10,9 +10,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -22,8 +26,6 @@ import pneumaticCraft.common.network.PacketNotifyVariablesRemote;
 import pneumaticCraft.common.remote.GlobalVariableManager;
 import pneumaticCraft.common.tileentity.TileEntitySecurityStation;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ItemRemote extends ItemPneumatic{
     public ItemRemote(String texture){
@@ -47,9 +49,9 @@ public class ItemRemote extends ItemPneumatic{
      * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
      */
     @Override
-    public boolean onItemUseFirst(ItemStack remote, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ){
+    public boolean onItemUseFirst(ItemStack remote, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ){
         if(!world.isRemote && !player.isSneaking() && isAllowedToEdit(player, remote)) {
-            TileEntity te = world.getTileEntity(x, y, z);
+            TileEntity te = world.getTileEntity(pos);
             if(te instanceof TileEntitySecurityStation) {
                 if(((TileEntitySecurityStation)te).doesAllowPlayer(player)) {
                     NBTTagCompound tag = remote.getTagCompound();
@@ -57,11 +59,11 @@ public class ItemRemote extends ItemPneumatic{
                         tag = new NBTTagCompound();
                         remote.setTagCompound(tag);
                     }
-                    tag.setInteger("securityX", x);
-                    tag.setInteger("securityY", y);
-                    tag.setInteger("securityZ", z);
-                    tag.setInteger("securityDimension", world.provider.dimensionId);
-                    player.addChatComponentMessage(new ChatComponentTranslation("gui.remote.boundSecurityStation", x, y, z));
+                    tag.setInteger("securityX", pos.getX());
+                    tag.setInteger("securityY", pos.getY());
+                    tag.setInteger("securityZ", pos.getZ());
+                    tag.setInteger("securityDimension", world.provider.getDimensionId());
+                    player.addChatComponentMessage(new ChatComponentTranslation("gui.remote.boundSecurityStation", pos.getX(), pos.getY(), pos.getZ()));
                     return true;
                 } else {
                     player.addChatComponentMessage(new ChatComponentTranslation("gui.remote.cantBindSecurityStation"));
@@ -132,13 +134,13 @@ public class ItemRemote extends ItemPneumatic{
                 int dimensionId = tag.getInteger("securityDimension");
                 WorldServer world = null;
                 for(WorldServer w : MinecraftServer.getServer().worldServers) {
-                    if(w.provider.dimensionId == dimensionId) {
+                    if(w.provider.getDimensionId() == dimensionId) {
                         world = w;
                         break;
                     }
                 }
                 if(world != null) {
-                    TileEntity te = world.getTileEntity(x, y, z);
+                    TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
                     if(te instanceof TileEntitySecurityStation) {
                         boolean canAccess = ((TileEntitySecurityStation)te).doesAllowPlayer(player);
                         if(!canAccess) {
@@ -164,13 +166,13 @@ public class ItemRemote extends ItemPneumatic{
                     int dimensionId = tag.getInteger("securityDimension");
                     WorldServer world = null;
                     for(WorldServer w : MinecraftServer.getServer().worldServers) {
-                        if(w.provider.dimensionId == dimensionId) {
+                        if(w.provider.getDimensionId() == dimensionId) {
                             world = w;
                             break;
                         }
                     }
                     if(world != null) {
-                        TileEntity te = world.getTileEntity(x, y, z);
+                        TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
                         if(!(te instanceof TileEntitySecurityStation)) {
                             tag.removeTag("securityX");
                             tag.removeTag("securityY");

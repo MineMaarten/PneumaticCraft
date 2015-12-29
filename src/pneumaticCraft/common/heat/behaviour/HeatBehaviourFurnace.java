@@ -20,17 +20,19 @@ public class HeatBehaviourFurnace extends HeatBehaviour<TileEntityFurnace>{
     public void update(){
         TileEntityFurnace furnace = getTileEntity();
         if(getHeatExchanger().getTemperature() > 373) {
-            if(furnace.furnaceBurnTime < 190 && furnace.getStackInSlot(0) != null) {
-                if(furnace.furnaceBurnTime == 0) BlockFurnace.updateFurnaceBlockState(true, furnace.getWorldObj(), furnace.xCoord, furnace.yCoord, furnace.zCoord);
-                furnace.currentItemBurnTime = 200;
-                furnace.furnaceBurnTime += 10;
+            int furnaceBurnTime = furnace.getField(0);
+            int furnaceCookTime = furnace.getField(2);
+            if(furnaceBurnTime < 190 && furnace.getStackInSlot(0) != null) {
+                if(furnaceBurnTime == 0) BlockFurnace.setState(true, furnace.getWorld(), furnace.getPos());
+                furnace.setField(1, 200); //currentItemBurnTime
+                furnace.setField(0, furnaceBurnTime + 10);
                 getHeatExchanger().addHeat(-1);
             }
-            if(furnace.furnaceCookTime > 0) {//Easy performance saver, the Furnace won't be ticked unnecessary when there's nothing to cook (or when just started cooking).
+            if(furnaceCookTime > 0) {//Easy performance saver, the Furnace won't be ticked unnecessary when there's nothing to cook (or when just started cooking).
                 int progress = Math.max(0, ((int)getHeatExchanger().getTemperature() - 343) / 30);
                 progress = Math.min(5, progress);
                 for(int i = 0; i < progress; i++) {
-                    furnace.updateEntity();
+                    furnace.update();
                 }
             }
         }

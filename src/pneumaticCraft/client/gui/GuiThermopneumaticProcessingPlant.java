@@ -6,7 +6,6 @@ import java.util.List;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.StatCollector;
-import net.minecraftforge.common.util.ForgeDirection;
 
 import org.lwjgl.opengl.GL11;
 
@@ -31,7 +30,7 @@ public class GuiThermopneumaticProcessingPlant extends
         super.initGui();
         addWidget(new WidgetTank(-1, guiLeft + 13, guiTop + 15, te.getInputTank()));
         addWidget(new WidgetTank(-1, guiLeft + 79, guiTop + 15, te.getOutputTank()));
-        addWidget(tempWidget = new WidgetTemperature(-1, guiLeft + 98, guiTop + 15, 273, 673, te.getHeatExchangerLogic(ForgeDirection.UNKNOWN), (int)te.requiredTemperature));
+        addWidget(tempWidget = new WidgetTemperature(-1, guiLeft + 98, guiTop + 15, 273, 673, te.getHeatExchangerLogic(null), (int)te.requiredTemperature));
     }
 
     @Override
@@ -53,7 +52,7 @@ public class GuiThermopneumaticProcessingPlant extends
     @Override
     protected void drawGuiContainerForegroundLayer(int x, int y){
         fontRendererObj.drawString(I18n.format("gui.tab.upgrades"), 91, 83, 4210752);
-        String containerName = te.hasCustomInventoryName() ? te.getInventoryName() : StatCollector.translateToLocal(te.getInventoryName() + ".name");
+        String containerName = te.hasCustomName() ? te.getName() : StatCollector.translateToLocal(te.getName() + ".name");
         GL11.glPushMatrix();
         GL11.glScaled(0.97, 0.97, 1);
         fontRendererObj.drawString(containerName, xSize / 2 - fontRendererObj.getStringWidth(containerName) / 2 + 1, 5, 4210752);
@@ -80,7 +79,7 @@ public class GuiThermopneumaticProcessingPlant extends
 
         if(!te.hasRecipe) {
             curInfo.add("gui.tab.problems.thermopneumaticProcessingPlant.noSufficientIngredients");
-        } else if(te.getHeatExchangerLogic(ForgeDirection.UNKNOWN).getTemperature() < te.requiredTemperature) {
+        } else if(te.getHeatExchangerLogic(null).getTemperature() < te.requiredTemperature) {
             curInfo.add("gui.tab.problems.notEnoughHeat");
         }
     }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 
@@ -47,7 +48,7 @@ public class TwitchStreamerSensor implements IPollSensorSetting{
     }
 
     @Override
-    public int getRedstoneValue(World world, int x, int y, int z, int sensorRange, String textBoxText){
+    public int getRedstoneValue(World world, BlockPos pos, int sensorRange, String textBoxText){
         return TwitchStream.isOnline(textBoxText) ? 15 : 0;
     }
 

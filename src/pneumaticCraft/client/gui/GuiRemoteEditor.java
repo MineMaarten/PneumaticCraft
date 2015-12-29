@@ -1,6 +1,7 @@
 package pneumaticCraft.client.gui;
 
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentTranslation;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
 import org.lwjgl.input.Mouse;
 
@@ -29,7 +31,6 @@ import pneumaticCraft.common.remote.ActionWidgetVariable;
 import pneumaticCraft.common.remote.RemoteLayout;
 import pneumaticCraft.common.remote.WidgetLabelVariable;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.client.FMLClientHandler;
 
 public class GuiRemoteEditor extends GuiRemote{
     private GuiInventorySearcher invSearchGui;
@@ -117,7 +118,7 @@ public class GuiRemoteEditor extends GuiRemote{
     @Override
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int x, int y){
         bindGuiTexture();
-        Gui.func_146110_a(guiLeft, guiTop, 0, 0, xSize, ySize, 320, 256);
+        Gui.drawModalRectWithCustomSizedTexture(guiLeft, guiTop, 0, 0, xSize, ySize, 320, 256);
         super.drawGuiContainerBackgroundLayer(partialTicks, x, y);
 
         x += guiLeft;
@@ -189,7 +190,7 @@ public class GuiRemoteEditor extends GuiRemote{
     }
 
     @Override
-    protected void mouseClicked(int x, int y, int par3){
+    protected void mouseClicked(int x, int y, int par3) throws IOException{
         super.mouseClicked(x, y, par3);
 
         if(par3 == 1) {

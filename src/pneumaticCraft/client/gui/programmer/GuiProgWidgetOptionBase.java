@@ -1,5 +1,7 @@
 package pneumaticCraft.client.gui.programmer;
 
+import java.io.IOException;
+
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 import pneumaticCraft.client.gui.GuiPneumaticScreenBase;
@@ -21,7 +23,7 @@ public class GuiProgWidgetOptionBase<Widget extends IProgWidget> extends GuiPneu
     }
 
     @Override
-    public void keyTyped(char key, int keyCode){
+    public void keyTyped(char key, int keyCode) throws IOException{
         super.keyTyped(key, keyCode);
         if(keyCode == 1) {
             onGuiClosed();

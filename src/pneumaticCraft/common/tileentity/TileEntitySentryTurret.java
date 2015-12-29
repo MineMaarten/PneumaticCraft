@@ -1,5 +1,6 @@
 package pneumaticCraft.common.tileentity;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -12,9 +13,10 @@ import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import pneumaticCraft.common.ai.StringFilterEntitySelector;
@@ -54,14 +56,14 @@ public class TileEntitySentryTurret extends TileEntityBase implements IRedstoneC
     }
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
         if(!worldObj.isRemote) {
             range = 16 + Math.min(16, getUpgrades(ItemMachineUpgrade.UPGRADE_RANGE));
             if(getMinigun().getAttackTarget() == null && redstoneAllows()) {
                 getMinigun().setSweeping(true);
                 if(worldObj.getTotalWorldTime() % 20 == 0) {
-                    List<EntityLivingBase> entities = worldObj.selectEntitiesWithinAABB(EntityLivingBase.class, getTargetingBoundingBox(), entitySelector);
+                    List<EntityLivingBase> entities = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, getTargetingBoundingBox(), entitySelector);
                     if(entities.size() > 0) {
                         Collections.sort(entities, new TargetSorter());
                         getMinigun().setAttackTarget(entities.get(0));
@@ -73,12 +75,12 @@ public class TileEntitySentryTurret extends TileEntityBase implements IRedstoneC
             }
             EntityLivingBase target = getMinigun().getAttackTarget();
             if(target != null) {
-                if(!redstoneAllows() || !entitySelector.isEntityApplicable(target)) {
+                if(!redstoneAllows() || !entitySelector.apply(target)) {
                     getMinigun().setAttackTarget(null);
                     targetEntityId = -1;
                 } else {
                     if(worldObj.getTotalWorldTime() % 5 == 0) {
-                        getFakePlayer().setPosition(xCoord + 0.5, yCoord + 0.5, zCoord + 0.5); //Make sure the knockback has the right direction.
+                        getFakePlayer().setPosition(getPos().getX() + 0.5, getPos().getY() + 0.5, getPos().getZ() + 0.5); //Make sure the knockback has the right direction.
                         boolean usedAmmo = getMinigun().tryFireMinigun(target);
                         if(usedAmmo) {
                             for(int i = 4; i < inventory.length; i++) {
@@ -92,18 +94,18 @@ public class TileEntitySentryTurret extends TileEntityBase implements IRedstoneC
                 }
             }
         }
-        getMinigun().update(xCoord + 0.5, yCoord + 0.5, zCoord + 0.5);
+        getMinigun().update(getPos().getX() + 0.5, getPos().getY() + 0.5, getPos().getZ() + 0.5);
     }
 
     private boolean canSeeEntity(Entity entity){
-        Vec3 entityVec = Vec3.createVectorHelper(entity.posX + entity.width / 2, entity.posY + entity.height / 2, entity.posZ + entity.width / 2);
-        Vec3 tileVec = Vec3.createVectorHelper(xCoord + 0.5, yCoord + 0.5, zCoord + 0.5);
+        Vec3 entityVec = new Vec3(entity.posX + entity.width / 2, entity.posY + entity.height / 2, entity.posZ + entity.width / 2);
+        Vec3 tileVec = new Vec3(getPos().getX() + 0.5, getPos().getY() + 0.5, getPos().getZ() + 0.5);
         MovingObjectPosition trace = worldObj.rayTraceBlocks(entityVec, tileVec);
-        return trace != null && trace.blockX == xCoord && trace.blockY == yCoord && trace.blockZ == zCoord;
+        return trace != null && trace.getBlockPos().equals(getPos());
     }
 
     private AxisAlignedBB getTargetingBoundingBox(){
-        return AxisAlignedBB.getBoundingBox(xCoord - range, yCoord - range, zCoord - range, xCoord + range + 1, yCoord + range + 1, zCoord + range + 1);
+        return new AxisAlignedBB(getPos().getX() - range, getPos().getY() - range, getPos().getZ() - range, getPos().getX() + range + 1, getPos().getY() + range + 1, getPos().getZ() + range + 1);
     }
 
     @Override
@@ -181,7 +183,7 @@ public class TileEntitySentryTurret extends TileEntityBase implements IRedstoneC
      * Returns the name of the inventory.
      */
     @Override
-    public String getInventoryName(){
+    public String getName(){
         return Blockss.sentryTurret.getUnlocalizedName();
     }
 
@@ -218,7 +220,7 @@ public class TileEntitySentryTurret extends TileEntityBase implements IRedstoneC
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
             setInventorySlotContents(slot, null);
@@ -258,7 +260,7 @@ public class TileEntitySentryTurret extends TileEntityBase implements IRedstoneC
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 
@@ -273,24 +275,29 @@ public class TileEntitySentryTurret extends TileEntityBase implements IRedstoneC
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
 
     @Override
-    public int[] getAccessibleSlotsFromSide(int p_94128_1_){
+    public int[] getSlotsForFace(EnumFacing p_94128_1_){
         return new int[]{0, 1, 2, 3, 4, 5, 6, 7};
     }
 
     @Override
-    public boolean canInsertItem(int slot, ItemStack stack, int side){
+    public boolean canInsertItem(int slot, ItemStack stack, EnumFacing side){
         return isItemValidForSlot(slot, stack);
     }
 
     @Override
-    public boolean canExtractItem(int slot, ItemStack stack, int side){
+    public boolean canExtractItem(int slot, ItemStack stack, EnumFacing side){
         return true;
+    }
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
     }
 
     private class MinigunSentryTurret extends Minigun{
@@ -321,7 +328,7 @@ public class TileEntitySentryTurret extends TileEntityBase implements IRedstoneC
 
         @Override
         public void playSound(String soundName, float volume, float pitch){
-            worldObj.playSoundEffect(xCoord + 0.5, yCoord + 0.5, zCoord + 0.5, soundName, volume, pitch);
+            worldObj.playSoundEffect(getPos().getX() + 0.5, getPos().getY() + 0.5, getPos().getZ() + 0.5, soundName, volume, pitch);
         }
 
         @Override
@@ -337,10 +344,10 @@ public class TileEntitySentryTurret extends TileEntityBase implements IRedstoneC
 
     private class TargetSorter implements Comparator<Entity>{
 
-        private final ChunkPosition pos;
+        private final BlockPos pos;
 
         public TargetSorter(){
-            pos = new ChunkPosition(xCoord, yCoord, zCoord);
+            pos = new BlockPos(getPos().getX(), getPos().getY(), getPos().getZ());
         }
 
         @Override
@@ -354,20 +361,20 @@ public class TileEntitySentryTurret extends TileEntityBase implements IRedstoneC
     private class SentryTurretEntitySelector extends StringFilterEntitySelector{
 
         @Override
-        public boolean isEntityApplicable(Entity entity){
+        public boolean apply(Entity entity){
             if(entity instanceof EntityPlayer) {
                 EntityPlayer player = (EntityPlayer)entity;
                 if(player.capabilities.isCreativeMode || isExcludedBySecurityStations(player)) return false;
             }
-            return super.isEntityApplicable(entity) && inRange(entity) && canSeeEntity(entity);
+            return super.apply(entity) && inRange(entity) && canSeeEntity(entity);
         }
 
         private boolean inRange(Entity entity){
-            return PneumaticCraftUtils.distBetween(new ChunkPosition(xCoord, yCoord, zCoord), entity.posX, entity.posY, entity.posZ) <= range;
+            return PneumaticCraftUtils.distBetween(new BlockPos(getPos().getX(), getPos().getY(), getPos().getZ()), entity.posX, entity.posY, entity.posZ) <= range;
         }
 
         private boolean isExcludedBySecurityStations(EntityPlayer player){
-            Iterator<TileEntitySecurityStation> iterator = PneumaticCraftUtils.getSecurityStations(worldObj, xCoord, yCoord, zCoord, false).iterator();
+            Iterator<TileEntitySecurityStation> iterator = PneumaticCraftUtils.getSecurityStations(worldObj, getPos(), false).iterator();
             if(iterator.hasNext()) { //When there are Security Stations, all stations need to be allowing the player.
                 while(iterator.hasNext()) {
                     if(!iterator.next().doesAllowPlayer(player)) return false;

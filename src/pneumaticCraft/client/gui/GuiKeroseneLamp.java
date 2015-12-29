@@ -1,5 +1,6 @@
 package pneumaticCraft.client.gui;
 
+import java.io.IOException;
 import java.util.List;
 
 import net.minecraft.client.resources.I18n;
@@ -56,7 +57,7 @@ public class GuiKeroseneLamp extends GuiPneumaticContainerBase<TileEntityKerosen
     }
 
     @Override
-    protected void mouseClicked(int par1, int par2, int par3){
+    protected void mouseClicked(int par1, int par2, int par3) throws IOException{
         super.mouseClicked(par1, par2, par3);
         if(!rangeWidget.isFocused()) {
             sendPacketToServer(rangeWidget.getValue());

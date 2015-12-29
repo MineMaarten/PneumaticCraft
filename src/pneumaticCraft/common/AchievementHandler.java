@@ -9,9 +9,11 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.Achievement;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Vec3i;
 import net.minecraft.world.ChunkCache;
 import net.minecraftforge.common.AchievementPage;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import pneumaticCraft.common.block.Blockss;
@@ -85,36 +87,39 @@ public class AchievementHandler{
         return achieveList.get(id);
     }
 
-    public static void checkFor9x9(EntityPlayer player, int x, int y, int z){
-        ChunkCache cache = new ChunkCache(player.worldObj, x - 8, y, z - 8, x + 8, y, z + 8, 0);
-        ForgeDirection[] dirs = {ForgeDirection.NORTH, ForgeDirection.WEST};
-        for(ForgeDirection dir : dirs) {
+    public static void checkFor9x9(EntityPlayer player, BlockPos pos){
+        ChunkCache cache = new ChunkCache(player.worldObj, pos.subtract(new Vec3i(8, 0, 8)), pos.add(new Vec3i(8, 0, 8)), 0);
+        EnumFacing[] dirs = {EnumFacing.NORTH, EnumFacing.WEST};
+        int x = pos.getX();
+        int y = pos.getY();
+        int z = pos.getZ();
+        for(EnumFacing dir : dirs) {
             int wallLength = 1;
             int minX = x;
             int minZ = z;
             int maxX = x;
             int maxZ = z;
-            int newX = x + dir.offsetX;
-            int newZ = z + dir.offsetZ;
-            while(wallLength < 9 && cache.getBlock(newX, y, newZ) == Blocks.cobblestone) {
+            int newX = x + dir.getFrontOffsetX();
+            int newZ = z + dir.getFrontOffsetZ();
+            while(wallLength < 9 && cache.getBlockState(new BlockPos(newX, y, newZ)).getBlock() == Blocks.cobblestone) {
                 wallLength++;
                 minX = Math.min(minX, newX);
                 minZ = Math.min(minZ, newZ);
                 maxX = Math.max(maxX, newX);
                 maxZ = Math.max(maxZ, newZ);
-                newX += dir.offsetX;
-                newZ += dir.offsetZ;
+                newX += dir.getFrontOffsetX();
+                newZ += dir.getFrontOffsetZ();
             }
-            newX = x - dir.offsetX;
-            newZ = z - dir.offsetZ;
-            while(wallLength < 9 && cache.getBlock(newX, y, newZ) == Blocks.cobblestone) {
+            newX = x - dir.getFrontOffsetX();
+            newZ = z - dir.getFrontOffsetZ();
+            while(wallLength < 9 && cache.getBlockState(new BlockPos(newX, y, newZ)).getBlock() == Blocks.cobblestone) {
                 wallLength++;
                 minX = Math.min(minX, newX);
                 minZ = Math.min(minZ, newZ);
                 maxX = Math.max(maxX, newX);
                 maxZ = Math.max(maxZ, newZ);
-                newX -= dir.offsetX;
-                newZ -= dir.offsetZ;
+                newX -= dir.getFrontOffsetX();
+                newZ -= dir.getFrontOffsetZ();
             }
             if(wallLength == 9) {
                 if(checkFor9x9(cache, x, y, z, minX, minZ, maxX, maxZ)) {
@@ -130,15 +135,15 @@ public class AchievementHandler{
             for(int offset = 0; offset < 2; offset++) {
                 boolean isValid = true;
                 for(int i = 0; i < 9; i++) {
-                    if(cache.getBlock(x - 8 + offset * 16, y, minZ + i) != Blocks.cobblestone) {
+                    if(cache.getBlockState(new BlockPos(x - 8 + offset * 16, y, minZ + i)) != Blocks.cobblestone) {
                         isValid = false;
                         break;
                     }
-                    if(cache.getBlock(x - 8 + offset * 8 + i, y, minZ) != Blocks.cobblestone) {
+                    if(cache.getBlockState(new BlockPos(x - 8 + offset * 8 + i, y, minZ)) != Blocks.cobblestone) {
                         isValid = false;
                         break;
                     }
-                    if(cache.getBlock(x - 8 + offset * 8 + i, y, maxZ) != Blocks.cobblestone) {
+                    if(cache.getBlockState(new BlockPos(x - 8 + offset * 8 + i, y, maxZ)) != Blocks.cobblestone) {
                         isValid = false;
                         break;
                     }
@@ -149,15 +154,15 @@ public class AchievementHandler{
             for(int offset = 0; offset < 2; offset++) {
                 boolean isValid = true;
                 for(int i = 0; i < 9; i++) {
-                    if(cache.getBlock(minX + i, y, z - 8 + offset * 16) != Blocks.cobblestone) {
+                    if(cache.getBlockState(new BlockPos(minX + i, y, z - 8 + offset * 16)) != Blocks.cobblestone) {
                         isValid = false;
                         break;
                     }
-                    if(cache.getBlock(minX, y, z - 8 + offset * 8 + i) != Blocks.cobblestone) {
+                    if(cache.getBlockState(new BlockPos(minX, y, z - 8 + offset * 8 + i)) != Blocks.cobblestone) {
                         isValid = false;
                         break;
                     }
-                    if(cache.getBlock(maxX, y, z - 8 + offset * 8 + i) != Blocks.cobblestone) {
+                    if(cache.getBlockState(new BlockPos(maxX, y, z - 8 + offset * 8 + i)) != Blocks.cobblestone) {
                         isValid = false;
                         break;
                     }

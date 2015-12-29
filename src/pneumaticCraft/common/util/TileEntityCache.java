@@ -1,24 +1,23 @@
 package pneumaticCraft.common.util;
 
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 public class TileEntityCache{
     private TileEntity te;
     private final World world;
-    private final int x, y, z;
+    private final BlockPos pos;
 
-    public TileEntityCache(World world, int x, int y, int z){
+    public TileEntityCache(World world, BlockPos pos){
         this.world = world;
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        this.pos = pos;
         update();
     }
 
     public void update(){
-        te = world.getTileEntity(x, y, z);
+        te = world.getTileEntity(pos);
     }
 
     public TileEntity getTileEntity(){
@@ -26,11 +25,11 @@ public class TileEntityCache{
         return te;
     }
 
-    public static TileEntityCache[] getDefaultCache(World world, int x, int y, int z){
+    public static TileEntityCache[] getDefaultCache(World world, BlockPos pos){
         TileEntityCache[] cache = new TileEntityCache[6];
         for(int i = 0; i < 6; i++) {
-            ForgeDirection d = ForgeDirection.getOrientation(i);
-            cache[i] = new TileEntityCache(world, x + d.offsetX, y + d.offsetY, z + d.offsetZ);
+            EnumFacing d = EnumFacing.getFront(i);
+            cache[i] = new TileEntityCache(world, pos.offset(d));
         }
         return cache;
     }

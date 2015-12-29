@@ -4,7 +4,8 @@ import java.util.List;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
 public abstract class TubeModuleRedstoneReceiving extends TubeModule{
@@ -30,8 +31,8 @@ public abstract class TubeModuleRedstoneReceiving extends TubeModule{
     @Override
     public void onNeighborBlockUpdate(){
         redstoneLevel = 0;
-        for(ForgeDirection side : ForgeDirection.VALID_DIRECTIONS) {
-            if(dir == side || isInline() && side != dir.getOpposite()) redstoneLevel = Math.max(redstoneLevel, pressureTube.world().getIndirectPowerLevelTo(pressureTube.x() + side.offsetX, pressureTube.y() + side.offsetY, pressureTube.z() + side.offsetZ, side.ordinal()));
+        for(EnumFacing side : EnumFacing.VALUES) {
+            if(dir == side || isInline() && side != dir.getOpposite()) redstoneLevel = Math.max(redstoneLevel, PneumaticCraftUtils.getRedstoneLevel(pressureTube.world(), pressureTube.pos().offset(side), side));
         }
     }
 

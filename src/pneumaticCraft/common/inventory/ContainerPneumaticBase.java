@@ -10,13 +10,13 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ICrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.NetworkUtils;
 import pneumaticCraft.common.network.PacketUpdateGui;
 import pneumaticCraft.common.tileentity.IGUIButtonSensitive;
 import pneumaticCraft.common.tileentity.TileEntityBase;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
 
 public class ContainerPneumaticBase<Tile extends TileEntityBase> extends Container implements IGUIButtonSensitive{
 

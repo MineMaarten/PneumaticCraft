@@ -13,7 +13,7 @@ public class PacketUpdatePressureBlock extends LocationIntPacket<PacketUpdatePre
     public PacketUpdatePressureBlock(){}
 
     public PacketUpdatePressureBlock(TileEntityPneumaticBase te){
-        super(te.xCoord, te.yCoord, te.zCoord);
+        super(te.getPos());
         currentAir = te.currentAir;
     }
 

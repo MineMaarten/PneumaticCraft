@@ -1,5 +1,6 @@
 package pneumaticCraft.common.tileentity;
 
+import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -9,8 +10,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.ChunkPosition;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.common.block.BlockPneumaticDoor;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.item.ItemMachineUpgrade;
@@ -40,7 +41,7 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
     @GuiSynced
     public int redstoneMode;
     @DescSynced
-    public ForgeDirection orientation = ForgeDirection.UNKNOWN;
+    public EnumFacing orientation = EnumFacing.UP;
     public static final int UPGRADE_SLOT_1 = 0;
     public static final int UPGRADE_SLOT_4 = 3;
     public static final int CAMO_SLOT = 4;
@@ -52,13 +53,13 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
     }
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
         oldProgress = progress;
         if(!worldObj.isRemote) {
-            if(getPressure(ForgeDirection.UNKNOWN) >= PneumaticValues.MIN_PRESSURE_PNEUMATIC_DOOR) {
+            if(getPressure(null) >= PneumaticValues.MIN_PRESSURE_PNEUMATIC_DOOR) {
                 if(worldObj.getTotalWorldTime() % 60 == 0) {
-                    TileEntity te = worldObj.getTileEntity(orientation.offsetX * 3 + xCoord, yCoord, orientation.offsetZ * 3 + zCoord);
+                    TileEntity te = worldObj.getTileEntity(getPos().offset(orientation, 3));
                     if(te instanceof TileEntityPneumaticDoorBase) {
                         doubleDoor = (TileEntityPneumaticDoorBase)te;
                     } else {
@@ -89,7 +90,7 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
             }
             if(progress < targetProgress) progress = targetProgress;
         }
-        if(!worldObj.isRemote) addAir((int)(-Math.abs(oldProgress - progress) * PneumaticValues.USAGE_PNEUMATIC_DOOR * (getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots()) / speedMultiplier)), ForgeDirection.UNKNOWN);
+        if(!worldObj.isRemote) addAir((int)(-Math.abs(oldProgress - progress) * PneumaticValues.USAGE_PNEUMATIC_DOOR * (getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots()) / speedMultiplier)), null);
 
         // if(worldObj.isRemote) System.out.println("progress: " + progress);
         door = getDoor();
@@ -100,8 +101,8 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
 
         if(oldCamo != inventory[CAMO_SLOT]) {
             oldCamo = inventory[CAMO_SLOT];
-            worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, inventory[CAMO_SLOT] != null ? inventory[CAMO_SLOT].getItemDamage() % 16 : 0, 2);
-            worldObj.markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, xCoord, yCoord, zCoord);
+            //TODO 1.8 fix camo meta     worldObj.setBlockMetadataWithNotify(getPos().getX(), getPos().getY(), getPos().getZ(), inventory[CAMO_SLOT] != null ? inventory[CAMO_SLOT].getItemDamage() % 16 : 0, 2);
+            rerenderChunk();
         }
     }
 
@@ -110,23 +111,23 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
             case 0:
             case 1:
                 int range = TileEntityConstants.RANGE_PNEUMATIC_DOOR_BASE + this.getUpgrades(ItemMachineUpgrade.UPGRADE_RANGE);
-                AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xCoord - range, yCoord - range, zCoord - range, xCoord + range + 1, yCoord + range + 1, zCoord + range + 1);
+                AxisAlignedBB aabb = new AxisAlignedBB(getPos().getX() - range, getPos().getY() - range, getPos().getZ() - range, getPos().getX() + range + 1, getPos().getY() + range + 1, getPos().getZ() + range + 1);
                 List<EntityPlayer> players = worldObj.getEntitiesWithinAABB(EntityPlayer.class, aabb);
                 for(EntityPlayer player : players) {
-                    if(PneumaticCraftUtils.getProtectingSecurityStations(worldObj, xCoord, yCoord, zCoord, player, false, false) == 0) {
+                    if(PneumaticCraftUtils.getProtectingSecurityStations(worldObj, getPos(), player, false, false) == 0) {
                         if(redstoneMode == 0) {
                             return true;
                         } else {
                             ((BlockPneumaticDoor)Blockss.pneumaticDoor).isTrackingPlayerEye = true;
-                            ChunkPosition lookedPosition = PneumaticCraftUtils.getEntityLookedBlock(player, range * 1.41F); //max range = range * sqrt(2).
+                            BlockPos lookedPosition = PneumaticCraftUtils.getEntityLookedBlock(player, range * 1.41F); //max range = range * sqrt(2).
                             ((BlockPneumaticDoor)Blockss.pneumaticDoor).isTrackingPlayerEye = false;
                             if(lookedPosition != null) {
-                                if(lookedPosition.equals(new ChunkPosition(xCoord, yCoord, zCoord))) {
+                                if(lookedPosition.equals(new BlockPos(getPos().getX(), getPos().getY(), getPos().getZ()))) {
                                     return true;
                                 } else {
                                     if(door != null) {
-                                        if(lookedPosition.equals(new ChunkPosition(door.xCoord, door.yCoord, door.zCoord))) return true;
-                                        if(lookedPosition.equals(new ChunkPosition(door.xCoord, door.yCoord + (door.getBlockMetadata() < 6 ? 1 : -1), door.zCoord))) return true;
+                                        if(lookedPosition.equals(new BlockPos(door.getPos().getX(), door.getPos().getY(), door.getPos().getZ()))) return true;
+                                        if(lookedPosition.equals(new BlockPos(door.getPos().getX(), door.getPos().getY() + (door.getBlockMetadata() < 6 ? 1 : -1), door.getPos().getZ()))) return true;
                                     }
                                 }
                             }
@@ -153,22 +154,22 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
     }
 
     public void setNeighborOpening(boolean opening){
-        if(doubleDoor != null && doubleDoor.getPressure(ForgeDirection.UNKNOWN) >= PneumaticValues.MIN_PRESSURE_PNEUMATIC_DOOR) {
+        if(doubleDoor != null && doubleDoor.getPressure(null) >= PneumaticValues.MIN_PRESSURE_PNEUMATIC_DOOR) {
             doubleDoor.setOpening(opening);
         }
     }
 
     @Override
-    public boolean isConnectedTo(ForgeDirection side){
-        return side != ForgeDirection.UP;
+    public boolean isConnectedTo(EnumFacing side){
+        return side != EnumFacing.UP;
     }
 
     private TileEntityPneumaticDoor getDoor(){
-        TileEntity te = worldObj.getTileEntity(orientation.offsetX + xCoord, yCoord - 1, orientation.offsetZ + zCoord);
+        TileEntity te = worldObj.getTileEntity(getPos().offset(orientation).add(0, -1, 0));
         if(te instanceof TileEntityPneumaticDoor) {
-            if(orientation.getRotation(ForgeDirection.UP) == ForgeDirection.getOrientation(te.getBlockMetadata()) && !((TileEntityPneumaticDoor)te).rightGoing) {
+            if(orientation.rotateY() == EnumFacing.getFront(te.getBlockMetadata()) && !((TileEntityPneumaticDoor)te).rightGoing) {
                 return (TileEntityPneumaticDoor)te;
-            } else if(orientation.getRotation(ForgeDirection.DOWN) == ForgeDirection.getOrientation(te.getBlockMetadata()) && ((TileEntityPneumaticDoor)te).rightGoing) {
+            } else if(orientation.rotateYCCW() == EnumFacing.getFront(te.getBlockMetadata()) && ((TileEntityPneumaticDoor)te).rightGoing) {
                 return (TileEntityPneumaticDoor)te;
             }
         }
@@ -182,7 +183,7 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
         progress = tag.getFloat("extension");
         opening = tag.getBoolean("opening");
         redstoneMode = tag.getInteger("redstoneMode");
-        orientation = ForgeDirection.getOrientation(tag.getInteger("orientation"));
+        orientation = EnumFacing.getFront(tag.getInteger("orientation"));
         rightGoing = tag.getBoolean("rightGoing");
         // Read in the ItemStacks in the inventory from NBT
         NBTTagList tagList = tag.getTagList("Items", 10);
@@ -266,7 +267,7 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
 
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
@@ -290,15 +291,20 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
         return Blockss.pneumaticDoorBase.getUnlocalizedName();
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
+    }
 
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack){
@@ -306,7 +312,7 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 

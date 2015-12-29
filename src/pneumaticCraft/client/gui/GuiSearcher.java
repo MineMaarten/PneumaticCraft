@@ -1,5 +1,6 @@
 package pneumaticCraft.client.gui;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 import net.minecraft.client.gui.GuiScreen;
@@ -14,6 +15,9 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -23,9 +27,6 @@ import pneumaticCraft.client.gui.pneumaticHelmet.GuiHelmetMainScreen;
 import pneumaticCraft.common.inventory.ContainerSearcher;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiSearcher extends InventoryEffectRenderer{
@@ -90,7 +91,7 @@ public class GuiSearcher extends InventoryEffectRenderer{
         super.initGui();
         buttonList.clear();
         Keyboard.enableRepeatEvents(true);
-        searchField = new GuiTextField(fontRendererObj, guiLeft + 20, guiTop + 36, 89, fontRendererObj.FONT_HEIGHT);
+        searchField = new GuiTextField(-1, fontRendererObj, guiLeft + 20, guiTop + 36, 89, fontRendererObj.FONT_HEIGHT);
         searchField.setMaxStringLength(15);
         searchField.setEnableBackgroundDrawing(true);
         searchField.setVisible(true);
@@ -124,7 +125,7 @@ public class GuiSearcher extends InventoryEffectRenderer{
      * Fired when a key is typed. This is the equivalent of KeyListener.keyTyped(KeyEvent e).
      */
     @Override
-    protected void keyTyped(char par1, int par2){
+    protected void keyTyped(char par1, int par2) throws IOException{
         if(field_74234_w) {
             field_74234_w = false;
             searchField.setText("");
@@ -157,14 +158,9 @@ public class GuiSearcher extends InventoryEffectRenderer{
             }
         }
 
-        Enchantment[] aenchantment = Enchantment.enchantmentsList;
-        int j = aenchantment.length;
-
-        for(int i = 0; i < j; ++i) {
-            Enchantment enchantment = aenchantment[i];
-
+        for(Enchantment enchantment : Enchantment.enchantmentsBookList) {
             if(enchantment != null && enchantment.type != null) {
-                Items.enchanted_book.func_92113_a(enchantment, containerSearcher.itemList);
+                Items.enchanted_book.getAll(enchantment, containerSearcher.itemList);
             }
         }
 
@@ -207,24 +203,6 @@ public class GuiSearcher extends InventoryEffectRenderer{
         fontRendererObj.drawString("Item Searcher", 23, 5, 4210752);
         fontRendererObj.drawString("Search Box", 23, 25, 4210752);
         fontRendererObj.drawString("Target", 113, 10, 4210752);
-    }
-
-    /**
-     * Called when the mouse is clicked.
-     */
-    @Override
-    protected void mouseClicked(int par1, int par2, int par3){
-
-        super.mouseClicked(par1, par2, par3);
-    }
-
-    /**
-     * Called when the mouse is moved or a mouse button is released.  Signature: (mouseX, mouseY, which) which==-1 is
-     * mouseMove, which==0 or which==1 is mouseUp
-     */
-    @Override
-    protected void mouseMovedOrUp(int par1, int par2, int par3){
-        super.mouseMovedOrUp(par1, par2, par3);
     }
 
     /**
@@ -315,7 +293,7 @@ public class GuiSearcher extends InventoryEffectRenderer{
      * Handles mouse input.
      */
     @Override
-    public void handleMouseInput(){
+    public void handleMouseInput() throws IOException{
         super.handleMouseInput();
         int i = Mouse.getEventDWheel();
 

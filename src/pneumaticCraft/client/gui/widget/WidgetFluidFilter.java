@@ -4,8 +4,9 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.util.IIcon;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -21,19 +22,19 @@ public class WidgetFluidFilter extends WidgetBase{
     @Override
     public void render(int mouseX, int mouseY, float partialTick){
         if(fluid != null) {
-            IIcon icon = fluid.getIcon();
+            ResourceLocation icon = fluid.getStill(); //TODO 1.8 still or flowing?
             if(icon != null) {
                 GL11.glColor4d(1, 1, 1, 1);
                 GL11.glPushMatrix();
                 GL11.glTranslated(x, y, 0);
-                Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
-                Tessellator t = Tessellator.instance;
-                t.startDrawingQuads();
-                t.addVertexWithUV(0, 0, 0, icon.getMinU(), icon.getMinV());
-                t.addVertexWithUV(0, 16, 0, icon.getMinU(), icon.getMaxV());
-                t.addVertexWithUV(16, 16, 0, icon.getMaxU(), icon.getMaxV());
-                t.addVertexWithUV(16, 0, 0, icon.getMaxU(), icon.getMinV());
-                t.draw();
+                Minecraft.getMinecraft().getTextureManager().bindTexture(icon);
+                WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+                wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+                wr.pos(0, 0, 0).tex(0, 0).endVertex();
+                wr.pos(0, 16, 0).tex(0, 1).endVertex();
+                wr.pos(16, 16, 0).tex(1, 1).endVertex();
+                wr.pos(16, 0, 0).tex(1, 0).endVertex();
+                Tessellator.getInstance().draw();
                 GL11.glPopMatrix();
             }
         }

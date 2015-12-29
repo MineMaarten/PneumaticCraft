@@ -1,12 +1,14 @@
 package pneumaticCraft.client.gui.programmer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import pneumaticCraft.client.gui.GuiButtonSpecial;
 import pneumaticCraft.client.gui.GuiInventorySearcher;
 import pneumaticCraft.client.gui.GuiProgrammer;
@@ -18,7 +20,6 @@ import pneumaticCraft.client.gui.widget.WidgetTextFieldNumber;
 import pneumaticCraft.common.item.ItemGPSTool;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.progwidgets.ProgWidgetCoordinate;
-import cpw.mods.fml.client.FMLClientHandler;
 
 public class GuiProgWidgetCoordinate extends GuiProgWidgetAreaShow<ProgWidgetCoordinate>{
     private GuiInventorySearcher invSearchGui;
@@ -35,7 +36,7 @@ public class GuiProgWidgetCoordinate extends GuiProgWidgetAreaShow<ProgWidgetCoo
         super.initGui();
 
         if(invSearchGui != null) {
-            ChunkPosition pos = invSearchGui.getSearchStack() != null ? ItemGPSTool.getGPSLocation(invSearchGui.getSearchStack()) : null;
+            BlockPos pos = invSearchGui.getSearchStack() != null ? ItemGPSTool.getGPSLocation(invSearchGui.getSearchStack()) : null;
             widget.setCoordinate(pos);
         }
 
@@ -62,9 +63,9 @@ public class GuiProgWidgetCoordinate extends GuiProgWidgetAreaShow<ProgWidgetCoo
             addWidget(coordFields[i]);
             coordFields[i].setEnabled(gpsButton.enabled);
         }
-        coordFields[0].setValue(widget.getRawCoordinate().chunkPosX);
-        coordFields[1].setValue(widget.getRawCoordinate().chunkPosY);
-        coordFields[2].setValue(widget.getRawCoordinate().chunkPosZ);
+        coordFields[0].setValue(widget.getRawCoordinate().getX());
+        coordFields[1].setValue(widget.getRawCoordinate().getY());
+        coordFields[2].setValue(widget.getRawCoordinate().getZ());
 
         variableField = new WidgetComboBox(fontRendererObj, guiLeft + 90, guiTop + 112, 80, fontRendererObj.FONT_HEIGHT + 1);
         variableField.setElements(guiProgrammer.te.getAllVariables());
@@ -88,12 +89,12 @@ public class GuiProgWidgetCoordinate extends GuiProgWidgetAreaShow<ProgWidgetCoo
     }
 
     @Override
-    public void actionPerformed(GuiButton button){
+    public void actionPerformed(GuiButton button) throws IOException{
         if(button.id == 0) {
             invSearchGui = new GuiInventorySearcher(FMLClientHandler.instance().getClient().thePlayer);
-            ChunkPosition area = widget.getRawCoordinate();
+            BlockPos area = widget.getRawCoordinate();
             ItemStack gps = new ItemStack(Itemss.GPSTool);
-            ItemGPSTool.setGPSLocation(gps, area.chunkPosX, area.chunkPosY, area.chunkPosZ);
+            ItemGPSTool.setGPSLocation(gps, area);
             invSearchGui.setSearchStack(ItemGPSTool.getGPSLocation(gps) != null ? gps : null);
             FMLClientHandler.instance().showGuiScreen(invSearchGui);
         }
@@ -101,9 +102,9 @@ public class GuiProgWidgetCoordinate extends GuiProgWidgetAreaShow<ProgWidgetCoo
     }
 
     @Override
-    public void keyTyped(char chr, int keyCode){
+    public void keyTyped(char chr, int keyCode) throws IOException{
         if(keyCode == 1) {
-            widget.setCoordinate(new ChunkPosition(coordFields[0].getValue(), coordFields[1].getValue(), coordFields[2].getValue()));
+            widget.setCoordinate(new BlockPos(coordFields[0].getValue(), coordFields[1].getValue(), coordFields[2].getValue()));
             widget.setVariable(variableField.getText());
         }
         super.keyTyped(chr, keyCode);

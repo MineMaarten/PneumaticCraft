@@ -6,13 +6,13 @@ import java.util.List;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.util.Rectangle;
 
 import pneumaticCraft.api.universalSensor.EntityPollSensor;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class EntityInRangeSensor extends EntityPollSensor{
 

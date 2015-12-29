@@ -7,7 +7,7 @@ import java.util.PriorityQueue;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidHandler;
 import pneumaticCraft.common.semiblock.IProvidingInventoryListener;
@@ -82,7 +82,7 @@ public class LogisticsManager{
             if(requester instanceof IProvidingInventoryListener) ((IProvidingInventoryListener)requester).notify(provider.getTileEntity());
             for(int i = 0; i < providingInventory.getSizeInventory(); i++) {
                 ItemStack providingStack = providingInventory.getStackInSlot(i);
-                if(providingStack != null && (!(provider instanceof ISpecificProvider) || ((ISpecificProvider)provider).canProvide(providingStack)) && IOHelper.canExtractItemFromInventory(providingInventory, providingStack, i, 0)) {
+                if(providingStack != null && (!(provider instanceof ISpecificProvider) || ((ISpecificProvider)provider).canProvide(providingStack)) && IOHelper.canExtractItemFromInventory(providingInventory, providingStack, i, EnumFacing.UP)) {
                     int requestedAmount = getRequestedAmount(requester, providingStack);
                     if(requestedAmount > 0) {
                         ItemStack stack = providingStack.copy();
@@ -94,7 +94,7 @@ public class LogisticsManager{
         }
         if(provider.getTileEntity() instanceof IFluidHandler) {
             IFluidHandler providingTank = (IFluidHandler)provider.getTileEntity();
-            for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
+            for(EnumFacing d : EnumFacing.VALUES) {
                 FluidStack providingStack = providingTank.drain(d, 16000, false);
                 if(providingStack != null && (!(provider instanceof ISpecificProvider) || ((ISpecificProvider)provider).canProvide(providingStack)) && providingTank.canDrain(d, providingStack.getFluid())) {
                     int requestedAmount = getRequestedAmount(requester, providingStack);
@@ -117,7 +117,7 @@ public class LogisticsManager{
         providingStack.stackSize = requestedAmount;
         ItemStack remainder = providingStack.copy();
         remainder.stackSize += requester.getIncomingItems(providingStack);
-        for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
+        for(EnumFacing d : EnumFacing.VALUES) {
             remainder = IOHelper.insert(te, remainder, d, true);
             if(remainder == null) break;
         }
@@ -136,7 +136,7 @@ public class LogisticsManager{
         TileEntity te = requester.getTileEntity();
         if(te instanceof IFluidHandler) {
             IFluidHandler fluidHandler = (IFluidHandler)te;
-            for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
+            for(EnumFacing d : EnumFacing.VALUES) {
                 int fluidFilled = fluidHandler.fill(d, remainder, false);
                 if(fluidFilled > 0) {
                     remainder.amount -= fluidFilled;

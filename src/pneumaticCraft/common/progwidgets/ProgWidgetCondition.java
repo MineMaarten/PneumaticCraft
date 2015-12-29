@@ -7,14 +7,14 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetCondition;
 import pneumaticCraft.common.ai.DroneAIBlockCondition;
 import pneumaticCraft.common.ai.IDroneBase;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Log;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public abstract class ProgWidgetCondition extends ProgWidgetInventoryBase implements ICondition, IJump{
 
@@ -142,6 +142,6 @@ public abstract class ProgWidgetCondition extends ProgWidgetInventoryBase implem
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.LIGHTNING_PLANT_DAMAGE;
+        return ItemPlastic.LIGHTNING_PLANT_DAMAGE;
     }
 }

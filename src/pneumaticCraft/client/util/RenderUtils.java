@@ -3,29 +3,30 @@ package pneumaticCraft.client.util;
 import java.util.Arrays;
 
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidTankInfo;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
 import org.lwjgl.opengl.GL11;
 
 import pneumaticCraft.common.util.PneumaticCraftUtils;
-import cpw.mods.fml.client.FMLClientHandler;
 
 public class RenderUtils extends Render{
     public static RenderUtils INSTANCE = new RenderUtils();
-    public RenderBlocks renderBlocks;
 
     private RenderUtils(){
-        renderBlocks = field_147909_c;
+        super(Minecraft.getMinecraft().getRenderManager());
     }
 
     public void renderLiquid(FluidTankInfo info, RenderInfo renderInfo, World worldObj){
@@ -34,7 +35,7 @@ public class RenderUtils extends Render{
         } else {
             renderInfo.baseBlock = Blocks.water;
         }
-        renderInfo.texture = info.fluid.getFluid().getIcon(info.fluid);
+        renderInfo.texture = info.fluid.getFluid().getStill(info.fluid); //TODO 1.8 still or flowing?
         FMLClientHandler.instance().getClient().getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
         // Tessellator.instance.setColorOpaque_I();
         int color = info.fluid.getFluid().getColor(info.fluid);
@@ -64,99 +65,100 @@ public class RenderUtils extends Render{
      * @param doTessellating
      */
     public void renderBlock(RenderInfo info, IBlockAccess blockAccess, double x, double y, double z, int lightX, int lightY, int lightZ, boolean doLight, boolean doTessellating){
-        float lightBottom = 0.5F;
-        float lightTop = 1.0F;
-        float lightEastWest = 0.8F;
-        float lightNorthSouth = 0.6F;
+        /*    float lightBottom = 0.5F;
+            float lightTop = 1.0F;
+            float lightEastWest = 0.8F;
+            float lightNorthSouth = 0.6F;
 
-        Tessellator tessellator = Tessellator.instance;
+            WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
 
-        boolean realDoLight = doLight;
+            boolean realDoLight = doLight;
 
-        if(blockAccess == null) {
-            realDoLight = false;
-        }
+            if(blockAccess == null) {
+                realDoLight = false;
+            }
 
-        boolean ambientOcclusion = renderBlocks.enableAO;
-        if(!realDoLight) {
-            tessellator.setColorOpaque_F(1, 1, 1);
-            renderBlocks.enableAO = false;
-        }
+            boolean ambientOcclusion = renderBlocks.enableAO;
+            if(!realDoLight) {
+                tessellator.setColorOpaque_F(1, 1, 1);
+                renderBlocks.enableAO = false;
+            }
 
-        if(doTessellating) tessellator.startDrawingQuads();
+            if(doTessellating) wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
 
-        float light = 0;
-        if(realDoLight) {
-            if(info.light < 0) {
-                light = info.baseBlock.getMixedBrightnessForBlock(blockAccess, lightX, lightY, lightZ);
-                light = light + (1.0f - light) * 0.4f;
+            float light = 0;
+            if(realDoLight) {
+                if(info.light < 0) {
+                    light = info.baseBlock.getMixedBrightnessForBlock(blockAccess, lightX, lightY, lightZ);
+                    light = light + (1.0f - light) * 0.4f;
+                } else {
+                    light = info.light;
+                }
+                int brightness = 0;
+                if(info.brightness < 0) {
+                    brightness = info.baseBlock.getMixedBrightnessForBlock(blockAccess, lightX, lightY, lightZ);
+                } else {
+                    brightness = info.brightness;
+                }
+                tessellator.setBrightness(brightness);
+                tessellator.setColorOpaque_F(lightBottom * light, lightBottom * light, lightBottom * light);
             } else {
-                light = info.light;
+                //          tessellator.setColorOpaque_F(1.0F, 1.0F, 1.0F);
+                if(info.brightness >= 0) {
+                    tessellator.setBrightness(info.brightness);
+                }
             }
-            int brightness = 0;
-            if(info.brightness < 0) {
-                brightness = info.baseBlock.getMixedBrightnessForBlock(blockAccess, lightX, lightY, lightZ);
-            } else {
-                brightness = info.brightness;
+
+            renderBlocks.setRenderBounds(info.minX, info.minY, info.minZ, info.maxX, info.maxY, info.maxZ);
+
+            if(info.renderSide[0]) {
+                renderBlocks.renderFaceYNeg(info.baseBlock, x, y, z, info.getBlockTextureFromSide(0));
             }
-            tessellator.setBrightness(brightness);
-            tessellator.setColorOpaque_F(lightBottom * light, lightBottom * light, lightBottom * light);
-        } else {
-            //          tessellator.setColorOpaque_F(1.0F, 1.0F, 1.0F);
-            if(info.brightness >= 0) {
-                tessellator.setBrightness(info.brightness);
+
+            if(realDoLight) {
+                tessellator.setColorOpaque_F(lightTop * light, lightTop * light, lightTop * light);
             }
-        }
 
-        renderBlocks.setRenderBounds(info.minX, info.minY, info.minZ, info.maxX, info.maxY, info.maxZ);
+            if(info.renderSide[1]) {
+                renderBlocks.renderFaceYPos(info.baseBlock, x, y, z, info.getBlockTextureFromSide(1));
+            }
 
-        if(info.renderSide[0]) {
-            renderBlocks.renderFaceYNeg(info.baseBlock, x, y, z, info.getBlockTextureFromSide(0));
-        }
+            if(realDoLight) {
+                tessellator.setColorOpaque_F(lightEastWest * light, lightEastWest * light, lightEastWest * light);
+            }
 
-        if(realDoLight) {
-            tessellator.setColorOpaque_F(lightTop * light, lightTop * light, lightTop * light);
-        }
+            if(info.renderSide[2]) {
+                renderBlocks.renderFaceZNeg(info.baseBlock, x, y, z, info.getBlockTextureFromSide(2));
+            }
 
-        if(info.renderSide[1]) {
-            renderBlocks.renderFaceYPos(info.baseBlock, x, y, z, info.getBlockTextureFromSide(1));
-        }
+            if(realDoLight) {
+                tessellator.setColorOpaque_F(lightEastWest * light, lightEastWest * light, lightEastWest * light);
+            }
 
-        if(realDoLight) {
-            tessellator.setColorOpaque_F(lightEastWest * light, lightEastWest * light, lightEastWest * light);
-        }
+            if(info.renderSide[3]) {
+                renderBlocks.renderFaceZPos(info.baseBlock, x, y, z, info.getBlockTextureFromSide(3));
+            }
 
-        if(info.renderSide[2]) {
-            renderBlocks.renderFaceZNeg(info.baseBlock, x, y, z, info.getBlockTextureFromSide(2));
-        }
+            if(realDoLight) {
+                tessellator.setColorOpaque_F(lightNorthSouth * light, lightNorthSouth * light, lightNorthSouth * light);
+            }
 
-        if(realDoLight) {
-            tessellator.setColorOpaque_F(lightEastWest * light, lightEastWest * light, lightEastWest * light);
-        }
+            if(info.renderSide[4]) {
+                renderBlocks.renderFaceXNeg(info.baseBlock, x, y, z, info.getBlockTextureFromSide(4));
+            }
 
-        if(info.renderSide[3]) {
-            renderBlocks.renderFaceZPos(info.baseBlock, x, y, z, info.getBlockTextureFromSide(3));
-        }
+            if(realDoLight) {
+                tessellator.setColorOpaque_F(lightNorthSouth * light, lightNorthSouth * light, lightNorthSouth * light);
+            }
 
-        if(realDoLight) {
-            tessellator.setColorOpaque_F(lightNorthSouth * light, lightNorthSouth * light, lightNorthSouth * light);
-        }
+            if(info.renderSide[5]) {
+                renderBlocks.renderFaceXPos(info.baseBlock, x, y, z, info.getBlockTextureFromSide(5));
+            }
 
-        if(info.renderSide[4]) {
-            renderBlocks.renderFaceXNeg(info.baseBlock, x, y, z, info.getBlockTextureFromSide(4));
-        }
+            renderBlocks.enableAO = ambientOcclusion;
 
-        if(realDoLight) {
-            tessellator.setColorOpaque_F(lightNorthSouth * light, lightNorthSouth * light, lightNorthSouth * light);
-        }
-
-        if(info.renderSide[5]) {
-            renderBlocks.renderFaceXPos(info.baseBlock, x, y, z, info.getBlockTextureFromSide(5));
-        }
-
-        renderBlocks.enableAO = ambientOcclusion;
-
-        if(doTessellating) tessellator.draw();
+            if(doTessellating) Tessellator.getInstance().draw();*/
+        //TODO 1.8 implement
     }
 
     @Override
@@ -192,8 +194,7 @@ public class RenderUtils extends Render{
         public double maxY;
         public double maxZ;
         public Block baseBlock = Blocks.sand;
-        public IIcon texture = null;
-        public IIcon[] textureArray = null;
+        public ResourceLocation texture = null;
         public boolean[] renderSide = new boolean[6];
         public float light = -1f;
         public int brightness = -1;
@@ -203,19 +204,9 @@ public class RenderUtils extends Render{
             setRenderAllSides();
         }
 
-        public RenderInfo(Block template, IIcon[] texture){
-            this();
-            baseBlock = template;
-            textureArray = texture;
-        }
-
         public RenderInfo(float minX, float minY, float minZ, float maxX, float maxY, float maxZ){
             this();
             setBounds(minX, minY, minZ, maxX, maxY, maxZ);
-        }
-
-        public float getBlockBrightness(IBlockAccess iblockaccess, int i, int j, int k){
-            return baseBlock.getMixedBrightnessForBlock(iblockaccess, i, j, k);
         }
 
         public RenderInfo setMeta(int meta){
@@ -262,32 +253,19 @@ public class RenderUtils extends Render{
             minZ = 1 - maxZ;
             maxZ = 1 - temp;
         }
-
-        public IIcon getBlockTextureFromSide(int i){
-            if(texture != null) {
-                return texture;
-            }
-
-            int index = i;
-
-            if(textureArray == null || textureArray.length == 0) {
-                return baseBlock.getIcon(index, meta);
-            } else {
-                if(index >= textureArray.length) {
-                    index = 0;
-                }
-
-                return textureArray[index];
-            }
-        }
     }
 
     public static void glColorHex(int color){
-        double alpha = (color >> 24 & 255) / 255D;
-        double red = (color >> 16 & 255) / 255D;
-        double green = (color >> 8 & 255) / 255D;
-        double blue = (color & 255) / 255D;
+        float alpha = (color >> 24 & 255) / 255F;
+        float red = (color >> 16 & 255) / 255F;
+        float green = (color >> 8 & 255) / 255F;
+        float blue = (color & 255) / 255F;
         GL11.glColor4d(red, green, blue, alpha);
+        GlStateManager.color(red, green, blue, alpha);
+    }
+
+    public static void glColorHex(int color, int alpha){
+        glColorHex(color | alpha << 24);
     }
 
     public static void render3DArrow(){
@@ -297,39 +275,39 @@ public class RenderUtils extends Render{
         double baseLength = 0.3;
         double baseRadius = 0.15;
 
-        Tessellator t = Tessellator.instance;
-        t.startDrawing(GL11.GL_POLYGON);
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+        wr.begin(GL11.GL_POLYGON, DefaultVertexFormats.POSITION);
         for(int i = PneumaticCraftUtils.sin.length - 1; i >= 0; i--) {
             double sin = PneumaticCraftUtils.sin[i] * baseRadius;
             double cos = PneumaticCraftUtils.cos[i] * baseRadius;
-            t.addVertex(sin, 0, cos);
+            wr.pos(sin, 0, cos).endVertex();
         }
-        t.draw();
-        t.startDrawing(GL11.GL_POLYGON);
+        Tessellator.getInstance().draw();
+        wr.begin(GL11.GL_POLYGON, DefaultVertexFormats.POSITION);
         for(int i = PneumaticCraftUtils.sin.length - 1; i >= 0; i--) {
             double sin = PneumaticCraftUtils.sin[i] * arrowTipRadius;
             double cos = PneumaticCraftUtils.cos[i] * arrowTipRadius;
-            t.addVertex(sin, baseLength, cos);
+            wr.pos(sin, baseLength, cos).endVertex();
         }
-        t.draw();
-        t.startDrawing(GL11.GL_QUAD_STRIP);
+        Tessellator.getInstance().draw();
+        wr.begin(GL11.GL_QUAD_STRIP, DefaultVertexFormats.POSITION);
         for(int i = PneumaticCraftUtils.sin.length - 1; i >= 0; i--) {
             double sin = PneumaticCraftUtils.sin[i] * baseRadius;
             double cos = PneumaticCraftUtils.cos[i] * baseRadius;
-            t.addVertex(sin, 0, cos);
-            t.addVertex(sin, baseLength, cos);
+            wr.pos(sin, 0, cos).endVertex();
+            wr.pos(sin, baseLength, cos).endVertex();
         }
-        t.draw();
+        Tessellator.getInstance().draw();
 
-        t.startDrawing(GL11.GL_TRIANGLE_FAN);
-        t.addVertex(0, baseLength + arrowTipLength, 0);
+        wr.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION);
+        wr.pos(0, baseLength + arrowTipLength, 0).endVertex();
         for(int i = 0; i < PneumaticCraftUtils.sin.length; i++) {
             double sin = PneumaticCraftUtils.sin[i] * arrowTipRadius;
             double cos = PneumaticCraftUtils.cos[i] * arrowTipRadius;
-            t.addVertex(sin, baseLength, cos);
+            wr.pos(sin, baseLength, cos).endVertex();
         }
-        t.addVertex(0, baseLength, arrowTipRadius);
-        t.draw();
+        wr.pos(0, baseLength, arrowTipRadius).endVertex();
+        Tessellator.getInstance().draw();
         GL11.glEnable(GL11.GL_TEXTURE_2D);
     }
 }

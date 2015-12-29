@@ -1,7 +1,7 @@
 package pneumaticCraft.api.item;
 
 import net.minecraft.item.Item;
-import cpw.mods.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 public class ItemSupplier{
     public static Item getItem(String itemName){

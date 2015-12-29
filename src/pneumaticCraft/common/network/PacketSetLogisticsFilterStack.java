@@ -3,11 +3,12 @@ package pneumaticCraft.common.network;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import pneumaticCraft.common.inventory.ContainerLogistics;
 import pneumaticCraft.common.semiblock.ISemiBlock;
 import pneumaticCraft.common.semiblock.SemiBlockLogistics;
 import pneumaticCraft.common.semiblock.SemiBlockManager;
-import cpw.mods.fml.common.network.ByteBufUtils;
 
 public class PacketSetLogisticsFilterStack extends LocationIntPacket<PacketSetLogisticsFilterStack>{
     private ItemStack settingStack;
@@ -16,7 +17,7 @@ public class PacketSetLogisticsFilterStack extends LocationIntPacket<PacketSetLo
     public PacketSetLogisticsFilterStack(){}
 
     public PacketSetLogisticsFilterStack(SemiBlockLogistics logistics, ItemStack stack, int index){
-        super(logistics.getPos().chunkPosX, logistics.getPos().chunkPosY, logistics.getPos().chunkPosZ);
+        super(logistics.getPos());
         settingStack = stack;
         settingIndex = index;
     }
@@ -42,12 +43,12 @@ public class PacketSetLogisticsFilterStack extends LocationIntPacket<PacketSetLo
 
     @Override
     public void handleServerSide(PacketSetLogisticsFilterStack message, EntityPlayer player){
-        if(message.x == 0 && message.y == 0 && message.z == 0) {
+        if(message.pos.equals(new BlockPos(0, 0, 0))) {
             if(player.openContainer instanceof ContainerLogistics) {
                 ((ContainerLogistics)player.openContainer).logistics.getFilters().setInventorySlotContents(message.settingIndex, message.settingStack);
             }
         } else {
-            ISemiBlock semiBlock = SemiBlockManager.getInstance(player.worldObj).getSemiBlock(player.worldObj, message.x, message.y, message.z);
+            ISemiBlock semiBlock = SemiBlockManager.getInstance(player.worldObj).getSemiBlock(player.worldObj, message.pos);
             if(semiBlock instanceof SemiBlockLogistics) {
                 ((SemiBlockLogistics)semiBlock).getFilters().setInventorySlotContents(message.settingIndex, message.settingStack);
             }

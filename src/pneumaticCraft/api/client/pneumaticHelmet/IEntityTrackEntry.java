@@ -32,7 +32,7 @@ public interface IEntityTrackEntry{
     /**
      * Called every render tick, this method can be used to render additional info. Used for Drone AI visualisation.
      * @param entity
-     * @param partialTicks TODO
+     * @param partialTicks
      */
     public void render(Entity entity, float partialTicks);
 

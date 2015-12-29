@@ -2,6 +2,7 @@ package pneumaticCraft.client.semiblock;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 
 import org.lwjgl.opengl.GL11;
 
@@ -23,16 +24,12 @@ public class SemiBlockRendererHeatFrame implements ISemiBlockRenderer<SemiBlockH
 
         AxisAlignedBB aabb;
         if(semiBlock.getWorld() != null) {
-            semiBlock.getBlock().setBlockBoundsBasedOnState(semiBlock.getWorld(), semiBlock.getPos().chunkPosX, semiBlock.getPos().chunkPosY, semiBlock.getPos().chunkPosZ);
-            aabb = semiBlock.getBlock().getSelectedBoundingBoxFromPool(semiBlock.getWorld(), semiBlock.getPos().chunkPosX, semiBlock.getPos().chunkPosY, semiBlock.getPos().chunkPosZ);
-            aabb.minX -= semiBlock.getX();
-            aabb.maxX -= semiBlock.getX();
-            aabb.minY -= semiBlock.getY();
-            aabb.maxY -= semiBlock.getY();
-            aabb.minZ -= semiBlock.getZ();
-            aabb.maxZ -= semiBlock.getZ();
+            semiBlock.getBlockState().getBlock().setBlockBoundsBasedOnState(semiBlock.getWorld(), semiBlock.getPos());
+            aabb = semiBlock.getBlockState().getBlock().getSelectedBoundingBox(semiBlock.getWorld(), semiBlock.getPos());
+            BlockPos p = semiBlock.getPos();
+            aabb = new AxisAlignedBB(aabb.minX - p.getX(), aabb.minY - p.getY(), aabb.minZ - p.getZ(), aabb.maxX - p.getX(), aabb.maxY - p.getY(), aabb.maxZ - p.getZ());
         } else {
-            aabb = AxisAlignedBB.getBoundingBox(1 / 16D, 1 / 16D, 1 / 16D, 15 / 16D, 15 / 16D, 15 / 16D);
+            aabb = new AxisAlignedBB(1 / 16D, 1 / 16D, 1 / 16D, 15 / 16D, 15 / 16D, 15 / 16D);
         }
         GL11.glTranslated(aabb.minX, aabb.minY, aabb.minZ);
         GL11.glScaled(aabb.maxX - aabb.minX, aabb.maxY - aabb.minY, aabb.maxZ - aabb.minZ);
@@ -41,5 +38,4 @@ public class SemiBlockRendererHeatFrame implements ISemiBlockRenderer<SemiBlockH
         GL11.glPopMatrix();
         GL11.glColor4d(1, 1, 1, 1);
     }
-
 }

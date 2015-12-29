@@ -2,20 +2,17 @@ package pneumaticCraft.common.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.recipes.programs.AssemblyProgram;
 import pneumaticCraft.common.recipes.programs.ProgramDrill;
 import pneumaticCraft.common.recipes.programs.ProgramDrillLaser;
 import pneumaticCraft.common.recipes.programs.ProgramLaser;
-import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ItemAssemblyProgram extends ItemPneumatic{
     public static final int PROGRAMS_AMOUNT = 3;
@@ -24,25 +21,10 @@ public class ItemAssemblyProgram extends ItemPneumatic{
     public static final int LASER_DAMAGE = 1;
     public static final int DRILL_LASER_DAMAGE = 2;
 
-    private IIcon[] texture;
     private AssemblyProgram[] referencePrograms;
 
     public ItemAssemblyProgram(){
         setHasSubtypes(true);
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IIconRegister par1IconRegister){
-        texture = new IIcon[PROGRAMS_AMOUNT];
-        texture[0] = par1IconRegister.registerIcon(Textures.ITEM_PROGRAM_DRILL);
-        texture[1] = par1IconRegister.registerIcon(Textures.ITEM_PROGRAM_LASER);
-        texture[2] = par1IconRegister.registerIcon(Textures.ITEM_PROGRAM_DRILL_LASER);
-    }
-
-    @Override
-    public IIcon getIconFromDamage(int meta){
-        return texture[meta < texture.length ? meta : 0];
     }
 
     @Override

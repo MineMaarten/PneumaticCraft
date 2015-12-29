@@ -1,6 +1,7 @@
 package pneumaticCraft.common.tileentity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.block.Block;
@@ -15,7 +16,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -33,8 +36,6 @@ import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.PneumaticValues;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityChargingStation extends TileEntityPneumaticBase implements ISidedInventory, IRedstoneControl{
     @DescSynced
@@ -69,7 +70,7 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
         if(camoStack == null || !(camoStack.getItem() instanceof ItemBlock)) {
             return new ItemStack(Blocks.cobblestone);
         }
-        Block block = ((ItemBlock)camoStack.getItem()).field_150939_a;
+        Block block = ((ItemBlock)camoStack.getItem()).getBlock();
         if(PneumaticCraftUtils.isRenderIDCamo(block.getRenderType())) {
             return camoStack;
         } else {
@@ -82,7 +83,7 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
     }
 
     @Override
-    public void updateEntity(){
+    public void update(){
         disCharging = false;
         charging = false;
         List<IPressurizable> chargingItems = new ArrayList<IPressurizable>();
@@ -93,7 +94,7 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
         }
         if(this.getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0) {
             //creating a new word, 'entities padding'.
-            List<Entity> entitiesPadding = worldObj.getEntitiesWithinAABB(Entity.class, AxisAlignedBB.getBoundingBox(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 2, zCoord + 1));
+            List<Entity> entitiesPadding = worldObj.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(getPos().getX(), getPos().getY(), getPos().getZ(), getPos().getX() + 1, getPos().getY() + 2, getPos().getZ() + 1));
             for(Entity entity : entitiesPadding) {
                 if(entity instanceof IPressurizable) {
                     chargingItems.add((IPressurizable)entity);
@@ -122,10 +123,10 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
             for(int j = 0; j < chargingItems.size(); j++) {
                 IPressurizable chargingItem = chargingItems.get(j);
                 ItemStack chargedItem = chargedStacks.get(j);
-                if(chargingItem.getPressure(chargedItem) > getPressure(ForgeDirection.UNKNOWN) + 0.01F && chargingItem.getPressure(chargedItem) > 0F) {
+                if(chargingItem.getPressure(chargedItem) > getPressure(null) + 0.01F && chargingItem.getPressure(chargedItem) > 0F) {
                     if(!worldObj.isRemote) {
                         chargingItem.addAir(chargedItem, -1);
-                        addAir(1, ForgeDirection.UNKNOWN);
+                        addAir(1, null);
                     }
                     disCharging = true;
                     renderAirProgress -= ANIMATION_AIR_SPEED;
@@ -133,10 +134,10 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
                         renderAirProgress += 1F;
                     }
                     charged = true;
-                } else if(chargingItem.getPressure(chargedItem) < getPressure(ForgeDirection.UNKNOWN) - 0.01F && chargingItem.getPressure(chargedItem) < chargingItem.maxPressure(chargedItem)) {// if there is pressure, and the item isn't fully charged yet..
+                } else if(chargingItem.getPressure(chargedItem) < getPressure(null) - 0.01F && chargingItem.getPressure(chargedItem) < chargingItem.maxPressure(chargedItem)) {// if there is pressure, and the item isn't fully charged yet..
                     if(!worldObj.isRemote) {
                         chargingItem.addAir(chargedItem, 1);
-                        addAir(-1, ForgeDirection.UNKNOWN);
+                        addAir(-1, null);
                     }
                     charging = true;
                     renderAirProgress += ANIMATION_AIR_SPEED;
@@ -154,20 +155,20 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
             updateNeighbours();
         }
 
-        super.updateEntity();
+        super.update();
 
     }
 
     @Override
     protected void disperseAir(){
         super.disperseAir();
-        List<Pair<ForgeDirection, IAirHandler>> teList = getConnectedPneumatics();
-        if(teList.size() == 0) airLeak(ForgeDirection.getOrientation(getBlockMetadata()));
+        List<Pair<EnumFacing, IAirHandler>> teList = getConnectedPneumatics();
+        if(teList.size() == 0) airLeak(getRotation());
     }
 
     @Override
-    public boolean isConnectedTo(ForgeDirection side){
-        return ForgeDirection.getOrientation(worldObj.getBlockMetadata(xCoord, yCoord, zCoord)) == side;
+    public boolean isConnectedTo(EnumFacing side){
+        return getRotation() == side;
     }
 
     @Override
@@ -177,7 +178,7 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
             if(redstoneMode > 3) redstoneMode = 0;
             updateNeighbours();
         } else if((buttonID == 1 || buttonID == 2) && inventory[CHARGE_INVENTORY_INDEX] != null && inventory[CHARGE_INVENTORY_INDEX].getItem() instanceof IChargingStationGUIHolderItem) {
-            player.openGui(PneumaticCraft.instance, buttonID == 1 ? ((IChargingStationGUIHolderItem)inventory[CHARGE_INVENTORY_INDEX].getItem()).getGuiID().ordinal() : EnumGuiId.CHARGING_STATION.ordinal(), worldObj, xCoord, yCoord, zCoord);
+            player.openGui(PneumaticCraft.instance, buttonID == 1 ? ((IChargingStationGUIHolderItem)inventory[CHARGE_INVENTORY_INDEX].getItem()).getGuiID().ordinal() : EnumGuiId.CHARGING_STATION.ordinal(), worldObj, getPos().getX(), getPos().getY(), getPos().getZ());
         }
     }
 
@@ -203,7 +204,7 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
     @Override
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox(){
-        return AxisAlignedBB.getBoundingBox(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 1, zCoord + 1);
+        return new AxisAlignedBB(getPos().getX(), getPos().getY(), getPos().getZ(), getPos().getX() + 1, getPos().getY() + 1, getPos().getZ() + 1);
     }
 
     public InventoryPneumaticInventoryItem getChargeableInventory(){
@@ -250,7 +251,7 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
 
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
@@ -283,9 +284,9 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
             for(EntityPlayer player : players) {
                 if(player.openContainer instanceof ContainerChargingStationItemInventory && ((ContainerChargingStationItemInventory)player.openContainer).te == this) {
                     if(itemStack != null && itemStack.getItem() instanceof IChargingStationGUIHolderItem) {
-                        // player.openGui(PneumaticCraft.instance, CommonProxy.GUI_ID_PNEUMATIC_ARMOR, worldObj, xCoord, yCoord, zCoord);
+                        // player.openGui(PneumaticCraft.instance, CommonProxy.GUI_ID_PNEUMATIC_ARMOR, worldObj, getPos().getX(), getPos().getY(), getPos().getZ());
                     } else {
-                        player.openGui(PneumaticCraft.instance, EnumGuiId.CHARGING_STATION.ordinal(), worldObj, xCoord, yCoord, zCoord);
+                        player.openGui(PneumaticCraft.instance, EnumGuiId.CHARGING_STATION.ordinal(), worldObj, getPos().getX(), getPos().getY(), getPos().getZ());
                     }
                 }
             }
@@ -293,7 +294,7 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
 
         return Blockss.chargingStation.getUnlocalizedName();
     }
@@ -310,10 +311,10 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
 
     @Override
     public void readFromNBT(NBTTagCompound tag){
@@ -387,7 +388,7 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
 
     @Override
     // upgrades in bottom, fuel in the rest.
-    public int[] getAccessibleSlotsFromSide(int var1){
+    public int[] getSlotsForFace(EnumFacing var1){
         if(chargeableInventory != null) {
             int[] slots = new int[chargeableInventory.getSizeInventory() + 1];
             slots[0] = 0;
@@ -401,18 +402,23 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
     }
 
     @Override
-    public boolean canInsertItem(int i, ItemStack itemstack, int j){
+    public boolean canInsertItem(int i, ItemStack itemstack, EnumFacing j){
         return true;
     }
 
     @Override
-    public boolean canExtractItem(int i, ItemStack itemstack, int j){
+    public boolean canExtractItem(int i, ItemStack itemstack, EnumFacing j){
         return true;
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
+    }
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
     }
 
     @Override

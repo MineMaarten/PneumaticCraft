@@ -1,5 +1,7 @@
 package pneumaticCraft.client.gui.semiblock;
 
+import java.io.IOException;
+
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.fluids.Fluid;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetLiquidFilter;
@@ -22,7 +24,7 @@ public class GuiLogisticsLiquidFilter extends GuiProgWidgetLiquidFilter{
     }
 
     @Override
-    public void keyTyped(char key, int keyCode){
+    public void keyTyped(char key, int keyCode) throws IOException{
         super.keyTyped(key, keyCode);
         if(keyCode == 1) {
             mc.displayGuiScreen(parentScreen);

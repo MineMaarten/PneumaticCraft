@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public abstract class EntityPollSensor implements IPollSensorSetting{
@@ -20,8 +21,8 @@ public abstract class EntityPollSensor implements IPollSensorSetting{
     }
 
     @Override
-    public int getRedstoneValue(World world, int x, int y, int z, int sensorRange, String textBoxText){
-        AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(x - sensorRange, y - sensorRange, z - sensorRange, x + 1 + sensorRange, y + 1 + sensorRange, z + 1 + sensorRange);
+    public int getRedstoneValue(World world, BlockPos pos, int sensorRange, String textBoxText){
+        AxisAlignedBB aabb = new AxisAlignedBB(pos.add(-sensorRange, -sensorRange, -sensorRange), pos.add(1 + sensorRange, 1 + sensorRange, 1 + sensorRange));
         return getRedstoneValue(world.getEntitiesWithinAABB(getEntityTracked(), aabb), textBoxText);
     }
 

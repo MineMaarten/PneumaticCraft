@@ -16,7 +16,7 @@ public class PacketUpdateLogisticModule extends LocationIntPacket<PacketUpdateLo
     public PacketUpdateLogisticModule(){}
 
     public PacketUpdateLogisticModule(ModuleLogistics logisticsModule, int action){
-        super(logisticsModule.getTube().x(), logisticsModule.getTube().y(), logisticsModule.getTube().z());
+        super(logisticsModule.getTube().pos());
         side = logisticsModule.getDirection().ordinal();
         colorIndex = logisticsModule.getColorChannel();
         if(action > 0) {

@@ -1,14 +1,20 @@
 package pneumaticCraft.common;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import pneumaticCraft.common.ai.DroneClaimManager;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.config.AmadronOfferPeriodicConfig;
@@ -17,8 +23,6 @@ import pneumaticCraft.common.network.PacketServerTickTime;
 import pneumaticCraft.common.recipes.AmadronOfferManager;
 import pneumaticCraft.common.tileentity.TileEntityElectrostaticCompressor;
 import pneumaticCraft.lib.PneumaticValues;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
 
 public class TickHandlerPneumaticCraft{
 
@@ -28,12 +32,12 @@ public class TickHandlerPneumaticCraft{
             World world = event.world;
             checkLightning(world);
             DroneClaimManager.getInstance(world).update();
-            if(!event.world.isRemote && event.world.provider.dimensionId == 0 && event.world.getWorldTime() % (24000 / AmadronOfferPeriodicConfig.timesPerDay) == 1) {
+            if(!event.world.isRemote && event.world.provider.getDimensionId() == 0 && event.world.getWorldTime() % (24000 / AmadronOfferPeriodicConfig.timesPerDay) == 1) {
                 AmadronOfferManager.getInstance().shufflePeriodicOffers();
             }
             if(!event.world.isRemote && event.world.getTotalWorldTime() % 100 == 0) {
-                double tickTime = net.minecraft.util.MathHelper.average(MinecraftServer.getServer().tickTimeArray) * 1.0E-6D;//In case world are going to get their own thread: MinecraftServer.getServer().worldTickTimes.get(event.world.provider.dimensionId)
-                NetworkHandler.sendToDimension(new PacketServerTickTime(tickTime), event.world.provider.dimensionId);
+                double tickTime = net.minecraft.util.MathHelper.average(MinecraftServer.getServer().tickTimeArray) * 1.0E-6D;//In case world are going to get their own thread: MinecraftServer.getServer().worldTickTimes.get(event.world.provider.getDimensionId())
+                NetworkHandler.sendToDimension(new PacketServerTickTime(tickTime), event.world.provider.getDimensionId());
                 if(event.world.getTotalWorldTime() % 600 == 0) AmadronOfferManager.getInstance().tryRestockCustomOffers();
             }
         }
@@ -43,27 +47,28 @@ public class TickHandlerPneumaticCraft{
         if(world.isRemote) return;
 
         for(int i = 0; i < world.weatherEffects.size(); i++) {
-            Entity entity = (Entity)world.weatherEffects.get(i);
+            Entity entity = world.weatherEffects.get(i);
             if(entity.ticksExisted == 1 && entity instanceof EntityLightningBolt) {
                 handleElectrostaticGeneration(world, entity);
             }
         }
     }
 
+    //TODO 1.8 test Electrostatic compressor
     private void handleElectrostaticGeneration(World world, Entity entity){
-        List<int[]> coordList = new ArrayList<int[]>();
-        getElectrostaticGrid(coordList, world, (int)Math.round(entity.posX), (int)Math.round(entity.posY), (int)Math.round(entity.posZ));
+        Set<BlockPos> posList = new HashSet<BlockPos>();
+        getElectrostaticGrid(posList, world, new BlockPos(Math.round(entity.posX), Math.round(entity.posY), Math.round(entity.posZ)));
         List<TileEntityElectrostaticCompressor> compressors = new ArrayList<TileEntityElectrostaticCompressor>();
-        for(int[] coord : coordList) {
-            if(world.getBlock(coord[0], coord[1], coord[2]) == Blockss.electrostaticCompressor) {
-                TileEntity te = world.getTileEntity(coord[0], coord[1], coord[2]);
+        for(BlockPos pos : posList) {
+            if(world.getBlockState(pos).getBlock() == Blockss.electrostaticCompressor) {
+                TileEntity te = world.getTileEntity(pos);
                 if(te instanceof TileEntityElectrostaticCompressor) {
                     compressors.add((TileEntityElectrostaticCompressor)te);
                 }
             }
         }
         for(TileEntityElectrostaticCompressor compressor : compressors) {
-            compressor.addAir(PneumaticValues.PRODUCTION_ELECTROSTATIC_COMPRESSOR / compressors.size(), ForgeDirection.UNKNOWN);
+            compressor.addAir(PneumaticValues.PRODUCTION_ELECTROSTATIC_COMPRESSOR / compressors.size());
             compressor.onStruckByLightning();
         }
     }
@@ -71,28 +76,19 @@ public class TickHandlerPneumaticCraft{
     /**
      * All Iron bar blocks blocks will be added to the given arraylist of coordinates. This method
      * will be recursively called until the whole grid of iron bars is on the list.
-     * @param list
+     * @param set
      * @param world
      * @param x
      * @param y
      * @param z
      */
-    public static void getElectrostaticGrid(List<int[]> list, World world, int x, int y, int z){
-        for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
-            if((world.getBlock(x + d.offsetX, y + d.offsetY, z + d.offsetZ) == net.minecraft.init.Blocks.iron_bars || world.getBlock(x + d.offsetX, y + d.offsetY, z + d.offsetZ) == Blockss.electrostaticCompressor) && !listContainsCoord(list, x + d.offsetX, y + d.offsetY, z + d.offsetZ)) {
-                int[] coord = {x + d.offsetX, y + d.offsetY, z + d.offsetZ};
-                list.add(coord);
-                getElectrostaticGrid(list, world, x + d.offsetX, y + d.offsetY, z + d.offsetZ);
+    public static void getElectrostaticGrid(Set<BlockPos> set, World world, BlockPos pos){
+        for(EnumFacing d : EnumFacing.VALUES) {
+            BlockPos newPos = pos.offset(d);
+            Block block = world.getBlockState(newPos).getBlock();
+            if((block == net.minecraft.init.Blocks.iron_bars || block == Blockss.electrostaticCompressor) && set.add(newPos)) {
+                getElectrostaticGrid(set, world, newPos);
             }
         }
     }
-
-    private static boolean listContainsCoord(List<int[]> list, int x, int y, int z){
-        for(int i = 0; i < list.size(); i++) {
-            int[] coord = list.get(i);
-            if(coord[0] == x && coord[1] == y && coord[2] == z) return true;
-        }
-        return false;
-    }
-
 }

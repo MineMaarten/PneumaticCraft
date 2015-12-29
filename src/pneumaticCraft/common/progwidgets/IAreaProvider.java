@@ -2,8 +2,8 @@ package pneumaticCraft.common.progwidgets;
 
 import java.util.Set;
 
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 
 public interface IAreaProvider{
-    public void getArea(Set<ChunkPosition> area);
+    public void getArea(Set<BlockPos> area);
 }

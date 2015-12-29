@@ -1,7 +1,7 @@
 package pneumaticCraft.common.tileentity;
 
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
-import net.minecraftforge.common.util.ForgeDirection;
 import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
@@ -19,7 +19,7 @@ public class TileEntityAdvancedAirCompressor extends TileEntityAirCompressor imp
     }
 
     @Override
-    public IHeatExchangerLogic getHeatExchangerLogic(ForgeDirection side){
+    public IHeatExchangerLogic getHeatExchangerLogic(EnumFacing side){
         return heatExchanger;
     }
 
@@ -48,7 +48,7 @@ public class TileEntityAdvancedAirCompressor extends TileEntityAirCompressor imp
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
 
         return Blockss.advancedAirCompressor.getUnlocalizedName();
     }

@@ -5,6 +5,8 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -13,8 +15,6 @@ import pneumaticCraft.client.gui.remote.GuiRemoteDropdown;
 import pneumaticCraft.client.gui.widget.WidgetComboBox;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketSetGlobalVariable;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ActionWidgetDropdown extends ActionWidgetVariable<WidgetComboBox>{
 
@@ -89,7 +89,7 @@ public class ActionWidgetDropdown extends ActionWidgetVariable<WidgetComboBox>{
     @Override
     public WidgetComboBox getWidget(){
         if(widget == null) {
-            widget = new WidgetComboBox(Minecraft.getMinecraft().fontRenderer, x, y, width, height);
+            widget = new WidgetComboBox(Minecraft.getMinecraft().fontRendererObj, x, y, width, height);
             widget.setElements(getDropdownElements());
             widget.setFixedOptions();
             updateWidget();

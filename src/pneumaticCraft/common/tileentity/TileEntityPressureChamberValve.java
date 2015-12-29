@@ -1,9 +1,11 @@
 package pneumaticCraft.common.tileentity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
@@ -15,8 +17,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,6 +30,7 @@ import pneumaticCraft.api.recipe.PressureChamberRecipe;
 import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.common.AchievementHandler;
 import pneumaticCraft.common.DamageSourcePneumaticCraft;
+import pneumaticCraft.common.NBTUtil;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.config.Config;
 import pneumaticCraft.common.fluid.Fluids;
@@ -46,7 +51,7 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
     @DescSynced
     public int multiBlockSize;
     public List<TileEntityPressureChamberValve> accessoryValves;
-    private final List<int[]> nbtValveList;
+    private final List<BlockPos> nbtValveList;
     private boolean readNBT = false;
     @GuiSynced
     public boolean isValidRecipeInChamber;
@@ -69,7 +74,7 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
     public TileEntityPressureChamberValve(){
         super(PneumaticValues.DANGER_PRESSURE_PRESSURE_CHAMBER, PneumaticValues.MAX_PRESSURE_PRESSURE_CHAMBER, PneumaticValues.VOLUME_PRESSURE_CHAMBER);
         accessoryValves = new ArrayList<TileEntityPressureChamberValve>();
-        nbtValveList = new ArrayList<int[]>();
+        nbtValveList = new ArrayList<BlockPos>();
         setUpgradeSlots(new int[]{UPGRADE_SLOT_1, 1, 2, UPGRADE_SLOT_4});
     }
 
@@ -81,27 +86,27 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
     // pneumatic methods-------------------------------------------------------
     // used in the air dispersion methods.
     @Override
-    public boolean isConnectedTo(ForgeDirection side){
-        switch(ForgeDirection.getOrientation(getBlockMetadata())){
+    public boolean isConnectedTo(EnumFacing side){
+        switch(getRotation()){
             case UP:
             case DOWN:
-                return side == ForgeDirection.UP || side == ForgeDirection.DOWN;
+                return side == EnumFacing.UP || side == EnumFacing.DOWN;
             case NORTH:
             case SOUTH:
-                return side == ForgeDirection.NORTH || side == ForgeDirection.SOUTH;
+                return side == EnumFacing.NORTH || side == EnumFacing.SOUTH;
             case EAST:
             case WEST:
-                return side == ForgeDirection.EAST || side == ForgeDirection.WEST;
+                return side == EnumFacing.EAST || side == EnumFacing.WEST;
         }
         return false;
     }
 
     @Override
-    public List<Pair<ForgeDirection, IAirHandler>> getConnectedPneumatics(){
-        List<Pair<ForgeDirection, IAirHandler>> teList = super.getConnectedPneumatics();
+    public List<Pair<EnumFacing, IAirHandler>> getConnectedPneumatics(){
+        List<Pair<EnumFacing, IAirHandler>> teList = super.getConnectedPneumatics();
         if(accessoryValves != null) {
             for(TileEntityPressureChamberValve valve : accessoryValves) {
-                if(valve != this) teList.add(new ImmutablePair(ForgeDirection.UNKNOWN, valve.getAirHandler()));
+                if(valve != this) teList.add(new ImmutablePair(null, valve.getAirHandler()));
             }
         }
 
@@ -115,13 +120,13 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
 
     // main update method
     @Override
-    public void updateEntity(){
+    public void update(){
         if(readNBT) {// this way of doing this is needed because other TE's are
                      // loaded after the reading of the NBT of this TE.
             readNBT = false;
             accessoryValves.clear();
-            for(int[] valve : nbtValveList) {
-                TileEntity te = worldObj.getTileEntity(valve[0], valve[1], valve[2]);
+            for(BlockPos valve : nbtValveList) {
+                TileEntity te = worldObj.getTileEntity(valve);
                 if(te instanceof TileEntityPressureChamberValve) {
 
                     accessoryValves.add((TileEntityPressureChamberValve)te);
@@ -129,33 +134,33 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
             }
             if(accessoryValves.isEmpty()) {//Hacky solution for an unexplainable bug.
                 invalidateMultiBlock();
-                checkIfProperlyFormed(worldObj, xCoord, yCoord, zCoord);
+                checkIfProperlyFormed(worldObj, getPos());
             }
-            if(worldObj.isRemote) worldObj.markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, xCoord, yCoord, zCoord);
+            if(worldObj.isRemote) worldObj.markBlockRangeForRenderUpdate(getPos().getX(), getPos().getY(), getPos().getZ(), getPos().getX(), getPos().getY(), getPos().getZ());
         }
 
         if(!worldObj.isRemote) {
             //code to check if we need to leak air.
             boolean[] connected = new boolean[]{true, true, true, true, true, true};//assume we are not leaking at any side
-            switch(ForgeDirection.getOrientation(getBlockMetadata())){//take off the sides that tubes can connect to.
+            switch(getRotation()){//take off the sides that tubes can connect to.
                 case UP:
                 case DOWN:
-                    connected[ForgeDirection.UP.ordinal()] = false;
-                    connected[ForgeDirection.DOWN.ordinal()] = false;
+                    connected[EnumFacing.UP.ordinal()] = false;
+                    connected[EnumFacing.DOWN.ordinal()] = false;
                     break;
                 case NORTH:
                 case SOUTH:
-                    connected[ForgeDirection.NORTH.ordinal()] = false;
-                    connected[ForgeDirection.SOUTH.ordinal()] = false;
+                    connected[EnumFacing.NORTH.ordinal()] = false;
+                    connected[EnumFacing.SOUTH.ordinal()] = false;
                     break;
                 case EAST:
                 case WEST:
-                    connected[ForgeDirection.EAST.ordinal()] = false;
-                    connected[ForgeDirection.WEST.ordinal()] = false;
+                    connected[EnumFacing.EAST.ordinal()] = false;
+                    connected[EnumFacing.WEST.ordinal()] = false;
                     break;
             }
-            List<Pair<ForgeDirection, IAirHandler>> teList = super.getConnectedPneumatics();//we need the super method, as the overridden method adds the other valves.
-            for(Pair<ForgeDirection, IAirHandler> entry : teList) {
+            List<Pair<EnumFacing, IAirHandler>> teList = super.getConnectedPneumatics();//we need the super method, as the overridden method adds the other valves.
+            for(Pair<EnumFacing, IAirHandler> entry : teList) {
                 connected[entry.getKey().ordinal()] = true;
             }
             //retrieve the valve that is controlling the (potential) chamber.
@@ -168,28 +173,28 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
             }
             //if we found one, we can scratch one side to be leaking air.
             if(baseValve != null) {
-                switch(ForgeDirection.getOrientation(getBlockMetadata())){
+                switch(getRotation()){
                     case UP:
                     case DOWN:
-                        if(baseValve.multiBlockY == yCoord) connected[ForgeDirection.UP.ordinal()] = true;
-                        else connected[ForgeDirection.DOWN.ordinal()] = true;
+                        if(baseValve.multiBlockY == getPos().getY()) connected[EnumFacing.UP.ordinal()] = true;
+                        else connected[EnumFacing.DOWN.ordinal()] = true;
                         break;
                     case NORTH:
                     case SOUTH:
-                        if(baseValve.multiBlockZ == zCoord) connected[ForgeDirection.SOUTH.ordinal()] = true;
-                        else connected[ForgeDirection.NORTH.ordinal()] = true;
+                        if(baseValve.multiBlockZ == getPos().getZ()) connected[EnumFacing.SOUTH.ordinal()] = true;
+                        else connected[EnumFacing.NORTH.ordinal()] = true;
                         break;
                     case EAST:
                     case WEST:
-                        if(baseValve.multiBlockX == xCoord) connected[ForgeDirection.EAST.ordinal()] = true;
-                        else connected[ForgeDirection.WEST.ordinal()] = true;
+                        if(baseValve.multiBlockX == getPos().getX()) connected[EnumFacing.EAST.ordinal()] = true;
+                        else connected[EnumFacing.WEST.ordinal()] = true;
                         break;
                 }
             }
             for(int i = 0; i < 6; i++)
-                if(!connected[i]) airLeak(ForgeDirection.getOrientation(i));
+                if(!connected[i]) airLeak(EnumFacing.getFront(i));
         }
-        super.updateEntity();
+        super.update();
 
         /*
          * FIXME pressure chamber particle effects not updating properly
@@ -207,7 +212,7 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
             //simple recipes
             for(PressureChamberRecipe recipe : PressureChamberRecipe.chamberRecipes) {
                 boolean isValidRecipeInChamberFlag = canBeCompressed(recipe, stacksInChamber);
-                boolean isSufficientPressureInChamberFlag = recipe.pressure <= getPressure(ForgeDirection.UNKNOWN) && recipe.pressure > 0F || recipe.pressure >= getPressure(ForgeDirection.UNKNOWN) && recipe.pressure < 0F;
+                boolean isSufficientPressureInChamberFlag = recipe.pressure <= getPressure(null) && recipe.pressure > 0F || recipe.pressure >= getPressure(null) && recipe.pressure < 0F;
                 if(isValidRecipeInChamberFlag) {
                     isValidRecipeInChamber = true;
                     if(Math.abs(recipe.pressure) < Math.abs(recipePressure)) {
@@ -224,7 +229,7 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
             for(IPressureChamberRecipe recipe : PressureChamberRecipe.specialRecipes) {
                 ItemStack[] removedStacks = recipe.isValidRecipe(stacksInChamber);
                 boolean isValidRecipeInChamberFlag = removedStacks != null;
-                boolean isSufficientPressureInChamberFlag = recipe.getCraftingPressure() <= getPressure(ForgeDirection.UNKNOWN) && recipe.getCraftingPressure() > 0F || recipe.getCraftingPressure() >= getPressure(ForgeDirection.UNKNOWN) && recipe.getCraftingPressure() < 0F;
+                boolean isSufficientPressureInChamberFlag = recipe.getCraftingPressure() <= getPressure(null) && recipe.getCraftingPressure() > 0F || recipe.getCraftingPressure() >= getPressure(null) && recipe.getCraftingPressure() < 0F;
                 if(isValidRecipeInChamberFlag) {
                     isValidRecipeInChamber = true;
                     if(Math.abs(recipe.getCraftingPressure()) < Math.abs(recipePressure)) {
@@ -238,8 +243,8 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
                 }
             }
 
-            if(getPressure(ForgeDirection.UNKNOWN) > PneumaticValues.MAX_PRESSURE_LIVING_ENTITY) {
-                AxisAlignedBB bbBox = AxisAlignedBB.getBoundingBox(multiBlockX + 1, multiBlockY + 1, multiBlockZ + 1, multiBlockX + multiBlockSize - 1, multiBlockY + multiBlockSize - 1, multiBlockZ + multiBlockSize - 1);
+            if(getPressure(null) > PneumaticValues.MAX_PRESSURE_LIVING_ENTITY) {
+                AxisAlignedBB bbBox = new AxisAlignedBB(multiBlockX + 1, multiBlockY + 1, multiBlockZ + 1, multiBlockX + multiBlockSize - 1, multiBlockY + multiBlockSize - 1, multiBlockZ + multiBlockSize - 1);
                 List<EntityLivingBase> entities = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, bbBox);
                 for(EntityLivingBase entity : entities) {
                     if(entity instanceof EntityVillager) {
@@ -254,13 +259,13 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
                             }
                         }
                     }
-                    entity.attackEntityFrom(DamageSourcePneumaticCraft.pressure, (int)(getPressure(ForgeDirection.UNKNOWN) * 2D));
+                    entity.attackEntityFrom(DamageSourcePneumaticCraft.pressure, (int)(getPressure(null) * 2D));
                 }
             }
         }
 
         // move entities to eachother.
-        AxisAlignedBB bbBox = AxisAlignedBB.getBoundingBox(multiBlockX, multiBlockY, multiBlockZ, multiBlockX + multiBlockSize, multiBlockY + multiBlockSize, multiBlockZ + multiBlockSize);
+        AxisAlignedBB bbBox = new AxisAlignedBB(multiBlockX, multiBlockY, multiBlockZ, multiBlockX + multiBlockSize, multiBlockY + multiBlockSize, multiBlockZ + multiBlockSize);
         List<EntityItem> entities = worldObj.getEntitiesWithinAABB(EntityItem.class, bbBox);
         areEntitiesDoneMoving = true; // set to true, set to false when one of
                                       // the entities is moving.
@@ -292,14 +297,14 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
         }
 
         // particles
-        if(worldObj.isRemote && getPressure(ForgeDirection.UNKNOWN) > 0.2D) {
+        if(worldObj.isRemote && getPressure(null) > 0.2D) {
             int particles = (int)Math.pow(multiBlockSize - 2, 3);
             for(int i = 0; i < particles; i++) {
-                if(rand.nextInt(Math.max(1, 8 - (int)(getPressure(ForgeDirection.UNKNOWN) * 2D))) == 0) {
+                if(rand.nextInt(Math.max(1, 8 - (int)(getPressure(null) * 2D))) == 0) {
                     double posX = multiBlockX + 1D + rand.nextDouble() * (multiBlockSize - 2D);
                     double posY = multiBlockY + 1D + rand.nextDouble() * (multiBlockSize - 2D);
                     double posZ = multiBlockZ + 1D + rand.nextDouble() * (multiBlockSize - 2D);
-                    worldObj.spawnParticle("explode", posX, posY, posZ, 0D, 0D, 0D);
+                    worldObj.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, posX, posY, posZ, 0D, 0D, 0D);
                 }
             }
         }
@@ -338,7 +343,7 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
         }*/
 
         // add Item entities lying on the ground.
-        AxisAlignedBB bbBox = AxisAlignedBB.getBoundingBox(multiBlockX, multiBlockY, multiBlockZ, multiBlockX + multiBlockSize, multiBlockY + multiBlockSize, multiBlockZ + multiBlockSize);
+        AxisAlignedBB bbBox = new AxisAlignedBB(multiBlockX, multiBlockY, multiBlockZ, multiBlockX + multiBlockSize, multiBlockY + multiBlockSize, multiBlockZ + multiBlockSize);
         List<EntityItem> entities = worldObj.getEntitiesWithinAABB(EntityItem.class, bbBox);
         for(EntityItem entity : entities) {
             if(entity.isDead) continue;
@@ -361,7 +366,7 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
         double[] outputPosition = new double[]{multiBlockX + multiBlockSize / 2D, multiBlockY + 1.2D, multiBlockZ + multiBlockSize / 2D};
 
         // get the in world EntityItems
-        AxisAlignedBB bbBox = AxisAlignedBB.getBoundingBox(multiBlockX, multiBlockY, multiBlockZ, multiBlockX + multiBlockSize, multiBlockY + multiBlockSize, multiBlockZ + multiBlockSize);
+        AxisAlignedBB bbBox = new AxisAlignedBB(multiBlockX, multiBlockY, multiBlockZ, multiBlockX + multiBlockSize, multiBlockY + multiBlockSize, multiBlockZ + multiBlockSize);
         List<EntityItem> entities = worldObj.getEntitiesWithinAABB(EntityItem.class, bbBox);
         for(EntityItem entity : entities) {
             if(entity.isDead) continue;
@@ -385,7 +390,7 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
     private void giveOutput(ItemStack[] output, double[] outputPosition){
         for(ItemStack iStack : output) {
             if(iStack.getItem() == etchingAcid) {
-                for(EntityPlayer player : (List<EntityPlayer>)worldObj.getEntitiesWithinAABB(EntityPlayer.class, AxisAlignedBB.getBoundingBox(xCoord - 32, yCoord - 32, zCoord - 32, xCoord + 32, yCoord + 32, zCoord + 32))) {
+                for(EntityPlayer player : worldObj.getEntitiesWithinAABB(EntityPlayer.class, new AxisAlignedBB(getPos().getX() - 32, getPos().getY() - 32, getPos().getZ() - 32, getPos().getX() + 32, getPos().getY() + 32, getPos().getZ() + 32))) {
                     AchievementHandler.giveAchievement(player, new ItemStack(etchingAcid));
                 }
             }
@@ -421,9 +426,7 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
         nbtValveList.clear();
         for(int i = 0; i < tagList2.tagCount(); ++i) {
             NBTTagCompound tagCompound = tagList2.getCompoundTagAt(i);
-            if(tagCompound != null) {
-                nbtValveList.add(new int[]{tagCompound.getInteger("xCoord"), tagCompound.getInteger("yCoord"), tagCompound.getInteger("zCoord")});
-            }
+            nbtValveList.add(NBTUtil.getPos(tagCompound));
         }
         readNBT = true;
     }
@@ -454,9 +457,9 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
         NBTTagList tagList2 = new NBTTagList();
         for(TileEntityPressureChamberValve valve : accessoryValves) {
             NBTTagCompound tagCompound = new NBTTagCompound();
-            tagCompound.setInteger("xCoord", valve.xCoord);
-            tagCompound.setInteger("yCoord", valve.yCoord);
-            tagCompound.setInteger("zCoord", valve.zCoord);
+            tagCompound.setInteger("getPos().getX()", valve.getPos().getX());
+            tagCompound.setInteger("getPos().getY()", valve.getPos().getY());
+            tagCompound.setInteger("getPos().getZ()", valve.getPos().getZ());
             tagList2.appendTag(tagCompound);
         }
 
@@ -505,7 +508,7 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
         for(int x = 0; x < multiBlockSize; x++) {
             for(int y = 0; y < multiBlockSize; y++) {
                 for(int z = 0; z < multiBlockSize; z++) {
-                    TileEntity te = worldObj.getTileEntity(x + multiBlockX, y + multiBlockY, z + multiBlockZ);
+                    TileEntity te = worldObj.getTileEntity(new BlockPos(x + multiBlockX, y + multiBlockY, z + multiBlockZ));
                     if(te instanceof TileEntityPressureChamberWall) {
                         TileEntityPressureChamberWall teWall = (TileEntityPressureChamberWall)te;
                         teWall.setCore(null); // Clear the base TE's, so that
@@ -535,12 +538,12 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
         multiBlockZ = baseZ;
     }
 
-    public static boolean checkIfProperlyFormed(World world, int x, int y, int z){
+    public static boolean checkIfProperlyFormed(World world, BlockPos pos){
         // ArrayList<int[]> blockList = getAccessoryTiles(new
         // ArrayList<int[]>(), world, x,y,z);
 
         for(int i = 3; i < 6; i++) {
-            if(checkForShiftedCubeOfSize(i, world, x, y, z)) {
+            if(checkForShiftedCubeOfSize(i, world, pos.getX(), pos.getY(), pos.getZ())) {
                 return true;
             }
         }
@@ -575,20 +578,22 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
             for(int y = 0; y < size; y++) {
                 for(int z = 0; z < size; z++) {
                     if(x != 0 && x != size - 1 && y != 0 && y != size - 1 && z != 0 && z != size - 1) continue;
-                    if(world.getBlock(x + baseX, y + baseY, z + baseZ) != Blockss.pressureChamberWall && world.getBlock(x + baseX, y + baseY, z + baseZ) != Blockss.pressureChamberValve && world.getBlock(x + baseX, y + baseY, z + baseZ) != Blockss.pressureChamberInterface) {
+                    BlockPos pos = new BlockPos(x + baseX, y + baseY, z + baseZ);
+                    Block block = world.getBlockState(pos).getBlock();
+                    if(block != Blockss.pressureChamberWall && block != Blockss.pressureChamberValve && block != Blockss.pressureChamberInterface) {
                         return false;
-                    } else if(world.getBlock(x + baseX, y + baseY, z + baseZ) == Blockss.pressureChamberValve) {
+                    } else if(block == Blockss.pressureChamberValve) {
                         boolean xMid = x != 0 && x != size - 1;
                         boolean yMid = y != 0 && y != size - 1;
                         boolean zMid = z != 0 && z != size - 1;
-                        ForgeDirection facing = ForgeDirection.getOrientation(world.getBlockMetadata(x + baseX, y + baseY, z + baseZ));
-                        if(xMid && yMid && (facing == ForgeDirection.NORTH || facing == ForgeDirection.SOUTH) || xMid && zMid && (facing == ForgeDirection.UP || facing == ForgeDirection.DOWN) || yMid && zMid && (facing == ForgeDirection.EAST || facing == ForgeDirection.WEST)) {
+                        EnumFacing facing = ((TileEntityBase)world.getTileEntity(pos)).getRotation();
+                        if(xMid && yMid && (facing == EnumFacing.NORTH || facing == EnumFacing.SOUTH) || xMid && zMid && (facing == EnumFacing.UP || facing == EnumFacing.DOWN) || yMid && zMid && (facing == EnumFacing.EAST || facing == EnumFacing.WEST)) {
                             validValveFound = true;
                         } else {
                             return false;
                         }
                     } else {// when blockID == wall/interface
-                        TileEntity te = world.getTileEntity(x + baseX, y + baseY, z + baseZ);
+                        TileEntity te = world.getTileEntity(pos);
                         if(te instanceof TileEntityPressureChamberWall && ((TileEntityPressureChamberWall)te).getCore() != null) {
                             return false;
                         }
@@ -606,13 +611,14 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
         for(int x = 0; x < size; x++) {
             for(int y = 0; y < size; y++) {
                 for(int z = 0; z < size; z++) {
-                    TileEntity te = world.getTileEntity(x + baseX, y + baseY, z + baseZ);
+                    BlockPos pos = new BlockPos(x + baseX, y + baseY, z + baseZ);
+                    TileEntity te = world.getTileEntity(pos);
                     if(te instanceof TileEntityPressureChamberValve) {
                         boolean xMid = x != 0 && x != size - 1;
                         boolean yMid = y != 0 && y != size - 1;
                         boolean zMid = z != 0 && z != size - 1;
-                        ForgeDirection facing = ForgeDirection.getOrientation(world.getBlockMetadata(x + baseX, y + baseY, z + baseZ));
-                        if(xMid && yMid && (facing == ForgeDirection.NORTH || facing == ForgeDirection.SOUTH) || xMid && zMid && (facing == ForgeDirection.UP || facing == ForgeDirection.DOWN) || yMid && zMid && (facing == ForgeDirection.EAST || facing == ForgeDirection.WEST)) {
+                        EnumFacing facing = ((TileEntityBase)world.getTileEntity(pos)).getRotation();
+                        if(xMid && yMid && (facing == EnumFacing.NORTH || facing == EnumFacing.SOUTH) || xMid && zMid && (facing == EnumFacing.UP || facing == EnumFacing.DOWN) || yMid && zMid && (facing == EnumFacing.EAST || facing == EnumFacing.WEST)) {
                             teValve = (TileEntityPressureChamberValve)te;
                             valveList.add(teValve);
                         }
@@ -635,7 +641,7 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
         for(int x = 0; x < size; x++) {
             for(int y = 0; y < size; y++) {
                 for(int z = 0; z < size; z++) {
-                    TileEntity te = world.getTileEntity(x + baseX, y + baseY, z + baseZ);
+                    TileEntity te = world.getTileEntity(new BlockPos(x + baseX, y + baseY, z + baseZ));
                     if(te instanceof TileEntityPressureChamberWall) {
                         TileEntityPressureChamberWall teWall = (TileEntityPressureChamberWall)te;
                         teWall.setCore(teValve); // set base TE to the valve
@@ -651,7 +657,10 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
         return true;
     }
 
-    public boolean isCoordWithinChamber(World world, int x, int y, int z){
+    public boolean isCoordWithinChamber(World world, BlockPos pos){
+        int x = pos.getX();
+        int y = pos.getY();
+        int z = pos.getZ();
         if(x > multiBlockX && x < multiBlockX + multiBlockSize - 1 && y > multiBlockY && y < multiBlockY + multiBlockSize - 1 && z > multiBlockZ && z < multiBlockZ + multiBlockSize - 1) {
             return true;
         }
@@ -698,7 +707,7 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
 
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
@@ -723,7 +732,7 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
 
         return Blockss.pressureChamberValve.getUnlocalizedName();
     }
@@ -734,7 +743,7 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 
@@ -744,10 +753,15 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
+    }
 
     @Override
     public float getMinWorkingPressure(){

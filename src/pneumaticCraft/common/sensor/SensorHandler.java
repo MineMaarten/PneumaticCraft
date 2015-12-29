@@ -7,9 +7,12 @@ import java.util.Set;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.util.Rectangle;
 
@@ -45,9 +48,6 @@ import pneumaticCraft.common.sensor.pollSensors.WorldWeatherForecaster;
 import pneumaticCraft.common.sensor.pollSensors.entity.EntityInRangeSensor;
 import pneumaticCraft.common.tileentity.TileEntityUniversalSensor;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
-import cpw.mods.fml.common.eventhandler.Event;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class SensorHandler implements ISensorRegistrator{
 
@@ -243,7 +243,7 @@ public class SensorHandler implements ISensorRegistrator{
         @Override
         public int emitRedstoneOnEvent(Event event, TileEntity tile, int sensorRange, String textboxText){
             TileEntityUniversalSensor teUs = (TileEntityUniversalSensor)tile;
-            Set<ChunkPosition> positions = teUs.getGPSPositions();
+            Set<BlockPos> positions = teUs.getGPSPositions();
             return positions == null ? 0 : coordinateSensor.emitRedstoneOnEvent(event, teUs, sensorRange, positions);
         }
 
@@ -289,18 +289,18 @@ public class SensorHandler implements ISensorRegistrator{
         @Override
         public int getPollFrequency(TileEntity te){
             TileEntityUniversalSensor us = (TileEntityUniversalSensor)te;
-            Set<ChunkPosition> positions = us.getGPSPositions();
+            Set<BlockPos> positions = us.getGPSPositions();
             int mult = positions == null ? 1 : positions.size();
             return coordinateSensor.getPollFrequency() * mult;
         }
 
         @Override
-        public int getRedstoneValue(World world, int x, int y, int z, int sensorRange, String textBoxText){
-            TileEntity te = world.getTileEntity(x, y, z);
+        public int getRedstoneValue(World world, BlockPos pos, int sensorRange, String textBoxText){
+            TileEntity te = world.getTileEntity(pos);
             if(te instanceof TileEntityUniversalSensor) {
                 TileEntityUniversalSensor teUs = (TileEntityUniversalSensor)te;
-                Set<ChunkPosition> positions = teUs.getGPSPositions();
-                return positions == null ? 0 : coordinateSensor.getRedstoneValue(world, x, y, z, sensorRange, textBoxText, positions);
+                Set<BlockPos> positions = teUs.getGPSPositions();
+                return positions == null ? 0 : coordinateSensor.getRedstoneValue(world, pos, sensorRange, textBoxText, positions);
             }
             return 0;
         }

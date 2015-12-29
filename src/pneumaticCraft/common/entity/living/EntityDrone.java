@@ -32,27 +32,33 @@ import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.EnumPacketDirection;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.client.C15PacketClientSettings;
 import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ItemInWorldManager;
 import net.minecraft.stats.StatBase;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.IExtendedEntityProperties;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.IFluidTank;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
 
@@ -94,13 +100,6 @@ import pneumaticCraft.lib.NBTKeys;
 import pneumaticCraft.lib.PneumaticValues;
 
 import com.mojang.authlib.GameProfile;
-
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
-import cpw.mods.fml.relauncher.ReflectionHelper;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IInventoryHolder, IPneumaticWrenchable,
         IEntityAdditionalSpawnData, IHackableEntity, IDroneBase{
@@ -164,12 +163,12 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
     public EntityDrone(World world, EntityPlayer player){
         this(world);
         playerUUID = player.getGameProfile().getId().toString();
-        playerName = player.getCommandSenderName();
+        playerName = player.getName();
     }
 
     private void initializeFakePlayer(){
         fakePlayer = new DroneFakePlayer((WorldServer)worldObj, new GameProfile(playerUUID != null ? UUID.fromString(playerUUID) : null, playerName), new FakePlayerItemInWorldManager(worldObj, fakePlayer, this), this);
-        fakePlayer.playerNetServerHandler = new NetHandlerPlayServer(MinecraftServer.getServer(), new NetworkManager(false), fakePlayer);
+        fakePlayer.playerNetServerHandler = new NetHandlerPlayServer(MinecraftServer.getServer(), new NetworkManager(EnumPacketDirection.SERVERBOUND), fakePlayer);
         fakePlayer.inventory = new InventoryFakePlayer(fakePlayer);
     }
 
@@ -178,9 +177,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
         super.entityInit();
         dataWatcher.addObject(12, 0F);
         dataWatcher.addObject(13, (byte)0);
-        dataWatcher.addObject(14, 0);
-        dataWatcher.addObject(15, 0);
-        dataWatcher.addObject(16, 0);
+        //15 is reserved for AI/NO AI
         dataWatcher.addObject(17, "");
         dataWatcher.addObject(18, 0);
         dataWatcher.addObject(19, 0);
@@ -192,6 +189,9 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
         dataWatcher.addObjectByDataType(25, 5);
         dataWatcher.addObject(26, "Main");
         dataWatcher.addObject(27, 0);
+        dataWatcher.addObject(28, 0);
+        dataWatcher.addObject(29, 0);
+        dataWatcher.addObject(30, 0);
     }
 
     @Override
@@ -204,7 +204,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
 
     @Override
     public void writeSpawnData(ByteBuf data){
-        ByteBufUtils.writeUTF8String(data, getFakePlayer().getCommandSenderName());
+        ByteBufUtils.writeUTF8String(data, getFakePlayer().getName());
     }
 
     @Override
@@ -272,12 +272,12 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
             if(path != null) {
                 PathPoint target = path.getFinalPathPoint();
                 if(target != null) {
-                    setTargetedBlock(target.xCoord, target.yCoord, target.zCoord);
+                    setTargetedBlock(new BlockPos(target.xCoord, target.yCoord, target.zCoord));
                 } else {
-                    setTargetedBlock(0, 0, 0);
+                    setTargetedBlock(null);
                 }
             } else {
-                setTargetedBlock(0, 0, 0);
+                setTargetedBlock(null);
             }
             if(worldObj.getTotalWorldTime() % 20 == 0) {
                 updateSyncedPlayers();
@@ -295,17 +295,18 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
                 int x = (int)Math.floor(posX);
                 int y = (int)Math.floor(posY - 1);
                 int z = (int)Math.floor(posZ);
+                BlockPos pos = new BlockPos(x, y, z);
                 Block block = null;
                 for(int i = 0; i < 3; i++) {
-                    block = worldObj.getBlock(x, y, z);
+                    block = worldObj.getBlockState(pos).getBlock();
                     if(block.getMaterial() != Material.air) break;
                     y--;
                 }
 
                 if(block.getMaterial() != Material.air) {
-                    Vec3 vec = Vec3.createVectorHelper(posY - y, 0, 0);
-                    vec.rotateAroundY((float)(rand.nextFloat() * Math.PI * 2));
-                    worldObj.spawnParticle("blockcrack_" + Block.getIdFromBlock(block) + "_" + worldObj.getBlockMetadata(x, y, z), posX + vec.xCoord, y + 1, posZ + vec.zCoord, vec.xCoord, 0, vec.zCoord);
+                    Vec3 vec = new Vec3(posY - y, 0, 0);
+                    vec = vec.rotateYaw((float)(rand.nextFloat() * Math.PI * 2));
+                    worldObj.spawnParticle(EnumParticleTypes.BLOCK_CRACK, posX + vec.xCoord, y + 1, posZ + vec.zCoord, vec.xCoord, 0, vec.zCoord, Block.getStateId(worldObj.getBlockState(pos)));
                 }
             }
         }
@@ -313,8 +314,8 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
             for(int x = (int)posX - 1; x <= (int)(posX + width); x++) {
                 for(int y = (int)posY - 1; y <= (int)(posY + height + 1); y++) {
                     for(int z = (int)posZ - 2; z <= (int)(posZ + width); z++) {
-                        if(PneumaticCraftUtils.isBlockLiquid(worldObj.getBlock(x, y, z))) {
-                            worldObj.setBlock(x, y, z, Blocks.air, 0, 2);
+                        if(PneumaticCraftUtils.isBlockLiquid(worldObj.getBlockState(new BlockPos(x, y, z)).getBlock())) {
+                            worldObj.setBlockState(new BlockPos(x, y, z), Blocks.air.getDefaultState(), 2);
                         }
                     }
                 }
@@ -341,10 +342,10 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
         if(hasMinigun()) getMinigun().setAttackTarget(getAttackTarget()).update(posX, posY, posZ);
         if(!worldObj.isRemote && isEntityAlive()) {
             if(enabled) aiManager.onUpdateTasks();
-            for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
+            for(EnumFacing d : EnumFacing.VALUES) {
                 if(getEmittingRedstone(d) > 0) {
-                    if(worldObj.isAirBlock((int)Math.floor(posX + width / 2), (int)Math.floor(posY), (int)Math.floor(posZ + width / 2))) {
-                        worldObj.setBlock((int)Math.floor(posX + width / 2), (int)Math.floor(posY), (int)Math.floor(posZ + width / 2), Blockss.droneRedstoneEmitter);
+                    if(worldObj.isAirBlock(new BlockPos((int)Math.floor(posX + width / 2), (int)Math.floor(posY), (int)Math.floor(posZ + width / 2)))) {
+                        worldObj.setBlockState(new BlockPos((int)Math.floor(posX + width / 2), (int)Math.floor(posY), (int)Math.floor(posZ + width / 2)), Blockss.droneRedstoneEmitter.getDefaultState());
                     }
                     break;
                 }
@@ -352,17 +353,17 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
         }
     }
 
-    public ChunkPosition getTargetedBlock(){
-        int x = dataWatcher.getWatchableObjectInt(14);
-        int y = dataWatcher.getWatchableObjectInt(15);
-        int z = dataWatcher.getWatchableObjectInt(16);
-        return x != 0 || y != 0 || z != 0 ? new ChunkPosition(x, y, z) : null;
+    public BlockPos getTargetedBlock(){
+        int x = dataWatcher.getWatchableObjectInt(28);
+        int y = dataWatcher.getWatchableObjectInt(29);
+        int z = dataWatcher.getWatchableObjectInt(30);
+        return x != 0 || y != 0 || z != 0 ? new BlockPos(x, y, z) : null;
     }
 
-    private void setTargetedBlock(int x, int y, int z){
-        dataWatcher.updateObject(14, x);
-        dataWatcher.updateObject(15, y);
-        dataWatcher.updateObject(16, z);
+    private void setTargetedBlock(BlockPos pos){
+        dataWatcher.updateObject(28, pos != null ? pos.getX() : 0);
+        dataWatcher.updateObject(29, pos != null ? pos.getY() : 0);
+        dataWatcher.updateObject(30, pos != null ? pos.getZ() : 0);
     }
 
     @Override
@@ -376,18 +377,18 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
     }
 
     @Override
-    protected ChunkPosition getDugBlock(){
+    protected BlockPos getDugBlock(){
         int x = dataWatcher.getWatchableObjectInt(18);
         int y = dataWatcher.getWatchableObjectInt(19);
         int z = dataWatcher.getWatchableObjectInt(20);
-        return x != 0 || y != 0 || z != 0 ? new ChunkPosition(x, y, z) : null;
+        return x != 0 || y != 0 || z != 0 ? new BlockPos(x, y, z) : null;
     }
 
     @Override
-    public void setDugBlock(int x, int y, int z){
-        dataWatcher.updateObject(18, x);
-        dataWatcher.updateObject(19, y);
-        dataWatcher.updateObject(20, z);
+    public void setDugBlock(BlockPos pos){
+        dataWatcher.updateObject(18, pos != null ? pos.getX() : 0);
+        dataWatcher.updateObject(19, pos != null ? pos.getY() : 0);
+        dataWatcher.updateObject(20, pos != null ? pos.getZ() : 0);
     }
 
     public List<EntityAITaskEntry> getRunningTasks(){
@@ -398,11 +399,11 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
         return aiManager.getTargetAI();
     }
 
-    public void setVariable(String varName, ChunkPosition pos){
+    public void setVariable(String varName, BlockPos pos){
         aiManager.setCoordinate(varName, pos);
     }
 
-    public ChunkPosition getVariable(String varName){
+    public BlockPos getVariable(String varName){
         return aiManager.getCoordinate(varName);
     }
 
@@ -488,10 +489,10 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
     /**
      * Returns true if the newer Entity AI code should be run
      */
-    @Override
-    public boolean isAIEnabled(){
-        return true;
-    }
+    /*  @Override //TODO 1.8 test
+      public boolean isAIEnabled(){
+          return true;
+      }*/
 
     /**
      * Decrements the entity's air supply when underwater
@@ -571,14 +572,14 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
         ItemStack equippedItem = player.getCurrentEquippedItem();
         if(!worldObj.isRemote && equippedItem != null) {
             if(equippedItem.getItem() == Itemss.GPSTool) {
-                ChunkPosition gpsLoc = ItemGPSTool.getGPSLocation(equippedItem);
+                BlockPos gpsLoc = ItemGPSTool.getGPSLocation(equippedItem);
                 if(gpsLoc != null) {
-                    getNavigator().tryMoveToXYZ(gpsLoc.chunkPosX, gpsLoc.chunkPosY, gpsLoc.chunkPosZ, 0.1D);
+                    getNavigator().tryMoveToXYZ(gpsLoc.getX(), gpsLoc.getY(), gpsLoc.getZ(), 0.1D);
                 }
             } else {
                 int dyeIndex = TileEntityPlasticMixer.getDyeIndex(equippedItem);
                 if(dyeIndex >= 0) {
-                    setDroneColor(ItemDye.field_150922_c[dyeIndex]);
+                    setDroneColor(ItemDye.dyeColors[dyeIndex]);
                     equippedItem.stackSize--;
                     if(equippedItem.stackSize <= 0) {
                         player.setCurrentItemOrArmor(0, null);
@@ -593,7 +594,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
      * Called when a drone is hit by a Pneumatic Wrench.
      */
     @Override
-    public boolean rotateBlock(World world, EntityPlayer player, int x, int y, int z, ForgeDirection side){
+    public boolean rotateBlock(World world, EntityPlayer player, BlockPos pos, EnumFacing side){
         if(!naturallySpawned) {
             if(player.capabilities.isCreativeMode) naturallySpawned = true;//don't drop the drone in creative.
             attackEntityFrom(DamageSource.outOfWorld, 2000.0F);
@@ -615,8 +616,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
 
         } else {
             ItemStack drone = getDroppedStack();
-            if(hasCustomNameTag()) drone.setStackDisplayName(getCustomNameTag());
-
+            if(hasCustomName()) drone.setStackDisplayName(getCustomNameTag());
             entityDropItem(drone, 0);
 
             if(!worldObj.isRemote) {
@@ -625,7 +625,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
                     int x = (int)Math.floor(posX);
                     int y = (int)Math.floor(posY);
                     int z = (int)Math.floor(posZ);
-                    if(hasCustomNameTag()) {
+                    if(hasCustomName()) {
                         owner.addChatComponentMessage(new ChatComponentTranslation("death.drone.named", getCustomNameTag(), x, y, z));
                     } else {
                         owner.addChatComponentMessage(new ChatComponentTranslation("death.drone", x, y, z));
@@ -676,8 +676,8 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
 
     @Override
     public void printManometerMessage(EntityPlayer player, List<String> curInfo){
-        if(hasCustomNameTag()) curInfo.add(EnumChatFormatting.AQUA + getCustomNameTag());
-        curInfo.add("Owner: " + getFakePlayer().getCommandSenderName());
+        if(hasCustomName()) curInfo.add(EnumChatFormatting.AQUA + getCustomNameTag());
+        curInfo.add("Owner: " + getFakePlayer().getName());
         curInfo.add("Current pressure: " + PneumaticCraftUtils.roundNumberTo(getPressure(null), 1) + " bar.");
         /*for(int i = 0; i < 9; i++) {
             if(upgradeInventory[i] != null) {
@@ -814,7 +814,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
     public void writeToNBT(NBTTagCompound tag){
         super.writeToNBT(tag);
         if(fakePlayer != null) {
-            tag.setString("owner", fakePlayer.getCommandSenderName());
+            tag.setString("owner", fakePlayer.getName());
             if(fakePlayer.getGameProfile().getId() != null) tag.setString("ownerUUID", fakePlayer.getGameProfile().getId().toString());
         }
     }
@@ -873,7 +873,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
     }
 
     @Override
-    public IInventory getInventory(){
+    public IInventory getInv(){
         return inventory;
     }
 
@@ -881,37 +881,37 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
         return speed;
     }
 
-    public int getEmittingRedstone(ForgeDirection side){
+    public int getEmittingRedstone(EnumFacing side){
         return emittingRedstoneValues[side.ordinal()];
     }
 
     @Override
-    public void setEmittingRedstone(ForgeDirection side, int value){
+    public void setEmittingRedstone(EnumFacing side, int value){
         if(emittingRedstoneValues[side.ordinal()] != value) {
             emittingRedstoneValues[side.ordinal()] = value;
-            worldObj.notifyBlocksOfNeighborChange((int)Math.floor(posX + width / 2), (int)Math.floor(posY), (int)Math.floor(posZ + width / 2), Blockss.droneRedstoneEmitter);
+            worldObj.notifyBlockOfStateChange(new BlockPos((int)Math.floor(posX + width / 2), (int)Math.floor(posY), (int)Math.floor(posZ + width / 2)), Blockss.droneRedstoneEmitter);
         }
     }
 
     @Override
-    public boolean isBlockValidPathfindBlock(int x, int y, int z){
-        if(worldObj.isAirBlock(x, y, z)) return true;
-        Block block = worldObj.getBlock(x, y, z);
+    public boolean isBlockValidPathfindBlock(BlockPos pos){
+        if(worldObj.isAirBlock(pos)) return true;
+        Block block = worldObj.getBlockState(pos).getBlock();
         if(PneumaticCraftUtils.isBlockLiquid(block)) {
             return hasLiquidImmunity;
         }
-        if(block.getBlocksMovement(worldObj, x, y, z) && block != Blocks.ladder) return true;
+        if(block.isPassable(worldObj, pos) && block != Blocks.ladder) return true;
         if(PneumaticCraftAPIHandler.getInstance().pathfindableBlocks.containsKey(block)) {
             IPathfindHandler pathfindHandler = PneumaticCraftAPIHandler.getInstance().pathfindableBlocks.get(block);
-            return pathfindHandler == null || pathfindHandler.canPathfindThrough(worldObj, x, y, z);
+            return pathfindHandler == null || pathfindHandler.canPathfindThrough(worldObj, pos);
         } else {
             return false;
         }
     }
 
     @Override
-    public void sendWireframeToClient(int x, int y, int z){
-        NetworkHandler.sendToAllAround(new PacketShowWireframe(this, x, y, z), worldObj);
+    public void sendWireframeToClient(BlockPos pos){
+        NetworkHandler.sendToAllAround(new PacketShowWireframe(this, pos), worldObj);
     }
 
     private class InventoryDrone extends InventoryBasic{
@@ -950,7 +950,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
             super.setInventorySlotContents(slot, stack);
             if(slot == 0 && !isChangingCurrentStack) {
                 isChangingCurrentStack = true;
-                getInventory().setInventorySlotContents(slot, stack);
+                getInv().setInventorySlotContents(slot, stack);
                 isChangingCurrentStack = false;
             }
         }
@@ -967,7 +967,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
 
         @Override
         public void addExperience(int amount){
-            Vec3 pos = drone.getPosition();
+            Vec3 pos = drone.getDronePos();
             EntityXPOrb orb = new EntityXPOrb(drone.getWorld(), pos.xCoord, pos.yCoord, pos.zCoord, amount);
             drone.getWorld().spawnEntityInWorld(orb);
         }
@@ -987,10 +987,10 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
             return false;
         }
 
-        @Override
-        public ChunkCoordinates getPlayerCoordinates(){
-            return new ChunkCoordinates(0, 0, 0);
-        }
+        /*   @Override TODO 1.8 verify not necessary
+           public ChunkCoordinates getPlayerCoordinates(){
+               return new ChunkCoordinates(0, 0, 0);
+           }*/
 
         @Override
         public void addChatComponentMessage(IChatComponent chatmessagecomponent){}
@@ -1001,10 +1001,10 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
         @Override
         public void openGui(Object mod, int modGuiId, World world, int x, int y, int z){}
 
-        @Override
-        public boolean isEntityInvulnerable(){
-            return true;
-        }
+        /* @Override TODO 1.8 verify not necessary
+         public boolean isEntityInvulnerable(){
+             return true;
+         }*/
 
         @Override
         public boolean canAttackPlayer(EntityPlayer player){
@@ -1026,10 +1026,10 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
             return;
         }
 
-        @Override
+        /* @Override TODO 1.8 verify not necessary
         public void func_147100_a(C15PacketClientSettings pkt){
             return;
-        }
+        }*/
 
         @Override
         public boolean isSneaking(){
@@ -1058,7 +1058,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
 
     @Override
     public void addInfo(Entity entity, List<String> curInfo, EntityPlayer player){
-        if(playerName.equals(player.getCommandSenderName())) {
+        if(playerName.equals(player.getName())) {
             if(isGoingToOwner()) {
                 curInfo.add("pneumaticHelmet.hacking.result.resumeTasks");
             } else {
@@ -1071,7 +1071,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
 
     @Override
     public void addPostHackInfo(Entity entity, List<String> curInfo, EntityPlayer player){
-        if(playerName.equals(player.getCommandSenderName())) {
+        if(playerName.equals(player.getName())) {
             if(isGoingToOwner()) {
                 curInfo.add("pneumaticHelmet.hacking.finished.calledBack");
             } else {
@@ -1084,7 +1084,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
 
     @Override
     public int getHackTime(Entity entity, EntityPlayer player){
-        return playerName.equals(player.getCommandSenderName()) ? 20 : 100;
+        return playerName.equals(player.getName()) ? 20 : 100;
     }
 
     @Override
@@ -1128,7 +1128,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
      * @return
      */
     public EntityPlayer getOwner(){
-        return MinecraftServer.getServer().getConfigurationManager().func_152612_a(playerName);
+        return MinecraftServer.getServer().getConfigurationManager().getPlayerByUsername(playerName);
     }
 
     public void setStandby(boolean standby){
@@ -1141,8 +1141,8 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
     }
 
     @Override
-    public Vec3 getPosition(){
-        return Vec3.createVectorHelper(posX, posY, posZ);
+    public Vec3 getDronePos(){
+        return new Vec3(posX, posY, posZ);
     }
 
     @Override
@@ -1212,17 +1212,17 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
     public void tryFireMinigun(EntityLivingBase target){
         ItemStack ammo = getAmmo();
         if(getMinigun().setAmmo(ammo).tryFireMinigun(target)) {
-            for(int i = 0; i < getInventory().getSizeInventory(); i++) {
-                if(getInventory().getStackInSlot(i) == ammo) {
-                    getInventory().setInventorySlotContents(i, null);
+            for(int i = 0; i < getInv().getSizeInventory(); i++) {
+                if(getInv().getStackInSlot(i) == ammo) {
+                    getInv().setInventorySlotContents(i, null);
                 }
             }
         }
     }
 
     public ItemStack getAmmo(){
-        for(int i = 0; i < getInventory().getSizeInventory(); i++) {
-            ItemStack stack = getInventory().getStackInSlot(i);
+        for(int i = 0; i < getInv().getSizeInventory(); i++) {
+            ItemStack stack = getInv().getStackInSlot(i);
             if(stack != null && stack.getItem() == Itemss.gunAmmo) {
                 return stack;
             }
@@ -1282,7 +1282,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
     }
 
     @Override
-    public void addDebugEntry(String message, ChunkPosition pos){
+    public void addDebugEntry(String message, BlockPos pos){
 
         DebugEntry entry = new DebugEntry(message, getActiveWidgetIndex(), pos);
         addDebugEntry(entry);

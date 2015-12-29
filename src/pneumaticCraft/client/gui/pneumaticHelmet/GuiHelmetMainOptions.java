@@ -4,6 +4,9 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Loader;
 
 import org.lwjgl.input.Keyboard;
 
@@ -13,9 +16,6 @@ import pneumaticCraft.client.KeyHandler;
 import pneumaticCraft.client.gui.widget.GuiAnimatedStat;
 import pneumaticCraft.client.render.pneumaticArmor.MainHelmetHandler;
 import pneumaticCraft.lib.ModIds;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Loader;
 
 public class GuiHelmetMainOptions implements IOptionPage{
 

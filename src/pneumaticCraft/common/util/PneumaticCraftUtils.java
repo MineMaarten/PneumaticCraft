@@ -1,7 +1,5 @@
 package pneumaticCraft.common.util;
 
-import ic2.api.item.IC2Items;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,18 +26,25 @@ import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.pathfinding.PathFinder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityHopper;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.Vec3i;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.world.pathfinder.WalkNodeProcessor;
 import net.minecraftforge.fluids.IFluidBlock;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry.UniqueIdentifier;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
 
 import org.apache.commons.lang3.StringUtils;
@@ -53,12 +58,6 @@ import pneumaticCraft.common.entity.living.EntityDrone;
 import pneumaticCraft.common.thirdparty.ModInteractionUtils;
 import pneumaticCraft.common.tileentity.TileEntitySecurityStation;
 import pneumaticCraft.lib.Log;
-import pneumaticCraft.lib.ModIds;
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class PneumaticCraftUtils{
 
@@ -71,21 +70,21 @@ public class PneumaticCraftUtils{
      * @param includeUpAndDown false when UP/DOWN should not be included.
      * @return
      */
-    public static ForgeDirection getDirectionFacing(EntityLivingBase entity, boolean includeUpAndDown){
+    public static EnumFacing getDirectionFacing(EntityLivingBase entity, boolean includeUpAndDown){
         double yaw = entity.rotationYaw;
         while(yaw < 0)
             yaw += 360;
         yaw = yaw % 360;
         if(includeUpAndDown) {
-            if(entity.rotationPitch > 45) return ForgeDirection.DOWN;
-            else if(entity.rotationPitch < -45) return ForgeDirection.UP;
+            if(entity.rotationPitch > 45) return EnumFacing.DOWN;
+            else if(entity.rotationPitch < -45) return EnumFacing.UP;
         }
-        if(yaw < 45) return ForgeDirection.SOUTH;
-        else if(yaw < 135) return ForgeDirection.WEST;
-        else if(yaw < 225) return ForgeDirection.NORTH;
-        else if(yaw < 315) return ForgeDirection.EAST;
+        if(yaw < 45) return EnumFacing.SOUTH;
+        else if(yaw < 135) return EnumFacing.WEST;
+        else if(yaw < 225) return EnumFacing.NORTH;
+        else if(yaw < 315) return EnumFacing.EAST;
 
-        else return ForgeDirection.SOUTH;
+        else return EnumFacing.SOUTH;
     }
 
     /**
@@ -94,8 +93,8 @@ public class PneumaticCraftUtils{
      * @return
      */
     @SideOnly(Side.CLIENT)
-    public static double rotateMatrixByMetadata(int metadata){
-        ForgeDirection facing = ForgeDirection.getOrientation(metadata & 7);
+    public static double rotateMatrixByMetadata(int metadata){ //TODO 1.8
+        EnumFacing facing = EnumFacing.getFront(metadata & 7);
         double metaRotation;
         switch(facing){
             case UP:
@@ -396,17 +395,15 @@ public class PneumaticCraftUtils{
     /**
      * Returns the redstone level at the given coordinate. Useful when triggering on analog levels. When for example a redstone torch is attached, normally getBlockPowerInput() would return 0.
      * @param world
-     * @param x
-     * @param y
-     * @param z
+     * @param pos
      * @return
      */
-    public static int getRedstoneLevel(World world, int x, int y, int z){
-        int analogLevel = world.getBlockPowerInput(x, y, z);
-        if(analogLevel == 0) {
-            if(world.isBlockIndirectlyGettingPowered(x, y, z)) return 15;
-        }
-        return analogLevel;
+    public static int getRedstoneLevel(World world, BlockPos pos){
+        return world.isBlockIndirectlyGettingPowered(pos);
+    }
+
+    public static int getRedstoneLevel(World world, BlockPos pos, EnumFacing dir){
+        return world.getRedstonePower(pos.offset(dir), dir);
     }
 
     /**
@@ -415,21 +412,21 @@ public class PneumaticCraftUtils{
      * @param ic2ItemKey
      * @return
      */
-    @Optional.Method(modid = ModIds.INDUSTRIALCRAFT)
-    public static boolean isIC2Item(Item id, String ic2ItemKey){
-        ItemStack ic2Item = IC2Items.getItem(ic2ItemKey);
-        return ic2Item != null && ic2Item.getItem() == id;
-    }
+    /* TODO IC2 dep  @Optional.Method(modid = ModIds.INDUSTRIALCRAFT)
+       public static boolean isIC2Item(Item id, String ic2ItemKey){
+           ItemStack ic2Item = IC2Items.getItem(ic2ItemKey);
+           return ic2Item != null && ic2Item.getItem() == id;
+       }*/
 
     /**
      * Returns true if the given item ID is a IC2 upgrade.
      * @param id
      * @return
      */
-    @Optional.Method(modid = ModIds.INDUSTRIALCRAFT)
-    public static boolean isIC2Upgrade(Item id){
-        return isIC2Item(id, "overclockerUpgrade") || isIC2Item(id, "transformerUpgrade") || isIC2Item(id, "energyStorageUpgrade");
-    }
+    /* @Optional.Method(modid = ModIds.INDUSTRIALCRAFT)
+     public static boolean isIC2Upgrade(Item id){
+         return isIC2Item(id, "overclockerUpgrade") || isIC2Item(id, "transformerUpgrade") || isIC2Item(id, "energyStorageUpgrade");
+     }*/
 
     public enum EnumBuildcraftModule{
         BUILDERS, CORE, ENERGY, FACTORY, SILICON, TRANSPORT
@@ -478,9 +475,9 @@ public class PneumaticCraftUtils{
         return PneumaticCraftAPIHandler.getInstance().concealableRenderIds.contains(renderID);
     }
 
-    public static int getProtectingSecurityStations(World world, int x, int y, int z, EntityPlayer player, boolean showRangeLines, boolean placementRange){
+    public static int getProtectingSecurityStations(World world, BlockPos pos, EntityPlayer player, boolean showRangeLines, boolean placementRange){
         int blockingStations = 0;
-        for(TileEntitySecurityStation station : getSecurityStations(world, x, y, z, placementRange)) {
+        for(TileEntitySecurityStation station : getSecurityStations(world, pos, placementRange)) {
             if(!station.doesAllowPlayer(player)) {
                 blockingStations++;
                 if(showRangeLines) station.showRangeLines();
@@ -489,33 +486,37 @@ public class PneumaticCraftUtils{
         return blockingStations;
     }
 
-    public static Iterable<TileEntitySecurityStation> getSecurityStations(final World world, final int x, final int y, final int z, final boolean placementRange){
+    public static Iterable<TileEntitySecurityStation> getSecurityStations(final World world, final BlockPos pos, final boolean placementRange){
         return new Iterable<TileEntitySecurityStation>(){
             @Override
             public Iterator<TileEntitySecurityStation> iterator(){
                 return new Iterator<TileEntitySecurityStation>(){
 
                     private final int range = placementRange ? 32 : 16;
-                    private int i = x - range;
-                    private int j = z - range;
+                    private int i = pos.getX() - range;
+                    private int j = pos.getZ() - range;
                     private TileEntitySecurityStation curStation;
                     private int chunkTileEntityIndex = -1;
 
                     @Override
                     public boolean hasNext(){
                         if(curStation != null) return true;
-                        for(; i <= x + range; i += 16) {
-                            for(; j <= z + range; j += 16) {
-                                Chunk chunk = world.getChunkFromBlockCoords(i, j);
+                        for(; i <= pos.getX() + range; i += 16) {
+                            for(; j <= pos.getZ() + range; j += 16) {
+                                Chunk chunk = world.getChunkFromBlockCoords(new BlockPos(i, 0, j));
                                 int curIndex = 0;
-                                for(TileEntity te : (Iterable<TileEntity>)chunk.chunkTileEntityMap.values()) {
+                                for(TileEntity te : chunk.getTileEntityMap().values()) {
                                     if(curIndex > chunkTileEntityIndex && te instanceof TileEntitySecurityStation) {
                                         TileEntitySecurityStation station = (TileEntitySecurityStation)te;
                                         if(station.hasValidNetwork()) {
-                                            if(Math.abs(station.xCoord - x) <= station.getSecurityRange() + (placementRange ? 16 : 0) && Math.abs(station.yCoord - y) <= station.getSecurityRange() + (placementRange ? 16 : 0) && Math.abs(station.zCoord - z) <= station.getSecurityRange() + (placementRange ? 16 : 0)) {
-                                                curStation = station;
-                                                chunkTileEntityIndex = curIndex;
-                                                return true;
+                                            if(Math.abs(station.getPos().getX() - pos.getX()) <= station.getSecurityRange() + (placementRange ? 16 : 0)) {
+                                                if(Math.abs(station.getPos().getY() - pos.getY()) <= station.getSecurityRange() + (placementRange ? 16 : 0)) {
+                                                    if(Math.abs(station.getPos().getZ() - pos.getZ()) <= station.getSecurityRange() + (placementRange ? 16 : 0)) {
+                                                        curStation = station;
+                                                        chunkTileEntityIndex = curIndex;
+                                                        return true;
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -523,7 +524,7 @@ public class PneumaticCraftUtils{
                                 }
                                 chunkTileEntityIndex = -1;
                             }
-                            j = z - range;
+                            j = pos.getZ() - range;
                         }
                         return false;
                     }
@@ -564,21 +565,21 @@ public class PneumaticCraftUtils{
     public static Pair<Vec3, Vec3> getStartAndEndLookVec(EntityLivingBase entity, float maxDistance){
         Vec3 entityVec;
         if(entity.worldObj.isRemote && entity instanceof EntityPlayer) {
-            entityVec = Vec3.createVectorHelper(entity.posX, entity.posY + 1.6200000000000001D - entity.yOffset, entity.posZ);
+            entityVec = new Vec3(entity.posX, entity.posY + 1.6200000000000001D - entity.getYOffset(), entity.posZ);
         } else {
-            entityVec = Vec3.createVectorHelper(entity.posX, entity.posY + entity.getEyeHeight() - entity.yOffset - (entity.isSneaking() ? 0.08 : 0), entity.posZ);
+            entityVec = new Vec3(entity.posX, entity.posY + entity.getEyeHeight() - entity.getYOffset() - (entity.isSneaking() ? 0.08 : 0), entity.posZ);
         }
         Vec3 entityLookVec = entity.getLook(1.0F);
         Vec3 maxDistVec = entityVec.addVector(entityLookVec.xCoord * maxDistance, entityLookVec.yCoord * maxDistance, entityLookVec.zCoord * maxDistance);
         return new ImmutablePair(entityVec, maxDistVec);
     }
 
-    public static ChunkPosition getEntityLookedBlock(EntityLivingBase entity, float maxDistance){
+    public static BlockPos getEntityLookedBlock(EntityLivingBase entity, float maxDistance){
         MovingObjectPosition hit = getEntityLookedObject(entity, maxDistance);
         if(hit == null || hit.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) {
             return null;
         }
-        return new ChunkPosition(hit.blockX, hit.blockY, hit.blockZ);
+        return hit.getBlockPos();
     }
 
     public static boolean isEntityValidForFilter(String filter, Entity entity){
@@ -664,9 +665,9 @@ public class PneumaticCraftUtils{
         } else {
             try {
                 String regex = filter.toLowerCase().replaceAll(".", "[$0]").replace("[*]", ".*");//Wildcard regex
-                return entity.getCommandSenderName().toLowerCase().matches(regex);//TODO when player, check if entity is tamed by the player (see EntityAIAvoidEntity for example)
+                return entity.getName().toLowerCase().matches(regex);//TODO when player, check if entity is tamed by the player (see EntityAIAvoidEntity for example)
             } catch(PatternSyntaxException e) {
-                return entity.getCommandSenderName().toLowerCase().equals(filter.toLowerCase());
+                return entity.getName().toLowerCase().equals(filter.toLowerCase());
             }
         }
     }
@@ -690,13 +691,13 @@ public class PneumaticCraftUtils{
      * @param stack
      * @return
      */
-    public static ItemStack exportStackToInventory(IInventory inv, ItemStack stack, ForgeDirection side){
-        return TileEntityHopper.func_145889_a(inv, stack, side.ordinal());
+    public static ItemStack exportStackToInventory(IInventory inv, ItemStack stack, EnumFacing side){
+        return TileEntityHopper.putStackInInventoryAllSlots(inv, stack, side);
     }
 
-    public static ItemStack exportStackToInventory(TileEntity te, ItemStack stack, ForgeDirection side){
+    public static ItemStack exportStackToInventory(TileEntity te, ItemStack stack, EnumFacing side){
         if(te instanceof IInventory) {
-            return TileEntityHopper.func_145889_a((IInventory)te, stack, side.ordinal());
+            return TileEntityHopper.putStackInInventoryAllSlots((IInventory)te, stack, side);
         } else {
             stack = ModInteractionUtils.getInstance().exportStackToTEPipe(te, stack, side);
             stack = ModInteractionUtils.getInstance().exportStackToBCPipe(te, stack, side);
@@ -719,7 +720,7 @@ public class PneumaticCraftUtils{
         if(inventory instanceof ISidedInventory) {
             for(int i = 0; i < accessibleSides.length; i++) {
                 if(accessibleSides[i]) {
-                    int[] accessibleSlots = ((ISidedInventory)inventory).getAccessibleSlotsFromSide(i);
+                    int[] accessibleSlots = ((ISidedInventory)inventory).getSlotsForFace(EnumFacing.getFront(i));
                     for(int accessibleSlot : accessibleSlots) {
                         slots.add(accessibleSlot);
                     }
@@ -746,16 +747,20 @@ public class PneumaticCraftUtils{
         return Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2) + Math.pow(z1 - z2, 2);
     }
 
+    public static double distBetweenSq(BlockPos pos1, BlockPos pos2){
+        return distBetweenSq(pos1.getX(), pos1.getY(), pos1.getZ(), pos2.getX(), pos2.getY(), pos2.getZ());
+    }
+
     public static double distBetween(double x1, double y1, double x2, double y2){
         return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
     }
 
-    public static double distBetween(ChunkPosition pos, double x, double y, double z){
-        return distBetween(pos.chunkPosX + 0.5, pos.chunkPosY + 0.5, pos.chunkPosZ + 0.5, x, y, z);
+    public static double distBetween(Vec3i pos, double x, double y, double z){
+        return distBetween(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, x, y, z);
     }
 
-    public static double distBetween(ChunkPosition pos1, ChunkPosition pos2){
-        return distBetween(pos1, pos2.chunkPosX + 0.5, pos2.chunkPosY + 0.5, pos2.chunkPosZ + 0.5);
+    public static double distBetween(Vec3i pos1, Vec3i pos2){
+        return distBetween(pos1, pos2.getX() + 0.5, pos2.getY() + 0.5, pos2.getZ() + 0.5);
     }
 
     public static double distBetween(Vec3 vec, double x, double y, double z){
@@ -808,7 +813,7 @@ public class PneumaticCraftUtils{
         return block instanceof BlockLiquid || block instanceof IFluidBlock;
     }
 
-    public static String getOrientationName(ForgeDirection dir){
+    public static String getOrientationName(EnumFacing dir){
         switch(dir){
             case UP:
                 return "Top";
@@ -848,23 +853,23 @@ public class PneumaticCraftUtils{
 
     public static World getWorldForDimension(int dimension){
         for(WorldServer w : MinecraftServer.getServer().worldServers) {
-            if(w.provider.dimensionId == dimension) {
+            if(w.provider.getDimensionId() == dimension) {
                 return w;
             }
         }
         return null;
     }
 
-    public static TileEntity getTileEntity(ChunkPosition pos, int dimension){
+    public static TileEntity getTileEntity(BlockPos pos, int dimension){
         World world = getWorldForDimension(dimension);
-        if(world != null && world.blockExists(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ)) {
-            return world.getTileEntity(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+        if(world != null && world.isBlockLoaded(pos)) {
+            return world.getTileEntity(pos);
         }
         return null;
     }
 
     public static EntityPlayer getPlayerFromId(String uuid){
-        for(EntityPlayer checkingPlayer : (List<EntityPlayer>)MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
+        for(EntityPlayer checkingPlayer : MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
             if(checkingPlayer.getGameProfile().getId().toString().equals(uuid)) {
                 return checkingPlayer;
             }
@@ -873,7 +878,7 @@ public class PneumaticCraftUtils{
     }
 
     public static EntityPlayer getPlayerFromName(String name){
-        for(EntityPlayer checkingPlayer : (List<EntityPlayer>)MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
+        for(EntityPlayer checkingPlayer : MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
             if(checkingPlayer.getGameProfile().getName().equals(name)) {
                 return checkingPlayer;
             }
@@ -887,7 +892,7 @@ public class PneumaticCraftUtils{
 
     private static MovingObjectPosition raytraceEntityBlocks(EntityLivingBase entity, double range){
         Pair<Vec3, Vec3> startAndEnd = getStartAndEndLookVec(entity, (float)range);
-        return entity.worldObj.func_147447_a(startAndEnd.getLeft(), startAndEnd.getRight(), false, false, true);
+        return entity.worldObj.rayTraceBlocks(startAndEnd.getLeft(), startAndEnd.getRight(), false, false, true);
     }
 
     public static MovingObjectPosition getMouseOverServer(EntityLivingBase lookingEntity, double range){
@@ -906,7 +911,7 @@ public class PneumaticCraftUtils{
         Entity pointedEntity = null;
         Vec3 vec33 = null;
         float f1 = 1.0F;
-        List list = lookingEntity.worldObj.getEntitiesWithinAABBExcludingEntity(lookingEntity, lookingEntity.boundingBox.addCoord(vec31.xCoord * range, vec31.yCoord * range, vec31.zCoord * range).expand(f1, f1, f1));
+        List list = lookingEntity.worldObj.getEntitiesWithinAABBExcludingEntity(lookingEntity, lookingEntity.getEntityBoundingBox().addCoord(vec31.xCoord * range, vec31.yCoord * range, vec31.zCoord * range).expand(f1, f1, f1));
         double d2 = d1;
 
         for(int i = 0; i < list.size(); ++i) {
@@ -914,7 +919,7 @@ public class PneumaticCraftUtils{
 
             if(entity.canBeCollidedWith()) {
                 float f2 = entity.getCollisionBorderSize();
-                AxisAlignedBB axisalignedbb = entity.boundingBox.expand(f2, f2, f2);
+                AxisAlignedBB axisalignedbb = entity.getEntityBoundingBox().expand(f2, f2, f2);
                 MovingObjectPosition movingobjectposition = axisalignedbb.calculateIntercept(vec3, vec32);
 
                 if(axisalignedbb.isVecInside(vec3)) {
@@ -948,4 +953,9 @@ public class PneumaticCraftUtils{
         return mop;
     }
 
+    public static PathFinder getPathFinder(){
+        WalkNodeProcessor processor = new WalkNodeProcessor();
+        processor.setEnterDoors(true);
+        return new PathFinder(processor);
+    }
 }

@@ -11,6 +11,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
 
@@ -28,12 +34,6 @@ import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketToggleHelmetFeature;
 import pneumaticCraft.lib.Sounds;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class HUDHandler implements IKeyListener{
@@ -119,7 +119,7 @@ public class HUDHandler implements IKeyListener{
         EntityPlayer player = minecraft.thePlayer;
         ItemStack helmetStack = player.inventory.armorInventory[3];
         if(helmetStack != null && minecraft.inGameHasFocus && helmetStack.getItem() == Itemss.pneumaticHelmet) {
-            ScaledResolution sr = new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight);
+            ScaledResolution sr = new ScaledResolution(minecraft);
             GL11.glDepthMask(false);
             GL11.glDisable(GL11.GL_CULL_FACE);
             GL11.glDisable(GL11.GL_TEXTURE_2D);
@@ -158,14 +158,14 @@ public class HUDHandler implements IKeyListener{
 
             // render every item in the list.
             for(ArmorMessage message : messageList) {
-                message.renderMessage(minecraft.fontRenderer, partialTicks);
+                message.renderMessage(minecraft.fontRendererObj, partialTicks);
             }
 
             GL11.glPopMatrix();
             GL11.glEnable(GL11.GL_CULL_FACE);
             GL11.glDepthMask(true);
             GL11.glEnable(GL11.GL_TEXTURE_2D);
-            if(comHudHandler.ticksExisted <= comHudHandler.getStartupTime()) minecraft.fontRenderer.drawString(CommonHUDHandler.getHandlerForPlayer().ticksExisted * 100 / comHudHandler.getStartupTime() + "%", sr.getScaledWidth() * 3 / 4 - 8, 16, 0x000000);
+            if(comHudHandler.ticksExisted <= comHudHandler.getStartupTime()) minecraft.fontRendererObj.drawString(CommonHUDHandler.getHandlerForPlayer().ticksExisted * 100 / comHudHandler.getStartupTime() + "%", sr.getScaledWidth() * 3 / 4 - 8, 16, 0x000000);
         } else if(helmetStack == null) {
             messageList.clear();
         }

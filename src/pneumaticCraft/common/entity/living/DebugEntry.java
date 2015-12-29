@@ -1,8 +1,8 @@
 package pneumaticCraft.common.entity.living;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.world.ChunkPosition;
-import cpw.mods.fml.common.network.ByteBufUtils;
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 public class DebugEntry implements Comparable<DebugEntry>{
     private static int curId;
@@ -10,27 +10,27 @@ public class DebugEntry implements Comparable<DebugEntry>{
     private final int id;
     private final int progWidgetId;
     private final String message;
-    private final ChunkPosition pos;
+    private final BlockPos pos;
 
-    public DebugEntry(String message, int progWidgetId, ChunkPosition pos){
+    public DebugEntry(String message, int progWidgetId, BlockPos pos){
         this.message = message;
-        this.pos = pos != null ? pos : new ChunkPosition(0, 0, 0);
+        this.pos = pos != null ? pos : new BlockPos(0, 0, 0);
         this.progWidgetId = progWidgetId;
         id = curId++;
     }
 
     public DebugEntry(ByteBuf buf){
         message = ByteBufUtils.readUTF8String(buf);
-        pos = new ChunkPosition(buf.readInt(), buf.readInt(), buf.readInt());
+        pos = new BlockPos(buf.readInt(), buf.readInt(), buf.readInt());
         id = buf.readInt();
         progWidgetId = buf.readInt();
     }
 
     public void toBytes(ByteBuf buf){
         ByteBufUtils.writeUTF8String(buf, message);
-        buf.writeInt(pos.chunkPosX);
-        buf.writeInt(pos.chunkPosY);
-        buf.writeInt(pos.chunkPosZ);
+        buf.writeInt(pos.getX());
+        buf.writeInt(pos.getY());
+        buf.writeInt(pos.getZ());
         buf.writeInt(id);
         buf.writeInt(progWidgetId);
     }
@@ -39,7 +39,7 @@ public class DebugEntry implements Comparable<DebugEntry>{
         return message;
     }
 
-    public ChunkPosition getPos(){
+    public BlockPos getPos(){
         return pos;
     }
 

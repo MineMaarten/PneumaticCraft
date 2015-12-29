@@ -7,9 +7,11 @@ import java.util.Set;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetAreaShow;
 import pneumaticCraft.common.ai.DroneAIAttackEntity;
@@ -17,10 +19,8 @@ import pneumaticCraft.common.ai.DroneAINearestAttackableTarget;
 import pneumaticCraft.common.ai.IDroneBase;
 import pneumaticCraft.common.ai.StringFilterEntitySelector;
 import pneumaticCraft.common.entity.living.EntityDrone;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetEntityAttack extends ProgWidget implements IAreaProvider, IEntityProvider{
 
@@ -78,15 +78,15 @@ public class ProgWidgetEntityAttack extends ProgWidget implements IAreaProvider,
     public boolean isEntityValid(Entity entity){
         StringFilterEntitySelector whitelistFilter = ProgWidgetAreaItemBase.getEntityFilter((ProgWidgetString)getConnectedParameters()[1], true);
         StringFilterEntitySelector blacklistFilter = ProgWidgetAreaItemBase.getEntityFilter((ProgWidgetString)getConnectedParameters()[3], false);
-        return whitelistFilter.isEntityApplicable(entity) && !blacklistFilter.isEntityApplicable(entity);
+        return whitelistFilter.apply(entity) && !blacklistFilter.apply(entity);
     }
 
     @Override
-    public void getArea(Set<ChunkPosition> area){
+    public void getArea(Set<BlockPos> area){
         getArea(area, (ProgWidgetArea)getConnectedParameters()[0], (ProgWidgetArea)getConnectedParameters()[2]);
     }
 
-    public static void getArea(Set<ChunkPosition> area, ProgWidgetArea whitelistWidget, ProgWidgetArea blacklistWidget){
+    public static void getArea(Set<BlockPos> area, ProgWidgetArea whitelistWidget, ProgWidgetArea blacklistWidget){
         if(whitelistWidget == null) return;
         ProgWidgetArea widget = whitelistWidget;
         while(widget != null) {
@@ -100,7 +100,7 @@ public class ProgWidgetEntityAttack extends ProgWidget implements IAreaProvider,
         while(widget != null) {
             ProgWidgetArea.EnumAreaType oldAreaType = widget.type;
             widget.type = ProgWidgetArea.EnumAreaType.FILL;
-            Set<ChunkPosition> blacklistedArea = new HashSet<ChunkPosition>();
+            Set<BlockPos> blacklistedArea = new HashSet<BlockPos>();
             widget.getArea(area);
             area.removeAll(blacklistedArea);
             widget.type = oldAreaType;
@@ -121,6 +121,6 @@ public class ProgWidgetEntityAttack extends ProgWidget implements IAreaProvider,
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.FIRE_FLOWER_DAMAGE;
+        return ItemPlastic.FIRE_FLOWER_DAMAGE;
     }
 }

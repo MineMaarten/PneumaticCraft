@@ -1,17 +1,18 @@
 package pneumaticCraft.common.tileentity;
 
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
 import pneumaticCraft.common.block.Blockss;
 
-public class TileEntityDroneRedstoneEmitter extends TileEntity{
+public class TileEntityDroneRedstoneEmitter extends TileEntity implements ITickable{
     @Override
-    public void updateEntity(){
-        for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
-            if(Blockss.droneRedstoneEmitter.isProvidingWeakPower(worldObj, xCoord, yCoord, zCoord, d.ordinal()) > 0) {
+    public void update(){
+        for(EnumFacing d : EnumFacing.VALUES) {
+            if(Blockss.droneRedstoneEmitter.getWeakPower(worldObj, getPos(), worldObj.getBlockState(getPos()), d) > 0) {
                 return;
             }
         }
-        worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+        worldObj.setBlockToAir(getPos());
     }
 }

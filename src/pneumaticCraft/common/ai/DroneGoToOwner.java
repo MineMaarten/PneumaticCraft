@@ -1,9 +1,7 @@
 package pneumaticCraft.common.ai;
 
-import java.util.List;
-
 import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import pneumaticCraft.common.entity.living.EntityDrone;
 
@@ -17,7 +15,7 @@ public class DroneGoToOwner extends EntityAIBase{
 
     @Override
     public boolean shouldExecute(){
-        EntityPlayer owner = getOnlineOwner();
+        EntityPlayerMP owner = getOnlineOwner();
         return isExecuting = owner != null && drone.getNavigator().tryMoveToEntityLiving(owner, drone.getSpeed());
     }
 
@@ -26,8 +24,8 @@ public class DroneGoToOwner extends EntityAIBase{
         return isExecuting = getOnlineOwner() != null && !drone.getNavigator().noPath();
     }
 
-    private EntityPlayer getOnlineOwner(){
-        for(EntityPlayer player : (List<EntityPlayer>)MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
+    private EntityPlayerMP getOnlineOwner(){
+        for(EntityPlayerMP player : MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
             if(player.getGameProfile().equals(drone.getFakePlayer().getGameProfile())) return player;
         }
         return null;

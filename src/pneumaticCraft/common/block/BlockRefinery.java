@@ -1,8 +1,11 @@
 package pneumaticCraft.common.block;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import pneumaticCraft.common.tileentity.TileEntityRefinery;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
@@ -19,10 +22,10 @@ public class BlockRefinery extends BlockPneumaticCraftModeled{
     }
 
     @Override
-    public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int par6, float par7, float par8, float par9){
-        TileEntityRefinery refinery = (TileEntityRefinery)world.getTileEntity(x, y, z);
+    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float par7, float par8, float par9){
+        TileEntityRefinery refinery = (TileEntityRefinery)world.getTileEntity(pos);
         refinery = refinery.getMasterRefinery();
-        return super.onBlockActivated(world, x, refinery.yCoord, z, player, par6, par7, par8, par9);
+        return super.onBlockActivated(world, refinery.getPos(), state, player, side, par7, par8, par9);
     }
 
     @Override

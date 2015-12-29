@@ -4,16 +4,14 @@ import java.util.List;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.api.tileentity.IPneumaticMachine;
 import pneumaticCraft.client.ClientTickHandler;
-import pneumaticCraft.client.model.BaseModel;
 import pneumaticCraft.client.model.IBaseModel;
 import pneumaticCraft.client.util.RenderUtils;
 import pneumaticCraft.common.network.NetworkHandler;
@@ -42,12 +40,12 @@ public class ModuleRegulatorTube extends TubeModuleRedstoneReceiving implements 
         if(isFake()) {
             if(!hasTicked) {
                 TileEntityPneumaticBase tile = (TileEntityPneumaticBase)getTube();
-                NetworkHandler.sendToServer(new PacketDescriptionPacketRequest(tile.xCoord, tile.yCoord, tile.zCoord));
-                TileEntity neighbor = tile.getWorldObj().getTileEntity(tile.xCoord + dir.offsetX, tile.yCoord + dir.offsetY, tile.zCoord + dir.offsetZ);
+                NetworkHandler.sendToServer(new PacketDescriptionPacketRequest(tile.getPos()));
+                TileEntity neighbor = tile.getWorld().getTileEntity(tile.getPos().offset(dir));
                 inLine = neighbor instanceof IPneumaticMachine;
                 if(inLine) {
-                    inverted = ((IPneumaticMachine)neighbor).getAirHandler().getPressure(dir) > tile.getPressure(ForgeDirection.UNKNOWN);
-                    NetworkHandler.sendToServer(new PacketDescriptionPacketRequest(neighbor.xCoord, neighbor.yCoord, neighbor.zCoord));
+                    inverted = ((IPneumaticMachine)neighbor).getAirHandler().getPressure(dir) > tile.getPressure(null);
+                    NetworkHandler.sendToServer(new PacketDescriptionPacketRequest(neighbor.getPos()));
                 }
                 hasTicked = true;
             }
@@ -78,22 +76,22 @@ public class ModuleRegulatorTube extends TubeModuleRedstoneReceiving implements 
     @Override
     public IBaseModel getModel(){
         if(model == null) {
-            model = new BaseModel("regulatorTubeModule.obj"){
-                @Override
-                public void renderStatic(float size, TileEntity te){
-                    GL11.glPushMatrix();
-                    GL11.glRotated(90, 0, -1, 0);
-                    GL11.glTranslated(10 / 16D, 24 / 16D, 0);
-                    if(renderItem) {
-                        GL11.glTranslated(1 / 16D, -1 / 16D, 3 / 16D);
-                    }
-                    float scale = 1 / 16F;
-                    GL11.glScalef(scale, scale, scale);
-                    GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-                    super.renderStatic(size, te);
-                    GL11.glPopMatrix();
-                }
-            };
+            /*TODO 1.8 model = new BaseModel("regulatorTubeModule.obj"){
+                 @Override
+                 public void renderStatic(float size, TileEntity te){
+                     GL11.glPushMatrix();
+                     GL11.glRotated(90, 0, -1, 0);
+                     GL11.glTranslated(10 / 16D, 24 / 16D, 0);
+                     if(renderItem) {
+                         GL11.glTranslated(1 / 16D, -1 / 16D, 3 / 16D);
+                     }
+                     float scale = 1 / 16F;
+                     GL11.glScalef(scale, scale, scale);
+                     GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+                     super.renderStatic(size, te);
+                     GL11.glPopMatrix();
+                 }
+             };*/
         }
         return model;
     }
@@ -101,14 +99,14 @@ public class ModuleRegulatorTube extends TubeModuleRedstoneReceiving implements 
     @Override
     public int getMaxDispersion(){
         IAirHandler connectedHandler = null;
-        for(Pair<ForgeDirection, IAirHandler> entry : pressureTube.getAirHandler().getConnectedPneumatics()) {
+        for(Pair<EnumFacing, IAirHandler> entry : pressureTube.getAirHandler().getConnectedPneumatics()) {
             if(entry.getKey().equals(dir)) {
                 connectedHandler = entry.getValue();
                 break;
             }
         }
         if(connectedHandler == null) return 0;
-        int maxDispersion = (int)((getThreshold() - connectedHandler.getPressure(ForgeDirection.UNKNOWN)) * connectedHandler.getVolume());
+        int maxDispersion = (int)((getThreshold() - connectedHandler.getPressure(null)) * connectedHandler.getVolume());
         if(maxDispersion < 0) return 0;
         return maxDispersion;
     }

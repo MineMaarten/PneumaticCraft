@@ -5,7 +5,7 @@ import java.util.List;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import pneumaticCraft.common.network.PacketDescription;
 
@@ -13,7 +13,7 @@ public interface ISemiBlock{
 
     public World getWorld();
 
-    public ChunkPosition getPos();
+    public BlockPos getPos();
 
     public void writeToNBT(NBTTagCompound tag);
 
@@ -21,7 +21,7 @@ public interface ISemiBlock{
 
     public void update();
 
-    public void initialize(World world, ChunkPosition pos);
+    public void initialize(World world, BlockPos pos);
 
     public void invalidate();
 

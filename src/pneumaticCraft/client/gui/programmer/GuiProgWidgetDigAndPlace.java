@@ -39,7 +39,7 @@ public class GuiProgWidgetDigAndPlace<Widget extends ProgWidgetDigAndPlace> exte
         useMaxActions.setTooltip("gui.progWidget.digAndPlace.useMaxActions.tooltip");
         useMaxActions.checked = widget.useMaxActions();
         addWidget(useMaxActions);
-        textField = new WidgetTextFieldNumber(Minecraft.getMinecraft().fontRenderer, guiLeft + (moveActionsToSide() ? 57 : 7), guiTop + 128, 50, 11);
+        textField = new WidgetTextFieldNumber(Minecraft.getMinecraft().fontRendererObj, guiLeft + (moveActionsToSide() ? 57 : 7), guiTop + 128, 50, 11);
         textField.setValue(widget.getMaxActions());
         textField.setEnabled(useMaxActions.checked);
         addWidget(textField);

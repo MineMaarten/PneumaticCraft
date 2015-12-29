@@ -8,16 +8,16 @@ import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetDropItem;
 import pneumaticCraft.common.ai.DroneAIImExBase;
 import pneumaticCraft.common.ai.IDroneBase;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetDropItem extends ProgWidgetInventoryBase implements IItemDropper{
     private boolean dropStraight;
@@ -64,13 +64,13 @@ public class ProgWidgetDropItem extends ProgWidgetInventoryBase implements IItem
     public EntityAIBase getWidgetAI(IDroneBase drone, IProgWidget widget){
         return new DroneAIImExBase(drone, (ProgWidgetAreaItemBase)widget){
 
-            private final Set<ChunkPosition> visitedPositions = new HashSet<ChunkPosition>();
+            private final Set<BlockPos> visitedPositions = new HashSet<BlockPos>();
 
             @Override
             public boolean shouldExecute(){
                 boolean shouldExecute = false;
-                for(int i = 0; i < drone.getInventory().getSizeInventory(); i++) {
-                    ItemStack stack = drone.getInventory().getStackInSlot(i);
+                for(int i = 0; i < drone.getInv().getSizeInventory(); i++) {
+                    ItemStack stack = drone.getInv().getStackInSlot(i);
                     if(stack != null && widget.isItemValidForFilters(stack)) {
                         shouldExecute = super.shouldExecute();
                         break;
@@ -85,15 +85,15 @@ public class ProgWidgetDropItem extends ProgWidgetInventoryBase implements IItem
             }
 
             @Override
-            protected boolean isValidPosition(ChunkPosition pos){
+            protected boolean isValidPosition(BlockPos pos){
                 return !visitedPositions.contains(pos);//another requirement is that the drone can navigate to this exact block, but that's handled by the pathfinder.
             }
 
             @Override
-            protected boolean doBlockInteraction(ChunkPosition pos, double distToBlock){
+            protected boolean doBlockInteraction(BlockPos pos, double distToBlock){
                 visitedPositions.add(pos);
-                for(int i = 0; i < drone.getInventory().getSizeInventory(); i++) {
-                    ItemStack stack = drone.getInventory().getStackInSlot(i);
+                for(int i = 0; i < drone.getInv().getSizeInventory(); i++) {
+                    ItemStack stack = drone.getInv().getStackInSlot(i);
                     if(stack != null && widget.isItemValidForFilters(stack)) {
 
                         if(useCount() && getRemainingCount() < stack.stackSize) {
@@ -101,9 +101,9 @@ public class ProgWidgetDropItem extends ProgWidgetInventoryBase implements IItem
                             decreaseCount(getRemainingCount());
                         } else {
                             decreaseCount(stack.stackSize);
-                            drone.getInventory().setInventorySlotContents(i, null);
+                            drone.getInv().setInventorySlotContents(i, null);
                         }
-                        EntityItem item = new EntityItem(drone.getWorld(), pos.chunkPosX + 0.5, pos.chunkPosY + 0.5, pos.chunkPosZ + 0.5, stack);
+                        EntityItem item = new EntityItem(drone.getWorld(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, stack);
                         if(((IItemDropper)widget).dropStraight()) {
                             item.motionX = 0;
                             item.motionY = 0;
@@ -121,7 +121,7 @@ public class ProgWidgetDropItem extends ProgWidgetInventoryBase implements IItem
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.POTION_PLANT_DAMAGE;
+        return ItemPlastic.POTION_PLANT_DAMAGE;
     }
 
     @Override

@@ -37,7 +37,7 @@ public class DroneAIAttackEntity extends EntityAIAttackOnCollide{
         if(isRanged) {
             EntityLivingBase entitylivingbase = attacker.getAttackTarget();
             if(entitylivingbase == null) return false;
-            double dist = attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.boundingBox.minY, entitylivingbase.posZ);
+            double dist = attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
             if(attacker.getAmmo() == null) return false;
             if(dist < Math.pow(rangedAttackRange, 2) && attacker.getEntitySenses().canSee(entitylivingbase)) return true;
         }
@@ -57,7 +57,7 @@ public class DroneAIAttackEntity extends EntityAIAttackOnCollide{
         boolean needingSuper = true;
         if(isRanged) {
             EntityLivingBase entitylivingbase = attacker.getAttackTarget();
-            double dist = attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.boundingBox.minY, entitylivingbase.posZ);
+            double dist = attacker.getDistanceSq(entitylivingbase.posX, entitylivingbase.getEntityBoundingBox().minY, entitylivingbase.posZ);
             if(dist < Math.pow(rangedAttackRange, 2) && attacker.getEntitySenses().canSee(entitylivingbase)) {
                 attacker.getFakePlayer().posX = attacker.posX;//Knockback direction
                 attacker.getFakePlayer().posY = attacker.posY;

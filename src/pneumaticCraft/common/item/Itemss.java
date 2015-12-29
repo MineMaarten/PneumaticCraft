@@ -2,6 +2,7 @@ package pneumaticCraft.common.item;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.common.semiblock.SemiBlockActiveProvider;
@@ -9,7 +10,6 @@ import pneumaticCraft.common.thirdparty.ThirdPartyManager;
 import pneumaticCraft.lib.Names;
 import pneumaticCraft.lib.PneumaticValues;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.common.registry.GameRegistry;
 
 public class Itemss{
 
@@ -20,7 +20,6 @@ public class Itemss{
     public static Item stoneBase;
     public static Item cannonBarrel;
     public static Item turbineBlade;
-    public static Item plasticPlant;
     public static Item plastic;
     public static Item airCanister;
     public static Item vortexCannon;
@@ -65,12 +64,11 @@ public class Itemss{
         stoneBase = new ItemPneumatic().setUnlocalizedName("stoneBase");
         cannonBarrel = new ItemPneumatic().setUnlocalizedName("cannonBarrel");
         turbineBlade = new ItemPneumatic(Textures.ITEM_TURBINE_BLADE).setUnlocalizedName("turbineBlade");
-        plasticPlant = new ItemPlasticPlants().setUnlocalizedName("plasticPlant");
         plastic = new ItemPlastic().setUnlocalizedName("plastic");
         airCanister = new ItemPressurizable(Textures.ITEM_AIR_CANISTER, PneumaticValues.AIR_CANISTER_MAX_AIR, PneumaticValues.AIR_CANISTER_VOLUME).setUnlocalizedName("airCanister");
         vortexCannon = new ItemVortexCannon(Textures.ITEM_VORTEX).setUnlocalizedName("vortexCannon");
         pneumaticCylinder = new ItemPneumatic(Textures.ITEM_CANNON_BARREL).setUnlocalizedName("pneumaticCilinder");
-        pneumaticHelmet = new ItemPneumaticArmor(Textures.ITEM_PNEUMATIC_HELMET, ItemArmor.ArmorMaterial.IRON, PneumaticCraft.proxy.getArmorRenderID(Textures.ARMOR_PNEUMATIC), 0, PneumaticValues.PNEUMATIC_HELMET_VOLUME, PneumaticValues.PNEUMATIC_HELMET_MAX_AIR).setUnlocalizedName("pneumaticHelmet");
+        pneumaticHelmet = new ItemPneumaticArmor(ItemArmor.ArmorMaterial.IRON, PneumaticCraft.proxy.getArmorRenderID(Textures.ARMOR_PNEUMATIC), 0, PneumaticValues.PNEUMATIC_HELMET_MAX_AIR).setUnlocalizedName("pneumaticHelmet");
         manometer = new pneumaticCraft.common.item.ItemManometer(Textures.ITEM_MANOMETER).setUnlocalizedName("manometer");
         turbineRotor = new pneumaticCraft.common.item.ItemPneumatic(Textures.ITEM_TURBINE_ROTOR).setUnlocalizedName("turbineRotor");
         assemblyProgram = new ItemAssemblyProgram().setUnlocalizedName("assemblyProgram");
@@ -100,7 +98,7 @@ public class Itemss{
         logisticsDrone = new ItemLogisticsDrone().setUnlocalizedName("logisticDrone");
         gunAmmo = new ItemGunAmmo().setUnlocalizedName("gunAmmo");
         amadronTablet = new ItemAmadronTablet("amadronTablet", PneumaticValues.AIR_CANISTER_MAX_AIR, PneumaticValues.AIR_CANISTER_VOLUME).setUnlocalizedName("amadronTablet");
-        minigun = new ItemMinigun(PneumaticValues.AIR_CANISTER_MAX_AIR, PneumaticValues.AIR_CANISTER_VOLUME).setUnlocalizedName("minigun");
+        minigun = new ItemMinigun(PneumaticValues.AIR_CANISTER_MAX_AIR, PneumaticValues.AIR_CANISTER_VOLUME);
 
         registerItems();
 
@@ -115,7 +113,6 @@ public class Itemss{
         registerItem(stoneBase);
         registerItem(cannonBarrel);
         registerItem(turbineBlade);
-        registerItem(plasticPlant);
         registerItem(plastic);
         registerItem(airCanister);
         registerItem(vortexCannon);

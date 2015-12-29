@@ -20,8 +20,8 @@ public class ProgWidgetDroneConditionItem extends ProgWidgetDroneEvaluation impl
     @Override
     protected int getCount(IDroneBase drone, IProgWidget widget){
         int count = 0;
-        for(int i = 0; i < drone.getInventory().getSizeInventory(); i++) {
-            ItemStack droneStack = drone.getInventory().getStackInSlot(i);
+        for(int i = 0; i < drone.getInv().getSizeInventory(); i++) {
+            ItemStack droneStack = drone.getInv().getStackInSlot(i);
 
             if(droneStack != null && ((IItemFiltering)widget).isItemValidForFilters(droneStack)) {
                 count += droneStack.stackSize;
@@ -37,7 +37,7 @@ public class ProgWidgetDroneConditionItem extends ProgWidgetDroneEvaluation impl
 
     @Override
     public boolean isItemValidForFilters(ItemStack item){
-        return ProgWidgetItemFilter.isItemValidForFilters(item, ProgWidget.getConnectedWidgetList(this, 0), ProgWidget.getConnectedWidgetList(this, getParameters().length), -1);
+        return ProgWidgetItemFilter.isItemValidForFilters(item, ProgWidget.getConnectedWidgetList(this, 0), ProgWidget.getConnectedWidgetList(this, getParameters().length), null);
     }
 
 }

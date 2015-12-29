@@ -8,11 +8,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.IShearable;
-import net.minecraftforge.common.util.ForgeDirection;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 
 public class EntityVortex extends EntityThrowable{
@@ -51,17 +52,20 @@ public class EntityVortex extends EntityThrowable{
             setDead();
         }
         if(!worldObj.isRemote) {
-            int blockX = (int)Math.floor(posX);
-            int blockY = (int)Math.floor(posY);
-            int blockZ = (int)Math.floor(posZ);
-            for(int i = 0; i < 7; i++) { // to 7 so the middle block will also trigger (with UNKNOWN direction)
-                Block block = worldObj.getBlock(blockX + ForgeDirection.getOrientation(i).offsetX, blockY + ForgeDirection.getOrientation(i).offsetY, blockZ + ForgeDirection.getOrientation(i).offsetZ);
-                if(block instanceof IPlantable || block instanceof BlockLeaves) {
-                    worldObj.func_147480_a(blockX + ForgeDirection.getOrientation(i).offsetX, blockY + ForgeDirection.getOrientation(i).offsetY, blockZ + ForgeDirection.getOrientation(i).offsetZ, true);
-                }
+            BlockPos pos = new BlockPos(posX, posY, posZ);
+            tryCutPlants(pos);
+            for(EnumFacing dir : EnumFacing.VALUES) {
+                tryCutPlants(pos.offset(dir));
             }
         }
 
+    }
+
+    private void tryCutPlants(BlockPos pos){
+        Block block = worldObj.getBlockState(pos).getBlock();
+        if(block instanceof IPlantable || block instanceof BlockLeaves) {
+            worldObj.destroyBlock(pos, true);
+        }
     }
 
     /*   private void blowOtherEntities(){
@@ -91,11 +95,9 @@ public class EntityVortex extends EntityThrowable{
             entity.motionZ += motionZ;
             if(!entity.worldObj.isRemote && entity instanceof IShearable) {
                 IShearable shearable = (IShearable)entity;
-                int x = (int)Math.floor(posX);
-                int y = (int)Math.floor(posY);
-                int z = (int)Math.floor(posZ);
-                if(shearable.isShearable(null, worldObj, x, y, z)) {
-                    List<ItemStack> drops = shearable.onSheared(null, worldObj, x, y, z, 0);
+                BlockPos pos = new BlockPos(posX, posY, posZ);
+                if(shearable.isShearable(null, worldObj, pos)) {
+                    List<ItemStack> drops = shearable.onSheared(null, worldObj, pos, 0);
                     for(ItemStack stack : drops) {
                         PneumaticCraftUtils.dropItemOnGround(stack, worldObj, entity.posX, entity.posY, entity.posZ);
                     }
@@ -103,7 +105,7 @@ public class EntityVortex extends EntityThrowable{
             }
 
         } else {
-            Block block = worldObj.getBlock(objectPosition.blockX, objectPosition.blockY, objectPosition.blockZ);
+            Block block = worldObj.getBlockState(objectPosition.getBlockPos()).getBlock();
             if(block instanceof IPlantable || block instanceof BlockLeaves) {
                 motionX = oldMotionX;
                 motionY = oldMotionY;

@@ -1,5 +1,6 @@
 package pneumaticCraft.client.gui.programmer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class GuiProgWidgetCoordinateOperator extends GuiProgWidgetAreaShow<ProgW
     }
 
     @Override
-    public void keyTyped(char chr, int keyCode){
+    public void keyTyped(char chr, int keyCode) throws IOException{
         if(keyCode == 1) {
             widget.setVariable(variableField.getText());
         }

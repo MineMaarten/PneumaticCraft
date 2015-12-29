@@ -4,10 +4,10 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import pneumaticCraft.client.gui.widget.WidgetAmadronOffer;
 import pneumaticCraft.common.config.AmadronOfferSettings;
 import pneumaticCraft.common.recipes.AmadronOfferCustom;
-import cpw.mods.fml.common.network.ByteBufUtils;
 
 public class PacketAmadronTradeNotifyDeal extends PacketAbstractAmadronTrade<PacketAmadronTradeNotifyDeal>{
     private int offerAmount;

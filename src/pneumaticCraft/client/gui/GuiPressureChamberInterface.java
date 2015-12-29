@@ -2,6 +2,7 @@ package pneumaticCraft.client.gui;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,9 +12,10 @@ import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.widget.GuiAnimatedStat;
 import pneumaticCraft.client.gui.widget.IGuiWidget;
 import pneumaticCraft.common.block.Blockss;
@@ -22,8 +24,6 @@ import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketUpdateTextfield;
 import pneumaticCraft.common.tileentity.TileEntityPressureChamberInterface;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiPressureChamberInterface extends GuiPneumaticContainerBase<TileEntityPressureChamberInterface>{
@@ -58,20 +58,20 @@ public class GuiPressureChamberInterface extends GuiPneumaticContainerBase<TileE
         filterStat.addWidget(filterButton);
 
         creativeTabButton = new GuiButton(2, xStart + 91, yStart + 58, 78, 20, "-");
-        nameFilterField = new GuiTextField(fontRendererObj, xStart + 91, yStart + 58, 78, 10);
+        nameFilterField = new GuiTextField(-1, fontRendererObj, xStart + 91, yStart + 58, 78, 10);
         nameFilterField.setText(te.itemNameFilter);
 
         buttonList.add(creativeTabButton);
         if(te.filterMode != TileEntityPressureChamberInterface.EnumFilterMode.ITEM) {
-            if(((Slot)inventorySlots.inventorySlots.get(5)).xDisplayPosition < 1000) {
+            if(inventorySlots.inventorySlots.get(5).xDisplayPosition < 1000) {
                 for(int i = 5; i < 14; i++) {
-                    ((Slot)inventorySlots.inventorySlots.get(i)).xDisplayPosition += 1000;
+                    inventorySlots.inventorySlots.get(i).xDisplayPosition += 1000;
                 }
             }
         } else {
-            if(((Slot)inventorySlots.inventorySlots.get(5)).xDisplayPosition > 1000) {
+            if(inventorySlots.inventorySlots.get(5).xDisplayPosition > 1000) {
                 for(int i = 5; i < 14; i++) {
-                    ((Slot)inventorySlots.inventorySlots.get(i)).xDisplayPosition -= 1000;
+                    inventorySlots.inventorySlots.get(i).xDisplayPosition -= 1000;
                 }
             }
         }
@@ -192,7 +192,7 @@ public class GuiPressureChamberInterface extends GuiPneumaticContainerBase<TileE
     }
 
     @Override
-    protected void mouseClicked(int par1, int par2, int par3){
+    protected void mouseClicked(int par1, int par2, int par3) throws IOException{
         super.mouseClicked(par1, par2, par3);
 
         if(te.filterMode == TileEntityPressureChamberInterface.EnumFilterMode.NAME_BEGINS || te.filterMode == TileEntityPressureChamberInterface.EnumFilterMode.NAME_CONTAINS) {
@@ -212,11 +212,11 @@ public class GuiPressureChamberInterface extends GuiPneumaticContainerBase<TileE
                 filterStat.closeWindow();
                 if(te.filterMode == TileEntityPressureChamberInterface.EnumFilterMode.ITEM) {
                     for(int i = 5; i < 14; i++) {
-                        ((Slot)inventorySlots.inventorySlots.get(i)).xDisplayPosition += 1000;
+                        inventorySlots.inventorySlots.get(i).xDisplayPosition += 1000;
                     }
                 } else if(te.filterMode.ordinal() == TileEntityPressureChamberInterface.EnumFilterMode.values().length - 1) {
                     for(int i = 5; i < 14; i++) {
-                        ((Slot)inventorySlots.inventorySlots.get(i)).xDisplayPosition -= 1000;
+                        inventorySlots.inventorySlots.get(i).xDisplayPosition -= 1000;
                     }
                 }
             }
@@ -231,7 +231,7 @@ public class GuiPressureChamberInterface extends GuiPneumaticContainerBase<TileE
     }
 
     @Override
-    protected void keyTyped(char par1, int par2){
+    protected void keyTyped(char par1, int par2) throws IOException{
         if(nameFilterField.isFocused() && par2 != 1) {
             nameFilterField.textboxKeyTyped(par1, par2);
             te.itemNameFilter = nameFilterField.getText();

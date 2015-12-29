@@ -14,7 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.profiler.Profiler;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import pneumaticCraft.api.drone.SpecialVariableRetrievalEvent;
 import pneumaticCraft.common.config.Config;
@@ -50,7 +50,7 @@ public class DroneAIManager{
     private boolean wasAIOveridden;
     private String currentLabel = "Main";//Holds the name of the last label that was jumped to.
 
-    private Map<String, ChunkPosition> coordinateVariables = new HashMap<String, ChunkPosition>();
+    private Map<String, BlockPos> coordinateVariables = new HashMap<String, BlockPos>();
     private Map<String, ItemStack> itemVariables = new HashMap<String, ItemStack>();
     private final Stack<IProgWidget> jumpBackWidgets = new Stack<IProgWidget>();//Used to jump back to a for each widget.
 
@@ -102,12 +102,12 @@ public class DroneAIManager{
 
     public void writeToNBT(NBTTagCompound tag){
         NBTTagList tagList = new NBTTagList();
-        for(Map.Entry<String, ChunkPosition> entry : coordinateVariables.entrySet()) {
+        for(Map.Entry<String, BlockPos> entry : coordinateVariables.entrySet()) {
             NBTTagCompound t = new NBTTagCompound();
             t.setString("key", entry.getKey());
-            t.setInteger("x", entry.getValue().chunkPosX);
-            t.setInteger("y", entry.getValue().chunkPosY);
-            t.setInteger("z", entry.getValue().chunkPosZ);
+            t.setInteger("x", entry.getValue().getX());
+            t.setInteger("y", entry.getValue().getY());
+            t.setInteger("z", entry.getValue().getZ());
             tagList.appendTag(t);
         }
         tag.setTag("coords", tagList);
@@ -120,14 +120,14 @@ public class DroneAIManager{
         NBTTagList tagList = tag.getTagList("coords", 10);
         for(int i = 0; i < tagList.tagCount(); i++) {
             NBTTagCompound t = tagList.getCompoundTagAt(i);
-            coordinateVariables.put(t.getString("key"), new ChunkPosition(t.getInteger("x"), t.getInteger("y"), t.getInteger("z")));
+            coordinateVariables.put(t.getString("key"), new BlockPos(t.getInteger("x"), t.getInteger("y"), t.getInteger("z")));
         }
 
         GlobalVariableManager.readItemVars(tag, itemVariables);
     }
 
-    public ChunkPosition getCoordinate(String varName){
-        ChunkPosition pos;
+    public BlockPos getCoordinate(String varName){
+        BlockPos pos;
         if(varName.startsWith("$")) {
             SpecialVariableRetrievalEvent.CoordinateVariable.Drone event = new SpecialVariableRetrievalEvent.CoordinateVariable.Drone(drone, varName.substring(1));
             MinecraftForge.EVENT_BUS.post(event);
@@ -137,10 +137,10 @@ public class DroneAIManager{
         } else {
             pos = coordinateVariables.get(varName);
         }
-        return pos != null ? pos : new ChunkPosition(0, 0, 0);
+        return pos != null ? pos : new BlockPos(0, 0, 0);
     }
 
-    public void setCoordinate(String varName, ChunkPosition coord){
+    public void setCoordinate(String varName, BlockPos coord){
         if(varName.startsWith("#")) {
             GlobalVariableManager.getInstance().set(varName.substring(1), coord);
         } else if(!varName.startsWith("$")) coordinateVariables.put(varName, coord);
@@ -381,7 +381,7 @@ public class DroneAIManager{
                 ai.action.resetTask();
             }
             executingTaskEntries.clear();
-            drone.setDugBlock(0, 0, 0);
+            drone.setDugBlock(null);
         }
     }
 

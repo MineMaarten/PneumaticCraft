@@ -3,13 +3,14 @@ package pneumaticCraft.common.network;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 
 public class PacketDescriptionPacketRequest extends LocationIntPacket<PacketDescriptionPacketRequest>{
 
     public PacketDescriptionPacketRequest(){}
 
-    public PacketDescriptionPacketRequest(int x, int y, int z){
-        super(x, y, z);
+    public PacketDescriptionPacketRequest(BlockPos pos){
+        super(pos);
     }
 
     @Override
@@ -17,7 +18,7 @@ public class PacketDescriptionPacketRequest extends LocationIntPacket<PacketDesc
 
     @Override
     public void handleServerSide(PacketDescriptionPacketRequest message, EntityPlayer player){
-        TileEntity te = player.worldObj.getTileEntity(message.x, message.y, message.z);
+        TileEntity te = message.getTileEntity(player.worldObj);
         if(te != null) {
             NetworkHandler.sendTo(new PacketSendNBTPacket(te), (EntityPlayerMP)player);
         }

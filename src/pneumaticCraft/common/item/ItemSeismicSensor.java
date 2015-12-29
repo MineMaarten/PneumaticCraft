@@ -6,13 +6,14 @@ import java.util.Stack;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidRegistry;
 import pneumaticCraft.common.fluid.Fluids;
+import pneumaticCraft.common.util.FluidUtils;
 
 public class ItemSeismicSensor extends ItemPneumatic{
     public ItemSeismicSensor(){
@@ -21,25 +22,25 @@ public class ItemSeismicSensor extends ItemPneumatic{
     }
 
     @Override
-    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int par7, float par8, float par9, float par10){
+    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float par8, float par9, float par10){
         if(!world.isRemote) {
-            int testingY = y;
-            while(testingY > 0) {
-                testingY--;
-                if(world.getBlock(x, testingY, z) == FluidRegistry.getFluid(Fluids.oil.getName()).getBlock()) {
-                    Set<ChunkPosition> oilPositions = new HashSet<ChunkPosition>();
-                    Stack<ChunkPosition> pendingPositions = new Stack<ChunkPosition>();
-                    pendingPositions.add(new ChunkPosition(x, testingY, z));
+            int startY = pos.getY();
+            while(pos.getY() > 0) {
+                pos = pos.offset(EnumFacing.DOWN);
+                if(world.getBlockState(pos).getBlock() == FluidRegistry.getFluid(Fluids.oil.getName()).getBlock()) {
+                    Set<BlockPos> oilPositions = new HashSet<BlockPos>();
+                    Stack<BlockPos> pendingPositions = new Stack<BlockPos>();
+                    pendingPositions.add(new BlockPos(pos));
                     while(!pendingPositions.empty()) {
-                        ChunkPosition checkingPos = pendingPositions.pop();
-                        for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
-                            ChunkPosition newPos = new ChunkPosition(checkingPos.chunkPosX + d.offsetX, checkingPos.chunkPosY + d.offsetY, checkingPos.chunkPosZ + d.offsetZ);
-                            if(world.getBlock(newPos.chunkPosX, newPos.chunkPosY, newPos.chunkPosZ) == Fluids.oil.getBlock() && world.getBlockMetadata(newPos.chunkPosX, newPos.chunkPosY, newPos.chunkPosZ) == 0 && oilPositions.add(newPos)) {
+                        BlockPos checkingPos = pendingPositions.pop();
+                        for(EnumFacing d : EnumFacing.VALUES) {
+                            BlockPos newPos = checkingPos.offset(d);
+                            if(world.getBlockState(newPos).getBlock() == Fluids.oil.getBlock() && FluidUtils.isSourceBlock(world, newPos) && oilPositions.add(newPos)) {
                                 pendingPositions.add(newPos);
                             }
                         }
                     }
-                    player.addChatComponentMessage(new ChatComponentTranslation("message.seismicSensor.foundOilDetails", EnumChatFormatting.GREEN.toString() + (y - testingY), EnumChatFormatting.GREEN.toString() + oilPositions.size() / 10 * 10));
+                    player.addChatComponentMessage(new ChatComponentTranslation("message.seismicSensor.foundOilDetails", EnumChatFormatting.GREEN.toString() + (startY - pos.getY()), EnumChatFormatting.GREEN.toString() + oilPositions.size() / 10 * 10));
                     return true;
                 }
             }

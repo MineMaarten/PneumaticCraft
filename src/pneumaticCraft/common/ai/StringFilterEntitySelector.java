@@ -4,16 +4,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 
-public class StringFilterEntitySelector implements IEntitySelector{
+import com.google.common.base.Predicate;
+
+public class StringFilterEntitySelector implements Predicate<Entity>{
 
     private List<String> filter = new ArrayList<String>();
 
     @Override
-    public boolean isEntityApplicable(Entity entity){
+    public boolean apply(Entity entity){
         List<String> filte = getFilter();
         for(String filt : filte) {
             if(PneumaticCraftUtils.isEntityValidForFilter(filt, entity)) return true;
@@ -39,5 +40,4 @@ public class StringFilterEntitySelector implements IEntitySelector{
         filter.add(filterEntry);
         return this;
     }
-
 }

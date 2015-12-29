@@ -11,7 +11,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
-import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityBoat;
@@ -41,8 +40,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.ChunkPosition;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -64,7 +65,6 @@ import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.PneumaticValues;
 import pneumaticCraft.lib.Sounds;
 import pneumaticCraft.lib.TileEntityConstants;
-import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
 
 public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISidedInventory, IInventory,
         IMinWorkingPressure, IRedstoneControl{
@@ -83,7 +83,6 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
     public float targetHeightAngle;
     @GuiSynced
     public boolean doneTurning = false;
-    private boolean redstonePowered = false;
     @GuiSynced
     public int gpsX;
     @GuiSynced
@@ -99,8 +98,8 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
     private boolean entityUpgradeInserted, dispenserUpgradeInserted;
     private final List<EntityItem> trackedItems = new ArrayList<EntityItem>();//Items that are being checked to be hoppering into inventories.
     private Set<UUID> trackedItemIds;
-    private ChunkPosition lastInsertingInventory; //Last coordinate where the item went into the inventory (as a result of the Block Tracker upgrade).
-    private ForgeDirection lastInsertingInventorySide;
+    private BlockPos lastInsertingInventory; //Last coordinate where the item went into the inventory (as a result of the Block Tracker upgrade).
+    private EnumFacing lastInsertingInventorySide;
     @GuiSynced
     public boolean insertingInventoryHasSpace = true;
 
@@ -119,12 +118,12 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
     }
 
     @Override
-    public void updateEntity(){
+    public void update(){
         // GPS Tool read
         if(inventory[1] != null && inventory[1].getItem() == Itemss.GPSTool && !externalControl) {
-            if(inventory[1].stackTagCompound != null) {
+            if(inventory[1].getTagCompound() != null) {
 
-                NBTTagCompound gpsTag = inventory[1].stackTagCompound;
+                NBTTagCompound gpsTag = inventory[1].getTagCompound();
                 int destinationX = gpsTag.getInteger("x");
                 int destinationY = gpsTag.getInteger("y");
                 int destinationZ = gpsTag.getInteger("z");
@@ -197,14 +196,14 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
 
         updateTrackedItems();
 
-        super.updateEntity();
+        super.update();
 
     }
 
     private void updateTrackedItems(){
         if(trackedItemIds != null) {
             trackedItems.clear();
-            for(Entity entity : (List<Entity>)worldObj.loadedEntityList) {
+            for(Entity entity : worldObj.loadedEntityList) {
                 if(trackedItemIds.contains(entity.getUniqueID()) && entity instanceof EntityItem) {
                     trackedItems.add((EntityItem)entity);
                 }
@@ -217,25 +216,25 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
             if(item.worldObj != worldObj || item.isDead) {
                 iterator.remove();
             } else {
-                Map<ChunkPosition, ForgeDirection> positions = new HashMap<ChunkPosition, ForgeDirection>();
+                Map<BlockPos, EnumFacing> positions = new HashMap<BlockPos, EnumFacing>();
                 double range = 0.2;
-                for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
-                    double posX = item.posX + d.offsetX * range;
-                    double posY = item.posY + d.offsetY * range;
-                    double posZ = item.posZ + d.offsetZ * range;
-                    positions.put(new ChunkPosition((int)Math.floor(posX), (int)Math.floor(posY), (int)Math.floor(posZ)), d.getOpposite());
+                for(EnumFacing d : EnumFacing.VALUES) {
+                    double posX = item.posX + d.getFrontOffsetX() * range;
+                    double posY = item.posY + d.getFrontOffsetY() * range;
+                    double posZ = item.posZ + d.getFrontOffsetZ() * range;
+                    positions.put(new BlockPos((int)Math.floor(posX), (int)Math.floor(posY), (int)Math.floor(posZ)), d.getOpposite());
                 }
-                for(Entry<ChunkPosition, ForgeDirection> entry : positions.entrySet()) {
-                    ChunkPosition pos = entry.getKey();
-                    TileEntity te = worldObj.getTileEntity(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+                for(Entry<BlockPos, EnumFacing> entry : positions.entrySet()) {
+                    BlockPos pos = entry.getKey();
+                    TileEntity te = worldObj.getTileEntity(pos);
                     IInventory inv = IOHelper.getInventoryForTE(te);
-                    ItemStack remainder = IOHelper.insert(inv, item.getEntityItem(), entry.getValue().ordinal(), false);
+                    ItemStack remainder = IOHelper.insert(inv, item.getEntityItem(), entry.getValue(), false);
                     if(remainder != null) {
                         item.setEntityItemStack(remainder);
                     } else {
                         item.setDead();
                         iterator.remove();
-                        lastInsertingInventory = new ChunkPosition(te.xCoord, te.yCoord, te.zCoord);
+                        lastInsertingInventory = te.getPos();
                         lastInsertingInventorySide = entry.getValue();
                         break;
                     }
@@ -297,8 +296,8 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
         }
 
         // calculate the heading.
-        double deltaX = gpsX - xCoord;
-        double deltaZ = gpsZ - zCoord;
+        double deltaX = gpsX - getPos().getX();
+        double deltaZ = gpsZ - getPos().getZ();
         float calculatedRotationAngle;
         if(deltaX >= 0 && deltaZ < 0) {
             calculatedRotationAngle = (float)(Math.atan(Math.abs(deltaX / deltaZ)) / Math.PI * 180D);
@@ -312,7 +311,7 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
 
         // calculate the height angle.
         double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-        double deltaY = gpsY - yCoord;
+        double deltaY = gpsY - getPos().getY();
         float calculatedHeightAngle = calculateBestHeightAngle(distance, deltaY, getForce(), payloadGravity, payloadFrictionX, payloadFrictionY);
 
         setTargetAngles(calculatedRotationAngle, calculatedHeightAngle);
@@ -387,13 +386,13 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
     @Override
     protected void disperseAir(){
         super.disperseAir();
-        List<Pair<ForgeDirection, IAirHandler>> teList = getConnectedPneumatics();
-        if(teList.size() == 0) airLeak(ForgeDirection.getOrientation(getBlockMetadata()));
+        List<Pair<EnumFacing, IAirHandler>> teList = getConnectedPneumatics();
+        if(teList.size() == 0) airLeak(getRotation());
     }
 
     @Override
-    public boolean isConnectedTo(ForgeDirection side){
-        return ForgeDirection.getOrientation(worldObj.getBlockMetadata(xCoord, yCoord, zCoord)) == side;
+    public boolean isConnectedTo(EnumFacing side){
+        return getRotation() == side;
     }
 
     public float getForce(){
@@ -440,7 +439,7 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
 
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
@@ -458,7 +457,7 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
         return Blockss.airCannon.getUnlocalizedName();
     }
 
@@ -468,9 +467,13 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
     }
 
     @Override
+    public void clear(){
+        inventory = new ItemStack[inventory.length];
+    }
+
+    @Override
     public void readFromNBT(NBTTagCompound tag){
         super.readFromNBT(tag);
-        redstonePowered = tag.getBoolean("redstonePowered");
         targetRotationAngle = tag.getFloat("targetRotationAngle");
         targetHeightAngle = tag.getFloat("targetHeightAngle");
         rotationAngle = tag.getFloat("rotationAngle");
@@ -478,11 +481,7 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
         gpsX = tag.getInteger("gpsX");
         gpsY = tag.getInteger("gpsY");
         gpsZ = tag.getInteger("gpsZ");
-        if(tag.hasKey("fireOnRightAngle")) {
-            redstoneMode = tag.getBoolean("fireOnRightAngle") ? 0 : 1; //TODO remove legacy
-        } else {
-            redstoneMode = tag.getByte("redstoneMode");
-        }
+        redstoneMode = tag.getByte("redstoneMode");
 
         coordWithinReach = tag.getBoolean("targetWithinReach");
         // Read in the ItemStacks in the inventory from NBT
@@ -504,8 +503,8 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
         }
 
         if(tag.hasKey("inventoryX")) {
-            lastInsertingInventory = new ChunkPosition(tag.getInteger("inventoryX"), tag.getInteger("inventoryY"), tag.getInteger("inventoryZ"));
-            lastInsertingInventorySide = ForgeDirection.getOrientation(tag.getByte("inventorySide"));
+            lastInsertingInventory = new BlockPos(tag.getInteger("inventoryX"), tag.getInteger("inventoryY"), tag.getInteger("inventoryZ"));
+            lastInsertingInventorySide = EnumFacing.getFront(tag.getByte("inventorySide"));
         } else {
             lastInsertingInventory = null;
             lastInsertingInventorySide = null;
@@ -515,7 +514,6 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
     @Override
     public void writeToNBT(NBTTagCompound tag){
         super.writeToNBT(tag);
-        tag.setBoolean("redstonePowered", redstonePowered);
         tag.setFloat("targetRotationAngle", targetRotationAngle);
         tag.setFloat("targetHeightAngle", targetHeightAngle);
         tag.setFloat("rotationAngle", rotationAngle);
@@ -548,9 +546,9 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
         tag.setTag("trackedItems", tagList);
 
         if(lastInsertingInventory != null) {
-            tag.setInteger("inventoryX", lastInsertingInventory.chunkPosX);
-            tag.setInteger("inventoryY", lastInsertingInventory.chunkPosY);
-            tag.setInteger("inventoryZ", lastInsertingInventory.chunkPosZ);
+            tag.setInteger("inventoryX", lastInsertingInventory.getX());
+            tag.setInteger("inventoryY", lastInsertingInventory.getY());
+            tag.setInteger("inventoryZ", lastInsertingInventory.getZ());
             tag.setByte("inventorySide", (byte)lastInsertingInventorySide.ordinal());
         }
     }
@@ -563,17 +561,17 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
     }
 
     @Override
-    public int[] getAccessibleSlotsFromSide(int var1){
+    public int[] getSlotsForFace(EnumFacing var1){
         return new int[]{1, 2, 3, 4, 5, 0};
     }
 
     @Override
-    public boolean canInsertItem(int slot, ItemStack itemstack, int side){
+    public boolean canInsertItem(int slot, ItemStack itemstack, EnumFacing side){
         return true;
     }
 
     @Override
-    public boolean canExtractItem(int slot, ItemStack itemstack, int side){
+    public boolean canExtractItem(int slot, ItemStack itemstack, EnumFacing side){
         return true;
     }
 
@@ -593,12 +591,13 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
         }
     }
 
-    public void onNeighbourBlockChange(int x, int y, int z, Block block){
-        if(!block.isAir(worldObj, x, y, z) && worldObj.isBlockIndirectlyGettingPowered(x, y, z) && !redstonePowered && (redstoneMode != 0 || doneTurning) && (redstoneMode != 2 || inventoryCanCarry())) {
+    @Override
+    public void onNeighborBlockUpdate(){
+        boolean wasPowered = poweredRedstone > 0;
+        super.onNeighborBlockUpdate();
+        boolean isPowered = poweredRedstone > 0;
+        if(isPowered && !wasPowered && (redstoneMode != 0 || doneTurning) && (redstoneMode != 2 || inventoryCanCarry())) {
             fire();
-            redstonePowered = true;
-        } else if(!worldObj.isBlockIndirectlyGettingPowered(x, y, z) && redstonePowered) {
-            redstonePowered = false;
         }
     }
 
@@ -606,10 +605,10 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
         insertingInventoryHasSpace = true;
         if(lastInsertingInventory == null) return true;
         if(inventory[0] == null) return true;
-        TileEntity te = worldObj.getTileEntity(lastInsertingInventory.chunkPosX, lastInsertingInventory.chunkPosY, lastInsertingInventory.chunkPosZ);
+        TileEntity te = worldObj.getTileEntity(lastInsertingInventory);
         IInventory inv = IOHelper.getInventoryForTE(te);
         if(inv != null) {
-            ItemStack remainder = IOHelper.insert(inv, inventory[0].copy(), lastInsertingInventorySide.ordinal(), true);
+            ItemStack remainder = IOHelper.insert(inv, inventory[0].copy(), lastInsertingInventorySide, true);
             insertingInventoryHasSpace = remainder == null;
             return insertingInventoryHasSpace;
         } else {
@@ -621,9 +620,9 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
 
     private synchronized boolean fire(){
         Entity itemShot = getCloseEntityIfUpgraded();
-        if(getPressure(ForgeDirection.UNKNOWN) >= PneumaticValues.MIN_PRESSURE_AIR_CANNON && (itemShot != null || inventory[0] != null)) {
+        if(getPressure(null) >= PneumaticValues.MIN_PRESSURE_AIR_CANNON && (itemShot != null || inventory[0] != null)) {
             double[] velocity = getVelocityVector(heightAngle, rotationAngle, getForce());
-            addAir((int)(-500 * getForce()), ForgeDirection.UNKNOWN);
+            addAir((int)(-500 * getForce()), null);
             boolean shootingInventory = false;
             if(itemShot == null) {
                 shootingInventory = true;
@@ -640,8 +639,8 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
                 }
             } else if(itemShot instanceof EntityPlayer) {
                 EntityPlayerMP entityplayermp = (EntityPlayerMP)itemShot;
-                if(entityplayermp.playerNetServerHandler.func_147362_b().isChannelOpen()) {
-                    entityplayermp.setPositionAndUpdate(xCoord + 0.5D, yCoord + 1.8D, zCoord + 0.5D);
+                if(entityplayermp.playerNetServerHandler.getNetworkManager().isChannelOpen()) {
+                    entityplayermp.setPositionAndUpdate(getPos().getX() + 0.5D, getPos().getY() + 1.8D, getPos().getZ() + 0.5D);
                 }
             }
 
@@ -649,8 +648,8 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
                 itemShot.mountEntity((Entity)null);
             }
 
-            itemShot.setPosition(xCoord + 0.5D, yCoord + 1.8D, zCoord + 0.5D);
-            NetworkHandler.sendToAllAround(new PacketSetEntityMotion(itemShot, velocity[0], velocity[1], velocity[2]), new TargetPoint(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, 64));
+            itemShot.setPosition(getPos().getX() + 0.5D, getPos().getY() + 1.8D, getPos().getZ() + 0.5D);
+            NetworkHandler.sendToAllAround(new PacketSetEntityMotion(itemShot, velocity[0], velocity[1], velocity[2]), new TargetPoint(worldObj.provider.getDimensionId(), getPos().getX(), getPos().getY(), getPos().getZ(), 64));
 
             if(itemShot instanceof EntityFireball) {
                 velocity[0] *= 0.05D;
@@ -674,9 +673,9 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
                 double velX = velocity[0] * 0.4D + (rand.nextGaussian() - 0.5D) * 0.05D;
                 double velY = velocity[1] * 0.4D + (rand.nextGaussian() - 0.5D) * 0.05D;
                 double velZ = velocity[2] * 0.4D + (rand.nextGaussian() - 0.5D) * 0.05D;
-                NetworkHandler.sendToAllAround(new PacketSpawnParticle("largesmoke", xCoord + 0.5D, yCoord + 0.7D, zCoord + 0.5D, velX, velY, velZ), worldObj);
+                NetworkHandler.sendToAllAround(new PacketSpawnParticle(EnumParticleTypes.SMOKE_LARGE, getPos().getX() + 0.5D, getPos().getY() + 0.7D, getPos().getZ() + 0.5D, velX, velY, velZ), worldObj);
             }
-            NetworkHandler.sendToAllAround(new PacketPlaySound(Sounds.CANNON_SOUND, xCoord, yCoord, zCoord, 1.0F, rand.nextFloat() / 4F + 0.75F, true), worldObj);
+            NetworkHandler.sendToAllAround(new PacketPlaySound(Sounds.CANNON_SOUND, getPos().getX(), getPos().getY(), getPos().getZ(), 1.0F, rand.nextFloat() / 4F + 0.75F, true), worldObj);
             return true;
         } else {
             return false;
@@ -713,7 +712,7 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
         }
         EntityItem item = new EntityItem(worldObj);
         item.setEntityItemStack(inventory[0].copy());
-        item.age = 4800; // 1200 ticks left to live, = 60s.
+        item.setAgeToCreativeDespawnTime(); // 1200 ticks left to live, = 60s.
         item.lifespan += Math.min(getUpgrades(ItemMachineUpgrade.UPGRADE_ITEM_LIFE, getUpgradeSlots()) * 600, 4800); // add
         // 30s
         // for
@@ -734,10 +733,10 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
         int entityUpgrades = getUpgrades(ItemMachineUpgrade.UPGRADE_ENTITY_TRACKER);
         if(entityUpgrades > 0) {
             entityUpgrades = Math.min(entityUpgrades, 5);
-            List<Entity> entities = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, AxisAlignedBB.getBoundingBox(xCoord - entityUpgrades, yCoord - entityUpgrades, zCoord - entityUpgrades, xCoord + 1 + entityUpgrades, yCoord + 1 + entityUpgrades, zCoord + 1 + entityUpgrades));
+            List<EntityLivingBase> entities = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, new AxisAlignedBB(getPos().add(-entityUpgrades, -entityUpgrades, -entityUpgrades), getPos().add(1 + entityUpgrades, 1 + entityUpgrades, 1 + entityUpgrades)));
             Entity closestEntity = null;
             for(Entity entity : entities) {
-                if(closestEntity == null || PneumaticCraftUtils.distBetween(closestEntity.posX, closestEntity.posY, closestEntity.posZ, xCoord + 0.5, yCoord + 0.5, zCoord + 0.5) > PneumaticCraftUtils.distBetween(entity.posX, entity.posY, entity.posZ, xCoord + 0.5, yCoord + 0.5, zCoord + 0.5)) {
+                if(closestEntity == null || PneumaticCraftUtils.distBetween(closestEntity.posX, closestEntity.posY, closestEntity.posZ, getPos().getX() + 0.5, getPos().getY() + 0.5, getPos().getZ() + 0.5) > PneumaticCraftUtils.distBetween(entity.posX, entity.posY, entity.posZ, getPos().getX() + 0.5, getPos().getY() + 0.5, getPos().getZ() + 0.5)) {
                     closestEntity = entity;
                 }
             }
@@ -747,24 +746,24 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
 
     /*
      *  COMPUTERCRAFT API
      */
 
-    @Override
+    /*@Override TODO CC dep
     public String getType(){
         return "airCannon";
-    }
+    }*/
 
     @Override
     protected void addLuaMethods(){

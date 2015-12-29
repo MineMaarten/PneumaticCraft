@@ -9,30 +9,18 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.network.IGuiHandler;
 import pneumaticCraft.common.config.Config;
 import pneumaticCraft.common.thirdparty.ae2.AE2;
-import pneumaticCraft.common.thirdparty.bloodmagic.BloodMagic;
 import pneumaticCraft.common.thirdparty.buildcraft.BuildCraft;
-import pneumaticCraft.common.thirdparty.cofh.CoFHCore;
-import pneumaticCraft.common.thirdparty.computercraft.ComputerCraft;
-import pneumaticCraft.common.thirdparty.computercraft.OpenComputers;
-import pneumaticCraft.common.thirdparty.ee3.EE3;
 import pneumaticCraft.common.thirdparty.enderio.EnderIO;
-import pneumaticCraft.common.thirdparty.fmp.FMPLoader;
 import pneumaticCraft.common.thirdparty.forestry.Forestry;
-import pneumaticCraft.common.thirdparty.hydraulicraft.Hydraulicraft;
-import pneumaticCraft.common.thirdparty.ic2.IC2;
 import pneumaticCraft.common.thirdparty.igwmod.IGWMod;
 import pneumaticCraft.common.thirdparty.mfr.MFR;
 import pneumaticCraft.common.thirdparty.openblocks.OpenBlocks;
-import pneumaticCraft.common.thirdparty.thaumcraft.Thaumcraft;
-import pneumaticCraft.common.thirdparty.waila.Waila;
 import pneumaticCraft.lib.Log;
 import pneumaticCraft.lib.ModIds;
-import codechicken.multipart.TMultiPart;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.common.network.IGuiHandler;
 
 public class ThirdPartyManager implements IGuiHandler{
 
@@ -47,24 +35,22 @@ public class ThirdPartyManager implements IGuiHandler{
     public void index(){
         Map<String, Class<? extends IThirdParty>> thirdPartyClasses = new HashMap<String, Class<? extends IThirdParty>>();
         try {
-            thirdPartyClasses.put(ModIds.INDUSTRIALCRAFT, IC2.class);
+            // thirdPartyClasses.put(ModIds.INDUSTRIALCRAFT, IC2.class);
             thirdPartyClasses.put(ModIds.BUILDCRAFT, BuildCraft.class);
             thirdPartyClasses.put(ModIds.IGWMOD, IGWMod.class);
-            thirdPartyClasses.put(ModIds.COMPUTERCRAFT, ComputerCraft.class);
-            if(!Loader.isModLoaded(ModIds.COMPUTERCRAFT)) thirdPartyClasses.put(ModIds.OPEN_COMPUTERS, OpenComputers.class);
-            thirdPartyClasses.put(ModIds.FMP, FMPLoader.class);
-            thirdPartyClasses.put(ModIds.WAILA, Waila.class);
-            thirdPartyClasses.put(ModIds.HC, Hydraulicraft.class);
-            thirdPartyClasses.put(ModIds.THAUMCRAFT, Thaumcraft.class);
-            thirdPartyClasses.put(ModIds.BLOOD_MAGIC, BloodMagic.class);
+            // thirdPartyClasses.put(ModIds.COMPUTERCRAFT, ComputerCraft.class);
+            // if(!Loader.isModLoaded(ModIds.COMPUTERCRAFT)) thirdPartyClasses.put(ModIds.OPEN_COMPUTERS, OpenComputers.class);
+            // thirdPartyClasses.put(ModIds.FMP, FMPLoader.class);
+            //thirdPartyClasses.put(ModIds.WAILA, Waila.class);
+            // thirdPartyClasses.put(ModIds.THAUMCRAFT, Thaumcraft.class);
             thirdPartyClasses.put(ModIds.AE2, AE2.class);
             thirdPartyClasses.put(ModIds.CHISEL, Chisel.class);
             thirdPartyClasses.put(ModIds.FORESTRY, Forestry.class);
             thirdPartyClasses.put(ModIds.MFR, MFR.class);
             thirdPartyClasses.put(ModIds.OPEN_BLOCKS, OpenBlocks.class);
-            thirdPartyClasses.put(ModIds.COFH_CORE, CoFHCore.class);
+            //  thirdPartyClasses.put(ModIds.COFH_CORE, CoFHCore.class);
             thirdPartyClasses.put(ModIds.NOT_ENOUGH_KEYS, NotEnoughKeys.class);
-            thirdPartyClasses.put(ModIds.EE3, EE3.class);
+            //  thirdPartyClasses.put(ModIds.EE3, EE3.class);
             thirdPartyClasses.put(ModIds.EIO, EnderIO.class);
             DramaSplash.newDrama();
         } catch(Throwable e) {
@@ -160,7 +146,7 @@ public class ThirdPartyManager implements IGuiHandler{
         }
     }
 
-    @Optional.Method(modid = ModIds.FMP)
+    /*TODO FMP dep @Optional.Method(modid = ModIds.FMP)
     public TMultiPart getPart(String partName){
         for(IThirdParty thirdParty : thirdPartyMods) {
             if(thirdParty instanceof FMPLoader) {
@@ -179,7 +165,7 @@ public class ThirdPartyManager implements IGuiHandler{
             }
         }
         throw new IllegalStateException("No FMP found!");
-    }
+    }*/
 
     @Override
     public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z){

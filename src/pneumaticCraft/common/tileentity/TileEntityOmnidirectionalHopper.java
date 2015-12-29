@@ -1,16 +1,18 @@
 package pneumaticCraft.common.tileentity;
 
+import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.network.DescSynced;
@@ -19,7 +21,7 @@ import pneumaticCraft.common.util.IOHelper;
 
 public class TileEntityOmnidirectionalHopper extends TileEntityBase implements ISidedInventory, IRedstoneControlled{
     @DescSynced
-    protected ForgeDirection inputDir = ForgeDirection.UNKNOWN;
+    protected EnumFacing inputDir = EnumFacing.UP;
     private ItemStack[] inventory = new ItemStack[getInvSize()];
     @GuiSynced
     public int redstoneMode;
@@ -36,9 +38,9 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
     }
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
-        if(!getWorldObj().isRemote && --cooldown <= 0 && redstoneAllows()) {
+    public void update(){
+        super.update();
+        if(!getWorld().isRemote && --cooldown <= 0 && redstoneAllows()) {
             int maxItems = getMaxItems();
             boolean success = suckInItem(maxItems);
             success |= exportItem(maxItems);
@@ -52,7 +54,7 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
     }
 
     protected boolean exportItem(int maxItems){
-        ForgeDirection dir = ForgeDirection.getOrientation(getBlockMetadata());
+        EnumFacing dir = getRotation();
         TileEntity neighbor = IOHelper.getNeighbor(this, dir);
         for(int i = 0; i < 5; i++) {
             ItemStack stack = inventory[i];
@@ -85,7 +87,7 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
             if(hasEmptySlot()) {
                 ItemStack extracted = IOHelper.extractOneItem(inputInv, inputDir.getOpposite(), true);//simulate extraction from the neighbor.
                 if(extracted != null) {
-                    ItemStack inserted = IOHelper.insert(this, extracted, ForgeDirection.UNKNOWN, false);//if we can insert the item in this hopper.
+                    ItemStack inserted = IOHelper.insert((IInventory)this, extracted, null, false);//if we can insert the item in this hopper.
                     if(inserted == null) {
                         IOHelper.extractOneItem(inputInv, inputDir.getOpposite(), false); //actually retrieve it from the neighbor.
                         success = true;
@@ -102,7 +104,7 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
                     stack.stackSize = 1;
                     ItemStack extracted = IOHelper.extract(inputInv, inputDir.getOpposite(), stack, true, true);//simulate extraction from the neighbor.
                     if(extracted != null) {
-                        ItemStack inserted = IOHelper.insert(this, extracted, ForgeDirection.UNKNOWN, false);//if we can insert the item in this hopper.
+                        ItemStack inserted = IOHelper.insert((IInventory)this, extracted, null, false);//if we can insert the item in this hopper.
                         if(inserted == null) {
                             IOHelper.extract(inputInv, inputDir.getOpposite(), stack, true, false); //actually retrieve it from the neighbor.
                             success = true;
@@ -116,7 +118,7 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
 
         for(EntityItem entity : getNeighborItems(this, inputDir)) {
             if(!entity.isDead) {
-                ItemStack remainder = IOHelper.insert(this, entity.getEntityItem(), ForgeDirection.UNKNOWN, false);
+                ItemStack remainder = IOHelper.insert((IInventory)this, entity.getEntityItem(), null, false);
                 if(remainder == null) {
                     entity.setDead();
                     success = true;//Don't set true when the stack could not be fully consumes, as that means next insertion there won't be any room.
@@ -134,9 +136,9 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
         return false;
     }
 
-    public static List<EntityItem> getNeighborItems(TileEntity te, ForgeDirection inputDir){
-        AxisAlignedBB box = AxisAlignedBB.getBoundingBox(te.xCoord + inputDir.offsetX, te.yCoord + inputDir.offsetY, te.zCoord + inputDir.offsetZ, te.xCoord + inputDir.offsetX + 1, te.yCoord + inputDir.offsetY + 1, te.zCoord + inputDir.offsetZ + 1);
-        return te.getWorldObj().getEntitiesWithinAABB(EntityItem.class, box);
+    public static List<EntityItem> getNeighborItems(TileEntity te, EnumFacing inputDir){
+        AxisAlignedBB box = new AxisAlignedBB(te.getPos().offset(inputDir), te.getPos().offset(inputDir).add(1, 1, 1));
+        return te.getWorld().getEntitiesWithinAABB(EntityItem.class, box);
     }
 
     public int getMaxItems(){
@@ -152,11 +154,11 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
         return 8 / (int)Math.pow(2, getUpgrades(ItemMachineUpgrade.UPGRADE_SPEED_DAMAGE, getUpgradeSlots()));
     }
 
-    public void setDirection(ForgeDirection dir){
+    public void setDirection(EnumFacing dir){
         inputDir = dir;
     }
 
-    public ForgeDirection getDirection(){
+    public EnumFacing getDirection(){
         return inputDir;
     }
 
@@ -182,7 +184,7 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
     @Override
     public void readFromNBT(NBTTagCompound tag){
         super.readFromNBT(tag);
-        inputDir = ForgeDirection.getOrientation(tag.getInteger("inputDir"));
+        inputDir = EnumFacing.getFront(tag.getInteger("inputDir"));
         redstoneMode = tag.getInteger("redstoneMode");
         leaveMaterial = tag.getBoolean("leaveMaterial");
 
@@ -201,7 +203,7 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
      * Returns the name of the inventory.
      */
     @Override
-    public String getInventoryName(){
+    public String getName(){
         return Blockss.omnidirectionalHopper.getUnlocalizedName();
     }
 
@@ -238,7 +240,7 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
             setInventorySlotContents(slot, null);
@@ -274,22 +276,22 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
     private static final int[] accessibleSlots = {0, 1, 2, 3, 4};
 
     @Override
-    public int[] getAccessibleSlotsFromSide(int var1){
+    public int[] getSlotsForFace(EnumFacing var1){
         return accessibleSlots;
     }
 
     @Override
-    public boolean canInsertItem(int var1, ItemStack var2, int var3){
+    public boolean canInsertItem(int var1, ItemStack var2, EnumFacing var3){
         return var1 < 5;
     }
 
     @Override
-    public boolean canExtractItem(int var1, ItemStack var2, int var3){
+    public boolean canExtractItem(int var1, ItemStack var2, EnumFacing var3){
         return var1 < 5;
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 
@@ -304,10 +306,15 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
+    }
 
     @Override
     public int getRedstoneMode(){

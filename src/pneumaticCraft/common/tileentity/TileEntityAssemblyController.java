@@ -1,6 +1,7 @@
 package pneumaticCraft.common.tileentity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -10,8 +11,11 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.api.tileentity.IPneumaticMachine;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.item.ItemAssemblyProgram;
@@ -23,8 +27,6 @@ import pneumaticCraft.common.recipes.programs.AssemblyProgram.EnumMachine;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.GuiConstants;
 import pneumaticCraft.lib.PneumaticValues;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityAssemblyController extends TileEntityPneumaticBase implements ISidedInventory, IAssemblyMachine,
         IMinWorkingPressure{
@@ -53,7 +55,7 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
     }
 
     @Override
-    public void updateEntity(){
+    public void update(){
 
         if(!worldObj.isRemote && firstRun) updateConnections();
 
@@ -68,7 +70,7 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
 
         if(!worldObj.isRemote) {
             displayedText = "Standby";
-            if(getPressure(ForgeDirection.UNKNOWN) >= PneumaticValues.MIN_PRESSURE_ASSEMBLY_CONTROLLER) {
+            if(getPressure(null) >= PneumaticValues.MIN_PRESSURE_ASSEMBLY_CONTROLLER) {
                 if(curProgram != null || goingToHomePosition) {
                     List<IAssemblyMachine> machineList = getMachines();
                     EnumMachine[] requiredMachines = curProgram != null ? curProgram.getRequiredMachines() : EnumMachine.values();
@@ -141,7 +143,7 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
                             goToHomePosition(platform, ioUnitImport, ioUnitExport, drill, laser);
                             displayedText = "Resetting...";
                         }
-                        if(useAir) addAir(-(int)(PneumaticValues.USAGE_ASSEMBLING * getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots())), ForgeDirection.UNKNOWN);
+                        if(useAir) addAir(-(int)(PneumaticValues.USAGE_ASSEMBLING * getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots())), null);
                         float speedMultiplier = getSpeedMultiplierFromUpgrades(getUpgradeSlots());
                         for(IAssemblyMachine machine : machineList) {
                             machine.setSpeed(speedMultiplier);
@@ -151,7 +153,7 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
             }
             hasProblem = hasProblem();
         }
-        super.updateEntity();
+        super.update();
 
     }
 
@@ -175,7 +177,7 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
     }
 
     public void addProblems(List<String> problemList){
-        if(getPressure(ForgeDirection.UNKNOWN) < PneumaticValues.MIN_PRESSURE_ASSEMBLY_CONTROLLER) {
+        if(getPressure(null) < PneumaticValues.MIN_PRESSURE_ASSEMBLY_CONTROLLER) {
             problemList.add(EnumChatFormatting.GRAY + "No sufficient pressure.");
             problemList.add(EnumChatFormatting.BLACK + "Add pressure.");
         }
@@ -201,12 +203,12 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
             textList = new ArrayList<String>();
             curProgram.addProgramProblem(textList);
         }
-        return !foundAllMachines || foundDuplicateMachine || getPressure(ForgeDirection.UNKNOWN) < PneumaticValues.MIN_PRESSURE_ASSEMBLY_CONTROLLER || curProgram == null || textList.size() > 0;
+        return !foundAllMachines || foundDuplicateMachine || getPressure(null) < PneumaticValues.MIN_PRESSURE_ASSEMBLY_CONTROLLER || curProgram == null || textList.size() > 0;
     }
 
     public List<IAssemblyMachine> getMachines(){
         List<IAssemblyMachine> machineList = new ArrayList<IAssemblyMachine>();
-        getMachines(machineList, xCoord, yCoord, zCoord);
+        getMachines(machineList, getPos());
         return machineList;
     }
 
@@ -217,20 +219,19 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
         return true;
     }
 
-    private void getMachines(List<IAssemblyMachine> machineList, int x, int y, int z){
-        for(ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
-            if(dir == ForgeDirection.UP || dir == ForgeDirection.DOWN) continue;
-            TileEntity te = worldObj.getTileEntity(x + dir.offsetX, y, z + dir.offsetZ);
+    private void getMachines(List<IAssemblyMachine> machineList, BlockPos pos){
+        for(EnumFacing dir : EnumFacing.HORIZONTALS) {
+            TileEntity te = worldObj.getTileEntity(pos.offset(dir));
             if(te instanceof IAssemblyMachine && !machineList.contains(te)) {
                 machineList.add((IAssemblyMachine)te);
-                getMachines(machineList, te.xCoord, te.yCoord, te.zCoord);
+                getMachines(machineList, te.getPos());
             }
         }
     }
 
     public void updateConnections(){
-        for(ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS) {
-            TileEntity te = worldObj.getTileEntity(xCoord + direction.offsetX, yCoord + direction.offsetY, zCoord + direction.offsetZ);
+        for(EnumFacing direction : EnumFacing.VALUES) {
+            TileEntity te = worldObj.getTileEntity(getPos().offset(direction));
             if(te instanceof IPneumaticMachine) {
                 sidesConnected[direction.ordinal()] = ((IPneumaticMachine)te).isConnectedTo(direction.getOpposite());
             } else {
@@ -240,14 +241,20 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
     }
 
     @Override
-    public boolean isConnectedTo(ForgeDirection side){
-        return side != ForgeDirection.UP;
+    public void onNeighborBlockUpdate(){
+        super.onNeighborBlockUpdate();
+        updateConnections();
+    }
+
+    @Override
+    public boolean isConnectedTo(EnumFacing side){
+        return side != EnumFacing.UP;
     }
 
     @Override
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox(){
-        return AxisAlignedBB.getBoundingBox(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 1, zCoord + 1);
+        return new AxisAlignedBB(getPos().getX(), getPos().getY(), getPos().getZ(), getPos().getX() + 1, getPos().getY() + 1, getPos().getZ() + 1);
     }
 
     /**
@@ -287,7 +294,7 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
 
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
@@ -306,7 +313,7 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
 
         return Blockss.assemblyController.getUnlocalizedName();
     }
@@ -323,10 +330,15 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
+    }
 
     @Override
     public void readFromNBT(NBTTagCompound tag){
@@ -391,18 +403,18 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
 
     @Override
     // upgrades in bottom, fuel in the rest.
-    public int[] getAccessibleSlotsFromSide(int var1){
-        if(var1 == 0) return new int[]{1, 2, 3, 4};
+    public int[] getSlotsForFace(EnumFacing var1){
+        if(var1 == EnumFacing.DOWN) return new int[]{1, 2, 3, 4};
         return new int[]{0};
     }
 
     @Override
-    public boolean canInsertItem(int i, ItemStack itemstack, int j){
+    public boolean canInsertItem(int i, ItemStack itemstack, EnumFacing j){
         return true;
     }
 
     @Override
-    public boolean canExtractItem(int i, ItemStack itemstack, int j){
+    public boolean canExtractItem(int i, ItemStack itemstack, EnumFacing j){
         return true;
     }
 
@@ -415,7 +427,7 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
     public void setSpeed(float speed){}
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 

@@ -6,8 +6,9 @@ import java.util.Map;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import pneumaticCraft.api.IHeatExchangerLogic;
@@ -46,16 +47,16 @@ public class HeatExchangerManager{
         PneumaticRegistry.getInstance().registerBlockExchanger(Blocks.flowing_lava, FluidRegistry.LAVA.getTemperature(), 500);
     }
 
-    public IHeatExchangerLogic getLogic(World world, int x, int y, int z, ForgeDirection side){
-        if(!world.blockExists(x, y, z)) return null;
-        TileEntity te = world.getTileEntity(x, y, z);
+    public IHeatExchangerLogic getLogic(World world, BlockPos pos, EnumFacing side){
+        if(!world.isBlockLoaded(pos)) return null;
+        TileEntity te = world.getTileEntity(pos);
         if(te instanceof IHeatExchanger) {
             return ((IHeatExchanger)te).getHeatExchangerLogic(side);
         } else {
-            if(world.isAirBlock(x, y, z)) {
+            if(world.isAirBlock(pos)) {
                 return AIR_EXCHANGER;
             } else {
-                Block block = world.getBlock(x, y, z);
+                Block block = world.getBlockState(pos).getBlock();
                 if(block instanceof IHeatExchanger) {
                     return ((IHeatExchanger)block).getHeatExchangerLogic(side);
                 } else {

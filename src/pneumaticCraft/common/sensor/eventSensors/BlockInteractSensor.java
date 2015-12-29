@@ -6,16 +6,16 @@ import java.util.Set;
 
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.world.ChunkPosition;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.util.Rectangle;
 
 import pneumaticCraft.api.universalSensor.IBlockAndCoordinateEventSensor;
-import cpw.mods.fml.common.eventhandler.Event;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockInteractSensor implements IBlockAndCoordinateEventSensor{
 
@@ -37,10 +37,10 @@ public class BlockInteractSensor implements IBlockAndCoordinateEventSensor{
     }
 
     @Override
-    public int emitRedstoneOnEvent(Event event, TileEntity sensor, int range, Set<ChunkPosition> positions){
+    public int emitRedstoneOnEvent(Event event, TileEntity sensor, int range, Set<BlockPos> positions){
         if(event instanceof PlayerInteractEvent) {
             PlayerInteractEvent interactEvent = (PlayerInteractEvent)event;
-            return positions.contains(new ChunkPosition(interactEvent.x, interactEvent.y, interactEvent.z)) ? 15 : 0;
+            return positions.contains(interactEvent.pos) ? 15 : 0;
         }
         return 0;
     }

@@ -7,6 +7,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityMobSpawner;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableBlock;
@@ -18,52 +19,50 @@ public class HackableMobSpawner implements IHackableBlock{
     }
 
     @Override
-    public boolean canHack(IBlockAccess world, int x, int y, int z, EntityPlayer player){
-        return !isHacked(world, x, y, z);
+    public boolean canHack(IBlockAccess world, BlockPos pos, EntityPlayer player){
+        return !isHacked(world, pos);
     }
 
-    public static boolean isHacked(IBlockAccess world, int x, int y, int z){
-        TileEntity te = world.getTileEntity(x, y, z);
-        if(te != null) {
-            NBTTagCompound tag = new NBTTagCompound();
-            te.writeToNBT(tag);
-            if(tag.hasKey("RequiredPlayerRange") && tag.getShort("RequiredPlayerRange") == 0) return true;
+    public static boolean isHacked(IBlockAccess world, BlockPos pos){
+        TileEntity te = world.getTileEntity(pos);
+        if(te instanceof TileEntityMobSpawner) {
+            return ((TileEntityMobSpawner)te).getSpawnerBaseLogic().activatingRangeFromPlayer == 0;
         }
         return false;
     }
 
     @Override
-    public void addInfo(World world, int x, int y, int z, List<String> curInfo, EntityPlayer player){
+    public void addInfo(World world, BlockPos pos, List<String> curInfo, EntityPlayer player){
         curInfo.add("pneumaticHelmet.hacking.result.neutralize");
     }
 
     @Override
-    public void addPostHackInfo(World world, int x, int y, int z, List<String> curInfo, EntityPlayer player){
+    public void addPostHackInfo(World world, BlockPos pos, List<String> curInfo, EntityPlayer player){
         curInfo.add("pneumaticHelmet.hacking.finished.neutralized");
     }
 
     @Override
-    public int getHackTime(IBlockAccess world, int x, int y, int z, EntityPlayer player){
+    public int getHackTime(IBlockAccess world, BlockPos pos, EntityPlayer player){
         return 200;
     }
 
     @Override
-    public void onHackFinished(World world, int x, int y, int z, EntityPlayer player){
+    public void onHackFinished(World world, BlockPos pos, EntityPlayer player){
         if(!world.isRemote) {
             NBTTagCompound tag = new NBTTagCompound();
-            TileEntity te = world.getTileEntity(x, y, z);
+            TileEntity te = world.getTileEntity(pos);
             te.writeToNBT(tag);
             tag.setShort("RequiredPlayerRange", (short)0);
             te.readFromNBT(tag);
-            world.markBlockForUpdate(x, y, z);
+            world.markBlockForUpdate(pos);
         }
 
     }
 
     @Override
-    public boolean afterHackTick(World world, int x, int y, int z){
-        MobSpawnerBaseLogic spawner = ((TileEntityMobSpawner)world.getTileEntity(x, y, z)).func_145881_a();
-        spawner.field_98284_d = spawner.field_98287_c;//oldRotation = rotation, to stop render glitching
+    public boolean afterHackTick(World world, BlockPos pos){
+        MobSpawnerBaseLogic spawner = ((TileEntityMobSpawner)world.getTileEntity(pos)).getSpawnerBaseLogic();
+        spawner.prevMobRotation = spawner.mobRotation;//oldRotation = rotation, to stop render glitching
         spawner.spawnDelay = 10;
         return false;
     }

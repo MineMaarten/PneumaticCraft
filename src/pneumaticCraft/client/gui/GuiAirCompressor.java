@@ -5,7 +5,9 @@ import java.util.List;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
@@ -14,8 +16,6 @@ import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.common.inventory.ContainerAirCompressor;
 import pneumaticCraft.common.tileentity.TileEntityAirCompressor;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiAirCompressor extends GuiPneumaticContainerBase<TileEntityAirCompressor>{
@@ -71,7 +71,7 @@ public class GuiAirCompressor extends GuiPneumaticContainerBase<TileEntityAirCom
             textList.add("\u00a77No fuel!");
             textList.add("\u00a70Insert any burnable item.");
         }
-        List<Pair<ForgeDirection, IAirHandler>> teSurrounding = te.getConnectedPneumatics();
+        List<Pair<EnumFacing, IAirHandler>> teSurrounding = te.getConnectedPneumatics();
         if(teSurrounding.isEmpty()) {
             textList.add("\u00a77Air leaking!");
             textList.add("\u00a70Add pipes / machines");

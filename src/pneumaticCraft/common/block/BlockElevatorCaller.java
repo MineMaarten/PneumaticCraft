@@ -2,25 +2,25 @@ package pneumaticCraft.common.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 import pneumaticCraft.common.tileentity.TileEntityElevatorBase;
 import pneumaticCraft.common.tileentity.TileEntityElevatorCaller;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
-import pneumaticCraft.lib.Textures;
 
 public class BlockElevatorCaller extends BlockPneumaticCraft{
 
     protected BlockElevatorCaller(Material par2Material){
         super(par2Material);
-        setBlockTextureName(Textures.BLOCK_ELEVATOR_CALLER);
     }
 
     @Override
@@ -29,18 +29,18 @@ public class BlockElevatorCaller extends BlockPneumaticCraft{
     }
 
     @Override
-    public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ){
-        TileEntityElevatorCaller te = (TileEntityElevatorCaller)world.getTileEntity(x, y, z);
+    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ){
+        TileEntityElevatorCaller te = (TileEntityElevatorCaller)world.getTileEntity(pos);
         if(!world.isRemote) {
             MovingObjectPosition mop = PneumaticCraftUtils.getEntityLookedObject(player);
             if(mop != null && mop.subHit >= 0) {
-                setSurroundingElevators(world, x, y, z, mop.subHit);
+                setSurroundingElevators(world, pos, mop.subHit);
             } else if(player.isSneaking()) {
                 te.camoStack = player.getCurrentEquippedItem();
                 return te.camoStack != null && te.camoStack.getItem() instanceof ItemBlock;
             }
         }
-        return te.getRotation().getOpposite().ordinal() == side;
+        return te.getRotation().getOpposite() == side;
     }
 
     @Override
@@ -49,17 +49,17 @@ public class BlockElevatorCaller extends BlockPneumaticCraft{
     }
 
     @Override
-    public boolean isNormalCube(IBlockAccess world, int x, int y, int z){
+    public boolean isNormalCube(IBlockAccess world, BlockPos pos){
         return true;
     }
 
     @Override
-    public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 origin, Vec3 direction){
+    public MovingObjectPosition collisionRayTrace(World world, BlockPos pos, Vec3 origin, Vec3 direction){
         setBlockBounds(0, 0, 0, 1, 1, 1);
-        MovingObjectPosition rayTrace = super.collisionRayTrace(world, x, y, z, origin, direction);
-        ForgeDirection orientation = ForgeDirection.getOrientation(world.getBlockMetadata(x, y, z) & 7).getOpposite();
-        if(rayTrace != null && rayTrace.sideHit == orientation.ordinal()) {
-            TileEntity te = world.getTileEntity(x, y, z);
+        MovingObjectPosition rayTrace = super.collisionRayTrace(world, pos, origin, direction);
+        EnumFacing orientation = getRotation(world, pos).getOpposite();
+        if(rayTrace != null && rayTrace.sideHit == orientation) {
+            TileEntity te = world.getTileEntity(pos);
             if(te instanceof TileEntityElevatorCaller) {
                 TileEntityElevatorCaller caller = (TileEntityElevatorCaller)te;
                 for(TileEntityElevatorCaller.ElevatorButton button : caller.getFloors()) {
@@ -92,7 +92,7 @@ public class BlockElevatorCaller extends BlockPneumaticCraft{
                     }
 
                     setBlockBounds(startX, 1 - (float)(button.posY + button.height), startZ, endX, 1 - (float)button.posY, endZ);
-                    MovingObjectPosition buttonTrace = super.collisionRayTrace(world, x, y, z, origin, direction);
+                    MovingObjectPosition buttonTrace = super.collisionRayTrace(world, pos, origin, direction);
                     if(buttonTrace != null) {
                         if(startX > 0.01F && startX < 0.98F) startX += 0.01F;
                         if(startZ > 0.01F && startZ < 0.98F) startZ += 0.01F;
@@ -110,52 +110,31 @@ public class BlockElevatorCaller extends BlockPneumaticCraft{
         return rayTrace;
     }
 
-    /**
-     * Lets the block know when one of its neighbor changes. Doesn't know which neighbor changed (coordinates passed are
-     * their own) Args: x, y, z, neighbor blockID
-     */
-    @Override
-    public void onNeighborBlockChange(World world, int x, int y, int z, Block block){
-        int oldMeta = world.getBlockMetadata(x, y, z);
-        boolean wasPowered = oldMeta / 8 > 0;
-        boolean isPowered = world.isBlockIndirectlyGettingPowered(x, y, z);
-        if(!wasPowered && isPowered) {
-            world.setBlockMetadataWithNotify(x, y, z, oldMeta + 8, 3);
-            TileEntity te = world.getTileEntity(x, y, z);
-            if(te instanceof TileEntityElevatorCaller) {
-                setSurroundingElevators(world, x, y, z, ((TileEntityElevatorCaller)te).thisFloor);
-            }
-        } else if(wasPowered && !isPowered) {
-            world.setBlockMetadataWithNotify(x, y, z, oldMeta - 8, 3);
-        }
-    }
-
-    private void setSurroundingElevators(World world, int x, int y, int z, int floor){
-        for(ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
-            if(dir != ForgeDirection.UP && dir != ForgeDirection.DOWN) {
-                TileEntityElevatorBase elevator = getElevatorBase(world, x + dir.offsetX, y - 2, z + dir.offsetZ);
-                if(elevator != null) {
-                    elevator.goToFloor(floor);
-                }
+    public static void setSurroundingElevators(World world, BlockPos pos, int floor){
+        for(EnumFacing dir : EnumFacing.HORIZONTALS) {
+            TileEntityElevatorBase elevator = getElevatorBase(world, pos.offset(dir));
+            if(elevator != null) {
+                elevator.goToFloor(floor);
             }
         }
     }
 
     @Override
-    public void onPostBlockPlaced(World world, int x, int y, int z, int meta){
-        updateElevatorButtons(world, x, y, z);
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state){
+        super.onBlockAdded(worldIn, pos, state);
+        updateElevatorButtons(worldIn, pos);
     }
 
     @Override
-    public void breakBlock(World world, int x, int y, int z, Block block, int meta){
-        updateElevatorButtons(world, x, y, z);
-        super.breakBlock(world, x, y, z, block, meta);
+    public void breakBlock(World world, BlockPos pos, IBlockState state){
+        updateElevatorButtons(world, pos);
+        super.breakBlock(world, pos, state);
     }
 
-    private void updateElevatorButtons(World world, int x, int y, int z){
-        for(ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
-            if(dir != ForgeDirection.UP && dir != ForgeDirection.DOWN) {
-                TileEntityElevatorBase elevator = getElevatorBase(world, x + dir.offsetX, y - 2, z + dir.offsetZ);
+    private void updateElevatorButtons(World world, BlockPos pos){
+        for(EnumFacing dir : EnumFacing.VALUES) {
+            if(dir.getAxis() != Axis.Y) {
+                TileEntityElevatorBase elevator = getElevatorBase(world, pos.offset(dir).offset(EnumFacing.DOWN, 2));
                 if(elevator != null) {
                     elevator.updateFloors();
                 }
@@ -163,14 +142,14 @@ public class BlockElevatorCaller extends BlockPneumaticCraft{
         }
     }
 
-    private TileEntityElevatorBase getElevatorBase(World world, int x, int y, int z){
-        Block block = world.getBlock(x, y, z);
+    private static TileEntityElevatorBase getElevatorBase(World world, BlockPos pos){
+        Block block = world.getBlockState(pos).getBlock();
         TileEntityElevatorBase elevator = null;
         if(block == Blockss.elevatorFrame) {
-            elevator = BlockElevatorFrame.getElevatorTE(world, x, y, z);
+            elevator = BlockElevatorFrame.getElevatorTE(world, pos);
         }
         if(block == Blockss.elevatorBase) {
-            TileEntity te = world.getTileEntity(x, y, z);
+            TileEntity te = world.getTileEntity(pos);
             if(te instanceof TileEntityElevatorBase && ((TileEntityElevatorBase)te).isCoreElevator()) {
                 elevator = (TileEntityElevatorBase)te;
             }
@@ -199,14 +178,14 @@ public class BlockElevatorCaller extends BlockPneumaticCraft{
         return true;
     }
 
-    @Override
+    /*@Override TODO elevator camo
     public IIcon getIcon(IBlockAccess world, int x, int y, int z, int side){
         TileEntityElevatorCaller te = (TileEntityElevatorCaller)world.getTileEntity(x, y, z);
         if(te.camoBlock != null && PneumaticCraftUtils.isRenderIDCamo(te.camoBlock.getRenderType())) {
             return te.camoBlock.getIcon(side, te.camoStack.getItemDamage());
         }
-        return this.getIcon(side, world.getBlockMetadata(x, y, z));
-    }
+        return getIcon(side, world.getBlockMetadata(x, y, z));
+    }*/
 
     /**
      * Returns true if the block is emitting indirect/weak redstone power on the
@@ -216,9 +195,9 @@ public class BlockElevatorCaller extends BlockPneumaticCraft{
      * when checking the bottom of the block.
      */
     @Override
-    public int isProvidingWeakPower(IBlockAccess par1IBlockAccess, int par2, int par3, int par4, int par5){
+    public int getWeakPower(IBlockAccess par1IBlockAccess, BlockPos pos, IBlockState state, EnumFacing side){
 
-        TileEntity te = par1IBlockAccess.getTileEntity(par2, par3, par4);
+        TileEntity te = par1IBlockAccess.getTileEntity(pos);
         if(te instanceof TileEntityElevatorCaller) {
             TileEntityElevatorCaller teEc = (TileEntityElevatorCaller)te;
             return teEc.getEmittingRedstone() ? 15 : 0;

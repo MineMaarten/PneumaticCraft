@@ -1,7 +1,8 @@
 package pneumaticCraft.common.block.tubes;
 
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+
 
 public interface ISidedPart{
-    public void setDirection(ForgeDirection dir);
+    public void setDirection(EnumFacing dir);
 }

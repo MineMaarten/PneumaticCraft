@@ -9,12 +9,12 @@ public class PacketRenderRangeLines extends LocationIntPacket<PacketRenderRangeL
     public PacketRenderRangeLines(){}
 
     public PacketRenderRangeLines(TileEntity te){
-        super(te.xCoord, te.yCoord, te.zCoord);
+        super(te.getPos());
     }
 
     @Override
     public void handleClientSide(PacketRenderRangeLines message, EntityPlayer player){
-        TileEntity te = player.worldObj.getTileEntity(message.x, message.y, message.z);
+        TileEntity te = message.getTileEntity(player.getEntityWorld());
         if(te instanceof IRangeLineShower) {
             ((IRangeLineShower)te).showRangeLines();
         }

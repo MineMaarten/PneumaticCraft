@@ -1,6 +1,7 @@
 package pneumaticCraft.client.gui;
 
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,9 +9,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.lwjgl.opengl.GL11;
@@ -20,7 +21,6 @@ import pneumaticCraft.api.client.IGuiAnimatedStat;
 import pneumaticCraft.client.gui.widget.IGuiWidget;
 import pneumaticCraft.client.gui.widget.IWidgetListener;
 import pneumaticCraft.client.gui.widget.WidgetLabel;
-import cpw.mods.fml.client.FMLClientHandler;
 
 public abstract class GuiPneumaticScreenBase extends GuiScreen implements IWidgetListener{
 
@@ -102,7 +102,7 @@ public abstract class GuiPneumaticScreenBase extends GuiScreen implements IWidge
     }
 
     @Override
-    protected void mouseClicked(int par1, int par2, int par3){
+    protected void mouseClicked(int par1, int par2, int par3) throws IOException{
         super.mouseClicked(par1, par2, par3);
         for(IGuiWidget widget : widgets) {
             if(widget.getBounds().contains(par1, par2)) widget.onMouseClicked(par1, par2, par3);
@@ -111,7 +111,7 @@ public abstract class GuiPneumaticScreenBase extends GuiScreen implements IWidge
     }
 
     @Override
-    protected void keyTyped(char key, int keyCode){
+    protected void keyTyped(char key, int keyCode) throws IOException{
         if(keyCode == 1) {
             super.keyTyped(key, keyCode);
         } else {
@@ -145,7 +145,7 @@ public abstract class GuiPneumaticScreenBase extends GuiScreen implements IWidge
     }
 
     @Override
-    public void handleMouseInput(){
+    public void handleMouseInput() throws IOException{
         super.handleMouseInput();
         for(IGuiWidget widget : widgets) {
             widget.handleMouseInput();
@@ -161,18 +161,6 @@ public abstract class GuiPneumaticScreenBase extends GuiScreen implements IWidge
         super.setWorldAndResolution(par1Minecraft, par2, par3);
     }
 
-    public static void drawTexture(String texture, int x, int y){
-        Minecraft.getMinecraft().getTextureManager().bindTexture(GuiUtils.getResourceLocation(texture));
-        Tessellator tessellator = Tessellator.instance;
-        tessellator.startDrawingQuads();
-        tessellator.addVertexWithUV(x, y + 16, 0, 0.0, 1.0);
-        tessellator.addVertexWithUV(x + 16, y + 16, 0, 1.0, 1.0);
-        tessellator.addVertexWithUV(x + 16, y, 0, 1.0, 0.0);
-        tessellator.addVertexWithUV(x, y, 0, 0.0, 0.0);
-        tessellator.draw();
-        // this.drawTexturedModalRect(x, y, 0, 0, 16, 16);
-    }
-
     public GuiButton getButtonFromRectangle(int buttonID, Rectangle buttonSize, String buttonText){
         return new GuiButton(buttonID, buttonSize.x, buttonSize.y, buttonSize.width, buttonSize.height, buttonText);
     }
@@ -182,7 +170,7 @@ public abstract class GuiPneumaticScreenBase extends GuiScreen implements IWidge
     }
 
     public GuiTextField getTextFieldFromRectangle(Rectangle textFieldSize){
-        return new GuiTextField(fontRendererObj, textFieldSize.x, textFieldSize.y, textFieldSize.width, textFieldSize.height);
+        return new GuiTextField(-1, fontRendererObj, textFieldSize.x, textFieldSize.y, textFieldSize.width, textFieldSize.height);
     }
 
 }

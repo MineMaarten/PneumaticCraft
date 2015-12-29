@@ -1,7 +1,7 @@
 package pneumaticCraft.common.tileentity;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
@@ -30,8 +30,8 @@ public class TileEntityVortexTube extends TileEntityPneumaticBase implements IHe
     }
 
     @Override
-    public IHeatExchangerLogic getHeatExchangerLogic(ForgeDirection side){
-        if(side == ForgeDirection.UNKNOWN || side == getRotation().getOpposite()) {
+    public IHeatExchangerLogic getHeatExchangerLogic(EnumFacing side){
+        if(side == null || side == getRotation().getOpposite()) {
             return hotHeatExchanger;
         } else if(side == getRotation()) {
             return coldHeatExchanger;
@@ -41,8 +41,8 @@ public class TileEntityVortexTube extends TileEntityPneumaticBase implements IHe
     }
 
     @Override
-    protected ForgeDirection[] getConnectedHeatExchangerSides(){
-        return new ForgeDirection[]{getRotation().getOpposite()};
+    protected EnumFacing[] getConnectedHeatExchangerSides(){
+        return new EnumFacing[]{getRotation().getOpposite()};
     }
 
     @Override
@@ -52,33 +52,33 @@ public class TileEntityVortexTube extends TileEntityPneumaticBase implements IHe
     }
 
     @Override
-    public boolean isConnectedTo(ForgeDirection side){
+    public boolean isConnectedTo(EnumFacing side){
         return getTubeDirection() == side;
     }
 
-    public ForgeDirection getTubeDirection(){
-        ForgeDirection d;
+    public EnumFacing getTubeDirection(){
+        EnumFacing d;
 
         switch(getRotation()){
             case DOWN:
             case NORTH:
             case UP:
-                d = ForgeDirection.WEST;
+                d = EnumFacing.WEST;
                 break;
             case SOUTH:
-                d = ForgeDirection.EAST;
+                d = EnumFacing.EAST;
                 break;
             case WEST:
-                d = ForgeDirection.SOUTH;
+                d = EnumFacing.SOUTH;
                 break;
             case EAST:
-                d = ForgeDirection.NORTH;
+                d = EnumFacing.NORTH;
                 break;
             default:
-                d = ForgeDirection.SOUTH;
+                d = EnumFacing.SOUTH;
         }
         for(int i = 0; i < roll; i++) {
-            d = d.getRotation(getRotation());
+            d = d.rotateAround(getRotation().getAxis()); //TODO 1.8 test
         }
         return d;
     }
@@ -123,14 +123,14 @@ public class TileEntityVortexTube extends TileEntityPneumaticBase implements IHe
     }
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
         if(!worldObj.isRemote) {
             connectingExchanger.update();
             coldHeatExchanger.update();//Only update the cold and connecting side, the hot side is handled in TileEntityBase.
-            int usedAir = (int)(getPressure(ForgeDirection.UNKNOWN) * 10);
+            int usedAir = (int)(getPressure(null) * 10);
             if(usedAir > 0) {
-                addAir(-usedAir, ForgeDirection.UNKNOWN);
+                addAir(-usedAir, null);
                 double generatedHeat = usedAir / 10D;
                 coldHeatExchanger.addHeat(-generatedHeat);
                 hotHeatExchanger.addHeat(generatedHeat);

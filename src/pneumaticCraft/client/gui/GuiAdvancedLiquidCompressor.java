@@ -4,7 +4,6 @@ import java.util.List;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraftforge.common.util.ForgeDirection;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 import pneumaticCraft.client.gui.widget.WidgetTemperature;
 import pneumaticCraft.common.inventory.ContainerAdvancedLiquidCompressor;
@@ -20,7 +19,7 @@ public class GuiAdvancedLiquidCompressor extends GuiLiquidCompressor{
     @Override
     public void initGui(){
         super.initGui();
-        addWidget(new WidgetTemperature(0, guiLeft + 92, guiTop + 20, 273, 675, ((IHeatExchanger)te).getHeatExchangerLogic(ForgeDirection.UNKNOWN), 325, 625));
+        addWidget(new WidgetTemperature(0, guiLeft + 92, guiTop + 20, 273, 675, ((IHeatExchanger)te).getHeatExchangerLogic(null), 325, 625));
     }
 
     @Override

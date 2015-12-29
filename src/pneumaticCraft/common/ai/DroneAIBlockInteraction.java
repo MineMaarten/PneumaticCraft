@@ -7,10 +7,11 @@ import java.util.List;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.common.util.ForgeDirection;
 import pneumaticCraft.api.item.IPressurizable;
 import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.ItemPneumaticArmor;
@@ -29,14 +30,14 @@ public abstract class DroneAIBlockInteraction<Widget extends ProgWidgetAreaItemB
     protected final IDroneBase drone;
     protected final Widget widget;
     private final EnumOrder order;
-    protected ChunkPosition curPos;
-    private final List<ChunkPosition> area;
+    protected BlockPos curPos;
+    private final List<BlockPos> area;
     protected final IBlockAccess worldCache;
-    private final List<ChunkPosition> blacklist = new ArrayList<ChunkPosition>();//a list of position which weren't allowed to be digged in the past.
+    private final List<BlockPos> blacklist = new ArrayList<BlockPos>();//a list of position which weren't allowed to be digged in the past.
     private int curY;
     private int lastSuccessfulY;
     private int minY, maxY;
-    private ThreadedSorter<ChunkPosition> sorter;
+    private ThreadedSorter<BlockPos> sorter;
     private boolean aborted;
 
     protected boolean searching; //true while the drone is searching for a coordinate, false if traveling/processing a coordinate.
@@ -59,13 +60,13 @@ public abstract class DroneAIBlockInteraction<Widget extends ProgWidgetAreaItemB
         area = widget.getCachedAreaList();
         worldCache = ProgWidgetAreaItemBase.getCache(area, drone.getWorld());
         if(area.size() > 0) {
-            Iterator<ChunkPosition> iterator = area.iterator();
-            ChunkPosition pos = iterator.next();
-            minY = maxY = pos.chunkPosY;
+            Iterator<BlockPos> iterator = area.iterator();
+            BlockPos pos = iterator.next();
+            minY = maxY = pos.getY();
             while(iterator.hasNext()) {
                 pos = iterator.next();
-                minY = Math.min(minY, pos.chunkPosY);
-                maxY = Math.max(maxY, pos.chunkPosY);
+                minY = Math.min(minY, pos.getY());
+                maxY = Math.max(maxY, pos.getY());
             }
             if(order == EnumOrder.HIGH_TO_LOW) {
                 curY = maxY;
@@ -114,9 +115,9 @@ public abstract class DroneAIBlockInteraction<Widget extends ProgWidgetAreaItemB
         return this;
     }
 
-    protected abstract boolean isValidPosition(ChunkPosition pos);
+    protected abstract boolean isValidPosition(BlockPos pos);
 
-    protected abstract boolean doBlockInteraction(ChunkPosition pos, double distToBlock);
+    protected abstract boolean doBlockInteraction(BlockPos pos, double distToBlock);
 
     /**
      * Returns whether an in-progress EntityAIBase should continue executing
@@ -131,14 +132,14 @@ public abstract class DroneAIBlockInteraction<Widget extends ProgWidgetAreaItemB
             while(curPos == null && curY != lastSuccessfulY && order != ProgWidgetDigAndPlace.EnumOrder.CLOSEST || firstRun) {
                 firstRun = false;
                 while(!shouldAbort() && searchIndex < area.size()) {
-                    ChunkPosition pos = area.get(searchIndex);
-                    if(isYValid(pos.chunkPosY) && !blacklist.contains(pos) && (!respectClaims() || !DroneClaimManager.getInstance(drone.getWorld()).isClaimed(pos))) {
+                    BlockPos pos = area.get(searchIndex);
+                    if(isYValid(pos.getY()) && !blacklist.contains(pos) && (!respectClaims() || !DroneClaimManager.getInstance(drone.getWorld()).isClaimed(pos))) {
                         indicateToListeningPlayers(pos);
                         if(isValidPosition(pos)) {
                             curPos = pos;
                             if(moveToPositions()) {
                                 if(moveIntoBlock()) {
-                                    if(drone.getPathNavigator().moveToXYZ(curPos.chunkPosX, curPos.chunkPosY + 0.5, curPos.chunkPosZ)) {
+                                    if(drone.getPathNavigator().moveToXYZ(curPos.getX(), curPos.getY() + 0.5, curPos.getZ())) {
                                         searching = false;
                                         totalActions++;
                                         if(respectClaims()) DroneClaimManager.getInstance(drone.getWorld()).claim(pos);
@@ -146,8 +147,8 @@ public abstract class DroneAIBlockInteraction<Widget extends ProgWidgetAreaItemB
                                         return true;
                                     }
                                 } else {
-                                    for(ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
-                                        if(drone.getPathNavigator().moveToXYZ(curPos.chunkPosX + dir.offsetX, curPos.chunkPosY + dir.offsetY + 0.5, curPos.chunkPosZ + dir.offsetZ)) {
+                                    for(EnumFacing dir : EnumFacing.VALUES) {
+                                        if(drone.getPathNavigator().moveToXYZ(curPos.getX() + dir.getFrontOffsetX(), curPos.getY() + dir.getFrontOffsetY() + 0.5, curPos.getZ() + dir.getFrontOffsetZ())) {
                                             searching = false;
                                             totalActions++;
                                             if(respectClaims()) DroneClaimManager.getInstance(drone.getWorld()).claim(pos);
@@ -181,8 +182,8 @@ public abstract class DroneAIBlockInteraction<Widget extends ProgWidgetAreaItemB
             if(!shouldAbort()) addEndingDebugEntry();
             return false;
         } else {
-            Vec3 dronePos = drone.getPosition();
-            double dist = curPos != null ? PneumaticCraftUtils.distBetween(curPos.chunkPosX + 0.5, curPos.chunkPosY + 0.5, curPos.chunkPosZ + 0.5, dronePos.xCoord, dronePos.yCoord, dronePos.zCoord) : 0;
+            Vec3 dronePos = drone.getDronePos();
+            double dist = curPos != null ? PneumaticCraftUtils.distBetween(curPos.getX() + 0.5, curPos.getY() + 0.5, curPos.getZ() + 0.5, dronePos.xCoord, dronePos.yCoord, dronePos.zCoord) : 0;
             if(curPos != null) {
                 if(!moveToPositions()) return doBlockInteraction(curPos, dist);
                 if(respectClaims()) DroneClaimManager.getInstance(drone.getWorld()).claim(curPos);
@@ -226,17 +227,17 @@ public abstract class DroneAIBlockInteraction<Widget extends ProgWidgetAreaItemB
      * Sends particle spawn packets to any close player that has a charged pneumatic helmet with entity tracker.
      * @param pos
      */
-    protected void indicateToListeningPlayers(ChunkPosition pos){
-        for(EntityPlayer player : (List<EntityPlayer>)drone.getWorld().playerEntities) {
+    protected void indicateToListeningPlayers(BlockPos pos){
+        for(EntityPlayer player : drone.getWorld().playerEntities) {
             if(player.getCurrentArmor(3) != null && player.getCurrentArmor(3).getItem() == Itemss.pneumaticHelmet && ItemPneumaticArmor.getUpgrades(ItemMachineUpgrade.UPGRADE_ENTITY_TRACKER, player.getCurrentArmor(3)) > 0 && ((IPressurizable)Itemss.pneumaticHelmet).getPressure(player.getCurrentArmor(3)) > 0) {
-                NetworkHandler.sendTo(new PacketSpawnParticle("reddust", pos.chunkPosX + 0.5, pos.chunkPosY + 0.5, pos.chunkPosZ + 0.5, 0, 0, 0), (EntityPlayerMP)player);
+                NetworkHandler.sendTo(new PacketSpawnParticle(EnumParticleTypes.REDSTONE, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 0, 0, 0), (EntityPlayerMP)player);
             }
         }
     }
 
-    protected void addToBlacklist(ChunkPosition coord){
+    protected void addToBlacklist(BlockPos coord){
         blacklist.add(coord);
-        drone.sendWireframeToClient(coord.chunkPosX, coord.chunkPosY, coord.chunkPosZ);
+        drone.sendWireframeToClient(coord);
     }
 
 }

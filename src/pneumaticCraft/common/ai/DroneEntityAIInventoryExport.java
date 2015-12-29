@@ -3,7 +3,8 @@ package pneumaticCraft.common.ai;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.common.progwidgets.ICountWidget;
 import pneumaticCraft.common.progwidgets.ISidedWidget;
 import pneumaticCraft.common.progwidgets.ProgWidgetAreaItemBase;
@@ -17,34 +18,34 @@ public class DroneEntityAIInventoryExport extends DroneAIImExBase{
     }
 
     @Override
-    protected boolean isValidPosition(ChunkPosition pos){
+    protected boolean isValidPosition(BlockPos pos){
         return export(pos, true);
     }
 
     @Override
-    protected boolean doBlockInteraction(ChunkPosition pos, double distToBlock){
+    protected boolean doBlockInteraction(BlockPos pos, double distToBlock){
         return export(pos, false) && super.doBlockInteraction(pos, distToBlock);
     }
 
-    private boolean export(ChunkPosition pos, boolean simulate){
-        IInventory inv = IOHelper.getInventoryForTE(drone.getWorld().getTileEntity(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ));
+    private boolean export(BlockPos pos, boolean simulate){
+        IInventory inv = IOHelper.getInventoryForTE(drone.getWorld().getTileEntity(pos));
         if(inv != null) {
-            for(int i = 0; i < drone.getInventory().getSizeInventory(); i++) {
-                ItemStack droneStack = drone.getInventory().getStackInSlot(i);
+            for(int i = 0; i < drone.getInv().getSizeInventory(); i++) {
+                ItemStack droneStack = drone.getInv().getStackInSlot(i);
                 if(droneStack != null) {
                     if(widget.isItemValidForFilters(droneStack)) {
                         for(int side = 0; side < 6; side++) {
-                            droneStack = drone.getInventory().getStackInSlot(i);
+                            droneStack = drone.getInv().getStackInSlot(i);
                             if(((ISidedWidget)widget).getSides()[side] && droneStack != null) {
                                 droneStack = droneStack.copy();
                                 int oldCount = droneStack.stackSize;
                                 if(((ICountWidget)widget).useCount()) droneStack.stackSize = Math.min(droneStack.stackSize, getRemainingCount());
-                                ItemStack remainder = IOHelper.insert(inv, droneStack.copy(), side, simulate);
-                                int stackSize = drone.getInventory().getStackInSlot(i).stackSize - (remainder == null ? droneStack.stackSize : droneStack.stackSize - remainder.stackSize);
+                                ItemStack remainder = IOHelper.insert(inv, droneStack.copy(), EnumFacing.getFront(side), simulate);
+                                int stackSize = drone.getInv().getStackInSlot(i).stackSize - (remainder == null ? droneStack.stackSize : droneStack.stackSize - remainder.stackSize);
                                 droneStack.stackSize = stackSize;
                                 int exportedItems = oldCount - stackSize;
                                 if(!simulate) {
-                                    drone.getInventory().setInventorySlotContents(i, stackSize > 0 ? droneStack : null);
+                                    drone.getInv().setInventorySlotContents(i, stackSize > 0 ? droneStack : null);
                                     decreaseCount(exportedItems);
                                 }
                                 if(simulate && exportedItems > 0) return true;

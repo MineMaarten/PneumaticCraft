@@ -36,7 +36,7 @@ public class NBTToJsonConverter{
     }
 
     private JsonObject getObject(NBTTagCompound tag){
-        Set<String> keys = tag.func_150296_c();
+        Set<String> keys = tag.getKeySet();
         JsonObject jsonRoot = new JsonObject();
         for(String key : keys) {
             JsonObject keyObject = new JsonObject();
@@ -48,9 +48,9 @@ public class NBTToJsonConverter{
             if(nbt instanceof NBTTagCompound) {
                 keyObject.add("value", getObject((NBTTagCompound)nbt));
             } else if(nbt instanceof NBTPrimitive) {
-                keyObject.addProperty("value", ((NBTPrimitive)nbt).func_150286_g());
+                keyObject.addProperty("value", ((NBTPrimitive)nbt).getDouble());
             } else if(nbt instanceof NBTTagString) {
-                keyObject.addProperty("value", ((NBTTagString)nbt).func_150285_a_());
+                keyObject.addProperty("value", ((NBTTagString)nbt).getString());
             } else if(nbt instanceof NBTTagList) {
                 JsonArray array = new JsonArray();
                 NBTTagList tagList = (NBTTagList)nbt;
@@ -61,12 +61,12 @@ public class NBTToJsonConverter{
             } else if(nbt instanceof NBTTagIntArray) {
                 JsonArray array = new JsonArray();
                 NBTTagIntArray intArray = (NBTTagIntArray)nbt;
-                for(int i : intArray.func_150302_c()) {
+                for(int i : intArray.getIntArray()) {
                     array.add(new JsonPrimitive(i));
                 }
                 keyObject.add("value", array);
             } else {
-                throw new IllegalArgumentException("NBT to JSON converter doesn't support the nbt tag: " + NBTBase.NBTTypes[nbt.getId()] + ", tag: " + nbt);
+                throw new IllegalArgumentException("NBT to JSON converter doesn't support the nbt tag: " + NBTBase.NBT_TYPES[nbt.getId()] + ", tag: " + nbt);
             }
         }
         return jsonRoot;

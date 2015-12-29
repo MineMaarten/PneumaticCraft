@@ -9,7 +9,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import pneumaticCraft.common.item.ItemLogisticsFrame;
 import pneumaticCraft.common.semiblock.SemiBlockLogistics;
 import pneumaticCraft.common.semiblock.SemiBlockManager;
@@ -52,7 +52,7 @@ public class ContainerLogistics extends ContainerPneumaticBase{
     public static SemiBlockLogistics getLogistics(EntityPlayer player, ItemStack itemRequester){
         if(itemRequester != null && itemRequester.getItem() instanceof ItemLogisticsFrame) {
             SemiBlockLogistics logistics = (SemiBlockLogistics)SemiBlockManager.getSemiBlockForKey(((ItemLogisticsFrame)itemRequester.getItem()).semiBlockId);
-            logistics.initialize(player.worldObj, new ChunkPosition(0, 0, 0));
+            logistics.initialize(player.worldObj, new BlockPos(0, 0, 0));
             logistics.onPlaced(player, itemRequester);
             return logistics;
         } else {

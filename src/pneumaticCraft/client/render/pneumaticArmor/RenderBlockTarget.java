@@ -4,17 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.MouseEvent;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
 import org.lwjgl.opengl.GL11;
 
@@ -29,14 +31,11 @@ import pneumaticCraft.common.CommonHUDHandler;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketDescriptionPacketRequest;
 import pneumaticCraft.common.network.PacketHackingBlockStart;
-import cpw.mods.fml.client.FMLClientHandler;
 
 public class RenderBlockTarget{
 
     private final World world;
-    private final int blockX;
-    private final int blockY;
-    private final int blockZ;
+    private final BlockPos pos;
     private final RenderBlockArrows arrowRenderer = new RenderBlockArrows();
     public int ticksExisted = 0;
     public final GuiAnimatedStat stat;
@@ -47,27 +46,25 @@ public class RenderBlockTarget{
     private final BlockTrackUpgradeHandler blockTracker;
     private TileEntity te;
 
-    public RenderBlockTarget(World world, EntityPlayer player, int x, int y, int z, TileEntity te,
+    public RenderBlockTarget(World world, EntityPlayer player, BlockPos pos, TileEntity te,
             BlockTrackUpgradeHandler blockTracker){
         this.world = world;
         this.player = player;
-        blockX = x;
-        blockY = y;
-        blockZ = z;
+        this.pos = pos;
         this.te = te;
         this.blockTracker = blockTracker;
         // oldTicksExisted = entity.ticksExisted;
-        String title = world.getBlock(x, y, z).getLocalizedName();
+        String title = world.getBlockState(pos).getBlock().getLocalizedName();
         if(title.contains(".name")) {
             try {
-                ItemStack stack = world.getBlock(x, y, z).getPickBlock(FMLClientHandler.instance().getClient().objectMouseOver, world, x, y, z, FMLClientHandler.instance().getClientPlayerEntity());
+                ItemStack stack = world.getBlockState(pos).getBlock().getPickBlock(FMLClientHandler.instance().getClient().objectMouseOver, world, pos, FMLClientHandler.instance().getClientPlayerEntity());
                 if(stack != null) title = stack.getDisplayName();
             } catch(Throwable e) {}
         }
         if(title.contains(".name")) {
             if(te instanceof IInventory) {
                 try {
-                    title = I18n.format(((IInventory)te).getInventoryName());
+                    title = I18n.format(((IInventory)te).getDisplayName().getFormattedText());
                 } catch(Throwable e) {
                     BlockTrackEntryInventory.addTileEntityToBlackList(te, e);
                 }
@@ -86,19 +83,19 @@ public class RenderBlockTarget{
     }
 
     public List<IBlockTrackEntry> getApplicableEntries(){
-        return BlockTrackEntryList.instance.getEntriesForCoordinate(world, blockX, blockY, blockZ, te);
+        return BlockTrackEntryList.instance.getEntriesForCoordinate(world, pos, te);
     }
 
-    public boolean isSameTarget(World world, int x, int y, int z){
-        return blockX == x && blockY == y && blockZ == z;
+    public boolean isSameTarget(World world, BlockPos pos){
+        return this.pos.equals(pos);
     }
 
     public Block getBlock(){
-        return world.getBlock(blockX, blockY, blockZ);
+        return world.getBlockState(pos).getBlock();
     }
 
     public double getDistanceToEntity(Entity entity){
-        return entity.getDistance(blockX + 0.5D, blockY + 0.5D, blockZ + 0.5D);
+        return entity.getDistance(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
     }
 
     public void update(){
@@ -110,7 +107,7 @@ public class RenderBlockTarget{
             for(IBlockTrackEntry entry : applicableTrackEntries) {
                 if(entry.shouldBeUpdatedFromServer(te)) {
                     if(!sentUpdate) {
-                        NetworkHandler.sendToServer(new PacketDescriptionPacketRequest(blockX, blockY, blockZ));
+                        NetworkHandler.sendToServer(new PacketDescriptionPacketRequest(pos));
                         sentUpdate = true;
                     }
                 }
@@ -119,7 +116,7 @@ public class RenderBlockTarget{
         playerIsLooking = isPlayerLookingAtTarget();
         arrowRenderer.ticksExisted++;
 
-        if(!getBlock().isAir(world, blockX, blockY, blockZ)) {
+        if(!getBlock().isAir(world, pos)) {
             textList = new ArrayList<String>();
             if(ticksExisted > 120) {
                 stat.closeWindow();
@@ -141,7 +138,7 @@ public class RenderBlockTarget{
         }
 
         if(hackTime > 0) {
-            IHackableBlock hackableBlock = HackableHandler.getHackableForCoord(world, blockX, blockY, blockZ, player);
+            IHackableBlock hackableBlock = HackableHandler.getHackableForCoord(world, pos, player);
             if(hackableBlock != null) {
                 hackTime++;// = Math.min(hackTime + 1, hackableBlock.getHackTime(world, blockX, blockY, blockZ, player));
             } else {
@@ -152,9 +149,9 @@ public class RenderBlockTarget{
 
     public void render(float partialTicks){
 
-        double x = blockX + 0.5D;
-        double y = blockY + 0.5D;
-        double z = blockZ + 0.5D;
+        double x = pos.getX() + 0.5D;
+        double y = pos.getY() + 0.5D;
+        double z = pos.getZ() + 0.5D;
 
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glPushMatrix();
@@ -172,19 +169,19 @@ public class RenderBlockTarget{
         // here.
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        if(!getBlock().isAir(world, blockX, blockY, blockZ)) arrowRenderer.render(world, blockX, blockY, blockZ, partialTicks);
+        if(!getBlock().isAir(world, pos)) arrowRenderer.render(world, pos, partialTicks);
 
         int targetAcquireProgress = (int)((ticksExisted - 50) / 0.7F);
-        GL11.glRotatef(180.0F - RenderManager.instance.playerViewY, 0.0F, 1.0F, 0.0F);
-        GL11.glRotatef(180.0F - RenderManager.instance.playerViewX, 1.0F, 0.0F, 0.0F);
+        GL11.glRotatef(180.0F - Minecraft.getMinecraft().getRenderManager().playerViewY, 0.0F, 1.0F, 0.0F);
+        GL11.glRotatef(180.0F - Minecraft.getMinecraft().getRenderManager().playerViewX, 1.0F, 0.0F, 0.0F);
         if(ticksExisted <= 120 && ticksExisted > 50) {
             GL11.glColor4d(0, 1, 0, 0.8D);
             RenderProgressBar.render(0D, 0.4D, 1.8D, 0.9D, 0, targetAcquireProgress);
         }
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        if(!getBlock().isAir(world, blockX, blockY, blockZ)) {
-            FontRenderer fontRenderer = RenderManager.instance.getFontRenderer();
+        if(!getBlock().isAir(world, pos)) {
+            FontRenderer fontRenderer = Minecraft.getMinecraft().fontRendererObj;
 
             GL11.glColor4d(red, green, blue, alpha);
             if(ticksExisted > 120) {
@@ -209,7 +206,7 @@ public class RenderBlockTarget{
 
     public void addBlockTrackInfo(List<String> textList){
         for(IBlockTrackEntry blockTrackEntry : getApplicableEntries())
-            blockTrackEntry.addInformation(world, blockX, blockY, blockZ, te, textList);
+            blockTrackEntry.addInformation(world, pos, te, textList);
     }
 
     public boolean isPlayerLooking(){
@@ -218,7 +215,7 @@ public class RenderBlockTarget{
 
     private boolean isPlayerLookingAtTarget(){
         Vec3 vec3 = player.getLook(1.0F).normalize();
-        Vec3 vec31 = Vec3.createVectorHelper(blockX + 0.5D - player.posX, blockY + 0.5D - player.posY + player.getEyeHeight(), blockZ + 0.5D - player.posZ);
+        Vec3 vec31 = new Vec3(pos.getX() + 0.5D - player.posX, pos.getY() + 0.5D - player.posY + player.getEyeHeight(), pos.getZ() + 0.5D - player.posZ);
         double d0 = vec31.lengthVector();
         vec31 = vec31.normalize();
         double d1 = vec3.dotProduct(vec31);
@@ -227,8 +224,8 @@ public class RenderBlockTarget{
 
     public void hack(){
         if(isInitialized() && isPlayerLookingAtTarget()) {
-            IHackableBlock block = HackableHandler.getHackableForCoord(world, blockX, blockY, blockZ, player);
-            if(block != null && (hackTime == 0 || hackTime > block.getHackTime(world, blockX, blockY, blockZ, player))) NetworkHandler.sendToServer(new PacketHackingBlockStart(blockX, blockY, blockZ));
+            IHackableBlock block = HackableHandler.getHackableForCoord(world, pos, player);
+            if(block != null && (hackTime == 0 || hackTime > block.getHackTime(world, pos, player))) NetworkHandler.sendToServer(new PacketHackingBlockStart(pos));
         }
     }
 

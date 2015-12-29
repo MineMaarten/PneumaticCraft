@@ -2,10 +2,10 @@ package pneumaticCraft.client.gui;
 
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import pneumaticCraft.common.item.ItemNetworkComponents;
 import pneumaticCraft.common.tileentity.TileEntitySecurityStation;
 import pneumaticCraft.lib.TileEntityConstants;
-import cpw.mods.fml.client.FMLClientHandler;
 
 public class NetworkConnectionAIHandler extends NetworkConnectionHandler{
     private boolean tracing;

@@ -2,21 +2,22 @@ package pneumaticCraft.common.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.common.tileentity.TileEntityPneumaticDoor;
 import pneumaticCraft.common.tileentity.TileEntityPneumaticDoorBase;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockPneumaticDoorBase extends BlockPneumaticCraftModeled{
 
@@ -44,29 +45,29 @@ public class BlockPneumaticDoorBase extends BlockPneumaticCraftModeled{
      * Called when the block is placed in the world.
      */
     @Override
-    public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase par5EntityLiving, ItemStack par6ItemStack){
-        TileEntityPneumaticDoorBase doorBase = (TileEntityPneumaticDoorBase)world.getTileEntity(x, y, z);
+    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase par5EntityLiving, ItemStack par6ItemStack){
+        TileEntityPneumaticDoorBase doorBase = (TileEntityPneumaticDoorBase)world.getTileEntity(pos);
         doorBase.orientation = PneumaticCraftUtils.getDirectionFacing(par5EntityLiving, false);
         updateDoorSide(doorBase);
     }
 
     @Override
-    public void onNeighborBlockChange(World world, int x, int y, int z, Block block){
-        TileEntity te = world.getTileEntity(x, y, z);
+    public void onNeighborBlockChange(World world, BlockPos pos, IBlockState state, Block block){
+        TileEntity te = world.getTileEntity(pos);
         if(te instanceof TileEntityPneumaticDoorBase) {
             updateDoorSide((TileEntityPneumaticDoorBase)te);
-            ForgeDirection dir = ((TileEntityPneumaticDoorBase)te).orientation;
-            if(world.getBlock(x + dir.offsetX, y, z + dir.offsetZ) == Blockss.pneumaticDoor) {
-                Blockss.pneumaticDoor.onNeighborBlockChange(world, x + dir.offsetX, y, z + dir.offsetZ, block);
+            EnumFacing dir = ((TileEntityPneumaticDoorBase)te).orientation;
+            if(world.getBlockState(pos.offset(dir)).getBlock() == Blockss.pneumaticDoor) {
+                Blockss.pneumaticDoor.onNeighborBlockChange(world, pos.offset(dir), world.getBlockState(pos.offset(dir)), block);
             }
         }
     }
 
     private void updateDoorSide(TileEntityPneumaticDoorBase doorBase){
-        TileEntity teDoor = doorBase.getWorldObj().getTileEntity(doorBase.xCoord + doorBase.orientation.offsetX, doorBase.yCoord, doorBase.zCoord + doorBase.orientation.offsetZ);
+        TileEntity teDoor = doorBase.getWorld().getTileEntity(doorBase.getPos().offset(doorBase.orientation));
         if(teDoor instanceof TileEntityPneumaticDoor) {
             TileEntityPneumaticDoor door = (TileEntityPneumaticDoor)teDoor;
-            if(doorBase.orientation.getRotation(ForgeDirection.UP) == ForgeDirection.getOrientation(door.getBlockMetadata() % 6) && door.rightGoing || doorBase.orientation.getRotation(ForgeDirection.DOWN) == ForgeDirection.getOrientation(door.getBlockMetadata() % 6) && !door.rightGoing) {
+            if(doorBase.orientation.rotateY() == door.getRotation() && door.rightGoing || doorBase.orientation.rotateYCCW() == EnumFacing.getFront(door.getBlockMetadata() % 6) && !door.rightGoing) {
                 door.rightGoing = !door.rightGoing;
                 door.setRotation(0);
             }
@@ -84,14 +85,14 @@ public class BlockPneumaticDoorBase extends BlockPneumaticCraftModeled{
     }
 
     @Override
-    public boolean rotateBlock(World world, EntityPlayer player, int x, int y, int z, ForgeDirection side){
+    public boolean rotateBlock(World world, EntityPlayer player, BlockPos pos, EnumFacing side){
         if(player.isSneaking()) {
-            return super.rotateBlock(world, player, x, y, z, side);
+            return super.rotateBlock(world, player, pos, side);
         } else {
-            TileEntity te = world.getTileEntity(x, y, z);
+            TileEntity te = world.getTileEntity(pos);
             if(te instanceof TileEntityPneumaticDoorBase) {
                 TileEntityPneumaticDoorBase teDb = (TileEntityPneumaticDoorBase)te;
-                teDb.orientation = teDb.orientation.getRotation(ForgeDirection.UP);
+                teDb.orientation = teDb.orientation.rotateY();
                 return true;
             }
             return false;
@@ -99,25 +100,11 @@ public class BlockPneumaticDoorBase extends BlockPneumaticCraftModeled{
     }
 
     @Override
-    public IIcon getIcon(IBlockAccess world, int x, int y, int z, int side){
-        TileEntityPneumaticDoorBase te = (TileEntityPneumaticDoorBase)world.getTileEntity(x, y, z);
+    public boolean shouldSideBeRendered(IBlockAccess world, BlockPos pos, EnumFacing side){
+        TileEntityPneumaticDoorBase te = (TileEntityPneumaticDoorBase)world.getTileEntity(pos.offset(side, -1));
         ItemStack camoStack = te.getStackInSlot(TileEntityPneumaticDoorBase.CAMO_SLOT);
         if(camoStack != null && camoStack.getItem() instanceof ItemBlock) {
-            Block block = ((ItemBlock)camoStack.getItem()).field_150939_a;
-            if(PneumaticCraftUtils.isRenderIDCamo(block.getRenderType())) {
-                return block.getIcon(side, camoStack.getItemDamage());
-            }
-        }
-        return this.getIcon(side, world.getBlockMetadata(x, y, z));
-    }
-
-    @Override
-    public boolean shouldSideBeRendered(IBlockAccess world, int x, int y, int z, int side){
-        ForgeDirection d = ForgeDirection.getOrientation(side);
-        TileEntityPneumaticDoorBase te = (TileEntityPneumaticDoorBase)world.getTileEntity(x - d.offsetX, y - d.offsetY, z - d.offsetZ);
-        ItemStack camoStack = te.getStackInSlot(TileEntityPneumaticDoorBase.CAMO_SLOT);
-        if(camoStack != null && camoStack.getItem() instanceof ItemBlock) {
-            Block block = ((ItemBlock)camoStack.getItem()).field_150939_a;
+            Block block = ((ItemBlock)camoStack.getItem()).getBlock();
             if(PneumaticCraftUtils.isRenderIDCamo(block.getRenderType())) {
                 return true;
             }

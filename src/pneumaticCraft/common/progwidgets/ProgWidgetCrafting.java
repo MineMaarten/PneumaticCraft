@@ -13,22 +13,23 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetImportExport;
 import pneumaticCraft.common.ai.IDroneBase;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.common.util.IOHelper;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetCrafting extends ProgWidget implements ICraftingWidget, ICountWidget{
     private boolean useCount;
@@ -72,7 +73,7 @@ public class ProgWidgetCrafting extends ProgWidget implements ICraftingWidget, I
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.ENDER_PLANT_DAMAGE;
+        return ItemPlastic.ENDER_PLANT_DAMAGE;
     }
 
     @Override
@@ -115,7 +116,7 @@ public class ProgWidgetCrafting extends ProgWidget implements ICraftingWidget, I
 
     public static IRecipe getRecipe(World world, ICraftingWidget widget){
         InventoryCrafting craftingGrid = widget.getCraftingGrid();
-        for(IRecipe recipe : (List<IRecipe>)CraftingManager.getInstance().getRecipeList()) {
+        for(IRecipe recipe : CraftingManager.getInstance().getRecipeList()) {
             if(recipe.matches(craftingGrid, world)) {
                 return recipe;
             }
@@ -157,8 +158,8 @@ public class ProgWidgetCrafting extends ProgWidget implements ICraftingWidget, I
                     ItemStack originalStack = craftingGrid.getStackInSlot(i);
                     if(originalStack != null) {
                         List<ItemStack> equivalents = new ArrayList<ItemStack>();
-                        for(int j = 0; j < drone.getInventory().getSizeInventory(); j++) {
-                            ItemStack droneStack = drone.getInventory().getStackInSlot(j);
+                        for(int j = 0; j < drone.getInv().getSizeInventory(); j++) {
+                            ItemStack droneStack = drone.getInv().getStackInSlot(j);
                             if(droneStack != null && (droneStack.getItem() == originalStack.getItem() || PneumaticCraftUtils.isSameOreDictStack(droneStack, originalStack))) {
                                 equivalents.add(droneStack);
                             }
@@ -237,9 +238,9 @@ public class ProgWidgetCrafting extends ProgWidget implements ICraftingWidget, I
                             continue;
                         }
 
-                        ItemStack remainder = IOHelper.insert(drone.getInventory(), itemstack2.copy(), 0, false);
+                        ItemStack remainder = IOHelper.insert(drone.getInv(), itemstack2.copy(), EnumFacing.UP, false);
                         if(remainder != null) {
-                            Vec3 pos = drone.getPosition();
+                            Vec3 pos = drone.getDronePos();
                             EntityItem item = new EntityItem(drone.getWorld(), pos.xCoord, pos.yCoord, pos.zCoord, remainder);
                             drone.getWorld().spawnEntityInWorld(item);
                         }
@@ -248,16 +249,16 @@ public class ProgWidgetCrafting extends ProgWidget implements ICraftingWidget, I
                 }
             }
 
-            for(int i = 0; i < drone.getInventory().getSizeInventory(); i++) {
-                ItemStack stack = drone.getInventory().getStackInSlot(i);
+            for(int i = 0; i < drone.getInv().getSizeInventory(); i++) {
+                ItemStack stack = drone.getInv().getStackInSlot(i);
                 if(stack != null && stack.stackSize <= 0) {
-                    drone.getInventory().setInventorySlotContents(i, null);
+                    drone.getInv().setInventorySlotContents(i, null);
                 }
             }
 
-            ItemStack remainder = IOHelper.insert(drone.getInventory(), craftedStack, 0, false);
+            ItemStack remainder = IOHelper.insert(drone.getInv(), craftedStack, EnumFacing.UP, false);
             if(remainder != null) {
-                Vec3 pos = drone.getPosition();
+                Vec3 pos = drone.getDronePos();
                 EntityItem item = new EntityItem(drone.getWorld(), pos.xCoord, pos.yCoord, pos.zCoord, remainder);
                 drone.getWorld().spawnEntityInWorld(item);
             }

@@ -4,7 +4,7 @@ import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.util.ResourceLocation;
 import pneumaticCraft.common.ai.DroneEntityAIInventoryExport;
 import pneumaticCraft.common.ai.IDroneBase;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
 
 public class ProgWidgetInventoryExport extends ProgWidgetInventoryBase{
@@ -25,6 +25,6 @@ public class ProgWidgetInventoryExport extends ProgWidgetInventoryBase{
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.PROPULSION_PLANT_DAMAGE;
+        return ItemPlastic.PROPULSION_PLANT_DAMAGE;
     }
 }

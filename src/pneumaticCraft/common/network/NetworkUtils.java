@@ -1,10 +1,14 @@
 package pneumaticCraft.common.network;
 
+import io.netty.buffer.ByteBuf;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.BlockPos;
 import net.minecraftforge.fluids.FluidTank;
 import pneumaticCraft.common.inventory.SyncedField;
 import pneumaticCraft.common.inventory.SyncedField.SyncedBoolean;
@@ -172,5 +176,13 @@ public class NetworkUtils{
         if(ItemStack.class.isAssignableFrom(field.getType())) return new SyncedItemStack(te, field);
         if(FluidTank.class.isAssignableFrom(field.getType())) return new SyncedFluidTank(te, field);
         return null;
+    }
+
+    public static void writeBlockPos(ByteBuf buf, BlockPos pos){
+        new PacketBuffer(buf).writeBlockPos(pos);
+    }
+
+    public static BlockPos readBlockPos(ByteBuf buf){
+        return new PacketBuffer(buf).readBlockPos();
     }
 }

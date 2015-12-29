@@ -1,8 +1,9 @@
 package pneumaticCraft.api;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * DO NOT IMPLEMENT THIS CLASS YOURSELF! Use PneumaticRegistry.getInstance().getHeatExchangerLogic() !
@@ -23,13 +24,11 @@ public interface IHeatExchangerLogic{
      * You don't _have_ to call this method, if this heat exchanger is not connected to the outside world (for example the heat of the liquid
      * plastic in the Plastic Mixer).
      * @param world
-     * @param x
-     * @param y
-     * @param z
+     * @param pos
      * @param validSides Can be left out as vararg, meaning every side can be connected. When one or more sides are specified this will constrain
      * this heat exchanger to only connect to other heat exchangers on these sides.
      */
-    public void initializeAsHull(World world, int x, int y, int z, ForgeDirection... validSides);
+    public void initializeAsHull(World world, BlockPos pos, EnumFacing... validSides);
 
     /**
      * When called, this will connect these two heat exchangers. You should only call this on one of the two heat exchangers. 

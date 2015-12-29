@@ -6,7 +6,7 @@ import java.util.List;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 import org.lwjgl.opengl.GL11;
 
@@ -28,7 +28,7 @@ public class GuiRefinery extends GuiPneumaticContainerBase<TileEntityRefinery>{
     public void initGui(){
         super.initGui();
 
-        addWidget(new WidgetTemperature(-1, guiLeft + 32, guiTop + 20, 273, 673, te.getHeatExchangerLogic(ForgeDirection.UNKNOWN), 373));
+        addWidget(new WidgetTemperature(-1, guiLeft + 32, guiTop + 20, 273, 673, te.getHeatExchangerLogic(null), 373));
 
         addWidget(new WidgetTank(-1, guiLeft + 8, guiTop + 13, te.getOilTank()));
 
@@ -39,8 +39,8 @@ public class GuiRefinery extends GuiPneumaticContainerBase<TileEntityRefinery>{
         refineries = new ArrayList<TileEntityRefinery>();
         refineries.add(te);
         TileEntityRefinery refinery = te;
-        while(refinery.getTileCache()[ForgeDirection.UP.ordinal()].getTileEntity() instanceof TileEntityRefinery) {
-            refinery = (TileEntityRefinery)refinery.getTileCache()[ForgeDirection.UP.ordinal()].getTileEntity();
+        while(refinery.getTileCache()[EnumFacing.UP.ordinal()].getTileEntity() instanceof TileEntityRefinery) {
+            refinery = (TileEntityRefinery)refinery.getTileCache()[EnumFacing.UP.ordinal()].getTileEntity();
             x += 20;
             y -= 4;
             if(refineries.size() < 4) addWidget(new WidgetTank(-1, x, y, refinery.getOutputTank()));
@@ -81,7 +81,7 @@ public class GuiRefinery extends GuiPneumaticContainerBase<TileEntityRefinery>{
     @Override
     public void addProblems(List<String> curInfo){
         super.addProblems(curInfo);
-        if(te.getHeatExchangerLogic(ForgeDirection.UNKNOWN).getTemperature() < 395) {
+        if(te.getHeatExchangerLogic(null).getTemperature() < 395) {
             curInfo.add("gui.tab.problems.notEnoughHeat");
         }
         if(te.getOilTank().getFluidAmount() < 10) {

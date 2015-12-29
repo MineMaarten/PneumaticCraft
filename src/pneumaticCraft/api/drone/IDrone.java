@@ -6,10 +6,11 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.IFluidTank;
 import pneumaticCraft.api.item.IPressurizable;
 
@@ -25,21 +26,21 @@ public interface IDrone extends IPressurizable{
 
     public IFluidTank getTank();
 
-    public IInventory getInventory();
+    public IInventory getInv();
 
-    public Vec3 getPosition();
+    public Vec3 getDronePos();
 
     public IPathNavigator getPathNavigator();
 
-    public void sendWireframeToClient(int x, int y, int z);
+    public void sendWireframeToClient(BlockPos pos);
 
     public EntityPlayerMP getFakePlayer();
 
-    public boolean isBlockValidPathfindBlock(int x, int y, int z);
+    public boolean isBlockValidPathfindBlock(BlockPos pos);
 
     public void dropItem(ItemStack stack);
 
-    public void setDugBlock(int x, int y, int z);
+    public void setDugBlock(BlockPos pos);
 
     public EntityAITasks getTargetAI();
 
@@ -47,7 +48,7 @@ public interface IDrone extends IPressurizable{
 
     public void setProperty(String key, IExtendedEntityProperties property);
 
-    public void setEmittingRedstone(ForgeDirection orientation, int emittingRedstone);
+    public void setEmittingRedstone(EnumFacing orientation, int emittingRedstone);
 
     public void setName(String string);
 

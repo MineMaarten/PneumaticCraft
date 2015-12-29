@@ -2,7 +2,7 @@ package pneumaticCraft.common.ai;
 
 import java.util.List;
 
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import pneumaticCraft.api.drone.IDrone;
 import pneumaticCraft.common.progwidgets.IProgWidget;
 
@@ -25,5 +25,5 @@ public interface IDroneBase extends IDrone{
 
     public void addDebugEntry(String message);
 
-    public void addDebugEntry(String message, ChunkPosition pos);
+    public void addDebugEntry(String message, BlockPos pos);
 }

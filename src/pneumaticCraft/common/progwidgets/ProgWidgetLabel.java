@@ -3,7 +3,7 @@ package pneumaticCraft.common.progwidgets;
 import java.util.List;
 
 import net.minecraft.util.ResourceLocation;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
 
 public class ProgWidgetLabel extends ProgWidget implements ILabel{
@@ -62,6 +62,6 @@ public class ProgWidgetLabel extends ProgWidget implements ILabel{
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.FLYING_FLOWER_DAMAGE;
+        return ItemPlastic.FLYING_FLOWER_DAMAGE;
     }
 }

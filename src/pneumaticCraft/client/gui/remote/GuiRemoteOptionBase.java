@@ -1,5 +1,7 @@
 package pneumaticCraft.client.gui.remote;
 
+import java.io.IOException;
+
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 import pneumaticCraft.client.gui.GuiPneumaticScreenBase;
@@ -27,7 +29,7 @@ public class GuiRemoteOptionBase<Widget extends ActionWidget> extends GuiPneumat
     }
 
     @Override
-    public void keyTyped(char key, int keyCode){
+    public void keyTyped(char key, int keyCode) throws IOException{
         if(keyCode == 1) {
             onGuiClosed();
             mc.displayGuiScreen(guiRemote);
@@ -81,17 +83,17 @@ public class GuiRemoteOptionBase<Widget extends ActionWidget> extends GuiPneumat
         String valueTooltip = I18n.format("gui.remote.enableValue.tooltip");
 
         xValueField = new WidgetTextFieldNumber(fontRendererObj, guiLeft + 20, guiTop + 185, 38, 10);
-        xValueField.setValue(widget.getEnablingValue().chunkPosX);
+        xValueField.setValue(widget.getEnablingValue().getX());
         xValueField.setTooltip(valueTooltip);
         addWidget(xValueField);
 
         yValueField = new WidgetTextFieldNumber(fontRendererObj, guiLeft + 78, guiTop + 185, 38, 10);
-        yValueField.setValue(widget.getEnablingValue().chunkPosY);
+        yValueField.setValue(widget.getEnablingValue().getY());
         yValueField.setTooltip(valueTooltip);
         addWidget(yValueField);
 
         zValueField = new WidgetTextFieldNumber(fontRendererObj, guiLeft + 136, guiTop + 185, 38, 10);
-        zValueField.setValue(widget.getEnablingValue().chunkPosZ);
+        zValueField.setValue(widget.getEnablingValue().getZ());
         zValueField.setTooltip(valueTooltip);
         addWidget(zValueField);
 

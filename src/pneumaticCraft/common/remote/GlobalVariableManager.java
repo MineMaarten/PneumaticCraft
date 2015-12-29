@@ -8,11 +8,11 @@ import java.util.Set;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * Manages global variables. These are prefixed with '#'.
@@ -21,7 +21,7 @@ public class GlobalVariableManager extends WorldSavedData{
 
     public static final String DATA_KEY = "PneumaticCraftGlobalVariables";
     private static GlobalVariableManager CLIENT_INSTANCE = new GlobalVariableManager(DATA_KEY);
-    private final Map<String, ChunkPosition> globalVars = new HashMap<String, ChunkPosition>();
+    private final Map<String, BlockPos> globalVars = new HashMap<String, BlockPos>();
     private final Map<String, ItemStack> globalItemVars = new HashMap<String, ItemStack>();
     public static World overworld;
 
@@ -51,10 +51,10 @@ public class GlobalVariableManager extends WorldSavedData{
     }
 
     public void set(String varName, int x, int y, int z){
-        set(varName, new ChunkPosition(x, y, z));
+        set(varName, new BlockPos(x, y, z));
     }
 
-    public void set(String varName, ChunkPosition pos){
+    public void set(String varName, BlockPos pos){
         globalVars.put(varName, pos);
         save();
     }
@@ -73,13 +73,13 @@ public class GlobalVariableManager extends WorldSavedData{
     }
 
     public int getInteger(String varName){
-        return getPos(varName).chunkPosX;
+        return getPos(varName).getX();
     }
 
-    public ChunkPosition getPos(String varName){
-        ChunkPosition pos = globalVars.get(varName);
+    public BlockPos getPos(String varName){
+        BlockPos pos = globalVars.get(varName);
         //if(pos != null) Log.info("getting var: " + varName + " set to " + pos.chunkPosX + ", " + pos.chunkPosY + ", " + pos.chunkPosZ);
-        return pos != null ? pos : new ChunkPosition(0, 0, 0);
+        return pos != null ? pos : new BlockPos(0, 0, 0);
     }
 
     public ItemStack getItem(String varName){
@@ -96,7 +96,7 @@ public class GlobalVariableManager extends WorldSavedData{
         NBTTagList list = tag.getTagList("globalVars", 10);
         for(int i = 0; i < list.tagCount(); i++) {
             NBTTagCompound t = list.getCompoundTagAt(i);
-            globalVars.put(t.getString("varName"), new ChunkPosition(t.getInteger("x"), t.getInteger("y"), t.getInteger("z")));
+            globalVars.put(t.getString("varName"), new BlockPos(t.getInteger("x"), t.getInteger("y"), t.getInteger("z")));
         }
 
         readItemVars(tag, globalItemVars);
@@ -114,13 +114,13 @@ public class GlobalVariableManager extends WorldSavedData{
     @Override
     public void writeToNBT(NBTTagCompound tag){
         NBTTagList list = new NBTTagList();
-        for(Map.Entry<String, ChunkPosition> entry : globalVars.entrySet()) {
+        for(Map.Entry<String, BlockPos> entry : globalVars.entrySet()) {
             NBTTagCompound t = new NBTTagCompound();
             t.setString("varName", entry.getKey());
-            ChunkPosition pos = entry.getValue();
-            t.setInteger("x", pos.chunkPosX);
-            t.setInteger("y", pos.chunkPosY);
-            t.setInteger("z", pos.chunkPosZ);
+            BlockPos pos = entry.getValue();
+            t.setInteger("x", pos.getX());
+            t.setInteger("y", pos.getY());
+            t.setInteger("z", pos.getZ());
             list.appendTag(t);
         }
         tag.setTag("globalVars", list);

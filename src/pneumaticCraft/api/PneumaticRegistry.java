@@ -7,6 +7,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
@@ -21,6 +22,7 @@ import pneumaticCraft.api.recipe.IPneumaticRecipeRegistry;
 import pneumaticCraft.api.tileentity.HeatBehaviour;
 
 /**
+ * TODO 1.8 change API structure
  * This class can be used to register and access various things to and from the mod.
  */
 public class PneumaticRegistry{
@@ -91,47 +93,39 @@ public class PneumaticRegistry{
          * 
          * When the Drone is tried to be caught by a player (by wrenching it), the drone will only the drop the items that it was delivering (or
          * none if it dropped those items already). The Drone itself never will be dropped.
-         * 
-         * @param x
-         * @param y
-         * @param z
+         * @param pos
          * @param deliveredStacks stacks that are delivered by the drone. When no stacks, or more than 65 stacks are given, this will generate an IllegalArgumentException.
+         * 
          * @return the drone. You can use this to set a custom name for example (defaults to "Amadron Delivery Drone").
          */
-        public EntityCreature deliverItemsAmazonStyle(World world, int x, int y, int z, ItemStack... deliveredStacks);
+        public EntityCreature deliverItemsAmazonStyle(World world, BlockPos pos, ItemStack... deliveredStacks);
 
         /**
          * The opposite of deliverItemsAmazonStyle. Will retrieve the queried items from an inventory at the specified location.
          * @param world
-         * @param x
-         * @param y
-         * @param z
+         * @param pos
          * @param queriedStacks
          * @return
          */
-        public EntityCreature retrieveItemsAmazonStyle(World world, int x, int y, int z, ItemStack... queriedStacks);
+        public EntityCreature retrieveItemsAmazonStyle(World world, BlockPos pos, ItemStack... queriedStacks);
 
         /**
          * Similar to deliverItemsAmazonStyle, but with Fluids. Will spawn in a Drone that will fill an IFluidHandler at the given x,y,z. If the fluid doesn't fit or there isn't a IFluidHandler, the fluid is lost.
          * @param world
-         * @param x
-         * @param y
-         * @param z
+         * @param pos
          * @param deliveredFluid
          * @return
          */
-        public EntityCreature deliverFluidAmazonStyle(World world, int x, int y, int z, FluidStack deliveredFluid);
+        public EntityCreature deliverFluidAmazonStyle(World world, BlockPos pos, FluidStack deliveredFluid);
 
         /**
          * The opposite of deliverFluidAmazonStyle. Will retrieve the queried fluid from an IFluidHandler at the specified location.
          * @param world
-         * @param x
-         * @param y
-         * @param z
+         * @param pos
          * @param queriedStacks
          * @return
          */
-        public EntityCreature retrieveFluidAmazonStyle(World world, int x, int y, int z, FluidStack queriedFluid);
+        public EntityCreature retrieveFluidAmazonStyle(World world, BlockPos pos, FluidStack queriedFluid);
 
         /*
          * --------------- Items -------------------
@@ -170,15 +164,13 @@ public class PneumaticRegistry{
          * Returns the amount of Security Stations that disallow interaction with the given coordinate for the given player.
          * Usually you'd disallow interaction when this returns > 0.
          * @param world
-         * @param x
-         * @param y
-         * @param z
+         * @param pos
          * @param player
          * @param showRangeLines When true, any Security Station that prevents interaction will show the line grid (server --> client update is handled internally).
          * @return The amount of Security Stations that disallow interaction for the given player.
          * This method throws an IllegalArgumentException when tried to be called from the client side!
          */
-        public int getProtectingSecurityStations(World world, int x, int y, int z, EntityPlayer player, boolean showRangeLines);
+        public int getProtectingSecurityStations(World world, BlockPos pos, EntityPlayer player, boolean showRangeLines);
 
         /**
          * Use this to register ISimpleBlockRenderHandler render id's of full blocks, those of which should be able to be used for the Pneumatic Door Base camouflage.

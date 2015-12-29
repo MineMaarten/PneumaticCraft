@@ -5,15 +5,15 @@ import java.util.List;
 import java.util.Set;
 
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.util.Rectangle;
 
 import pneumaticCraft.api.universalSensor.IBlockAndCoordinatePollSensor;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockLightLevelSensor implements IBlockAndCoordinatePollSensor{
 
@@ -40,10 +40,10 @@ public class BlockLightLevelSensor implements IBlockAndCoordinatePollSensor{
     }
 
     @Override
-    public int getRedstoneValue(World world, int x, int y, int z, int sensorRange, String textBoxText, Set<ChunkPosition> positions){
+    public int getRedstoneValue(World world, BlockPos pos, int sensorRange, String textBoxText, Set<BlockPos> positions){
         int lightValue = 0;
-        for(ChunkPosition pos : positions) {
-            lightValue = Math.max(lightValue, world.getBlockLightValue(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ));
+        for(BlockPos p : positions) {
+            lightValue = Math.max(lightValue, world.getLight(p));
         }
         return lightValue;
     }

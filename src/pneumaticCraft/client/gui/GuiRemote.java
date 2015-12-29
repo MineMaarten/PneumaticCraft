@@ -2,17 +2,13 @@ package pneumaticCraft.client.gui;
 
 import java.awt.Point;
 
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.item.ItemStack;
 import pneumaticCraft.client.gui.widget.IGuiWidget;
 import pneumaticCraft.common.inventory.ContainerRemote;
 import pneumaticCraft.common.remote.ActionWidget;
 import pneumaticCraft.common.remote.ActionWidgetVariable;
 import pneumaticCraft.common.remote.RemoteLayout;
-import pneumaticCraft.lib.ModIds;
 import pneumaticCraft.lib.Textures;
-import codechicken.nei.VisiblityData;
-import cpw.mods.fml.common.Optional;
 
 public class GuiRemote extends GuiPneumaticContainerBase{
 
@@ -90,11 +86,12 @@ public class GuiRemote extends GuiPneumaticContainerBase{
         }
     }
 
-    @Override
-    @Optional.Method(modid = ModIds.NEI)
-    public VisiblityData modifyVisiblity(GuiContainer gui, VisiblityData currentVisibility){
-        currentVisibility.showNEI = false;
-        return currentVisibility;
-    }
+    /* @Override
+     * TODO NEI dep
+     @Optional.Method(modid = ModIds.NEI)
+     public VisiblityData modifyVisiblity(GuiContainer gui, VisiblityData currentVisibility){
+         currentVisibility.showNEI = false;
+         return currentVisibility;
+     }*/
 
 }

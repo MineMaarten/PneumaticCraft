@@ -1,18 +1,18 @@
 package pneumaticCraft.common.ai;
 
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import pneumaticCraft.common.progwidgets.ProgWidgetForEachCoordinate;
 
 public class DroneAIForEachCoordinate extends DroneAIBlockInteraction<ProgWidgetForEachCoordinate>{
 
-    private ChunkPosition curCoord;
+    private BlockPos curCoord;
 
     public DroneAIForEachCoordinate(IDroneBase drone, ProgWidgetForEachCoordinate widget){
         super(drone, widget);
     }
 
     @Override
-    protected boolean isValidPosition(ChunkPosition pos){
+    protected boolean isValidPosition(BlockPos pos){
         if(widget.isValidPosition(pos)) {
             curCoord = pos;
             abort();
@@ -21,11 +21,11 @@ public class DroneAIForEachCoordinate extends DroneAIBlockInteraction<ProgWidget
     }
 
     @Override
-    protected boolean doBlockInteraction(ChunkPosition pos, double distToBlock){
+    protected boolean doBlockInteraction(BlockPos pos, double distToBlock){
         return false;
     }
 
-    public ChunkPosition getCurCoord(){
+    public BlockPos getCurCoord(){
         return curCoord;
     }
 

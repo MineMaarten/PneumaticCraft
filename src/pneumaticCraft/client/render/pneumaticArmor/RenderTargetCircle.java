@@ -3,6 +3,8 @@ package pneumaticCraft.client.render.pneumaticArmor;
 import java.util.Random;
 
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -37,7 +39,7 @@ public class RenderTargetCircle{
 
     public void render(double size, float partialTicks){
         double renderRotationAngle = oldRotationAngle + (rotationAngle - oldRotationAngle) * partialTicks;
-        Tessellator tessellator = Tessellator.instance;
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
 
         GL11.glPushMatrix();
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
@@ -46,25 +48,25 @@ public class RenderTargetCircle{
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
         GL11.glRotatef((float)renderRotationAngle, 0, 0, 1);
-        tessellator.setNormal(0F, 1F, 0F);
+        GL11.glNormal3f(0F, 1F, 0F); //TODO 1.8 test
         for(int j = 0; j < 2; j++) {
-            tessellator.startDrawing(GL11.GL_TRIANGLE_STRIP);
+            wr.begin(GL11.GL_TRIANGLE_STRIP, DefaultVertexFormats.POSITION);
             for(int i = 0; i < PneumaticCraftUtils.circlePoints / 4; i++) {
-                tessellator.addVertex(PneumaticCraftUtils.cos[i] * size, PneumaticCraftUtils.sin[i] * size, 0);
-                tessellator.addVertex(PneumaticCraftUtils.cos[i] * (size + 0.1D), PneumaticCraftUtils.sin[i] * (size + 0.1D), 0);
+                wr.pos(PneumaticCraftUtils.cos[i] * size, PneumaticCraftUtils.sin[i] * size, 0).endVertex();
+                wr.pos(PneumaticCraftUtils.cos[i] * (size + 0.1D), PneumaticCraftUtils.sin[i] * (size + 0.1D), 0).endVertex();
             }
-            tessellator.draw();
+            Tessellator.getInstance().draw();
 
             if(renderAsTagged) {
                 GL11.glColor4d(1, 0, 0, 1);
-                tessellator.startDrawing(GL11.GL_LINE_LOOP);
+                wr.begin(GL11.GL_LINE_LOOP, DefaultVertexFormats.POSITION);
                 for(int i = 0; i < PneumaticCraftUtils.circlePoints / 4; i++) {
-                    tessellator.addVertex(PneumaticCraftUtils.cos[i] * size, PneumaticCraftUtils.sin[i] * size, 0);
+                    wr.pos(PneumaticCraftUtils.cos[i] * size, PneumaticCraftUtils.sin[i] * size, 0).endVertex();
                 }
                 for(int i = PneumaticCraftUtils.circlePoints / 4 - 1; i >= 0; i--) {
-                    tessellator.addVertex(PneumaticCraftUtils.cos[i] * (size + 0.1D), PneumaticCraftUtils.sin[i] * (size + 0.1D), 0);
+                    wr.pos(PneumaticCraftUtils.cos[i] * (size + 0.1D), PneumaticCraftUtils.sin[i] * (size + 0.1D), 0).endVertex();
                 }
-                tessellator.draw();
+                Tessellator.getInstance().draw();
                 GL11.glColor4d(1, 1, 0, 0.5);
             }
 

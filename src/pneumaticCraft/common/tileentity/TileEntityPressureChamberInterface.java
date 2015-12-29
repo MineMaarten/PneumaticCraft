@@ -1,6 +1,7 @@
 package pneumaticCraft.common.tileentity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.creativetab.CreativeTabs;
@@ -12,8 +13,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Facing;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.FilteredSynced;
@@ -72,8 +73,8 @@ public class TileEntityPressureChamberInterface extends TileEntityPressureChambe
     }
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
 
         boolean wasOpeningI = isOpeningI;
         boolean wasOpeningO = isOpeningO;
@@ -138,15 +139,15 @@ public class TileEntityPressureChamberInterface extends TileEntityPressureChambe
         }
 
         if(worldObj.isRemote && (wasOpeningI != isOpeningI || wasOpeningO != isOpeningO)) {
-            worldObj.playSound(xCoord + 0.5, yCoord + 0.5, zCoord + 0.5, Sounds.INTERFACE_DOOR, 0.1F, 1.0F, true);
+            worldObj.playSound(getPos().getX() + 0.5, getPos().getY() + 0.5, getPos().getZ() + 0.5, Sounds.INTERFACE_DOOR, 0.1F, 1.0F, true);
         }
     }
 
     private void exportToInventory(){
-        ForgeDirection facing = ForgeDirection.getOrientation(getBlockMetadata());
-        TileEntity te = worldObj.getTileEntity(xCoord + facing.offsetX, yCoord + facing.offsetY, zCoord + facing.offsetZ);
+        EnumFacing facing = getRotation();
+        TileEntity te = worldObj.getTileEntity(getPos().offset(facing));
         if(te != null) {
-            ForgeDirection side = facing.getOpposite();
+            EnumFacing side = facing.getOpposite();
             ItemStack leftoverStack = PneumaticCraftUtils.exportStackToInventory(te, inventory[0], side);
             if(leftoverStack == null || leftoverStack.stackSize == 0) {
                 inventory[0] = null;
@@ -162,7 +163,7 @@ public class TileEntityPressureChamberInterface extends TileEntityPressureChambe
                 if(maxAllowedItems > 0) {
                     if(inventory[0] != null) maxAllowedItems = Math.min(maxAllowedItems, chamberStack.getMaxStackSize() - inventory[0].stackSize);
                     int transferedItems = Math.min(chamberStack.stackSize, maxAllowedItems);
-                    core.addAir((core.currentAir > 0 ? -1 : 1) * transferedItems * PneumaticValues.USAGE_CHAMBER_INTERFACE, ForgeDirection.UNKNOWN);
+                    core.addAir((core.currentAir > 0 ? -1 : 1) * transferedItems * PneumaticValues.USAGE_CHAMBER_INTERFACE, null);
                     ItemStack transferedStack = chamberStack.copy().splitStack(transferedItems);
                     ItemStack insertedStack = transferedStack.copy();
                     if(inventory[0] != null) insertedStack.stackSize += inventory[0].stackSize;
@@ -176,15 +177,13 @@ public class TileEntityPressureChamberInterface extends TileEntityPressureChambe
     private void outputInChamber(){
         TileEntityPressureChamberValve valve = getCore();
         if(valve != null) {
-            for(int i = 0; i < 6; i++) {
-                int x = xCoord + Facing.offsetsXForSide[i];
-                int y = yCoord + Facing.offsetsYForSide[i];
-                int z = zCoord + Facing.offsetsZForSide[i];
-                if(valve.isCoordWithinChamber(worldObj, x, y, z)) {
+            for(EnumFacing d : EnumFacing.VALUES) {
+                BlockPos neighborPos = getPos().offset(d);
+                if(valve.isCoordWithinChamber(worldObj, neighborPos)) {
                     enoughAir = Math.abs(valve.currentAir) > inventory[0].stackSize * PneumaticValues.USAGE_CHAMBER_INTERFACE;
                     if(enoughAir) {
-                        valve.addAir((valve.currentAir > 0 ? -1 : 1) * inventory[0].stackSize * PneumaticValues.USAGE_CHAMBER_INTERFACE, ForgeDirection.UNKNOWN);
-                        EntityItem item = new EntityItem(worldObj, x + 0.5D, y + 0.5D, z + 0.5D, inventory[0].copy());
+                        valve.addAir((valve.currentAir > 0 ? -1 : 1) * inventory[0].stackSize * PneumaticValues.USAGE_CHAMBER_INTERFACE, null);
+                        EntityItem item = new EntityItem(worldObj, neighborPos.getX() + 0.5, neighborPos.getY() + 0.5, neighborPos.getZ() + 0.5D, inventory[0].copy());
                         worldObj.spawnEntityInWorld(item);
                         setInventorySlotContents(0, null);
                         break;
@@ -203,18 +202,18 @@ public class TileEntityPressureChamberInterface extends TileEntityPressureChambe
     // figure out whether the Interface is exporting or importing.
     private EnumInterfaceMode getInterfaceMode(TileEntityPressureChamberValve core){
         if(core != null) {
-            boolean xMid = xCoord != core.multiBlockX && xCoord != core.multiBlockX + core.multiBlockSize - 1;
-            boolean yMid = yCoord != core.multiBlockY && yCoord != core.multiBlockY + core.multiBlockSize - 1;
-            boolean zMid = zCoord != core.multiBlockZ && zCoord != core.multiBlockZ + core.multiBlockSize - 1;
+            boolean xMid = getPos().getX() != core.multiBlockX && getPos().getX() != core.multiBlockX + core.multiBlockSize - 1;
+            boolean yMid = getPos().getY() != core.multiBlockY && getPos().getY() != core.multiBlockY + core.multiBlockSize - 1;
+            boolean zMid = getPos().getZ() != core.multiBlockZ && getPos().getZ() != core.multiBlockZ + core.multiBlockSize - 1;
             int meta = getBlockMetadata();
             if(xMid && yMid && meta == 2 || xMid && zMid && meta == 0 || yMid && zMid && meta == 4) {
-                if(xCoord == core.multiBlockX || yCoord == core.multiBlockY || zCoord == core.multiBlockZ) {
+                if(getPos().getX() == core.multiBlockX || getPos().getY() == core.multiBlockY || getPos().getZ() == core.multiBlockZ) {
                     return EnumInterfaceMode.EXPORT;
                 } else {
                     return EnumInterfaceMode.IMPORT;
                 }
             } else if(xMid && yMid && meta == 3 || xMid && zMid && meta == 1 || yMid && zMid && meta == 5) {
-                if(xCoord == core.multiBlockX || yCoord == core.multiBlockY || zCoord == core.multiBlockZ) {
+                if(getPos().getX() == core.multiBlockX || getPos().getY() == core.multiBlockY || getPos().getZ() == core.multiBlockZ) {
                     return EnumInterfaceMode.IMPORT;
                 } else {
                     return EnumInterfaceMode.EXPORT;
@@ -242,19 +241,6 @@ public class TileEntityPressureChamberInterface extends TileEntityPressureChambe
 
     public boolean hasEnoughPressure(){
         return enoughAir;
-    }
-
-    @Override
-    public boolean redstoneAllows(){
-        switch(redstoneMode){
-            case 0:
-                return true;
-            case 1:
-                return worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord);
-            case 2:
-                return !worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord);
-        }
-        return false;
     }
 
     // INVENTORY METHODS- && NBT
@@ -342,7 +328,7 @@ public class TileEntityPressureChamberInterface extends TileEntityPressureChambe
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
             setInventorySlotContents(slot, null);
@@ -367,15 +353,15 @@ public class TileEntityPressureChamberInterface extends TileEntityPressureChambe
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
         return Blockss.pressureChamberInterface.getUnlocalizedName();
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
 
     @Override
     public boolean isItemValidForSlot(int slot, ItemStack iStack){
@@ -418,22 +404,27 @@ public class TileEntityPressureChamberInterface extends TileEntityPressureChambe
 
     @Override
     public boolean isGuiUseableByPlayer(EntityPlayer par1EntityPlayer){
-        return worldObj.getTileEntity(xCoord, yCoord, zCoord) != this ? false : par1EntityPlayer.getDistanceSq(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D) <= 64.0D;
+        return worldObj.getTileEntity(getPos()) != this ? false : par1EntityPlayer.getDistanceSq(getPos().getX() + 0.5D, getPos().getY() + 0.5D, getPos().getZ() + 0.5D) <= 64.0D;
     }
 
     @Override
-    public int[] getAccessibleSlotsFromSide(int var1){
+    public int[] getSlotsForFace(EnumFacing var1){
         return new int[]{0};
     }
 
     @Override
-    public boolean canInsertItem(int i, ItemStack itemstack, int j){
-        return inputProgress == MAX_PROGRESS && j == getRotation().getOpposite().ordinal() && redstoneAllows();
+    public boolean canInsertItem(int i, ItemStack itemstack, EnumFacing j){
+        return inputProgress == MAX_PROGRESS && j == getRotation().getOpposite() && redstoneAllows();
     }
 
     @Override
-    public boolean canExtractItem(int i, ItemStack itemstack, int j){
-        return outputProgress == MAX_PROGRESS && j == getRotation().ordinal();
+    public boolean canExtractItem(int i, ItemStack itemstack, EnumFacing j){
+        return outputProgress == MAX_PROGRESS && j == getRotation();
+    }
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
     }
 
     @Override
@@ -469,7 +460,7 @@ public class TileEntityPressureChamberInterface extends TileEntityPressureChambe
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 

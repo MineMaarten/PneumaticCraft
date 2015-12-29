@@ -1,6 +1,7 @@
 package pneumaticCraft.common.tileentity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -11,7 +12,9 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,16 +29,14 @@ import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.thirdparty.ModInteractionUtils;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.PneumaticValues;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IInventory, IRedstoneControlled{
     @GuiSynced
     private final TileEntityPneumaticBase vacuumHandler = new TileEntityPneumaticBase(5, 7, PneumaticValues.VOLUME_VACUUM_PUMP){
         @Override
-        public List<Pair<ForgeDirection, IAirHandler>> getConnectedPneumatics(){
-            List<Pair<ForgeDirection, IAirHandler>> teList = new ArrayList<Pair<ForgeDirection, IAirHandler>>();
-            ForgeDirection direction = getVacuumSide();
+        public List<Pair<EnumFacing, IAirHandler>> getConnectedPneumatics(){
+            List<Pair<EnumFacing, IAirHandler>> teList = new ArrayList<Pair<EnumFacing, IAirHandler>>();
+            EnumFacing direction = getVacuumSide();
             TileEntity te = getTileCache()[direction.ordinal()].getTileEntity();
             IPneumaticMachine machine = ModInteractionUtils.getInstance().getMachine(te);
             if(machine != null && isConnectedTo(direction) && machine.isConnectedTo(direction.getOpposite())) {
@@ -75,23 +76,22 @@ public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IIn
     }
 
     @Override
-    public boolean isConnectedTo(ForgeDirection side){
-        int meta = worldObj.getBlockMetadata(xCoord, yCoord, zCoord);
-        switch(ForgeDirection.getOrientation(meta)){
+    public boolean isConnectedTo(EnumFacing side){
+        switch(getRotation()){
             case NORTH:
             case SOUTH:
-                return side == ForgeDirection.NORTH || side == ForgeDirection.SOUTH;
+                return side == EnumFacing.NORTH || side == EnumFacing.SOUTH;
             case EAST:
             case WEST:
-                return side == ForgeDirection.EAST || side == ForgeDirection.WEST;
+                return side == EnumFacing.EAST || side == EnumFacing.WEST;
         }
         return false;
     }
 
     @Override
-    public List<Pair<ForgeDirection, IAirHandler>> getConnectedPneumatics(){
-        List<Pair<ForgeDirection, IAirHandler>> teList = new ArrayList<Pair<ForgeDirection, IAirHandler>>();
-        ForgeDirection direction = getInputSide();
+    public List<Pair<EnumFacing, IAirHandler>> getConnectedPneumatics(){
+        List<Pair<EnumFacing, IAirHandler>> teList = new ArrayList<Pair<EnumFacing, IAirHandler>>();
+        EnumFacing direction = getInputSide();
         TileEntity te = getTileCache()[direction.ordinal()].getTileEntity();
         IPneumaticMachine machine = ModInteractionUtils.getInstance().getMachine(te);
         if(machine != null && isConnectedTo(direction) && machine.isConnectedTo(direction.getOpposite())) {
@@ -123,16 +123,16 @@ public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IIn
         super.setVolume(newVolume);
     }
 
-    public ForgeDirection getInputSide(){
+    public EnumFacing getInputSide(){
         return getVacuumSide().getOpposite();
     }
 
-    public ForgeDirection getVacuumSide(){
-        return ForgeDirection.getOrientation(getBlockMetadata());
+    public EnumFacing getVacuumSide(){
+        return getRotation();
     }
 
     @Override
-    public float getPressure(ForgeDirection sideRequested){
+    public float getPressure(EnumFacing sideRequested){
         if(sideRequested == getVacuumSide()) {
             return vacuumHandler.getPressure(sideRequested);
         } else {
@@ -141,12 +141,12 @@ public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IIn
     }
 
     @Override
-    public int getCurrentAir(ForgeDirection sideRequested){
+    public int getCurrentAir(EnumFacing sideRequested){
         return sideRequested == getInputSide() ? currentAir : vacuumHandler.getCurrentAir(sideRequested);
     }
 
     @Override
-    public void updateEntity(){
+    public void update(){
         if(!worldObj.isRemote && turnTimer >= 0) turnTimer--;
         if(!worldObj.isRemote && getPressure(getInputSide()) > PneumaticValues.MIN_PRESSURE_VACUUM_PUMP && getPressure(getVacuumSide()) > -1F && redstoneAllows()) {
             if(!worldObj.isRemote && turnTimer == -1) {
@@ -169,9 +169,9 @@ public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IIn
             rotation += rotationSpeed;
         }
 
-        super.updateEntity();
+        super.update();
         vacuumHandler.updateEntityI();
-        List<Pair<ForgeDirection, IAirHandler>> teList = getConnectedPneumatics();
+        List<Pair<EnumFacing, IAirHandler>> teList = getConnectedPneumatics();
         if(teList.size() == 0) airLeak(getInputSide());
         teList = vacuumHandler.getConnectedPneumatics();
         if(teList.size() == 0) vacuumHandler.airLeak(getVacuumSide());
@@ -179,7 +179,7 @@ public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IIn
     }
 
     @Override
-    public void addAir(int amount, ForgeDirection side){
+    public void addAir(int amount, EnumFacing side){
         if(side == getInputSide()) {
             currentAir += amount;
         } else {
@@ -190,7 +190,7 @@ public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IIn
     @Override
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox(){
-        return AxisAlignedBB.getBoundingBox(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 1, zCoord + 1);
+        return new AxisAlignedBB(getPos().getX(), getPos().getY(), getPos().getZ(), getPos().getX() + 1, getPos().getY() + 1, getPos().getZ() + 1);
     }
 
     @Override
@@ -241,19 +241,6 @@ public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IIn
     }
 
     @Override
-    public boolean redstoneAllows(){
-        switch(redstoneMode){
-            case 0:
-                return true;
-            case 1:
-                return worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord);
-            case 2:
-                return !worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord);
-        }
-        return false;
-    }
-
-    @Override
     public void printManometerMessage(EntityPlayer player, List<String> curInfo){
         curInfo.add(EnumChatFormatting.GREEN + "Input pressure: " + PneumaticCraftUtils.roundNumberTo(getPressure(getInputSide()), 1) + " bar. Vacuum pressure: " + PneumaticCraftUtils.roundNumberTo(getPressure(getVacuumSide()), 1) + " bar.");
     }
@@ -298,7 +285,7 @@ public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IIn
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
 
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
@@ -323,7 +310,7 @@ public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IIn
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
 
         return Blockss.vacuumPump.getUnlocalizedName();
     }
@@ -334,7 +321,7 @@ public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IIn
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 
@@ -344,10 +331,15 @@ public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IIn
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
+    }
 
     @Override
     public int getRedstoneMode(){

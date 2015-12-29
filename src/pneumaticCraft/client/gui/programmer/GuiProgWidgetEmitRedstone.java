@@ -1,6 +1,6 @@
 package pneumaticCraft.client.gui.programmer;
 
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.widget.GuiCheckBox;
 import pneumaticCraft.client.gui.widget.IGuiWidget;
@@ -18,7 +18,7 @@ public class GuiProgWidgetEmitRedstone extends GuiProgWidgetOptionBase<ProgWidge
         super.initGui();
 
         for(int i = 0; i < 6; i++) {
-            String sideName = PneumaticCraftUtils.getOrientationName(ForgeDirection.getOrientation(i));
+            String sideName = PneumaticCraftUtils.getOrientationName(EnumFacing.getFront(i));
             GuiCheckBox checkBox = new GuiCheckBox(i, guiLeft + 4, guiTop + 30 + i * 12, 0xFF000000, sideName);
             checkBox.checked = widget.getSides()[i];
             addWidget(checkBox);

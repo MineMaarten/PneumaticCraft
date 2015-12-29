@@ -7,15 +7,12 @@ import java.util.Map;
 import java.util.Random;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockGrass;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.monster.EntityMob;
-import net.minecraft.entity.monster.EntitySlime;
-import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -23,25 +20,29 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.StatCollector;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.living.EnderTeleportEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
-import net.minecraftforge.event.entity.player.BonemealEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.api.block.IPneumaticWrenchable;
 import pneumaticCraft.api.client.pneumaticHelmet.EntityTrackEvent;
@@ -57,15 +58,12 @@ import pneumaticCraft.client.render.pneumaticArmor.hacking.HackableHandler;
 import pneumaticCraft.client.render.pneumaticArmor.hacking.entity.HackableEnderman;
 import pneumaticCraft.common.ai.IDroneBase;
 import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.block.pneumaticPlants.BlockPlants;
-import pneumaticCraft.common.block.pneumaticPlants.BlockPneumaticPlantBase;
 import pneumaticCraft.common.config.Config;
 import pneumaticCraft.common.entity.EntityProgrammableController;
 import pneumaticCraft.common.entity.living.EntityDrone;
 import pneumaticCraft.common.fluid.Fluids;
 import pneumaticCraft.common.item.ItemAmadronTablet;
 import pneumaticCraft.common.item.ItemMachineUpgrade;
-import pneumaticCraft.common.item.ItemPlasticPlants;
 import pneumaticCraft.common.item.ItemPneumaticArmor;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.NetworkHandler;
@@ -77,15 +75,9 @@ import pneumaticCraft.common.recipes.AmadronOfferManager;
 import pneumaticCraft.common.remote.GlobalVariableManager;
 import pneumaticCraft.common.thirdparty.ModInteractionUtilImplementation;
 import pneumaticCraft.common.tileentity.TileEntityProgrammer;
+import pneumaticCraft.common.util.FluidUtils;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.TileEntityConstants;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.common.eventhandler.EventPriority;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class EventHandlerPneumaticCraft{
 
@@ -109,7 +101,7 @@ public class EventHandlerPneumaticCraft{
                         }
                         ((EntityItem)entity).setEntityItemStack(newStack);
                         iterator.remove();
-                        for(EntityPlayer player : (List<EntityPlayer>)event.world.getEntitiesWithinAABB(EntityPlayer.class, AxisAlignedBB.getBoundingBox(event.explosion.explosionX - 32, event.explosion.explosionY - 32, event.explosion.explosionZ - 32, event.explosion.explosionX + 32, event.explosion.explosionY + 32, event.explosion.explosionZ + 32))) {
+                        for(EntityPlayer player : event.world.getEntitiesWithinAABB(EntityPlayer.class, new AxisAlignedBB(event.explosion.getPosition().xCoord - 32, event.explosion.getPosition().yCoord - 32, event.explosion.getPosition().zCoord - 32, event.explosion.getPosition().xCoord + 32, event.explosion.getPosition().yCoord + 32, event.explosion.getPosition().zCoord + 32))) {
                             AchievementHandler.giveAchievement(player, newStack);
                         }
                     }
@@ -121,7 +113,6 @@ public class EventHandlerPneumaticCraft{
     @SubscribeEvent
     public void onEntityConstruction(EntityConstructing event){
         HackableHandler.onEntityConstruction(event.entity);
-        ItemPlasticPlants.onEntityConstruction(event.entity);
         if(event.entity instanceof IDroneBase) {
             MinecraftForge.EVENT_BUS.post(new DroneConstructingEvent((IDroneBase)event.entity));
         }
@@ -132,69 +123,17 @@ public class EventHandlerPneumaticCraft{
         if(event.item != null && event.entityPlayer != null) AchievementHandler.giveAchievement(event.entityPlayer, event.item.getEntityItem());
     }
 
-    // add slime seeds as mobdrop to Slimes.
-    @SubscribeEvent
-    public void onEntityDeath(LivingDeathEvent event){
-        if(!event.entity.worldObj.isRemote) {
-            if(Config.enableSlimeSeedDrop && event.entity instanceof EntitySlime && Math.random() < 0.1D) {
-                ItemPlasticPlants.markInactive(event.entity.entityDropItem(new ItemStack(Itemss.plasticPlant, 1, ItemPlasticPlants.SLIME_PLANT_DAMAGE), 0));
-            } else if(Config.enableCreeperSeedDrop && event.entity instanceof EntityCreeper && Math.random() < 0.05D) {
-                if(Config.enableCreeperDropExplosion) event.entity.worldObj.createExplosion(event.entity, event.entity.posX, event.entity.posY + event.entityLiving.height / 2D, event.entity.posZ, 0.5F, event.entity.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing"));
-                int dropAmount = (int)(Math.random() * 3D) + 1;
-                for(int i = 0; i < dropAmount; i++)
-                    ItemPlasticPlants.markInactive(event.entity.entityDropItem(new ItemStack(Itemss.plasticPlant, 1, ItemPlasticPlants.CREEPER_PLANT_DAMAGE), 0));
-            } else if(Config.enableSquidSeedDrop && event.entity instanceof EntitySquid && Math.random() < 0.05D) {
-                ItemPlasticPlants.markInactive(event.entity.entityDropItem(new ItemStack(Itemss.plasticPlant, 1, ItemPlasticPlants.SQUID_PLANT_DAMAGE), 0));
-            }
-        }
-    }
-
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onEnderTeleport(EnderTeleportEvent event){
         if(!HackableEnderman.onEndermanTeleport(event.entity)) {
             event.setCanceled(true);
-        } else {
-            if(Config.enableEndermanSeedDrop && Math.random() < 0.05D) {
-                if(!event.entity.worldObj.isRemote) ItemPlasticPlants.markInactive(event.entity.entityDropItem(new ItemStack(Itemss.plasticPlant, 1, ItemPlasticPlants.ENDER_PLANT_DAMAGE), 0));
-            }
-        }
-    }
-
-    // bone meal event, to grow plants
-    @SubscribeEvent
-    public void onFertilization(BonemealEvent event){
-        if(event.world.isRemote) return; // why would we want to handle this on the client-side?
-
-        if(event.block == Blocks.netherrack || event.block == Blocks.end_stone || event.block.canSustainPlant(event.world, event.x, event.y, event.z, ForgeDirection.UP, Blocks.red_flower)) { // can bonemeal Biomes O' Plenty grass, etc.    			    			
-            boolean onGrass = event.block instanceof BlockGrass;
-            if(onGrass && Config.includePlantsOnBonemeal || !onGrass && Config.allowDirtBonemealing) {
-                // we'll try to spawn plants in a 5x5 area which is centered on the block that has been bonemealed
-                for(int x = event.x - 2; x < event.x + 3; x++) {
-                    for(int z = event.z - 2; z < event.z + 3; z++) {
-                        if(event.world.isAirBlock(x, event.y + 1, z)) {
-                            if(event.world.rand.nextInt(8) == 1) { // increase .nextInt(x) to lower the chances of spawning a plant
-                                BlockPneumaticPlantBase trySpawn = BlockPlants.allPlants.get(event.world.rand.nextInt(BlockPlants.allPlants.size() - 1)); // select a random plant    							
-                                if(trySpawn.canPlantGrowOnThisBlock(event.world.getBlock(x, event.y, z), event.world, x, event.y, z)) { // make sure that the plant we selected can grow on the soil
-                                    event.world.setBlock(x, event.y + (trySpawn.isPlantHanging() ? -1 : 1), z, trySpawn);
-                                }
-                            }
-                        }
-                    }
-
-                    /*
-                     * vanilla mechanics will spawn flowers etc. when bonemeal is used on grass,
-                     * so we cannot set Result.ALLOW in this case because it would stop event-propagation
-                     */
-                    if(!onGrass) event.setResult(Result.ALLOW);
-                }
-            }
         }
     }
 
     @SubscribeEvent
     public void FillBucket(FillBucketEvent event){
         MovingObjectPosition p = event.target;
-        if(event.current == null || event.current.getItem() != Items.bucket || event.world.getBlockMetadata(p.blockX, p.blockY, p.blockZ) != 0) return;
+        if(event.current == null || event.current.getItem() != Items.bucket || !FluidUtils.isSourceBlock(event.world, p.getBlockPos())) return;
         ItemStack result = attemptFill(event.world, event.target);
         if(result != null) {
             event.result = result;
@@ -204,10 +143,10 @@ public class EventHandlerPneumaticCraft{
     }
 
     private ItemStack attemptFill(World world, MovingObjectPosition p){
-        Block id = world.getBlock(p.blockX, p.blockY, p.blockZ);
+        Block id = world.getBlockState(p.getBlockPos()).getBlock();
         for(Map.Entry<Block, Item> entry : Fluids.fluidBlockToBucketMap.entrySet()) {
             if(id == entry.getKey()) {
-                world.setBlock(p.blockX, p.blockY, p.blockZ, Blocks.air);
+                world.setBlockToAir(p.getBlockPos());
                 return new ItemStack(entry.getValue());
             }
         }
@@ -216,13 +155,15 @@ public class EventHandlerPneumaticCraft{
 
     @SubscribeEvent
     public void onPlayerClick(PlayerInteractEvent event){
-        Block interactedBlock = event.world.getBlock(event.x, event.y, event.z);
+        if(event.action == PlayerInteractEvent.Action.RIGHT_CLICK_AIR) return;
+        IBlockState interactedBlockState = event.world.getBlockState(event.pos);
+        Block interactedBlock = interactedBlockState.getBlock();
         if(!event.entityPlayer.capabilities.isCreativeMode || !event.entityPlayer.canCommandSenderUseCommand(2, "securityStation")) {
-            if(event.action != PlayerInteractEvent.Action.RIGHT_CLICK_AIR && event.world != null && !event.world.isRemote) {
+            if(event.world != null && !event.world.isRemote) {
                 if(interactedBlock != Blockss.securityStation || event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) {
                     ItemStack heldItem = event.entityPlayer.getCurrentEquippedItem();
-                    boolean tryingToPlaceSecurityStation = heldItem != null && heldItem.getItem() instanceof ItemBlock && ((ItemBlock)heldItem.getItem()).field_150939_a == Blockss.securityStation;
-                    int blockingStations = PneumaticCraftUtils.getProtectingSecurityStations(event.entity.worldObj, event.x, event.y, event.z, event.entityPlayer, true, tryingToPlaceSecurityStation);
+                    boolean tryingToPlaceSecurityStation = heldItem != null && heldItem.getItem() instanceof ItemBlock && ((ItemBlock)heldItem.getItem()).getBlock() == Blockss.securityStation;
+                    int blockingStations = PneumaticCraftUtils.getProtectingSecurityStations(event.entity.worldObj, event.pos, event.entityPlayer, true, tryingToPlaceSecurityStation);
                     if(blockingStations > 0) {
                         event.setCanceled(true);
                         event.entityPlayer.addChatComponentMessage(new ChatComponentText(StatCollector.translateToLocalFormatted(tryingToPlaceSecurityStation ? "message.securityStation.stationPlacementPrevented" : "message.securityStation.accessPrevented", blockingStations)));
@@ -236,16 +177,16 @@ public class EventHandlerPneumaticCraft{
          */
         if(!event.isCanceled() && event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK && !event.world.isRemote) {
             if(event.entityPlayer.isSneaking() && (interactedBlock == Blockss.elevatorCaller || interactedBlock == Blockss.chargingStation)) {
-                event.setCanceled(interactedBlock.onBlockActivated(event.world, event.x, event.y, event.z, event.entityPlayer, event.face, 0, 0, 0));
+                event.setCanceled(interactedBlock.onBlockActivated(event.world, event.pos, interactedBlockState, event.entityPlayer, event.face, 0, 0, 0));
             } else if(event.entityPlayer.getCurrentEquippedItem() != null && ModInteractionUtilImplementation.getInstance().isModdedWrench(event.entityPlayer.getCurrentEquippedItem().getItem())) {
                 if(interactedBlock instanceof IPneumaticWrenchable) {
-                    ((IPneumaticWrenchable)interactedBlock).rotateBlock(event.world, event.entityPlayer, event.x, event.y, event.z, ForgeDirection.getOrientation(event.face));
+                    ((IPneumaticWrenchable)interactedBlock).rotateBlock(event.world, event.entityPlayer, event.pos, event.face);
                 }
             }
         }
 
         if(!event.isCanceled() && interactedBlock == Blocks.cobblestone) {
-            AchievementHandler.checkFor9x9(event.entityPlayer, event.x, event.y, event.z);
+            AchievementHandler.checkFor9x9(event.entityPlayer, event.pos);
         }
     }
 
@@ -257,7 +198,7 @@ public class EventHandlerPneumaticCraft{
     public void onMobTargetSet(LivingSetAttackTargetEvent event){
         if(event.entity instanceof EntityCreature) {
             if(!event.entity.worldObj.isRemote) {
-                NetworkHandler.sendToAllAround(new PacketSetMobTarget((EntityCreature)event.entity, event.target), new NetworkRegistry.TargetPoint(event.entity.worldObj.provider.dimensionId, event.entity.posX, event.entity.posY, event.entity.posZ, TileEntityConstants.PACKET_UPDATE_DISTANCE));
+                NetworkHandler.sendToAllAround(new PacketSetMobTarget((EntityCreature)event.entity, event.target), new NetworkRegistry.TargetPoint(event.entity.worldObj.provider.getDimensionId(), event.entity.posX, event.entity.posY, event.entity.posZ, TileEntityConstants.PACKET_UPDATE_DISTANCE));
             } else {
                 warnPlayerIfNecessary(event);
             }
@@ -288,7 +229,7 @@ public class EventHandlerPneumaticCraft{
     @SubscribeEvent
     public void onWorldLoad(WorldEvent.Load event){
         if(!event.world.isRemote) {
-            if(event.world.provider.dimensionId == 0) {
+            if(event.world.provider.getDimensionId() == 0) {
                 GlobalVariableManager.overworld = event.world;
                 event.world.loadItemData(GlobalVariableManager.class, GlobalVariableManager.DATA_KEY);
             }
@@ -314,14 +255,14 @@ public class EventHandlerPneumaticCraft{
                 int times = drone.getOfferTimes();
                 if(offer.getInput() instanceof ItemStack) {
                     int requiredCount = ((ItemStack)offer.getInput()).stackSize * times;
-                    for(int i = 0; i < drone.getInventory().getSizeInventory(); i++) {
-                        if(drone.getInventory().getStackInSlot(i) != null) {
-                            requiredCount -= drone.getInventory().getStackInSlot(i).stackSize;
+                    for(int i = 0; i < drone.getInv().getSizeInventory(); i++) {
+                        if(drone.getInv().getStackInSlot(i) != null) {
+                            requiredCount -= drone.getInv().getStackInSlot(i).stackSize;
                         }
                     }
                     if(requiredCount <= 0) {
-                        for(int i = 0; i < drone.getInventory().getSizeInventory(); i++) {
-                            drone.getInventory().setInventorySlotContents(i, null);
+                        for(int i = 0; i < drone.getInv().getSizeInventory(); i++) {
+                            drone.getInv().setInventorySlotContents(i, null);
                         }
                         MinecraftForge.EVENT_BUS.post(new AmadronRetrievalEvent(event.drone));
                     }
@@ -368,18 +309,18 @@ public class EventHandlerPneumaticCraft{
                     stacks.add(stack);
                     producedItems -= stack.stackSize;
                 }
-                ChunkPosition pos = ItemAmadronTablet.getItemProvidingLocation(usedTablet);
+                BlockPos pos = ItemAmadronTablet.getItemProvidingLocation(usedTablet);
                 if(pos != null) {
                     World world = PneumaticCraftUtils.getWorldForDimension(ItemAmadronTablet.getItemProvidingDimension(usedTablet));
-                    PneumaticRegistry.getInstance().deliverItemsAmazonStyle(world, pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, stacks.toArray(new ItemStack[stacks.size()]));
+                    PneumaticRegistry.getInstance().deliverItemsAmazonStyle(world, pos, stacks.toArray(new ItemStack[stacks.size()]));
                 }
             } else {
                 FluidStack offeringFluid = ((FluidStack)offer.getOutput()).copy();
                 offeringFluid.amount *= drone.getOfferTimes();
-                ChunkPosition pos = ItemAmadronTablet.getLiquidProvidingLocation(usedTablet);
+                BlockPos pos = ItemAmadronTablet.getLiquidProvidingLocation(usedTablet);
                 if(pos != null) {
                     World world = PneumaticCraftUtils.getWorldForDimension(ItemAmadronTablet.getLiquidProvidingDimension(usedTablet));
-                    PneumaticRegistry.getInstance().deliverFluidAmazonStyle(world, pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, offeringFluid);
+                    PneumaticRegistry.getInstance().deliverFluidAmazonStyle(world, pos, offeringFluid);
                 }
             }
         }

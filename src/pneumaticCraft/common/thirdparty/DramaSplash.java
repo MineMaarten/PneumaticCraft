@@ -2,9 +2,9 @@ package pneumaticCraft.common.thirdparty;
 
 import java.lang.reflect.Method;
 
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import pneumaticCraft.lib.Log;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.relauncher.ReflectionHelper;
 
 /*
  * Implementation for Aphorism Tiles using Mr_okushama's DramaSplash mod

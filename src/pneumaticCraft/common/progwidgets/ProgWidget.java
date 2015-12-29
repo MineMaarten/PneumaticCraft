@@ -10,12 +10,17 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.lwjgl.opengl.GL11;
@@ -23,9 +28,6 @@ import org.lwjgl.opengl.GL11;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.common.ai.IDroneBase;
 import pneumaticCraft.lib.Log;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public abstract class ProgWidget implements IProgWidget{
     private int x, y;
@@ -48,7 +50,7 @@ public abstract class ProgWidget implements IProgWidget{
         if(getExtraStringInfo() != null) {
             GL11.glPushMatrix();
             GL11.glScaled(0.5, 0.5, 0.5);
-            FontRenderer fr = Minecraft.getMinecraft().fontRenderer;
+            FontRenderer fr = Minecraft.getMinecraft().fontRendererObj;
             String[] splittedInfo = WordUtils.wrap(getExtraStringInfo(), 40).split(System.getProperty("line.separator"));
             for(int i = 0; i < splittedInfo.length; i++) {
                 int stringLength = fr.getStringWidth(splittedInfo[i]);
@@ -143,13 +145,13 @@ public abstract class ProgWidget implements IProgWidget{
         FMLClientHandler.instance().getClient().getTextureManager().bindTexture(getTexture());
         int width = getWidth() + (getParameters() != null && getParameters().length > 0 ? 10 : 0);
         int height = getHeight() + (hasStepOutput() ? 10 : 0);
-        Tessellator t = Tessellator.instance;
-        t.startDrawingQuads();
-        t.addVertexWithUV(0, 0, 0, 0, 0);
-        t.addVertexWithUV(0, height, 0, 0, 1);
-        t.addVertexWithUV(width, height, 0, 1, 1);
-        t.addVertexWithUV(width, 0, 0, 1, 0);
-        t.draw();
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+        wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+        wr.pos(0, 0, 0).tex(0, 0).endVertex();
+        wr.pos(0, height, 0).tex(0, 1).endVertex();
+        wr.pos(width, height, 0).tex(1, 1).endVertex();
+        wr.pos(width, 0, 0).tex(1, 0).endVertex();
+        Tessellator.getInstance().draw();
     }
 
     protected abstract ResourceLocation getTexture();

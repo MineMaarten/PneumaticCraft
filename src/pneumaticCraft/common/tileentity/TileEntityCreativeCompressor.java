@@ -2,7 +2,7 @@ package pneumaticCraft.common.tileentity;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.common.network.DescSynced;
 
 public class TileEntityCreativeCompressor extends TileEntityPneumaticBase{
@@ -14,7 +14,7 @@ public class TileEntityCreativeCompressor extends TileEntityPneumaticBase{
     }
 
     @Override
-    public float getPressure(ForgeDirection sideRequested){
+    public float getPressure(EnumFacing sideRequested){
         return pressureSetpoint;
     }
 
@@ -31,11 +31,11 @@ public class TileEntityCreativeCompressor extends TileEntityPneumaticBase{
     }
 
     @Override
-    public void updateEntity(){
+    public void update(){
         if(!worldObj.isRemote) {
             currentAir = (int)(getVolume() * pressureSetpoint);
         }
-        super.updateEntity();
+        super.update();
     }
 
     @Override

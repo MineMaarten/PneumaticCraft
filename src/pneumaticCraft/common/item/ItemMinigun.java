@@ -7,17 +7,17 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.common.NBTUtil;
 import pneumaticCraft.common.minigun.Minigun;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ItemMinigun extends ItemPressurizable{
 
     private final Minigun minigun = new MinigunItem();
 
     public ItemMinigun(int maxAir, int volume){
-        super(null, maxAir, volume);
+        super("minigun", maxAir, volume);
     }
 
     /**

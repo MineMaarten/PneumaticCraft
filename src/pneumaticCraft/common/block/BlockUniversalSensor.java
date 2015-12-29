@@ -3,9 +3,12 @@ package pneumaticCraft.common.block;
 import java.util.List;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import pneumaticCraft.common.tileentity.TileEntityUniversalSensor;
@@ -20,14 +23,14 @@ public class BlockUniversalSensor extends BlockPneumaticCraftModeled{
     }
 
     @Override
-    public void setBlockBoundsBasedOnState(IBlockAccess par1IBlockAccess, int par2, int par3, int par4){
+    public void setBlockBoundsBasedOnState(IBlockAccess par1IBlockAccess, BlockPos pos){
         setBlockBounds(BBConstants.UNIVERSAL_SENSOR_MIN_POS, 0F, BBConstants.UNIVERSAL_SENSOR_MIN_POS, BBConstants.UNIVERSAL_SENSOR_MAX_POS, BBConstants.UNIVERSAL_SENSOR_MAX_POS_TOP, BBConstants.UNIVERSAL_SENSOR_MAX_POS);
     }
 
     @Override
-    public void addCollisionBoxesToList(World world, int i, int j, int k, AxisAlignedBB axisalignedbb, List arraylist, Entity par7Entity){
+    public void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB axisalignedbb, List arraylist, Entity par7Entity){
         setBlockBounds(BBConstants.UNIVERSAL_SENSOR_MIN_POS, BBConstants.UNIVERSAL_SENSOR_MIN_POS, BBConstants.UNIVERSAL_SENSOR_MIN_POS, BBConstants.UNIVERSAL_SENSOR_MAX_POS, BBConstants.UNIVERSAL_SENSOR_MAX_POS_TOP, BBConstants.UNIVERSAL_SENSOR_MAX_POS);
-        super.addCollisionBoxesToList(world, i, j, k, axisalignedbb, arraylist, par7Entity);
+        super.addCollisionBoxesToList(world, pos, state, axisalignedbb, arraylist, par7Entity);
         setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
     }
 
@@ -51,7 +54,7 @@ public class BlockUniversalSensor extends BlockPneumaticCraftModeled{
      * reversed - eg it is 1 (up) when checking the bottom of the block.
      */
     @Override
-    public int isProvidingStrongPower(IBlockAccess par1IBlockAccess, int par2, int par3, int par4, int par5){
+    public int getStrongPower(IBlockAccess par1IBlockAccess, BlockPos pos, IBlockState state, EnumFacing side){
         return 0;
     }
 
@@ -63,9 +66,9 @@ public class BlockUniversalSensor extends BlockPneumaticCraftModeled{
      * when checking the bottom of the block.
      */
     @Override
-    public int isProvidingWeakPower(IBlockAccess par1IBlockAccess, int par2, int par3, int par4, int par5){
+    public int getWeakPower(IBlockAccess par1IBlockAccess, BlockPos pos, IBlockState state, EnumFacing side){
 
-        TileEntity te = par1IBlockAccess.getTileEntity(par2, par3, par4);
+        TileEntity te = par1IBlockAccess.getTileEntity(pos);
         if(te instanceof TileEntityUniversalSensor) {
             TileEntityUniversalSensor teUs = (TileEntityUniversalSensor)te;
             return teUs.redstoneStrength;

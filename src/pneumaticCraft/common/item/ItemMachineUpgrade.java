@@ -3,20 +3,17 @@ package pneumaticCraft.common.item;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.sensor.SensorHandler;
 import pneumaticCraft.lib.ModIds;
-import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ItemMachineUpgrade extends ItemPneumatic{
     public static final int UPGRADES_AMOUNT = 11;
@@ -33,32 +30,8 @@ public class ItemMachineUpgrade extends ItemPneumatic{
     public static final int UPGRADE_SECURITY = 9;
     public static final int UPGRADE_THAUMCRAFT = 10;
 
-    private IIcon[] texture;
-
     public ItemMachineUpgrade(){
         setHasSubtypes(true);
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IIconRegister par1IconRegister){
-        texture = new IIcon[UPGRADES_AMOUNT];
-        texture[0] = par1IconRegister.registerIcon(Textures.ITEM_UPGRADE_VOLUME);
-        texture[1] = par1IconRegister.registerIcon(Textures.ITEM_UPGRADE_DISPENSER);
-        texture[2] = par1IconRegister.registerIcon(Textures.ITEM_UPGRADE_ITEM_LIFE);
-        texture[3] = par1IconRegister.registerIcon(Textures.ITEM_UPGRADE_ENTITY_TRACKER);
-        texture[4] = par1IconRegister.registerIcon(Textures.ITEM_UPGRADE_BLOCK_TRACKER);
-        texture[5] = par1IconRegister.registerIcon(Textures.ITEM_UPGRADE_SPEED);
-        texture[6] = par1IconRegister.registerIcon(Textures.ITEM_UPGRADE_SEARCH);
-        texture[7] = par1IconRegister.registerIcon(Textures.ITEM_UPGRADE_COORDINATE_TRACKER);
-        texture[8] = par1IconRegister.registerIcon(Textures.ITEM_UPGRADE_RANGE);
-        texture[9] = par1IconRegister.registerIcon(Textures.ITEM_UPGRADE_SECURITY);
-        texture[10] = par1IconRegister.registerIcon(Textures.ITEM_UPGRADE_THAUMCRAFT);
-    }
-
-    @Override
-    public IIcon getIconFromDamage(int meta){
-        return texture[meta];
     }
 
     @Override

@@ -2,10 +2,11 @@ package pneumaticCraft.client.render.pneumaticArmor.blockTracker;
 
 import java.util.List;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockEndPortalFrame;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import pneumaticCraft.api.client.pneumaticHelmet.IBlockTrackEntry;
@@ -13,8 +14,8 @@ import pneumaticCraft.api.client.pneumaticHelmet.IBlockTrackEntry;
 public class BlockTrackEntryEndPortalFrame implements IBlockTrackEntry{
 
     @Override
-    public boolean shouldTrackWithThisEntry(IBlockAccess world, int x, int y, int z, Block block, TileEntity te){
-        return block == Blocks.end_portal_frame;
+    public boolean shouldTrackWithThisEntry(IBlockAccess world, BlockPos pos, IBlockState state, TileEntity te){
+        return state.getBlock() == Blocks.end_portal_frame;
     }
 
     @Override
@@ -28,8 +29,8 @@ public class BlockTrackEntryEndPortalFrame implements IBlockTrackEntry{
     }
 
     @Override
-    public void addInformation(World world, int x, int y, int z, TileEntity te, List<String> infoList){
-        if(BlockEndPortalFrame.isEnderEyeInserted(world.getBlockMetadata(x, y, z))) {
+    public void addInformation(World world, BlockPos pos, TileEntity te, List<String> infoList){
+        if(world.getBlockState(pos).getValue(BlockEndPortalFrame.EYE)) {
             infoList.add("Eye inserted");
         } else {
             infoList.add("Eye not inserted");

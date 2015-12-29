@@ -1,10 +1,12 @@
 package pneumaticCraft.common.tileentity;
 
+import java.util.Arrays;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -13,12 +15,12 @@ import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidContainerItem;
 import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.fluids.IFluidTank;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.common.PneumaticCraftAPIHandler;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.lib.PneumaticValues;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityLiquidCompressor extends TileEntityPneumaticBase implements IInventory, IRedstoneControlled,
         IFluidHandler{
@@ -51,8 +53,8 @@ public class TileEntityLiquidCompressor extends TileEntityPneumaticBase implemen
     }
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
 
         if(!worldObj.isRemote) {
             processFluidItem(4, 5);
@@ -72,7 +74,7 @@ public class TileEntityLiquidCompressor extends TileEntityPneumaticBase implemen
                     isProducing = true;
                     internalFuelBuffer -= usageRate;
                     onFuelBurn(usageRate);
-                    addAir((int)(getBaseProduction() * this.getSpeedMultiplierFromUpgrades() * getEfficiency() / 100), ForgeDirection.UNKNOWN);
+                    addAir((int)(getBaseProduction() * this.getSpeedMultiplierFromUpgrades() * getEfficiency() / 100), null);
                 }
             }
         }
@@ -89,9 +91,9 @@ public class TileEntityLiquidCompressor extends TileEntityPneumaticBase implemen
     }
 
     @Override
-    public boolean isConnectedTo(ForgeDirection dir){
-        ForgeDirection orientation = ForgeDirection.getOrientation(worldObj.getBlockMetadata(xCoord, yCoord, zCoord));
-        return orientation == dir || orientation == dir.getOpposite() || dir == ForgeDirection.UP;
+    public boolean isConnectedTo(EnumFacing dir){
+        EnumFacing orientation = getRotation();
+        return orientation == dir || orientation == dir.getOpposite() || dir == EnumFacing.UP;
     }
 
     @Override
@@ -125,7 +127,7 @@ public class TileEntityLiquidCompressor extends TileEntityPneumaticBase implemen
      * Returns the name of the inventory.
      */
     @Override
-    public String getInventoryName(){
+    public String getName(){
         return Blockss.liquidCompressor.getUnlocalizedName();
     }
 
@@ -162,7 +164,7 @@ public class TileEntityLiquidCompressor extends TileEntityPneumaticBase implemen
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
             setInventorySlotContents(slot, null);
@@ -184,7 +186,7 @@ public class TileEntityLiquidCompressor extends TileEntityPneumaticBase implemen
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 
@@ -199,10 +201,15 @@ public class TileEntityLiquidCompressor extends TileEntityPneumaticBase implemen
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
+    }
 
     /*
      * --------------Redstone modes-------------------
@@ -226,33 +233,33 @@ public class TileEntityLiquidCompressor extends TileEntityPneumaticBase implemen
      */
 
     @Override
-    public int fill(ForgeDirection from, FluidStack resource, boolean doFill){
+    public int fill(EnumFacing from, FluidStack resource, boolean doFill){
         if(getFuelValue(resource) == 0) return 0;
         return tank.fill(resource, doFill);
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain){
+    public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain){
         return drain(from, PneumaticValues.MAX_DRAIN, doDrain);
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain){
+    public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain){
         return tank.drain(Math.min(PneumaticValues.MAX_DRAIN, maxDrain), doDrain);
     }
 
     @Override
-    public boolean canFill(ForgeDirection from, Fluid fluid){
+    public boolean canFill(EnumFacing from, Fluid fluid){
         return getFuelValue(fluid) > 0;
     }
 
     @Override
-    public boolean canDrain(ForgeDirection from, Fluid fluid){
+    public boolean canDrain(EnumFacing from, Fluid fluid){
         return true;
     }
 
     @Override
-    public FluidTankInfo[] getTankInfo(ForgeDirection from){
+    public FluidTankInfo[] getTankInfo(EnumFacing from){
         return new FluidTankInfo[]{tank.getInfo()};
     }
 

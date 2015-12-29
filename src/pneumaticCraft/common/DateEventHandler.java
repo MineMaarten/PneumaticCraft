@@ -78,7 +78,7 @@ public class DateEventHandler{
         byte b0 = 0;
         ArrayList arraylist = new ArrayList();
 
-        arraylist.add(Integer.valueOf(ItemDye.field_150922_c[rand.nextInt(16)]));
+        arraylist.add(Integer.valueOf(ItemDye.dyeColors[rand.nextInt(16)]));
 
         if(rand.nextBoolean()) nbttagcompound1.setBoolean("Flicker", true);
 

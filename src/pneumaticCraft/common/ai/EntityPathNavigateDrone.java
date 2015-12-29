@@ -4,12 +4,12 @@ import java.util.Random;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.pathfinding.PathEntity;
-import net.minecraft.pathfinding.PathFinderDrone;
+import net.minecraft.pathfinding.PathFinder;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathPoint;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.ChunkCache;
 import net.minecraft.world.World;
 import pneumaticCraft.api.drone.IPathNavigator;
 import pneumaticCraft.common.entity.living.EntityDrone;
@@ -24,7 +24,7 @@ public class EntityPathNavigateDrone extends PathNavigate implements IPathNaviga
     public boolean pathThroughLiquid;
     private boolean forceTeleport;
     private int teleportCounter = -1;
-    private int telX, telY, telZ;
+    private BlockPos telPos;
     private static final int TELEPORT_TICKS = 120;
 
     public EntityPathNavigateDrone(EntityDrone pathfindingEntity, World par2World){
@@ -38,69 +38,33 @@ public class EntityPathNavigateDrone extends PathNavigate implements IPathNaviga
     }
 
     /**
-     * Returns the path to the given coordinates
-     */
-    @Override
-    public PathEntity getPathToXYZ(double par1, double par3, double par5){
-        return getEntityPathToXYZ(pathfindingEntity, MathHelper.floor_double(par1), (int)par3, MathHelper.floor_double(par5), getPathSearchRange(), false, false, true, false);
-    }
-
-    /**
      * Returns the path to the given EntityLiving
      */
     @Override
     public PathEntity getPathToEntityLiving(Entity par1Entity){
-        return getPathEntityToEntity(pathfindingEntity, par1Entity, getPathSearchRange(), false, false, true, false);
+        BlockPos pos = new BlockPos(par1Entity.posX, par1Entity.getEntityBoundingBox().minY, par1Entity.posZ);
+        return getPathToPos(pos); //TODO 1.8 test
     }
 
     public void setForceTeleport(boolean forceTeleport){
         this.forceTeleport = forceTeleport;
     }
 
-    private PathEntity getPathEntityToEntity(EntityDrone par1Entity, Entity par2Entity, float par3, boolean par4, boolean par5, boolean par6, boolean par7){
-        /* int i = MathHelper.floor_double(par1Entity.posX);
-         int j = MathHelper.floor_double(par1Entity.posY + 1.0D);
-         int k = MathHelper.floor_double(par1Entity.posZ);
-         int l = (int)(par3 + 16.0F);
-         int i1 = i - l;
-         int j1 = j - l;
-         int k1 = k - l;
-         int l1 = i + l;
-         int i2 = j + l;
-         int j2 = k + l;
-         ChunkCache chunkcache = new ChunkCache(par1Entity.worldObj, i1, j1, k1, l1, i2, j2, 0);
-         PathEntity pathentity = new PathFinderDrone(par1Entity, chunkcache, par4, par5, pathThroughLiquid, par7).createEntityPathTo(par1Entity, par2Entity, par3);
-         return pathentity;*/
-        return getEntityPathToXYZ(par1Entity, (int)Math.floor(par2Entity.posX), (int)Math.floor(par2Entity.posY), (int)Math.floor(par2Entity.posZ), par3, par4, par5, par6, par7);
-    }
-
-    public PathEntity getEntityPathToXYZ(EntityDrone par1Entity, int par2, int par3, int par4, float par5, boolean par6, boolean par7, boolean par8, boolean par9){
-        if(!par1Entity.isBlockValidPathfindBlock(par2, par3, par4)) return null;
-        PathEntity pathentity = null;
-        int l = MathHelper.floor_double(par1Entity.posX);
-        int i1 = MathHelper.floor_double(par1Entity.posY);
-        int j1 = MathHelper.floor_double(par1Entity.posZ);
-        if(!forceTeleport || l == par2 && i1 == par3 && j1 == par4) {
-            int k1 = (int)(par5 + 8.0F);
-            int l1 = l - k1;
-            int i2 = i1 - k1;
-            int j2 = j1 - k1;
-            int k2 = l + k1;
-            int l2 = i1 + k1;
-            int i3 = j1 + k1;
-            ChunkCache chunkcache = new ChunkCache(par1Entity.worldObj, l1, i2, j2, k2, l2, i3, 0);
-            pathentity = new PathFinderDrone(par1Entity, chunkcache, par6, par7, pathThroughLiquid, par9).createEntityPathTo(par1Entity, par2, par3, par4, par5);
-            if(pathentity != null) {
-                PathPoint finalPoint = pathentity.getFinalPathPoint();
-                if(finalPoint == null || finalPoint.xCoord != par2 || finalPoint.yCoord != par3 || finalPoint.zCoord != par4) pathentity = null;
+    @Override
+    public PathEntity getPathToPos(BlockPos pos){
+        if(!pathfindingEntity.isBlockValidPathfindBlock(pos)) return null;
+        PathEntity path = null;
+        if(!forceTeleport || pos.equals(new BlockPos(pathfindingEntity))) {
+            path = super.getPathToPos(pos);
+            if(path != null) {
+                PathPoint finalPoint = path.getFinalPathPoint();
+                if(finalPoint == null || !pos.equals(new BlockPos(finalPoint.xCoord, finalPoint.yCoord, finalPoint.zCoord))) path = null;
             }
         }
-        teleportCounter = pathentity != null ? -1 : 0;
-        telX = par2;
-        telY = par3;
-        telZ = par4;
-        par1Entity.setStandby(false);
-        return pathentity;
+        teleportCounter = path != null ? -1 : 0;
+        telPos = pos;
+        pathfindingEntity.setStandby(false);
+        return path;
     }
 
     @Override
@@ -130,16 +94,16 @@ public class EntityPathNavigateDrone extends PathNavigate implements IPathNaviga
                 float f = (rand.nextFloat() - 0.5F) * 0.02F * teleportCounter;
                 float f1 = (rand.nextFloat() - 0.5F) * 0.02F * teleportCounter;
                 float f2 = (rand.nextFloat() - 0.5F) * 0.02F * teleportCounter;
-                NetworkHandler.sendToAllAround(new PacketSpawnParticle("portal", pathfindingEntity.posX, pathfindingEntity.posY, pathfindingEntity.posZ, f, f1, f2), pathfindingEntity.worldObj);
+                NetworkHandler.sendToAllAround(new PacketSpawnParticle(EnumParticleTypes.PORTAL, pathfindingEntity.posX, pathfindingEntity.posY, pathfindingEntity.posZ, f, f1, f2), pathfindingEntity.worldObj);
             }
 
             if(++teleportCounter > TELEPORT_TICKS) {
-                if(pathfindingEntity.isBlockValidPathfindBlock(telX, telY, telZ)) {
+                if(pathfindingEntity.isBlockValidPathfindBlock(telPos)) {
                     teleport();
                 }
                 teleportCounter = -1;
                 setPath(null, 0);
-                pathfindingEntity.getMoveHelper().setMoveTo(telX, telY, telZ, pathfindingEntity.getSpeed());
+                pathfindingEntity.getMoveHelper().setMoveTo(telPos.getX(), telPos.getY(), telPos.getZ(), pathfindingEntity.getSpeed());
                 pathfindingEntity.addAir(null, -10000);
             }
         } else {
@@ -160,16 +124,16 @@ public class EntityPathNavigateDrone extends PathNavigate implements IPathNaviga
             float f = (rand.nextFloat() - 0.5F) * 0.2F;
             float f1 = (rand.nextFloat() - 0.5F) * 0.2F;
             float f2 = (rand.nextFloat() - 0.5F) * 0.2F;
-            double d7 = pathfindingEntity.posX + (telX + 0.5 - pathfindingEntity.posX) * d6 + (rand.nextDouble() - 0.5D) * width * 2.0D;
-            double d8 = pathfindingEntity.posY + (telY - pathfindingEntity.posY) * d6 + rand.nextDouble() * height;
-            double d9 = pathfindingEntity.posZ + (telZ + 0.5 - pathfindingEntity.posZ) * d6 + (rand.nextDouble() - 0.5D) * width * 2.0D;
-            NetworkHandler.sendToAllAround(new PacketSpawnParticle("portal", d7, d8, d9, f, f1, f2), pathfindingEntity.worldObj);
+            double d7 = pathfindingEntity.posX + (telPos.getX() + 0.5 - pathfindingEntity.posX) * d6 + (rand.nextDouble() - 0.5D) * width * 2.0D;
+            double d8 = pathfindingEntity.posY + (telPos.getY() - pathfindingEntity.posY) * d6 + rand.nextDouble() * height;
+            double d9 = pathfindingEntity.posZ + (telPos.getZ() + 0.5 - pathfindingEntity.posZ) * d6 + (rand.nextDouble() - 0.5D) * width * 2.0D;
+            NetworkHandler.sendToAllAround(new PacketSpawnParticle(EnumParticleTypes.PORTAL, d7, d8, d9, f, f1, f2), pathfindingEntity.worldObj);
         }
 
         pathfindingEntity.worldObj.playSoundEffect(pathfindingEntity.posX, pathfindingEntity.posY, pathfindingEntity.posZ, "mob.endermen.portal", 1.0F, 1.0F);
         pathfindingEntity.playSound("mob.endermen.portal", 1.0F, 1.0F);
 
-        pathfindingEntity.setPosition(telX + 0.5, telY + 0.5, telZ + 0.5);
+        pathfindingEntity.setPosition(telPos.getX() + 0.5, telPos.getY() + 0.5, telPos.getZ() + 0.5);
     }
 
     @Override
@@ -190,5 +154,20 @@ public class EntityPathNavigateDrone extends PathNavigate implements IPathNaviga
     @Override
     public boolean isDirectPathBetweenPoints(Vec3 p_75493_1_, Vec3 p_75493_2_, int p_75493_3_, int p_75493_4_, int p_75493_5_){
         return false;
+    }
+
+    @Override
+    protected PathFinder getPathFinder(){
+        return new PathFinder(new NodeProcessorDrone());
+    }
+
+    @Override
+    protected Vec3 getEntityPosition(){
+        return pathfindingEntity.getDronePos();//TODO 1.8 test if offset is necessary.
+    }
+
+    @Override
+    protected boolean canNavigate(){
+        return true;
     }
 }

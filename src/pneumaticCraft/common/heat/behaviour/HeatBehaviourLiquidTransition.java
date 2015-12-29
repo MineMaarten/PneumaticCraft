@@ -7,8 +7,9 @@ import java.util.Stack;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.ChunkPosition;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraftforge.fluids.Fluid;
 import pneumaticCraft.common.heat.HeatExchangerManager;
 import pneumaticCraft.common.network.NetworkHandler;
@@ -65,26 +66,26 @@ public abstract class HeatBehaviourLiquidTransition extends HeatBehaviourLiquid{
     }
 
     protected void transformSourceBlock(Block turningBlockSource, Block turningBlockFlowing){
-        if(FluidUtils.isSourceBlock(getWorld(), getX(), getY(), getZ())) {
-            getWorld().setBlock(getX(), getY(), getZ(), turningBlockSource);
-            onLiquidTransition(getX(), getY(), getZ());
+        if(FluidUtils.isSourceBlock(getWorld(), getPos())) {
+            getWorld().setBlockState(getPos(), turningBlockSource.getDefaultState());
+            onLiquidTransition(getPos());
         } else {
-            Set<ChunkPosition> traversed = new HashSet<ChunkPosition>();
-            Stack<ChunkPosition> pending = new Stack<ChunkPosition>();
-            pending.push(new ChunkPosition(getX(), getY(), getZ()));
+            Set<BlockPos> traversed = new HashSet<BlockPos>();
+            Stack<BlockPos> pending = new Stack<BlockPos>();
+            pending.push(getPos());
             while(!pending.isEmpty()) {
-                ChunkPosition pos = pending.pop();
-                for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
-                    ChunkPosition newPos = new ChunkPosition(pos.chunkPosX + d.offsetX, pos.chunkPosY + d.offsetY, pos.chunkPosZ + d.offsetZ);
-                    Block checkingBlock = getWorld().getBlock(newPos.chunkPosX, newPos.chunkPosY, newPos.chunkPosZ);
-                    if((checkingBlock == getBlock() || getBlock() == Blocks.flowing_water && checkingBlock == Blocks.water || getBlock() == Blocks.flowing_lava && checkingBlock == Blocks.lava) && traversed.add(newPos)) {
-                        if(FluidUtils.isSourceBlock(getWorld(), newPos.chunkPosX, newPos.chunkPosY, newPos.chunkPosZ)) {
-                            getWorld().setBlock(newPos.chunkPosX, newPos.chunkPosY, newPos.chunkPosZ, turningBlockSource);
-                            onLiquidTransition(newPos.chunkPosX, newPos.chunkPosY, newPos.chunkPosZ);
+                BlockPos pos = pending.pop();
+                for(EnumFacing d : EnumFacing.VALUES) {
+                    BlockPos newPos = pos.offset(d);
+                    Block checkingBlock = getWorld().getBlockState(newPos).getBlock();
+                    if((checkingBlock == getBlockState().getBlock() || getBlockState().getBlock() == Blocks.flowing_water && checkingBlock == Blocks.water || getBlockState().getBlock() == Blocks.flowing_lava && checkingBlock == Blocks.lava) && traversed.add(newPos)) {
+                        if(FluidUtils.isSourceBlock(getWorld(), newPos)) {
+                            getWorld().setBlockState(newPos, turningBlockSource.getDefaultState());
+                            onLiquidTransition(newPos);
                             return;
                         } else {
-                            getWorld().setBlock(newPos.chunkPosX, newPos.chunkPosY, newPos.chunkPosZ, turningBlockFlowing);
-                            onLiquidTransition(newPos.chunkPosX, newPos.chunkPosY, newPos.chunkPosZ);
+                            getWorld().setBlockState(newPos, turningBlockFlowing.getDefaultState());
+                            onLiquidTransition(newPos);
                             pending.push(newPos);
                         }
                     }
@@ -93,12 +94,12 @@ public abstract class HeatBehaviourLiquidTransition extends HeatBehaviourLiquid{
         }
     }
 
-    protected void onLiquidTransition(int x, int y, int z){
-        NetworkHandler.sendToAllAround(new PacketPlaySound("random.fizz", x + 0.5, y + 0.5, z + 0.5, 0.5F, 2.6F + (getWorld().rand.nextFloat() - getWorld().rand.nextFloat()) * 0.8F, true), getWorld());
+    protected void onLiquidTransition(BlockPos pos){
+        NetworkHandler.sendToAllAround(new PacketPlaySound("random.fizz", pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 0.5F, 2.6F + (getWorld().rand.nextFloat() - getWorld().rand.nextFloat()) * 0.8F, true), getWorld());
         for(int i = 0; i < 8; i++) {
-            double randX = x + getWorld().rand.nextDouble();
-            double randZ = z + getWorld().rand.nextDouble();
-            NetworkHandler.sendToAllAround(new PacketSpawnParticle("largesmoke", randX, y + 1, randZ, 0, 0, 0), getWorld());
+            double randX = pos.getX() + getWorld().rand.nextDouble();
+            double randZ = pos.getZ() + getWorld().rand.nextDouble();
+            NetworkHandler.sendToAllAround(new PacketSpawnParticle(EnumParticleTypes.SMOKE_LARGE, randX, pos.getY() + 1, randZ, 0, 0, 0), getWorld());
         }
     }
 }

@@ -6,7 +6,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.pathfinding.PathEntity;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableEntity;
 
 public class HackableTameable implements IHackableEntity{
@@ -40,12 +39,12 @@ public class HackableTameable implements IHackableEntity{
     public void onHackFinished(Entity entity, EntityPlayer player){
         EntityTameable tameable = (EntityTameable)entity;
         if(entity.worldObj.isRemote) {
-            tameable.handleHealthUpdate((byte)7);
+            tameable.handleStatusUpdate((byte)7); //TODO 1.8 test
         } else {
-            tameable.setPathToEntity((PathEntity)null);
+            tameable.getNavigator().clearPathEntity();
             tameable.setAttackTarget((EntityLivingBase)null);
             tameable.setHealth(20.0F);
-            tameable.func_152115_b(player.getUniqueID().toString());//setOwner
+            tameable.setOwnerId(player.getUniqueID().toString());
             entity.worldObj.setEntityState(tameable, (byte)7);
             tameable.setTamed(true);
         }

@@ -6,8 +6,8 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemNonDespawning extends ItemPneumatic{
     public ItemNonDespawning(){
@@ -20,7 +20,7 @@ public class ItemNonDespawning extends ItemPneumatic{
 
     @Override
     public boolean onEntityItemUpdate(EntityItem entityItem){
-        if(!entityItem.worldObj.isRemote) entityItem.age--;
+        if(!entityItem.worldObj.isRemote) entityItem.setNoDespawn(); //age-- TODO 1.8 test
         return false;
     }
 

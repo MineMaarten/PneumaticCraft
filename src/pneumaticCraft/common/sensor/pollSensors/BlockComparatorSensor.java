@@ -6,15 +6,15 @@ import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.util.Rectangle;
 
 import pneumaticCraft.api.universalSensor.IBlockAndCoordinatePollSensor;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockComparatorSensor implements IBlockAndCoordinatePollSensor{
 
@@ -41,14 +41,12 @@ public class BlockComparatorSensor implements IBlockAndCoordinatePollSensor{
     }
 
     @Override
-    public int getRedstoneValue(World world, int x, int y, int z, int sensorRange, String textBoxText, Set<ChunkPosition> positions){
+    public int getRedstoneValue(World world, BlockPos pos, int sensorRange, String textBoxText, Set<BlockPos> positions){
         int maxStrength = 0;
-        for(ChunkPosition pos : positions) {
-            Block block = world.getBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+        for(BlockPos p : positions) {
+            Block block = world.getBlockState(p).getBlock();
             if(block.hasComparatorInputOverride()) {
-                for(int i = 0; i < 6; i++) {
-                    maxStrength = Math.max(maxStrength, block.getComparatorInputOverride(world, pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, i));
-                }
+                maxStrength = Math.max(maxStrength, block.getComparatorInputOverride(world, p));
             }
         }
         return maxStrength;

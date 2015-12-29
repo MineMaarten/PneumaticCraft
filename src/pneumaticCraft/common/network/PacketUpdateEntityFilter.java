@@ -3,8 +3,8 @@ package pneumaticCraft.common.network;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import pneumaticCraft.common.NBTUtil;
-import cpw.mods.fml.common.network.ByteBufUtils;
 
 public class PacketUpdateEntityFilter extends AbstractPacket<PacketUpdateEntityFilter>{
 

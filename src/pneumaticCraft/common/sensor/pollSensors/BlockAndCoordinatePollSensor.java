@@ -2,6 +2,7 @@ package pneumaticCraft.common.sensor.pollSensors;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import pneumaticCraft.api.universalSensor.IPollSensorSetting;
 import pneumaticCraft.common.item.Itemss;
@@ -14,8 +15,8 @@ public abstract class BlockAndCoordinatePollSensor implements IPollSensorSetting
     }
 
     @Override
-    public int getRedstoneValue(World world, int x, int y, int z, int sensorRange, String textBoxText){
-        TileEntity te = world.getTileEntity(x, y, z);
+    public int getRedstoneValue(World world, BlockPos pos, int sensorRange, String textBoxText){
+        TileEntity te = world.getTileEntity(pos);
         if(te instanceof TileEntityUniversalSensor) {
             TileEntityUniversalSensor teUs = (TileEntityUniversalSensor)te;
 
@@ -25,8 +26,8 @@ public abstract class BlockAndCoordinatePollSensor implements IPollSensorSetting
                     int toolX = gpsTag.getInteger("x");
                     int toolY = gpsTag.getInteger("y");
                     int toolZ = gpsTag.getInteger("z");
-                    if(Math.abs(toolX - x) <= sensorRange && Math.abs(toolY - y) <= sensorRange && Math.abs(toolZ - z) <= sensorRange) {
-                        return getRedstoneValue(world, x, y, z, sensorRange, textBoxText, toolX, toolY, toolZ);
+                    if(Math.abs(toolX - pos.getX()) <= sensorRange && Math.abs(toolY - pos.getY()) <= sensorRange && Math.abs(toolZ - pos.getZ()) <= sensorRange) {
+                        return getRedstoneValue(world, pos, sensorRange, textBoxText, new BlockPos(toolX, toolY, toolZ));
                     }
                 }
             }
@@ -34,6 +35,6 @@ public abstract class BlockAndCoordinatePollSensor implements IPollSensorSetting
         return 0;
     }
 
-    public abstract int getRedstoneValue(World world, int x, int y, int z, int sensorRange, String textBoxText, int toolX, int toolY, int toolZ);
+    public abstract int getRedstoneValue(World world, BlockPos pos, int sensorRange, String textBoxText, BlockPos toolPos);
 
 }

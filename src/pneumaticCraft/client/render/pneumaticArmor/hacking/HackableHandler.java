@@ -22,9 +22,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
+import net.minecraftforge.fml.relauncher.Side;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableBlock;
@@ -58,7 +60,6 @@ import pneumaticCraft.common.PneumaticCraftAPIHandler;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.util.WorldAndCoord;
 import pneumaticCraft.lib.Log;
-import cpw.mods.fml.relauncher.Side;
 
 public class HackableHandler{
     private final Map<Entity, IHackableEntity> trackedHackableEntities = new HashMap<Entity, IHackableEntity>();
@@ -81,7 +82,12 @@ public class HackableHandler{
         PneumaticRegistry.getInstance().addHackable(Blocks.lever, HackableLever.class);
         PneumaticRegistry.getInstance().addHackable(Blocks.stone_button, HackableButton.class);
         PneumaticRegistry.getInstance().addHackable(Blocks.wooden_button, HackableButton.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.wooden_door, HackableDoor.class);
+        PneumaticRegistry.getInstance().addHackable(Blocks.oak_door, HackableDoor.class);
+        PneumaticRegistry.getInstance().addHackable(Blocks.spruce_door, HackableDoor.class);
+        PneumaticRegistry.getInstance().addHackable(Blocks.birch_door, HackableDoor.class);
+        PneumaticRegistry.getInstance().addHackable(Blocks.jungle_door, HackableDoor.class);
+        PneumaticRegistry.getInstance().addHackable(Blocks.acacia_door, HackableDoor.class);
+        PneumaticRegistry.getInstance().addHackable(Blocks.dark_oak_door, HackableDoor.class);
         PneumaticRegistry.getInstance().addHackable(Blocks.tripwire_hook, HackableTripwire.class);
         PneumaticRegistry.getInstance().addHackable(Blocks.dispenser, HackableDispenser.class);
         PneumaticRegistry.getInstance().addHackable(Blocks.dropper, HackableDispenser.class);
@@ -135,27 +141,27 @@ public class HackableHandler{
     }
 
     public static IHackableBlock getHackableForCoord(WorldAndCoord coord, EntityPlayer player){
-        return getHackableForCoord(coord.world, coord.x, coord.y, coord.z, player);
+        return getHackableForCoord(coord.world, coord.pos, player);
     }
 
-    public static IHackableBlock getHackableForCoord(IBlockAccess world, int x, int y, int z, EntityPlayer player){
+    public static IHackableBlock getHackableForCoord(IBlockAccess world, BlockPos pos, EntityPlayer player){
         //clean up the map
         Iterator<Map.Entry<WorldAndCoord, IHackableBlock>> iterator = getInstance().trackedHackableBlocks.entrySet().iterator();
         while(iterator.hasNext()) {
             Map.Entry<WorldAndCoord, IHackableBlock> entry = iterator.next();
             Class<? extends IHackableBlock> hackableBlockClazz = PneumaticCraftAPIHandler.getInstance().hackableBlocks.get(entry.getKey().getBlock());
-            if(hackableBlockClazz != entry.getValue().getClass() || !entry.getValue().canHack(entry.getKey().world, entry.getKey().x, entry.getKey().y, entry.getKey().z, player) && !isInDisplayCooldown(entry.getValue(), entry.getKey().world, entry.getKey().x, entry.getKey().y, entry.getKey().z, player)) iterator.remove();
+            if(hackableBlockClazz != entry.getValue().getClass() || !entry.getValue().canHack(entry.getKey().world, entry.getKey().pos, player) && !isInDisplayCooldown(entry.getValue(), entry.getKey().world, entry.getKey().pos, player)) iterator.remove();
         }
 
-        Block block = world.getBlock(x, y, z);
-        if(block instanceof IHackableBlock && ((IHackableBlock)block).canHack(world, x, y, z, player)) return (IHackableBlock)block;
-        IHackableBlock hackable = getInstance().trackedHackableBlocks.get(new WorldAndCoord(world, x, y, z));
+        Block block = world.getBlockState(pos).getBlock();
+        if(block instanceof IHackableBlock && ((IHackableBlock)block).canHack(world, pos, player)) return (IHackableBlock)block;
+        IHackableBlock hackable = getInstance().trackedHackableBlocks.get(new WorldAndCoord(world, pos));
         if(hackable == null) {
             if(!PneumaticCraftAPIHandler.getInstance().hackableBlocks.containsKey(block)) return null;
             try {
                 hackable = PneumaticCraftAPIHandler.getInstance().hackableBlocks.get(block).newInstance();
-                if(hackable.canHack(world, x, y, z, player)) {
-                    getInstance().trackedHackableBlocks.put(new WorldAndCoord(world, x, y, z), hackable);
+                if(hackable.canHack(world, pos, player)) {
+                    getInstance().trackedHackableBlocks.put(new WorldAndCoord(world, pos), hackable);
                 } else {
                     hackable = null;
                 }
@@ -167,10 +173,10 @@ public class HackableHandler{
         return hackable;
     }
 
-    private static boolean isInDisplayCooldown(IHackableBlock hackableBlock, IBlockAccess world, int x, int y, int z, EntityPlayer player){
+    private static boolean isInDisplayCooldown(IHackableBlock hackableBlock, IBlockAccess world, BlockPos pos, EntityPlayer player){
         if(player.worldObj.isRemote) {
-            RenderBlockTarget target = HUDHandler.instance().getSpecificRenderer(BlockTrackUpgradeHandler.class).getTargetForCoord(x, y, z);
-            int requiredHackTime = hackableBlock.getHackTime(world, x, y, z, player);
+            RenderBlockTarget target = HUDHandler.instance().getSpecificRenderer(BlockTrackUpgradeHandler.class).getTargetForCoord(pos);
+            int requiredHackTime = hackableBlock.getHackTime(world, pos, player);
             return target != null && target.getHackTime() >= requiredHackTime && target.getHackTime() <= requiredHackTime + 20;
         } else {
             return false;

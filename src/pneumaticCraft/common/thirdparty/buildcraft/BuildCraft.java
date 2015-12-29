@@ -1,13 +1,13 @@
 package pneumaticCraft.common.thirdparty.buildcraft;
 
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.thirdparty.IThirdParty;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.common.util.PneumaticCraftUtils.EnumBuildcraftModule;
 import pneumaticCraft.lib.Names;
-import cpw.mods.fml.common.registry.GameRegistry;
 
 public class BuildCraft implements IThirdParty{
 

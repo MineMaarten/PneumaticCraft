@@ -4,7 +4,7 @@ import java.util.List;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -44,12 +44,12 @@ public interface IAirHandler extends IManoMeasurable{
      * It automatically detects if it needs to release air (when under pressure), suck air (when in vacuum) or do nothing.
      * @param side
      */
-    public void airLeak(ForgeDirection side);
+    public void airLeak(EnumFacing side);
 
     /**
      * Returns a list of all the connecting pneumatics. It takes sides in account.
      */
-    public List<Pair<ForgeDirection, IAirHandler>> getConnectedPneumatics();
+    public List<Pair<EnumFacing, IAirHandler>> getConnectedPneumatics();
 
     /**
      * Adds air to the tank of the given side of this TE. It also updates clients where needed (when they have a GUI opened).
@@ -58,9 +58,9 @@ public interface IAirHandler extends IManoMeasurable{
      * @param side
      */
     @Deprecated
-    public void addAir(float amount, ForgeDirection side);
+    public void addAir(float amount, EnumFacing side);
 
-    public void addAir(int amount, ForgeDirection side);
+    public void addAir(int amount, EnumFacing side);
 
     /**
      * Sets the volume of this TE's air tank. When the volume decreases the pressure will remain the same, meaning air will
@@ -82,14 +82,14 @@ public interface IAirHandler extends IManoMeasurable{
      */
     public float getMaxPressure();
 
-    public float getPressure(ForgeDirection sideRequested);
+    public float getPressure(EnumFacing sideRequested);
 
     /**
      * Returns the amount of air (that has a relation to the pressure: air = pressure * volume)
      * @param sideRequested
      * @return
      */
-    public int getCurrentAir(ForgeDirection sideRequested);
+    public int getCurrentAir(EnumFacing sideRequested);
 
     /**
      * When your TileEntity is implementing IInventory and has slots that accept PneumaticCraft upgrades, register these slots

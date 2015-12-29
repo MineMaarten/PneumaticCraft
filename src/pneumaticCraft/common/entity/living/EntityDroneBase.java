@@ -1,11 +1,11 @@
 package pneumaticCraft.common.entity.living;
 
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.render.RenderLaser;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public abstract class EntityDroneBase extends EntityCreature{
     public float oldPropRotation;
@@ -20,14 +20,14 @@ public abstract class EntityDroneBase extends EntityCreature{
     }
 
     public void renderExtras(double x, double y, double z, float partialTicks){
-        ChunkPosition diggingPos = getDugBlock();
+        BlockPos diggingPos = getDugBlock();
         if(diggingPos != null) {
             if(digLaser == null) {
                 int color = 0xFF0000;
 
                 digLaser = new RenderLaser(color);
             }
-            digLaser.render(partialTicks, 0, getLaserOffsetY(), 0, diggingPos.chunkPosX + 0.5 - posX, diggingPos.chunkPosY + 0.45 - posY, diggingPos.chunkPosZ + 0.5 - posZ);
+            digLaser.render(partialTicks, 0, getLaserOffsetY(), 0, diggingPos.getX() + 0.5 - posX, diggingPos.getY() + 0.45 - posY, diggingPos.getZ() + 0.5 - posZ);
         }
     }
 
@@ -47,6 +47,6 @@ public abstract class EntityDroneBase extends EntityCreature{
         return true;
     }
 
-    protected abstract ChunkPosition getDugBlock();
+    protected abstract BlockPos getDugBlock();
 
 }

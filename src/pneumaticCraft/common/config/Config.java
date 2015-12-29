@@ -7,24 +7,18 @@ import java.util.List;
 
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import pneumaticCraft.PneumaticCraft;
-import pneumaticCraft.common.item.ItemPlasticPlants;
 import pneumaticCraft.lib.Log;
 import pneumaticCraft.lib.Names;
-import cpw.mods.fml.client.event.ConfigChangedEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class Config{
     public static Configuration config;
 
     public static int villagerMechanicID;
 
-    public static boolean[] configPlantFullGrownEffect = new boolean[16];
-    public static double[] configPlantGenerationChance = new double[16];
-    public static boolean includePlantsOnBonemeal, allowDirtBonemealing;
-
     public static double oilGenerationChance;
-    public static boolean shouldDisplayChangeNotification;
     public static boolean stopDroneAI;
     public static boolean disableKeroseneLampFakeAirBlock;
 
@@ -46,22 +40,16 @@ public class Config{
     public static boolean enableElectricCompressorRecipe;
     public static boolean enablePneumaticGeneratorRecipe;
     public static boolean enablePneumaticPumpRecipe;
-    public static boolean enableCreeperPlantMaceratorRecipe;
-    public static boolean enableHeliumPlantMaceratorRecipe;
-    public static boolean enableFlyingFlowerExtractorRecipe;
-    public static boolean enablePropulsionPlantExtractorRecipe;
 
     public static boolean enableCoalToDiamondsRecipe;
 
     public static boolean enableDroneSuffocationDamage;
-    public static boolean enableCreeperDropExplosion;
-    public static boolean enableSlimeSeedDrop, enableCreeperSeedDrop, enableSquidSeedDrop, enableEndermanSeedDrop;
     public static boolean enableDungeonLoot;
 
     public static float configMinigunDamage;
 
-    public static final String[] CATEGORIES = new String[]{Configuration.CATEGORY_GENERAL, "plant_full-grown_effects", "plant_generation_options", "machine_properties", "advanced", "recipe_enabling", "third_party_enabling"};
-    public static List<String> NO_MC_RESTART_CATS = Arrays.asList(new String[]{"plant_full-grown_effects", "plant_generation_options", "machine_properties"});
+    public static final String[] CATEGORIES = new String[]{Configuration.CATEGORY_GENERAL, "machine_properties", "advanced", "recipe_enabling", "third_party_enabling"};
+    public static List<String> NO_MC_RESTART_CATS = Arrays.asList(new String[]{"machine_properties"});
     private static ISubConfig[] subConfigs = new ISubConfig[]{new AmadronOfferSettings(), AmadronOfferStaticConfig.INSTANCE, new AmadronOfferPeriodicConfig(), new ProgWidgetConfig()};
 
     @SubscribeEvent
@@ -73,9 +61,6 @@ public class Config{
 
     public static void init(File configFile){
         if(configFile != null) {
-            File oldConfig = new File(configFile.getAbsolutePath().replace("PneumaticCraft", "Minemaarten_PneumaticCraft"));//TODO remove legacy.
-            if(oldConfig.exists()) configFile = oldConfig;
-
             config = new Configuration(configFile);
             config.load(); // get the actual data from the file.
 
@@ -92,31 +77,7 @@ public class Config{
             }
         }
 
-        boolean foundConfigWithoutOil = !config.hasKey(Configuration.CATEGORY_GENERAL, "oil_generation_chance");
         oilGenerationChance = config.get(Configuration.CATEGORY_GENERAL, "oil_generation_chance", 15D, "Chance per chunk in percentage to generate an Oil Lake. Set to 0 for no spawns").getDouble();
-
-        config.addCustomCategoryComment("plant_full-grown_effects", "When true, the plant is allowed to execute its full-grown effect. (When false bonemeal still works though)");
-        for(int i = 0; i < 16; i++) {
-            Property prop = config.get("plant_full-grown_effects", ItemPlasticPlants.PLANT_NAMES[i], false);
-            configPlantFullGrownEffect[i] = prop.getBoolean(false);
-            if(foundConfigWithoutOil && configPlantFullGrownEffect[i]) {
-                prop.set(false);
-                configPlantFullGrownEffect[i] = false;
-                shouldDisplayChangeNotification = true;
-            }
-        }
-        config.addCustomCategoryComment("plant_generation_options", "The percentage chance of plant groups to spawn per chunk. 0 for no spawns, 100 for a group for every chunk");
-        for(int i = 0; i < 16; i++) {
-            if(!ItemPlasticPlants.NEEDS_GENERATION[i]) continue;
-            double defaultValue = 0;
-            Property prop = config.get("plant_generation_options", ItemPlasticPlants.PLANT_NAMES[i], defaultValue);
-            configPlantGenerationChance[i] = prop.getDouble() / 100;
-            if(foundConfigWithoutOil && configPlantGenerationChance[i] > 0) {
-                prop.set(0D);
-                configPlantGenerationChance[i] = 0;
-                shouldDisplayChangeNotification = true;
-            }
-        }
 
         Property property = config.get(Configuration.CATEGORY_GENERAL, "Compressed Iron Loss Percentage", 20);
         property.comment = "Loss percentage (on average) of Compressed Iron ingots/blocks when exposed to an explosion.";
@@ -182,38 +143,11 @@ public class Config{
         enableUpdateChecker = config.get(Configuration.CATEGORY_GENERAL, "Enable Update Checker", true).getBoolean(true);
 
         enableDroneSuffocationDamage = config.get(Configuration.CATEGORY_GENERAL, "Enable Drone Suffocation Damage", true).getBoolean(true);
-        enableCreeperDropExplosion = config.getBoolean("Enable Creeper Explosions on seed drop", Configuration.CATEGORY_GENERAL, false, "When true, Creepers when dropping a Creeper Plant Seed will create a tiny explosion.");
-        enableCreeperSeedDrop = config.get(Configuration.CATEGORY_GENERAL, "Enable Creeper Seed Drops", false).getBoolean(true);
-        enableSlimeSeedDrop = config.get(Configuration.CATEGORY_GENERAL, "Enable Slime Seed Drops", false).getBoolean(true);
-        enableEndermanSeedDrop = config.get(Configuration.CATEGORY_GENERAL, "Enable Enderman Seed Drops", false).getBoolean(true);
-        enableSquidSeedDrop = config.get(Configuration.CATEGORY_GENERAL, "Enable Squid Seed Drops", false).getBoolean(true);
-        includePlantsOnBonemeal = config.get(Configuration.CATEGORY_GENERAL, "Include Plastic Plants on bonemealing", false).getBoolean(true);
-        allowDirtBonemealing = config.get(Configuration.CATEGORY_GENERAL, "Allow dirt to be bonemealed for plastic plants", false).getBoolean(true);
-
-        if(foundConfigWithoutOil && (enableCreeperDropExplosion || enableCreeperSeedDrop || enableSlimeSeedDrop || enableEndermanSeedDrop || enableSquidSeedDrop || includePlantsOnBonemeal || allowDirtBonemealing)) {
-            enableCreeperDropExplosion = enableCreeperSeedDrop = enableSlimeSeedDrop = enableEndermanSeedDrop = enableSquidSeedDrop = includePlantsOnBonemeal = allowDirtBonemealing = false;
-            config.get(Configuration.CATEGORY_GENERAL, "Enable Creeper Explosions on seed drop", true, "When true, Creepers when dropping a Creeper Plant Seed will create a tiny explosion.").set(false);
-            config.get(Configuration.CATEGORY_GENERAL, "Enable Creeper Seed Drops", true).set(false);
-            config.get(Configuration.CATEGORY_GENERAL, "Enable Slime Seed Drops", true).set(false);
-            config.get(Configuration.CATEGORY_GENERAL, "Enable Enderman Seed Drops", true).set(false);
-            config.get(Configuration.CATEGORY_GENERAL, "Enable Squid Seed Drops", true).set(false);
-            config.get(Configuration.CATEGORY_GENERAL, "Include Plastic Plants on bonemealing", true).set(false);
-            config.get(Configuration.CATEGORY_GENERAL, "Allow dirt to be bonemealed for plastic plants", true).set(false);
-            shouldDisplayChangeNotification = true;
-        }
-
-        if(shouldDisplayChangeNotification) {
-            Log.warning("Disabled world generation of plants and plant mob drops in the config automatically, oil is turned on as replacement. This is only done once, you can change it as you wish now.");
-        }
 
         enableCoalToDiamondsRecipe = config.get("recipe_enabling", "8 Block of Coal --> 1 Diamond (Pressure Chamber)", true).getBoolean(true);
         enableElectricCompressorRecipe = config.get("recipe_enabling", "Electric Compressor", true).getBoolean(true);
         enablePneumaticGeneratorRecipe = config.get("recipe_enabling", "Pneumatic Generator", true).getBoolean(true);
         enablePneumaticPumpRecipe = config.get("recipe_enabling", "Pneumatic Pump", true).getBoolean(true);
-        enableCreeperPlantMaceratorRecipe = config.get("recipe_enabling", "Creeper Plant Seeds --> Gunpowder (IC2 Macerator)", true).getBoolean(true);
-        enableHeliumPlantMaceratorRecipe = config.get("recipe_enabling", "Helium Plant Seeds --> Glowstone (IC2 Macerator)", true).getBoolean(true);
-        enableFlyingFlowerExtractorRecipe = config.get("recipe_enabling", "Flying Flower Seeds --> Feather (IC2 Extractor)", true).getBoolean(true);
-        enablePropulsionPlantExtractorRecipe = config.get("recipe_enabling", "Propulsion Plant Seeds --> Sugar (IC2 Extractor)", true).getBoolean(true);
 
         PneumaticCraft.proxy.initConfig(config);
 

@@ -4,8 +4,8 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import pneumaticCraft.common.item.Itemss;
-import cpw.mods.fml.common.network.ByteBufUtils;
 
 public class PacketUpdateRemoteLayout extends AbstractPacket<PacketUpdateRemoteLayout>{
 

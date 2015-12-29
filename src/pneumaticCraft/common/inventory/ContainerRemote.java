@@ -10,7 +10,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketSetGlobalVariable;
@@ -19,13 +19,13 @@ import pneumaticCraft.common.remote.TextVariableParser;
 
 public class ContainerRemote extends ContainerPneumaticBase{
     private final List<String> syncedVars;
-    private final ChunkPosition[] lastValues;
+    private final BlockPos[] lastValues;
     public String[] variables = new String[0];
 
     public ContainerRemote(ItemStack remote){
         super(null);
         syncedVars = new ArrayList<String>(getRelevantVariableNames(remote));
-        lastValues = new ChunkPosition[syncedVars.size()];
+        lastValues = new BlockPos[syncedVars.size()];
     }
 
     private static Set<String> getRelevantVariableNames(ItemStack remote){
@@ -49,7 +49,7 @@ public class ContainerRemote extends ContainerPneumaticBase{
     public void detectAndSendChanges(){
         super.detectAndSendChanges();
         for(int i = 0; i < lastValues.length; i++) {
-            ChunkPosition newValue = GlobalVariableManager.getInstance().getPos(syncedVars.get(i));
+            BlockPos newValue = GlobalVariableManager.getInstance().getPos(syncedVars.get(i));
             if(!newValue.equals(lastValues[i])) {
                 lastValues[i] = newValue;
                 for(Object o : crafters) {

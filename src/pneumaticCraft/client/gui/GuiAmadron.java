@@ -42,14 +42,14 @@ public class GuiAmadron extends GuiPneumaticContainerBase{
     public void initGui(){
         super.initGui();
         String amadron = I18n.format("gui.amadron");
-        addLabel(amadron, guiLeft + xSize / 2 - mc.fontRenderer.getStringWidth(amadron) / 2, guiTop + 5);
-        addLabel(I18n.format("gui.search"), guiLeft + 76 - mc.fontRenderer.getStringWidth(I18n.format("gui.search")), guiTop + 41);
+        addLabel(amadron, guiLeft + xSize / 2 - mc.fontRendererObj.getStringWidth(amadron) / 2, guiTop + 5);
+        addLabel(I18n.format("gui.search"), guiLeft + 76 - mc.fontRendererObj.getStringWidth(I18n.format("gui.search")), guiTop + 41);
 
         addInfoTab(I18n.format("gui.tooltip.item.amadronTablet"));
         addAnimatedStat("gui.tab.info.ghostSlotInteraction.title", new ItemStack(Blocks.hopper), 0xFF00AAFF, true).setText("gui.tab.info.ghostSlotInteraction");
         addAnimatedStat("gui.tab.amadron.disclaimer.title", new ItemStack(Items.writable_book), 0xFF0000FF, true).setText("gui.tab.amadron.disclaimer");
 
-        searchBar = new WidgetTextField(mc.fontRenderer, guiLeft + 79, guiTop + 40, 73, mc.fontRenderer.FONT_HEIGHT);
+        searchBar = new WidgetTextField(mc.fontRendererObj, guiLeft + 79, guiTop + 40, 73, mc.fontRendererObj.FONT_HEIGHT);
         addWidget(searchBar);
 
         scrollbar = new WidgetVerticalScrollbar(-1, guiLeft + 156, guiTop + 54, 142);

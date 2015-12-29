@@ -1,26 +1,28 @@
 package pneumaticCraft.client.render.entity;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderEntity;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
 import pneumaticCraft.common.entity.projectile.EntityVortex;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class RenderEntityVortex extends RenderEntity{
 
-    // ModelAirCannon model;
     private static final ResourceLocation texture = new ResourceLocation("pneumaticcraft:textures/items/" + Textures.ITEM_VORTEX + ".png");
 
     public RenderEntityVortex(){
-        // model = new ModelAirCannon();
+        super(Minecraft.getMinecraft().getRenderManager());
     }
 
     public void renderVortex(EntityVortex entity, double x, double y, double z, float var1, float partialTicks){
@@ -57,14 +59,14 @@ public class RenderEntityVortex extends RenderEntity{
      * private void renderGust(Icon icon){ float f3 = icon.getMinU(); float f4 =
      * icon.getMaxU(); float f5 = icon.getMinV(); float f6 = icon.getMaxV();
      * float f7 = 1.0F; float f8 = 0.5F; float f9 = 0.25F; Tessellator
-     * tessellator = Tessellator.instance; tessellator.startDrawingQuads();
+     * tessellator = Tessellator.instance; wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
      * tessellator.setNormal(0.0F, 1.0F, 0.0F);
-     * tessellator.addVertexWithUV((double)(0.0F - f8), (double)(0.0F - f9),
-     * 0.0D, (double)f3, (double)f6); tessellator.addVertexWithUV((double)(f7 -
+     * wr.pos((double)(0.0F - f8), (double)(0.0F - f9),
+     * 0.0D, (double)f3, (double)f6); wr.pos((double)(f7 -
      * f8), (double)(0.0F - f9), 0.0D, (double)f4, (double)f6);
-     * tessellator.addVertexWithUV((double)(f7 - f8), (double)(1.0F - f9), 0.0D,
-     * (double)f4, (double)f5); tessellator.addVertexWithUV((double)(0.0F - f8),
-     * (double)(1.0F - f9), 0.0D, (double)f3, (double)f5); tessellator.draw(); }
+     * wr.pos((double)(f7 - f8), (double)(1.0F - f9), 0.0D,
+     * (double)f4, (double)f5); wr.pos((double)(0.0F - f8),
+     * (double)(1.0F - f9), 0.0D, (double)f3, (double)f5); Tessellator.getInstance().draw(); }
      */
 
     private void renderGust(){
@@ -86,29 +88,29 @@ public class RenderEntityVortex extends RenderEntity{
         GL11.glScalef(f10, f10, f10);
         GL11.glTranslatef(-4.0F, 0.0F, 0.0F);
         GL11.glNormal3f(f10, 0.0F, 0.0F);
-        Tessellator tessellator = Tessellator.instance;
-        tessellator.startDrawingQuads();
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+        wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 
-        tessellator.addVertexWithUV(-7.0D, -2.0D, -2.0D, f6, f8);
-        tessellator.addVertexWithUV(-7.0D, -2.0D, 2.0D, f7, f8);
-        tessellator.addVertexWithUV(-7.0D, 2.0D, 2.0D, f7, f9);
-        tessellator.addVertexWithUV(-7.0D, 2.0D, -2.0D, f6, f9);
+        wr.pos(-7.0D, -2.0D, -2.0D).tex(f6, f8).endVertex();
+        wr.pos(-7.0D, -2.0D, 2.0D).tex(f7, f8).endVertex();
+        wr.pos(-7.0D, 2.0D, 2.0D).tex(f7, f9).endVertex();
+        wr.pos(-7.0D, 2.0D, -2.0D).tex(f6, f9).endVertex();
 
         double start = 0d;
         double end = 1 / 16d;
-        tessellator.addVertexWithUV(-7.0D, -2.0D, -2.0D, start, start);
-        tessellator.addVertexWithUV(-7.0D, -2.0D, 2.0D, start, end);
-        tessellator.addVertexWithUV(-7.0D, 2.0D, 2.0D, end, end);
-        tessellator.addVertexWithUV(-7.0D, 2.0D, -2.0D, end, start);
-        tessellator.draw();
+        wr.pos(-7.0D, -2.0D, -2.0D).tex(start, start).endVertex();
+        wr.pos(-7.0D, -2.0D, 2.0D).tex(start, end).endVertex();
+        wr.pos(-7.0D, 2.0D, 2.0D).tex(end, end).endVertex();
+        wr.pos(-7.0D, 2.0D, -2.0D).tex(end, start).endVertex();
+        Tessellator.getInstance().draw();
         GL11.glNormal3f(-f10, 0.0F, 0.0F);
 
-        tessellator.startDrawingQuads();
-        tessellator.addVertexWithUV(-7.0D, 2.0D, -2.0D, f6, f8);
-        tessellator.addVertexWithUV(-7.0D, 2.0D, 2.0D, f7, f8);
-        tessellator.addVertexWithUV(-7.0D, -2.0D, 2.0D, f7, f9);
-        tessellator.addVertexWithUV(-7.0D, -2.0D, -2.0D, f6, f9);
-        tessellator.draw();
+        wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+        wr.pos(-7.0D, 2.0D, -2.0D).tex(f6, f8).endVertex();
+        wr.pos(-7.0D, 2.0D, 2.0D).tex(f7, f8).endVertex();
+        wr.pos(-7.0D, -2.0D, 2.0D).tex(f7, f9).endVertex();
+        wr.pos(-7.0D, -2.0D, -2.0D).tex(f6, f9).endVertex();
+        Tessellator.getInstance().draw();
 
     }
 

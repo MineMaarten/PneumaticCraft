@@ -1,5 +1,6 @@
 package pneumaticCraft.client.gui.programmer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -7,8 +8,9 @@ import java.util.Set;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import pneumaticCraft.client.gui.GuiButtonSpecial;
 import pneumaticCraft.client.gui.GuiInventorySearcher;
 import pneumaticCraft.client.gui.GuiProgrammer;
@@ -22,7 +24,6 @@ import pneumaticCraft.common.item.ItemGPSTool;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.progwidgets.ProgWidgetArea;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.client.FMLClientHandler;
 
 public class GuiProgWidgetArea extends GuiProgWidgetAreaShow<ProgWidgetArea>{
     private GuiInventorySearcher invSearchGui;
@@ -81,16 +82,16 @@ public class GuiProgWidgetArea extends GuiProgWidgetAreaShow<ProgWidgetArea>{
             radioButton.otherChoices = radioButtons;
         }
         if(invSearchGui != null) {
-            ChunkPosition pos = invSearchGui.getSearchStack() != null ? ItemGPSTool.getGPSLocation(invSearchGui.getSearchStack()) : null;
+            BlockPos pos = invSearchGui.getSearchStack() != null ? ItemGPSTool.getGPSLocation(invSearchGui.getSearchStack()) : null;
             if(pos != null) {
                 if(pointSearched == 0) {
-                    widget.x1 = pos.chunkPosX;
-                    widget.y1 = pos.chunkPosY;
-                    widget.z1 = pos.chunkPosZ;
+                    widget.x1 = pos.getX();
+                    widget.y1 = pos.getY();
+                    widget.z1 = pos.getZ();
                 } else {
-                    widget.x2 = pos.chunkPosX;
-                    widget.y2 = pos.chunkPosY;
-                    widget.z2 = pos.chunkPosZ;
+                    widget.x2 = pos.getX();
+                    widget.y2 = pos.getY();
+                    widget.z2 = pos.getZ();
                 }
             } else {
                 if(pointSearched == 0) {
@@ -112,14 +113,14 @@ public class GuiProgWidgetArea extends GuiProgWidgetAreaShow<ProgWidgetArea>{
     }
 
     @Override
-    public void actionPerformed(GuiButton button){
+    public void actionPerformed(GuiButton button) throws IOException{
         if(button.id == 0 || button.id == 1) {
             invSearchGui = new GuiInventorySearcher(FMLClientHandler.instance().getClient().thePlayer);
             ItemStack gps = new ItemStack(Itemss.GPSTool);
             if(button.id == 0) {
-                ItemGPSTool.setGPSLocation(gps, widget.x1, widget.y1, widget.z1);
+                ItemGPSTool.setGPSLocation(gps, new BlockPos(widget.x1, widget.y1, widget.z1));
             } else {
-                ItemGPSTool.setGPSLocation(gps, widget.x2, widget.y2, widget.z2);
+                ItemGPSTool.setGPSLocation(gps, new BlockPos(widget.x2, widget.y2, widget.z2));
             }
             invSearchGui.setSearchStack(ItemGPSTool.getGPSLocation(gps) != null ? gps : null);
             FMLClientHandler.instance().showGuiScreen(invSearchGui);
@@ -134,7 +135,7 @@ public class GuiProgWidgetArea extends GuiProgWidgetAreaShow<ProgWidgetArea>{
     }
 
     @Override
-    public void keyTyped(char key, int keyCode){
+    public void keyTyped(char key, int keyCode) throws IOException{
         if(keyCode == 1) {
             widget.setCoord1Variable(variableField1.getText());
             widget.setCoord2Variable(variableField2.getText());

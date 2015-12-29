@@ -1,7 +1,6 @@
 package pneumaticCraft.common.block;
 
 import net.minecraft.block.material.Material;
-import pneumaticCraft.PneumaticCraft;
 
 public abstract class BlockPneumaticCraftModeled extends BlockPneumaticCraft{
 
@@ -11,13 +10,13 @@ public abstract class BlockPneumaticCraftModeled extends BlockPneumaticCraft{
 
     @Override
     public int getRenderType(){
-        return PneumaticCraft.proxy.SPECIAL_RENDER_TYPE_VALUE;
+        return 3;//TODO 1.8 PneumaticCraft.proxy.SPECIAL_RENDER_TYPE_VALUE;
     }
 
-    @Override
-    public boolean renderAsNormalBlock(){
-        return false;
-    }
+    /* @Override
+     public boolean renderAsNormalBlock(){
+         return false;
+     }*/
 
     @Override
     public boolean isOpaqueCube(){

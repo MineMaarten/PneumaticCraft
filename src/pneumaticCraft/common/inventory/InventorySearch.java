@@ -5,6 +5,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.IChatComponent;
 import pneumaticCraft.common.NBTUtil;
 import pneumaticCraft.common.item.ItemPneumaticArmor;
 import pneumaticCraft.common.network.NetworkHandler;
@@ -34,7 +35,7 @@ public class InventorySearch implements IInventory{
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int i){
+    public ItemStack removeStackFromSlot(int i){
         return null;
     }
 
@@ -47,7 +48,7 @@ public class InventorySearch implements IInventory{
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
         return "Inventory Search";
     }
 
@@ -67,7 +68,7 @@ public class InventorySearch implements IInventory{
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return true;
     }
 
@@ -75,9 +76,30 @@ public class InventorySearch implements IInventory{
     public void markDirty(){}
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
+
+    @Override
+    public IChatComponent getDisplayName(){
+        return null;
+    }
+
+    @Override
+    public int getField(int id){
+        return 0;
+    }
+
+    @Override
+    public void setField(int id, int value){}
+
+    @Override
+    public int getFieldCount(){
+        return 0;
+    }
+
+    @Override
+    public void clear(){}
 
 }

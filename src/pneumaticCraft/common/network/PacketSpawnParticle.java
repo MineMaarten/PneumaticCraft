@@ -2,7 +2,7 @@ package pneumaticCraft.common.network;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
-import cpw.mods.fml.common.network.ByteBufUtils;
+import net.minecraft.util.EnumParticleTypes;
 
 /**
  * MineChess
@@ -14,13 +14,13 @@ import cpw.mods.fml.common.network.ByteBufUtils;
 public class PacketSpawnParticle extends LocationDoublePacket<PacketSpawnParticle>{
 
     private double dx, dy, dz;
-    private String particleName;
+    private int particleId;
 
     public PacketSpawnParticle(){}
 
-    public PacketSpawnParticle(String particleName, double x, double y, double z, double dx, double dy, double dz){
+    public PacketSpawnParticle(EnumParticleTypes particle, double x, double y, double z, double dx, double dy, double dz){
         super(x, y, z);
-        this.particleName = particleName;
+        particleId = particle.ordinal();
         this.dx = dx;
         this.dy = dy;
         this.dz = dz;
@@ -29,7 +29,7 @@ public class PacketSpawnParticle extends LocationDoublePacket<PacketSpawnParticl
     @Override
     public void toBytes(ByteBuf buffer){
         super.toBytes(buffer);
-        ByteBufUtils.writeUTF8String(buffer, particleName);
+        buffer.writeInt(particleId);
         buffer.writeDouble(dx);
         buffer.writeDouble(dy);
         buffer.writeDouble(dz);
@@ -38,7 +38,7 @@ public class PacketSpawnParticle extends LocationDoublePacket<PacketSpawnParticl
     @Override
     public void fromBytes(ByteBuf buffer){
         super.fromBytes(buffer);
-        particleName = ByteBufUtils.readUTF8String(buffer);
+        particleId = buffer.readInt();
         dx = buffer.readDouble();
         dy = buffer.readDouble();
         dz = buffer.readDouble();
@@ -46,7 +46,7 @@ public class PacketSpawnParticle extends LocationDoublePacket<PacketSpawnParticl
 
     @Override
     public void handleClientSide(PacketSpawnParticle message, EntityPlayer player){
-        player.worldObj.spawnParticle(message.particleName, message.x, message.y, message.z, message.dx, message.dy, message.dz);
+        player.worldObj.spawnParticle(EnumParticleTypes.values()[message.particleId], message.x, message.y, message.z, message.dx, message.dy, message.dz);
     }
 
     @Override

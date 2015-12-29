@@ -1,6 +1,7 @@
 package pneumaticCraft.common.tileentity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,23 +20,27 @@ import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.EnumPacketDirection;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.fluids.IFluidTank;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.api.drone.DroneConstructingEvent;
 import pneumaticCraft.api.drone.IPathNavigator;
 import pneumaticCraft.api.item.IProgrammable;
@@ -58,14 +63,10 @@ import pneumaticCraft.common.progwidgets.ProgWidgetEntityImport;
 import pneumaticCraft.common.progwidgets.ProgWidgetStandby;
 import pneumaticCraft.common.progwidgets.ProgWidgetSuicide;
 import pneumaticCraft.common.progwidgets.ProgWidgetTeleport;
-import pneumaticCraft.common.thirdparty.computercraft.ProgWidgetCC;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.Log;
 
 import com.mojang.authlib.GameProfile;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityProgrammableController extends TileEntityPneumaticBase implements ISidedInventory,
         IFluidHandler, IMinWorkingPressure, IDroneBase{
@@ -95,7 +96,7 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
     private static final Set<Class<? extends IProgWidget>> WIDGET_BLACKLIST = new HashSet<Class<? extends IProgWidget>>();
 
     static {
-        WIDGET_BLACKLIST.add(ProgWidgetCC.class);
+        //TODO CC dep    WIDGET_BLACKLIST.add(ProgWidgetCC.class);
         WIDGET_BLACKLIST.add(ProgWidgetEntityAttack.class);
         WIDGET_BLACKLIST.add(ProgWidgetDroneConditionEntity.class);
         WIDGET_BLACKLIST.add(ProgWidgetStandby.class);
@@ -114,19 +115,19 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
     }
 
     @Override
-    public void updateEntity(){
+    public void update(){
 
-        super.updateEntity();
+        super.update();
 
         oldCurX = curX;
         oldCurY = curY;
         oldCurZ = curZ;
-        if(PneumaticCraftUtils.distBetween(getPosition(), targetX, targetY, targetZ) <= getSpeed()) {
+        if(PneumaticCraftUtils.distBetween(getPos(), targetX, targetY, targetZ) <= getSpeed()) {
             curX = targetX;
             curY = targetY;
             curZ = targetZ;
         } else {
-            Vec3 vec = Vec3.createVectorHelper(targetX - curX, targetY - curY, targetZ - curZ).normalize();
+            Vec3 vec = new Vec3(targetX - curX, targetY - curY, targetZ - curZ).normalize();
             curX += vec.xCoord * getSpeed();
             curY += vec.yCoord * getSpeed();
             curZ += vec.zCoord * getSpeed();
@@ -141,7 +142,7 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
                 for(int i = getDroneSlots(); i < 36; i++) {
                     ItemStack stack = getFakePlayer().inventory.getStackInSlot(i);
                     if(stack != null) {
-                        worldObj.spawnEntityInWorld(new EntityItem(worldObj, xCoord + 0.5, yCoord + 1.5, zCoord + 0.5, stack));
+                        worldObj.spawnEntityInWorld(new EntityItem(worldObj, getPos().getX() + 0.5, getPos().getY() + 1.5, getPos().getZ() + 0.5, stack));
                         getFakePlayer().inventory.setInventorySlotContents(i, null);
                     }
                 }
@@ -154,8 +155,8 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
             for(int i = 0; i < 4; i++) {
                 getFakePlayer().theItemInWorldManager.updateBlockRemoving();
             }
-            if(getPressure(ForgeDirection.UNKNOWN) >= getMinWorkingPressure()) {
-                if(!aiManager.isIdling()) addAir(-10, ForgeDirection.UNKNOWN);
+            if(getPressure() >= getMinWorkingPressure()) {
+                if(!aiManager.isIdling()) addAir(-10, null);
                 aiManager.onUpdateTasks();
             }
         } else {
@@ -191,7 +192,7 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
         String playerUUID = null;
         String playerName = "Drone";
         fakePlayer = new DroneFakePlayer((WorldServer)worldObj, new GameProfile(playerUUID != null ? UUID.fromString(playerUUID) : null, playerName), new FakePlayerItemInWorldManager(worldObj, fakePlayer, this), this);
-        fakePlayer.playerNetServerHandler = new NetHandlerPlayServer(MinecraftServer.getServer(), new NetworkManager(false), fakePlayer);
+        fakePlayer.playerNetServerHandler = new NetHandlerPlayServer(MinecraftServer.getServer(), new NetworkManager(EnumPacketDirection.SERVERBOUND), fakePlayer);
         fakePlayer.inventory = new InventoryPlayer(fakePlayer){
             private ItemStack oldStack;
 
@@ -223,7 +224,7 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 
@@ -261,7 +262,7 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
             setInventorySlotContents(slot, null);
@@ -284,9 +285,9 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
                     if(!worldObj.isRemote) getAIManager().setWidgets(progWidgets);
                 } else {
                     progWidgets.clear();
-                    targetX = xCoord + 0.5;
-                    targetY = yCoord + 0.6;
-                    targetZ = zCoord + 0.5;
+                    targetX = getPos().getX() + 0.5;
+                    targetY = getPos().getY() + 0.6;
+                    targetZ = getPos().getZ() + 0.5;
                     boolean updateNeighbours = false;
                     for(int i = 0; i < redstoneLevels.length; i++) {
                         if(redstoneLevels[i] > 0) {
@@ -304,7 +305,7 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
 
         return Blockss.programmableController.getUnlocalizedName();
     }
@@ -428,14 +429,14 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
 
     @Override
-    public int[] getAccessibleSlotsFromSide(int var1){
-        if(ForgeDirection.getOrientation(var1) == ForgeDirection.UP) {
+    public int[] getSlotsForFace(EnumFacing var1){
+        if(var1 == EnumFacing.UP) {
             return new int[]{0};
         } else {
             if(worldObj.isRemote) return new int[0];
@@ -448,13 +449,18 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
     }
 
     @Override
-    public boolean canInsertItem(int slot, ItemStack stack, int p_102007_3_){
+    public boolean canInsertItem(int slot, ItemStack stack, EnumFacing p_102007_3_){
         return isItemValidForSlot(slot, stack);
     }
 
     @Override
-    public boolean canExtractItem(int p_102008_1_, ItemStack p_102008_2_, int p_102008_3_){
+    public boolean canExtractItem(int p_102008_1_, ItemStack p_102008_2_, EnumFacing p_102008_3_){
         return true;
+    }
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
     }
 
     @Override
@@ -474,12 +480,12 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
 
     @Override
     public float getPressure(ItemStack iStack){
-        return getPressure(ForgeDirection.UNKNOWN);
+        return getPressure();
     }
 
     @Override
     public void addAir(ItemStack iStack, int amount){
-        addAir(amount, ForgeDirection.UNKNOWN);
+        addAir(amount, null);
     }
 
     @Override
@@ -498,21 +504,21 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
     }
 
     @Override
-    public IInventory getInventory(){
+    public IInventory getInv(){
         return getFakePlayer().inventory;
     }
 
     @Override
-    public Vec3 getPosition(){
+    public Vec3 getDronePos(){
         if(curX == 0 && curY == 0 && curZ == 0) {
-            curX = xCoord + 0.5;
-            curY = yCoord + 0.6;
-            curZ = zCoord + 0.5;
+            curX = getPos().getX() + 0.5;
+            curY = getPos().getY() + 0.6;
+            curZ = getPos().getZ() + 0.5;
             targetX = curX;
             targetY = curY;
             targetZ = curZ;
         }
-        return Vec3.createVectorHelper(curX, curY, curZ);
+        return new Vec3(curX, curY, curZ);
     }
 
     @Override
@@ -521,10 +527,7 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
 
             @Override
             public boolean moveToXYZ(double x, double y, double z){
-                int blockX = (int)Math.floor(x);
-                int blockY = (int)Math.floor(y);
-                int blockZ = (int)Math.floor(z);
-                if(isBlockValidPathfindBlock(blockX, blockY, blockZ)) {
+                if(isBlockValidPathfindBlock(new BlockPos(x, y, z))) {
                     targetX = x + 0.5;
                     targetY = y - 0.3;
                     targetZ = z + 0.5;
@@ -553,7 +556,7 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
     }
 
     @Override
-    public void sendWireframeToClient(int x, int y, int z){}
+    public void sendWireframeToClient(BlockPos pos){}
 
     @Override
     public EntityPlayerMP getFakePlayer(){
@@ -569,25 +572,29 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
     }
 
     @Override
-    public boolean isBlockValidPathfindBlock(int x, int y, int z){
-        return worldObj.isAirBlock(x, y, z);
+    public boolean isBlockValidPathfindBlock(BlockPos pos){
+        return worldObj.isAirBlock(pos);
     }
 
     @Override
     public void dropItem(ItemStack stack){
-        Vec3 pos = getPosition();
+        Vec3 pos = getDronePos();
         worldObj.spawnEntityInWorld(new EntityItem(worldObj, pos.xCoord, pos.yCoord, pos.zCoord, stack));
     }
 
     @Override
-    public void setDugBlock(int x, int y, int z){
-        diggingX = x;
-        diggingY = y;
-        diggingZ = z;
+    public void setDugBlock(BlockPos pos){
+        if(pos != null) {
+            diggingX = pos.getX();
+            diggingY = pos.getY();
+            diggingZ = pos.getZ();
+        } else {
+            diggingX = diggingY = diggingZ = 0;
+        }
     }
 
-    public ChunkPosition getDugPosition(){
-        return diggingX != 0 || diggingY != 0 || diggingZ != 0 ? new ChunkPosition(diggingX, diggingY, diggingZ) : null;
+    public BlockPos getDugPosition(){
+        return diggingX != 0 || diggingY != 0 || diggingZ != 0 ? new BlockPos(diggingX, diggingY, diggingZ) : null;
     }
 
     @Override
@@ -619,13 +626,13 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
     }
 
     @Override
-    public void setEmittingRedstone(ForgeDirection orientation, int emittingRedstone){
+    public void setEmittingRedstone(EnumFacing orientation, int emittingRedstone){
         redstoneLevels[orientation.ordinal()] = emittingRedstone;
         updateNeighbours();
     }
 
-    public int getEmittingRedstone(int direction){
-        return redstoneLevels[direction];
+    public int getEmittingRedstone(EnumFacing direction){
+        return redstoneLevels[direction.ordinal()];
     }
 
     @Override
@@ -661,39 +668,39 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
      */
 
     @Override
-    public int fill(ForgeDirection from, FluidStack resource, boolean doFill){
+    public int fill(EnumFacing from, FluidStack resource, boolean doFill){
         return tank.fill(resource, doFill);
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain){
+    public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain){
         return tank.getFluid() != null && tank.getFluid().isFluidEqual(resource) ? tank.drain(resource.amount, doDrain) : null;
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain){
+    public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain){
         return tank.drain(maxDrain, doDrain);
     }
 
     @Override
-    public boolean canFill(ForgeDirection from, Fluid fluid){
+    public boolean canFill(EnumFacing from, Fluid fluid){
         return true;
     }
 
     @Override
-    public boolean canDrain(ForgeDirection from, Fluid fluid){
+    public boolean canDrain(EnumFacing from, Fluid fluid){
         return true;
     }
 
     @Override
-    public FluidTankInfo[] getTankInfo(ForgeDirection from){
+    public FluidTankInfo[] getTankInfo(EnumFacing from){
         return new FluidTankInfo[]{new FluidTankInfo(tank)};
     }
 
     @Override
     public void overload(){
         for(int i = 0; i < 10; i++) {
-            NetworkHandler.sendToAllAround(new PacketSpawnParticle("largesmoke", xCoord + worldObj.rand.nextDouble(), yCoord + 1, zCoord + worldObj.rand.nextDouble(), 0, 0, 0), worldObj);
+            NetworkHandler.sendToAllAround(new PacketSpawnParticle(EnumParticleTypes.SMOKE_LARGE, getPos().getX() + worldObj.rand.nextDouble(), getPos().getY() + 1, getPos().getZ() + worldObj.rand.nextDouble(), 0, 0, 0), worldObj);
         }
     }
 
@@ -716,7 +723,7 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
     }
 
     @Override
-    public void addDebugEntry(String message, ChunkPosition pos){
+    public void addDebugEntry(String message, BlockPos pos){
 
     }
 }

@@ -7,7 +7,7 @@ import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.util.ResourceLocation;
 import pneumaticCraft.common.ai.DroneAIEditSign;
 import pneumaticCraft.common.ai.IDroneBase;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.common.remote.TextVariableParser;
 import pneumaticCraft.lib.Textures;
 
@@ -35,7 +35,7 @@ public class ProgWidgetEditSign extends ProgWidgetAreaItemBase implements ISignE
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.ENDER_PLANT_DAMAGE;
+        return ItemPlastic.ENDER_PLANT_DAMAGE;
     }
 
     @Override

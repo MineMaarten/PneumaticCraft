@@ -7,6 +7,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
 import org.lwjgl.opengl.GL11;
 
@@ -18,7 +19,6 @@ import pneumaticCraft.common.network.PacketSecurityStationAddHacker;
 import pneumaticCraft.common.network.PacketUseItem;
 import pneumaticCraft.common.tileentity.TileEntitySecurityStation;
 import pneumaticCraft.lib.TileEntityConstants;
-import cpw.mods.fml.client.FMLClientHandler;
 
 public class NetworkConnectionPlayerHandler extends NetworkConnectionHandler{
     private final List<GuiStatBalloon> balloons = new ArrayList<GuiStatBalloon>();
@@ -118,7 +118,7 @@ public class NetworkConnectionPlayerHandler extends NetworkConnectionHandler{
         if(station.getStackInSlot(slot) != null && (station.getStackInSlot(slot).getItemDamage() == ItemNetworkComponents.NETWORK_REGISTRY || station.getStackInSlot(slot).getItemDamage() == ItemNetworkComponents.DIAGNOSTIC_SUBROUTINE)) {
             hackedSuccessfully = true;
             EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
-            NetworkHandler.sendToServer(new PacketSecurityStationAddHacker(station, player.getCommandSenderName()));
+            NetworkHandler.sendToServer(new PacketSecurityStationAddHacker(station, player.getName()));
             FMLClientHandler.instance().getClient().thePlayer.closeScreen();
             player.addChatComponentMessage(new ChatComponentTranslation(EnumChatFormatting.GREEN + "Hacking successful! This Security Station now doesn't protect the area any longer!"));
             if(gui instanceof GuiSecurityStationHacking) ((GuiSecurityStationHacking)gui).removeUpdatesOnConnectionHandlers();

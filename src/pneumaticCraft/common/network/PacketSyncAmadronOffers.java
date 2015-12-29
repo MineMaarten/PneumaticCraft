@@ -9,10 +9,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import pneumaticCraft.common.recipes.AmadronOffer;
 import pneumaticCraft.common.recipes.AmadronOfferCustom;
 import pneumaticCraft.common.recipes.AmadronOfferManager;
-import cpw.mods.fml.common.network.ByteBufUtils;
 
 public class PacketSyncAmadronOffers extends AbstractPacket<PacketSyncAmadronOffers>{
     private Collection<AmadronOffer> offers = new ArrayList<AmadronOffer>();

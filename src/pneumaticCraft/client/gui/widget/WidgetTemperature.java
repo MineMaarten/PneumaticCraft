@@ -38,15 +38,15 @@ public class WidgetTemperature extends WidgetBase{
         GL11.glDisable(GL11.GL_LIGHTING);
         Minecraft.getMinecraft().getTextureManager().bindTexture(Textures.WIDGET_TEMPERATURE);
         GL11.glColor4d(1, 1, 1, 1);
-        Gui.func_146110_a(x + 6, y, 6, 0, 7, 50, 18, 50);
+        Gui.drawModalRectWithCustomSizedTexture(x + 6, y, 6, 0, 7, 50, 18, 50);
 
         int barLength = ((int)logic.getTemperature() - minTemp) * 48 / maxTemp;
         barLength = MathHelper.clamp_int(barLength, 0, 48);
-        Gui.func_146110_a(x + 7, y + 1 + 48 - barLength, 13, 48 - barLength, 5, barLength, 18, 50);
+        Gui.drawModalRectWithCustomSizedTexture(x + 7, y + 1 + 48 - barLength, 13, 48 - barLength, 5, barLength, 18, 50);
 
         for(int scale : scales) {
             int scaleY = 48 - (scale - minTemp) * 48 / maxTemp;
-            Gui.func_146110_a(x, y - 1 + scaleY, 0, 0, 6, 5, 18, 50);
+            Gui.drawModalRectWithCustomSizedTexture(x, y - 1 + scaleY, 0, 0, 6, 5, 18, 50);
         }
     }
 

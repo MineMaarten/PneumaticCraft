@@ -8,9 +8,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableEntity;
 import pneumaticCraft.lib.Log;
-import cpw.mods.fml.relauncher.ReflectionHelper;
 
 public class HackableLivingDisarm implements IHackableEntity{
     private static Field fieldDropChance;
@@ -22,7 +22,7 @@ public class HackableLivingDisarm implements IHackableEntity{
 
     @Override
     public boolean canHack(Entity entity, EntityPlayer player){
-        for(ItemStack stack : ((EntityLiving)entity).getLastActiveItems()) {
+        for(ItemStack stack : ((EntityLiving)entity).getInventory()) {
             if(stack != null) return true;
         }
         return false;
@@ -53,8 +53,8 @@ public class HackableLivingDisarm implements IHackableEntity{
             }
             try {
                 float[] equipmentDropChances = (float[])fieldDropChance.get(entity);
-                for(int i = 0; i < ((EntityLiving)entity).getLastActiveItems().length; i++) {
-                    ItemStack stack = ((EntityLiving)entity).getLastActiveItems()[i];
+                for(int i = 0; i < ((EntityLiving)entity).getInventory().length; i++) {
+                    ItemStack stack = ((EntityLiving)entity).getInventory()[i];
                     float equipmentDropChance = equipmentDropChances[i];
 
                     boolean flag1 = equipmentDropChance > 1.0F;

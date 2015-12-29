@@ -20,6 +20,8 @@ import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.api.client.pneumaticHelmet.EntityTrackEvent;
 import pneumaticCraft.api.client.pneumaticHelmet.IOptionPage;
 import pneumaticCraft.api.client.pneumaticHelmet.IUpgradeRenderHandler;
@@ -32,8 +34,6 @@ import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.PneumaticValues;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class EntityTrackUpgradeHandler implements IUpgradeRenderHandler{
 
@@ -65,7 +65,7 @@ public class EntityTrackUpgradeHandler implements IUpgradeRenderHandler{
         if(helmetStack != null) entityFilter = NBTUtil.getString(helmetStack, "entityFilter");
         double entityTrackRange = ENTITY_TRACKING_RANGE + rangeUpgrades * PneumaticValues.RANGE_UPGRADE_HELMET_RANGE_INCREASE;
         AxisAlignedBB bbBox = getAABBFromRange(player, rangeUpgrades);
-        List<Entity> mobs = player.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, bbBox);
+        List<EntityLivingBase> mobs = player.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, bbBox);
         if(mobs.contains(player)) mobs.remove(player);
         for(int i = 0; i < mobs.size(); i++) {
             if(player.getDistanceToEntity(mobs.get(i)) > entityTrackRange || !PneumaticCraftUtils.isEntityValidForFilter(entityFilter, mobs.get(i)) || MinecraftForge.EVENT_BUS.post(new EntityTrackEvent(mobs.get(i)))) continue;
@@ -114,7 +114,7 @@ public class EntityTrackUpgradeHandler implements IUpgradeRenderHandler{
             target.update();
             if(target.isLookingAtTarget) {
                 if(target.isInitialized()) {
-                    text.add(EnumChatFormatting.GRAY + target.entity.getCommandSenderName());
+                    text.add(EnumChatFormatting.GRAY + target.entity.getName());
                     text.addAll(target.getEntityText());
                 } else {
                     text.add(EnumChatFormatting.GRAY + "Acquiring target...");
@@ -152,13 +152,13 @@ public class EntityTrackUpgradeHandler implements IUpgradeRenderHandler{
     public static AxisAlignedBB getAABBFromRange(EntityPlayer player, int rangeUpgrades){
         double entityTrackRange = ENTITY_TRACKING_RANGE + Math.min(10, rangeUpgrades) * PneumaticValues.RANGE_UPGRADE_HELMET_RANGE_INCREASE;
 
-        return AxisAlignedBB.getBoundingBox(player.posX - entityTrackRange, player.posY - entityTrackRange, player.posZ - entityTrackRange, player.posX + entityTrackRange, player.posY + entityTrackRange, player.posZ + entityTrackRange);
+        return new AxisAlignedBB(player.posX - entityTrackRange, player.posY - entityTrackRange, player.posZ - entityTrackRange, player.posX + entityTrackRange, player.posY + entityTrackRange, player.posZ + entityTrackRange);
     }
 
     private boolean isEntityWithinPlayerFOV(EntityPlayer player, Entity entity){
         // code used from the Enderman player looking code.
         Vec3 vec3 = player.getLook(1.0F).normalize();
-        Vec3 vec31 = Vec3.createVectorHelper(entity.posX - player.posX, entity.boundingBox.minY + entity.height / 2.0F - (player.posY + player.getEyeHeight()), entity.posZ - player.posZ);
+        Vec3 vec31 = new Vec3(entity.posX - player.posX, entity.getEntityBoundingBox().minY + entity.height / 2.0F - (player.posY + player.getEyeHeight()), entity.posZ - player.posZ);
         double d0 = vec31.lengthVector();
         vec31 = vec31.normalize();
         double d1 = vec3.dotProduct(vec31);
@@ -228,7 +228,7 @@ public class EntityTrackUpgradeHandler implements IUpgradeRenderHandler{
     public GuiAnimatedStat getAnimatedStat(){
         if(entityTrackInfo == null) {
             Minecraft minecraft = Minecraft.getMinecraft();
-            ScaledResolution sr = new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight);
+            ScaledResolution sr = new ScaledResolution(minecraft);
             entityTrackInfo = new GuiAnimatedStat(null, "Current tracked entities:", new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_ENTITY_TRACKER), statX != -1 ? statX : sr.getScaledWidth() - 2, statY, 0x3000AA00, null, statLeftSided);
             entityTrackInfo.setMinDimensionsAndReset(0, 0);
         }

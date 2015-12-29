@@ -1,5 +1,6 @@
 package pneumaticCraft.common.tileentity;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import net.minecraft.entity.item.EntityItem;
@@ -11,13 +12,14 @@ import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fml.common.Loader;
 import pneumaticCraft.common.PneumaticCraftAPIHandler;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.item.ItemMachineUpgrade;
@@ -26,19 +28,12 @@ import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.ModIds;
 import pneumaticCraft.lib.PneumaticValues;
-import cofh.api.energy.EnergyStorage;
-import cofh.api.energy.IEnergyContainerItem;
-import cofh.api.energy.IEnergyReceiver;
-import cofh.api.tileentity.IEnergyInfo;
 
 import com.mojang.authlib.GameProfile;
 
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.Optional;
-
-@Optional.InterfaceList({@Optional.Interface(iface = "cofh.api.energy.IEnergyReceiver", modid = ModIds.COFH_CORE), @Optional.Interface(iface = "cofh.api.tileentity.IEnergyInfo", modid = ModIds.COFH_CORE)})
+//TODO TE dep @Optional.InterfaceList({@Optional.Interface(iface = "cofh.api.energy.IEnergyReceiver", modid = ModIds.COFH_CORE), @Optional.Interface(iface = "cofh.api.tileentity.IEnergyInfo", modid = ModIds.COFH_CORE)})
 public class TileEntityAerialInterface extends TileEntityPneumaticBase implements ISidedInventory, IFluidHandler,
-        IMinWorkingPressure, IRedstoneControl, IEnergyReceiver, IEnergyInfo{
+        IMinWorkingPressure, IRedstoneControl, IComparatorSupport/*, IEnergyReceiver, IEnergyInfo*/{
     private ItemStack[] inventory;
 
     private final int INVENTORY_SIZE = 4;
@@ -80,15 +75,15 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
     }
 
     @Override
-    public void updateEntity(){
+    public void update(){
         if(!worldObj.isRemote && updateNeighbours) {
             updateNeighbours = false;
             updateNeighbours();
         }
         if(!worldObj.isRemote) {
-            if(getPressure(ForgeDirection.UNKNOWN) > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE && isConnectedToPlayer) {
+            if(getPressure(null) > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE && isConnectedToPlayer) {
                 if(energyRF != null) tickRF();
-                addAir(-PneumaticValues.USAGE_AERIAL_INTERFACE, ForgeDirection.UNKNOWN);
+                addAir(-PneumaticValues.USAGE_AERIAL_INTERFACE, null);
                 if(worldObj.getTotalWorldTime() % 40 == 0) dispenserUpgradeInserted = getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0;
                 if(worldObj.getTotalWorldTime() % 20 == 0) {
                     EntityPlayer player = getPlayer();
@@ -106,7 +101,7 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
             updateNeighbours = true;
         }
 
-        super.updateEntity();
+        super.update();
 
     }
 
@@ -151,7 +146,7 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 
@@ -200,7 +195,7 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
         if(slot < 4) {
             ItemStack itemStack = getStackInSlot(slot);
             if(itemStack != null) {
@@ -209,7 +204,7 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
             return itemStack;
         } else {
             InventoryPlayer inventoryPlayer = getPlayerInventory();
-            return inventoryPlayer != null ? inventoryPlayer.getStackInSlotOnClosing(slot - 4) : null;
+            return inventoryPlayer != null ? inventoryPlayer.removeStackFromSlot(slot - 4) : null;
         }
     }
 
@@ -223,10 +218,10 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
         } else {
             EntityPlayer player = getPlayer();
             if(dispenserUpgradeInserted) {
-                if(itemStack != null) {
+                if(itemStack != null && itemStack.getItem() instanceof ItemFood) {
                     int startValue = itemStack.stackSize;
                     while(itemStack.stackSize > 0) {
-                        ItemStack remainingItem = itemStack.onFoodEaten(player.worldObj, player);
+                        ItemStack remainingItem = itemStack.onItemUseFinish(player.worldObj, player);
                         remainingItem = ForgeEventFactory.onItemUseFinish(player, itemStack, 0, remainingItem);
                         if(remainingItem != null && remainingItem.stackSize > 0 && (remainingItem != itemStack || remainingItem.stackSize != startValue)) {
                             if(!player.inventory.addItemStackToInventory(remainingItem) && remainingItem.stackSize > 0) {
@@ -241,7 +236,7 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
                 if(inventoryPlayer != null) {
                     inventoryPlayer.setInventorySlotContents(slot - 4, itemStack);
                 } else if(worldObj != null && !worldObj.isRemote) {
-                    EntityItem item = new EntityItem(worldObj, xCoord, yCoord, zCoord, itemStack);
+                    EntityItem item = new EntityItem(worldObj, getPos().getX(), getPos().getY(), getPos().getZ(), itemStack);
                     worldObj.spawnEntityInWorld(item);
                 }
             }
@@ -250,7 +245,7 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
 
         return Blockss.aerialInterface.getUnlocalizedName();
     }
@@ -318,12 +313,12 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
 
     @Override
     // upgrades in bottom, fuel in the rest.
-    public int[] getAccessibleSlotsFromSide(int var1){
-        if(ForgeDirection.getOrientation(var1) == ForgeDirection.UP) {
+    public int[] getSlotsForFace(EnumFacing var1){
+        if(var1 == EnumFacing.UP) {
             return new int[]{0, 1, 2, 3};
         } else if(getPlayerInventory() == null) {
             return new int[0];
-        } else if(ForgeDirection.getOrientation(var1) == ForgeDirection.DOWN) {
+        } else if(var1 == EnumFacing.DOWN) {
             return new int[]{40, 41, 42, 43};
         } else if(dispenserUpgradeInserted) {
             return new int[]{44};
@@ -338,11 +333,11 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
     }
 
     @Override
-    public boolean canInsertItem(int i, ItemStack itemstack, int j){
+    public boolean canInsertItem(int i, ItemStack itemstack, EnumFacing j){
         if(i < 4) return true;
         EntityPlayer player = getPlayer();
         if(player == null) return false;
-        if(getPressure(ForgeDirection.UNKNOWN) > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE) {
+        if(getPressure(null) > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE) {
             if(!dispenserUpgradeInserted || i >= 40 && i <= 43) {
                 return i < 40 || itemstack != null && itemstack.getItem() instanceof ItemArmor && ((ItemArmor)itemstack.getItem()).armorType == 43 - i;
             } else {
@@ -368,8 +363,8 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
     }
 
     @Override
-    public boolean canExtractItem(int i, ItemStack itemstack, int j){
-        return i < 4 || getPressure(ForgeDirection.UNKNOWN) > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE;
+    public boolean canExtractItem(int i, ItemStack itemstack, EnumFacing j){
+        return i < 4 || getPressure(null) > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE;
     }
 
     @Override
@@ -378,13 +373,18 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
+    }
 
     private int getFoodValue(ItemStack item){
-        return item != null && item.getItem() instanceof ItemFood ? ((ItemFood)item.getItem()).func_150905_g(item) : 0;
+        return item != null && item.getItem() instanceof ItemFood ? ((ItemFood)item.getItem()).getHealAmount(item) : 0;
     }
 
     /*
@@ -394,7 +394,7 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
      */
 
     @Override
-    public int fill(ForgeDirection from, FluidStack resource, boolean doFill){
+    public int fill(EnumFacing from, FluidStack resource, boolean doFill){
         if(resource != null && canFill(from, resource.getFluid())) {
             EntityPlayer player = getPlayer();
             if(player != null) {
@@ -411,7 +411,7 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain){
+    public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain){
         if(resource != null && canDrain(from, resource.getFluid())) {
             EntityPlayer player = getPlayer();
             if(player != null) {
@@ -425,7 +425,7 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain){
+    public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain){
         updateXpFluid();
         if(curXpFluid == null) return null;
         return drain(from, new FluidStack(curXpFluid, maxDrain), doDrain);
@@ -439,17 +439,17 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
     }
 
     @Override
-    public boolean canFill(ForgeDirection from, Fluid fluid){
-        return fluid != null && PneumaticCraftAPIHandler.getInstance().liquidXPs.containsKey(fluid) && getPlayer() != null && getPressure(ForgeDirection.UNKNOWN) > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE && dispenserUpgradeInserted;
+    public boolean canFill(EnumFacing from, Fluid fluid){
+        return fluid != null && PneumaticCraftAPIHandler.getInstance().liquidXPs.containsKey(fluid) && getPlayer() != null && getPressure(null) > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE && dispenserUpgradeInserted;
     }
 
     @Override
-    public boolean canDrain(ForgeDirection from, Fluid fluid){
-        return (fluid == null || PneumaticCraftAPIHandler.getInstance().liquidXPs.containsKey(fluid)) && getPlayer() != null && getPressure(ForgeDirection.UNKNOWN) > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE && dispenserUpgradeInserted;
+    public boolean canDrain(EnumFacing from, Fluid fluid){
+        return (fluid == null || PneumaticCraftAPIHandler.getInstance().liquidXPs.containsKey(fluid)) && getPlayer() != null && getPressure(null) > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE && dispenserUpgradeInserted;
     }
 
     @Override
-    public FluidTankInfo[] getTankInfo(ForgeDirection from){
+    public FluidTankInfo[] getTankInfo(EnumFacing from){
         updateXpFluid();
         if(curXpFluid != null) {
             EntityPlayer player = getPlayer();
@@ -531,6 +531,11 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
         return redstoneMode;
     }
 
+    @Override
+    public int getComparatorValue(){
+        return shouldEmitRedstone() ? 15 : 0;
+    }
+
     /**
      * RF integration
      */
@@ -543,81 +548,80 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
     }
 
     private void initRF(){
-        energyRF = new EnergyStorage(100000);
+        // TODO TE dep   energyRF = new EnergyStorage(100000);
     }
 
     private void saveRF(NBTTagCompound tag){
-        getEnergy().writeToNBT(tag);
+        //TODO TE dep     getEnergy().writeToNBT(tag);
     }
 
     private void readRF(NBTTagCompound tag){
-        getEnergy().readFromNBT(tag);
+        //TODO TE dep    getEnergy().readFromNBT(tag);
     }
 
     private void tickRF(){
-
-        if(getEnergyStored(null) > 0) {
-            InventoryPlayer inv = getPlayerInventory();
-            if(inv != null) {
-                for(int i = 0; i < inv.getSizeInventory(); i++) {
-                    ItemStack stack = inv.getStackInSlot(i);
-                    if(stack != null && stack.getItem() instanceof IEnergyContainerItem) {
-                        IEnergyContainerItem chargingItem = (IEnergyContainerItem)stack.getItem();
-                        int energyLeft = getEnergyStored(null);
-                        if(energyLeft > 0) {
-                            getEnergy().extractEnergy(chargingItem.receiveEnergy(stack, energyLeft, false), false);
-                        } else {
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+        /*TODO TE dep
+          if(getEnergyStored(null) > 0) {
+              InventoryPlayer inv = getPlayerInventory();
+              if(inv != null) {
+                  for(int i = 0; i < inv.getSizeInventory(); i++) {
+                      ItemStack stack = inv.getStackInSlot(i);
+                      if(stack != null && stack.getItem() instanceof IEnergyContainerItem) {
+                          IEnergyContainerItem chargingItem = (IEnergyContainerItem)stack.getItem();
+                          int energyLeft = getEnergyStored(null);
+                          if(energyLeft > 0) {
+                              getEnergy().extractEnergy(chargingItem.receiveEnergy(stack, energyLeft, false), false);
+                          } else {
+                              break;
+                          }
+                      }
+                  }
+              }
+          }*/
     }
 
-    @Optional.Method(modid = ModIds.COFH_CORE)
-    private EnergyStorage getEnergy(){
-        return (EnergyStorage)energyRF;
-    }
+    /* @Optional.Method(modid = ModIds.COFH_CORE)
+     private EnergyStorage getEnergy(){
+         return (EnergyStorage)energyRF;
+     }
 
-    @Override
-    public boolean canConnectEnergy(ForgeDirection from){
-        return true;
-    }
+     @Override
+     public boolean canConnectEnergy(EnumFacing from){
+         return true;
+     }
 
-    @Override
-    public int getInfoEnergyPerTick(){
-        return RF_PER_TICK;
-    }
+     @Override
+     public int getInfoEnergyPerTick(){
+         return RF_PER_TICK;
+     }
 
-    @Override
-    public int getInfoMaxEnergyPerTick(){
-        return RF_PER_TICK;
-    }
+     @Override
+     public int getInfoMaxEnergyPerTick(){
+         return RF_PER_TICK;
+     }
 
-    @Override
-    public int getInfoEnergyStored(){
-        return getEnergy().getEnergyStored();
-    }
+     @Override
+     public int getInfoEnergyStored(){
+         return getEnergy().getEnergyStored();
+     }
 
-    @Override
-    public int getInfoMaxEnergyStored(){
-        return getEnergy().getMaxEnergyStored();
-    }
+     @Override
+     public int getInfoMaxEnergyStored(){
+         return getEnergy().getMaxEnergyStored();
+     }
 
-    @Override
-    public int receiveEnergy(ForgeDirection from, int maxReceive, boolean simulate){
-        return getEnergy().receiveEnergy(maxReceive, simulate);
-    }
+     @Override
+     public int receiveEnergy(EnumFacing from, int maxReceive, boolean simulate){
+         return getEnergy().receiveEnergy(maxReceive, simulate);
+     }
 
-    @Override
-    public int getEnergyStored(ForgeDirection from){
-        return getEnergy().getEnergyStored();
-    }
+     @Override
+     public int getEnergyStored(EnumFacing from){
+         return getEnergy().getEnergyStored();
+     }
 
-    @Override
-    public int getMaxEnergyStored(ForgeDirection from){
-        return getEnergy().getMaxEnergyStored();
-    }
-
+     @Override
+     public int getMaxEnergyStored(EnumFacing from){
+         return getEnergy().getMaxEnergyStored();
+     }*/
 }

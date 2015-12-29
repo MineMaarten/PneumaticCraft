@@ -5,12 +5,15 @@ import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
@@ -21,8 +24,6 @@ import pneumaticCraft.common.network.LazySynced;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketSpawnParticle;
 import pneumaticCraft.lib.PneumaticValues;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityRefinery extends TileEntityBase implements IFluidHandler, IHeatExchanger, IRedstoneControlled,
         IComparatorSupport{
@@ -65,8 +66,8 @@ public class TileEntityRefinery extends TileEntityBase implements IFluidHandler,
     }
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
         if(!worldObj.isRemote) {
             oilTankAmount = oilTank.getFluidAmount() / 100;
             outputTankAmount = outputTank.getFluidAmount() / 100;
@@ -85,7 +86,7 @@ public class TileEntityRefinery extends TileEntityBase implements IFluidHandler,
                             refine(refineries, false);
                             oilTank.drain(10, true);
                             for(int i = 0; i < 5; i++)
-                                NetworkHandler.sendToAllAround(new PacketSpawnParticle("largesmoke", xCoord + worldObj.rand.nextDouble(), yCoord + refineries.size(), zCoord + worldObj.rand.nextDouble(), 0, 0, 0), worldObj);
+                                NetworkHandler.sendToAllAround(new PacketSpawnParticle(EnumParticleTypes.SMOKE_LARGE, getPos().getX() + worldObj.rand.nextDouble(), getPos().getY() + refineries.size(), getPos().getZ() + worldObj.rand.nextDouble(), 0, 0, 0), worldObj);
 
                         }
                     } else {
@@ -101,8 +102,8 @@ public class TileEntityRefinery extends TileEntityBase implements IFluidHandler,
         List<TileEntityRefinery> refineries = new ArrayList<TileEntityRefinery>();
         refineries.add(this);
         TileEntityRefinery refinery = this;
-        while(refinery.getTileCache()[ForgeDirection.UP.ordinal()].getTileEntity() instanceof TileEntityRefinery) {
-            refinery = (TileEntityRefinery)refinery.getTileCache()[ForgeDirection.UP.ordinal()].getTileEntity();
+        while(refinery.getTileCache()[EnumFacing.UP.ordinal()].getTileEntity() instanceof TileEntityRefinery) {
+            refinery = (TileEntityRefinery)refinery.getTileCache()[EnumFacing.UP.ordinal()].getTileEntity();
             refineries.add(refinery);
         }
         return refineries;
@@ -123,8 +124,8 @@ public class TileEntityRefinery extends TileEntityBase implements IFluidHandler,
 
     public TileEntityRefinery getMasterRefinery(){
         TileEntityRefinery master = this;
-        while(master.getTileCache()[ForgeDirection.DOWN.ordinal()].getTileEntity() instanceof TileEntityRefinery) {
-            master = (TileEntityRefinery)master.getTileCache()[ForgeDirection.DOWN.ordinal()].getTileEntity();
+        while(master.getTileCache()[EnumFacing.DOWN.ordinal()].getTileEntity() instanceof TileEntityRefinery) {
+            master = (TileEntityRefinery)master.getTileCache()[EnumFacing.DOWN.ordinal()].getTileEntity();
         }
         return master;
     }
@@ -139,8 +140,8 @@ public class TileEntityRefinery extends TileEntityBase implements IFluidHandler,
         boolean isPoweredByRedstone = poweredRedstone > 0;
 
         TileEntityRefinery refinery = this;
-        while(poweredRedstone == 0 && refinery.getTileCache()[ForgeDirection.UP.ordinal()].getTileEntity() instanceof TileEntityRefinery) {
-            refinery = (TileEntityRefinery)refinery.getTileCache()[ForgeDirection.UP.ordinal()].getTileEntity();
+        while(poweredRedstone == 0 && refinery.getTileCache()[EnumFacing.UP.ordinal()].getTileEntity() instanceof TileEntityRefinery) {
+            refinery = (TileEntityRefinery)refinery.getTileCache()[EnumFacing.UP.ordinal()].getTileEntity();
             refinery.onNeighborBlockUpdate();
             isPoweredByRedstone = refinery.poweredRedstone > 0;
         }
@@ -157,7 +158,7 @@ public class TileEntityRefinery extends TileEntityBase implements IFluidHandler,
     }
 
     @Override
-    public int fill(ForgeDirection from, FluidStack resource, boolean doFill){
+    public int fill(EnumFacing from, FluidStack resource, boolean doFill){
         if(canFill(from, resource != null ? resource.getFluid() : null)) {
             if(isMaster()) {
                 return oilTank.fill(resource, doFill);
@@ -170,27 +171,27 @@ public class TileEntityRefinery extends TileEntityBase implements IFluidHandler,
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain){
+    public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain){
         return outputTank.getFluid() != null && outputTank.getFluid().isFluidEqual(resource) ? outputTank.drain(resource.amount, doDrain) : null;
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain){
+    public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain){
         return outputTank.drain(maxDrain, doDrain);
     }
 
     @Override
-    public boolean canFill(ForgeDirection from, Fluid fluid){
+    public boolean canFill(EnumFacing from, Fluid fluid){
         return Fluids.areFluidsEqual(fluid, Fluids.oil);
     }
 
     @Override
-    public boolean canDrain(ForgeDirection from, Fluid fluid){
+    public boolean canDrain(EnumFacing from, Fluid fluid){
         return true;
     }
 
     @Override
-    public FluidTankInfo[] getTankInfo(ForgeDirection from){
+    public FluidTankInfo[] getTankInfo(EnumFacing from){
         return new FluidTankInfo[]{new FluidTankInfo(getMasterRefinery().oilTank), new FluidTankInfo(outputTank)};
     }
 
@@ -228,7 +229,7 @@ public class TileEntityRefinery extends TileEntityBase implements IFluidHandler,
     }
 
     @Override
-    public IHeatExchangerLogic getHeatExchangerLogic(ForgeDirection side){
+    public IHeatExchangerLogic getHeatExchangerLogic(EnumFacing side){
         return heatExchanger;
     }
 
@@ -259,7 +260,7 @@ public class TileEntityRefinery extends TileEntityBase implements IFluidHandler,
     }
 
     @Override
-    public int getComparatorValue(ForgeDirection side){
+    public int getComparatorValue(){
         return getMasterRefinery().comparatorValue;
     }
 }

@@ -10,7 +10,8 @@ package pneumaticCraft.common.util;
 import java.util.Random;
 
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketDebugBlock;
@@ -26,25 +27,21 @@ public class Debugger{
 
     public static void indicateBlock(TileEntity te){
 
-        indicateBlock(te.getWorldObj(), te.xCoord, te.yCoord, te.zCoord);
+        indicateBlock(te.getWorld(), te.getPos());
     }
 
-    public static void indicateBlock(World world, ChunkPosition pos){
-        indicateBlock(world, pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
-    }
-
-    public static void indicateBlock(World world, int x, int y, int z){
+    public static void indicateBlock(World world, BlockPos pos){
 
         if(world != null) {
             if(world.isRemote) {
                 for(int i = 0; i < 5; i++) {
-                    double dx = x + 0.5;
-                    double dy = y + 0.5;
-                    double dz = z + 0.5;
-                    world.spawnParticle("reddust", dx, dy, dz, 0, 0, 0);
+                    double dx = pos.getX() + 0.5;
+                    double dy = pos.getY() + 0.5;
+                    double dz = pos.getZ() + 0.5;
+                    world.spawnParticle(EnumParticleTypes.REDSTONE, dx, dy, dz, 0, 0, 0);
                 }
             } else {
-                NetworkHandler.sendToAllAround(new PacketDebugBlock(x, y, z), world);
+                NetworkHandler.sendToAllAround(new PacketDebugBlock(pos), world);
             }
         }
     }

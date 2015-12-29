@@ -5,12 +5,12 @@ import java.util.List;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetString;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetString extends ProgWidget{
     public String string = "";
@@ -80,7 +80,7 @@ public class ProgWidgetString extends ProgWidget{
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.CHOPPER_PLANT_DAMAGE;
+        return ItemPlastic.CHOPPER_PLANT_DAMAGE;
     }
 
 }

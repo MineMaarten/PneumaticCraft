@@ -1,10 +1,10 @@
 package pneumaticCraft.client.gui.pneumaticHelmet;
 
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import pneumaticCraft.api.client.IGuiAnimatedStat;
 import pneumaticCraft.api.client.pneumaticHelmet.IUpgradeRenderHandler;
 import pneumaticCraft.client.gui.widget.GuiAnimatedStat;
-import cpw.mods.fml.client.FMLClientHandler;
 
 public class GuiMoveStat extends GuiScreen{
     private final IGuiAnimatedStat movedStat;

@@ -1,6 +1,6 @@
 package pneumaticCraft.common.heat;
 
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 
@@ -12,7 +12,7 @@ public class SimpleHeatExchanger implements IHeatExchanger{
     }
 
     @Override
-    public IHeatExchangerLogic getHeatExchangerLogic(ForgeDirection side){
+    public IHeatExchangerLogic getHeatExchangerLogic(EnumFacing side){
         return logic;
     }
 

@@ -8,13 +8,14 @@ import java.util.List;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
-
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiRadioButton extends Gui implements IGuiWidget{
@@ -22,7 +23,7 @@ public class GuiRadioButton extends Gui implements IGuiWidget{
     public int x, y, color;
     private final int id;
     public String text;
-    public FontRenderer fontRenderer = FMLClientHandler.instance().getClient().fontRenderer;
+    public FontRenderer fontRenderer = FMLClientHandler.instance().getClient().fontRendererObj;
     private List<String> tooltip = new ArrayList<String>();
     public List<GuiRadioButton> otherChoices;
     private IWidgetListener listener;
@@ -58,7 +59,7 @@ public class GuiRadioButton extends Gui implements IGuiWidget{
     }
 
     private void drawCircle(int x, int y, int radius, int color){
-        Tessellator t = Tessellator.instance;
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
         float f = (color >> 24 & 255) / 255.0F;
         float f1 = (color >> 16 & 255) / 255.0F;
         float f2 = (color >> 8 & 255) / 255.0F;
@@ -67,14 +68,14 @@ public class GuiRadioButton extends Gui implements IGuiWidget{
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glColor4f(f1, f2, f3, f);
-        t.startDrawing(GL11.GL_TRIANGLE_FAN);
+        wr.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION);
         int points = 20;
         for(int i = 0; i < points; i++) {
             double sin = Math.sin((double)i / points * Math.PI * 2);
             double cos = Math.cos((double)i / points * Math.PI * 2);
-            t.addVertex(x + sin * radius, y + cos * radius, zLevel);
+            wr.pos(x + sin * radius, y + cos * radius, zLevel).endVertex();
         }
-        t.draw();
+        Tessellator.getInstance().draw();
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glDisable(GL11.GL_BLEND);
     }

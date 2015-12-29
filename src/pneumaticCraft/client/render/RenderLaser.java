@@ -2,16 +2,19 @@ package pneumaticCraft.client.render;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
 
+import pneumaticCraft.client.util.RenderUtils;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class RenderLaser{
@@ -88,24 +91,24 @@ public class RenderLaser{
     }
 
     private void renderQuad(int color){
-        Tessellator t = Tessellator.instance;
-        t.startDrawingQuads();
-        t.setColorOpaque_I(color);
-        t.addVertexWithUV(-0.5, 0, 0, 0, 0);
-        t.addVertexWithUV(-0.5, 1, 0, 0, 1);
-        t.addVertexWithUV(0.5, 1, 0, 1, 1);
-        t.addVertexWithUV(0.5, 0, 0, 1, 0);
-        t.draw();
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+        wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+        RenderUtils.glColorHex(color);
+        wr.pos(-0.5, 0, 0).tex(0, 0).endVertex();
+        wr.pos(-0.5, 1, 0).tex(0, 1).endVertex();
+        wr.pos(0.5, 1, 0).tex(1, 1).endVertex();
+        wr.pos(0.5, 0, 0).tex(1, 0).endVertex();
+        Tessellator.getInstance().draw();
     }
 
     /*  private void renderAnimation(float partialTicks, double length){
           float p = (ticksExisted + partialTicks) % 100 / 100;
-          Tessellator t = Tessellator.instance;
-          t.startDrawingQuads();
+          WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+          wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
           t.addVertexWithUV(-0.5, 0, 0, 0, p);
           t.addVertexWithUV(-0.5, 1, 0, 0, length + p);
           t.addVertexWithUV(0.5, 1, 0, 1, length + p);
           t.addVertexWithUV(0.5, 0, 0, 1, p);
-          t.draw();
+          Tessellator.getInstance().draw();
       }*/
 }

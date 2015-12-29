@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -34,15 +34,15 @@ public class ProgWidgetLiquidInventoryCondition extends ProgWidgetCondition{
         return new DroneAIBlockCondition(drone, (ProgWidgetAreaItemBase)widget){
 
             @Override
-            protected boolean evaluate(ChunkPosition pos){
-                TileEntity te = drone.getWorld().getTileEntity(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+            protected boolean evaluate(BlockPos pos){
+                TileEntity te = drone.getWorld().getTileEntity(pos);
                 int count = 0;
                 if(te instanceof IFluidHandler) {
                     List<FluidStack> visitedStacks = new ArrayList<FluidStack>();
                     IFluidHandler inv = (IFluidHandler)te;
                     for(int i = 0; i < 6; i++) {
                         if(((ISidedWidget)widget).getSides()[i]) {
-                            FluidTankInfo[] info = inv.getTankInfo(ForgeDirection.getOrientation(i));
+                            FluidTankInfo[] info = inv.getTankInfo(EnumFacing.getFront(i));
                             if(info != null) {
                                 for(FluidTankInfo inf : info) {
                                     if(inf.fluid != null && !visitedStacks.contains(visitedStacks) && ProgWidgetLiquidFilter.isLiquidValid(inf.fluid.getFluid(), widget, 1)) {
@@ -54,8 +54,8 @@ public class ProgWidgetLiquidInventoryCondition extends ProgWidgetCondition{
                         }
                     }
                 } else {
-                    Fluid fluid = FluidRegistry.lookupFluidForBlock(drone.getWorld().getBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ));
-                    if(fluid != null && ProgWidgetLiquidFilter.isLiquidValid(fluid, widget, 1) && FluidUtils.isSourceBlock(drone.getWorld(), pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ)) {
+                    Fluid fluid = FluidRegistry.lookupFluidForBlock(drone.getWorld().getBlockState(pos).getBlock());
+                    if(fluid != null && ProgWidgetLiquidFilter.isLiquidValid(fluid, widget, 1) && FluidUtils.isSourceBlock(drone.getWorld(), pos)) {
                         count += 1000;
                     }
                 }

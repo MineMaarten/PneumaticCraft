@@ -3,11 +3,10 @@ package pneumaticCraft.client.render.pneumaticArmor;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityUtils;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.monster.EntitySlime;
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,6 +15,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.MouseEvent;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
 
@@ -33,9 +35,6 @@ import pneumaticCraft.common.network.PacketHackingEntityStart;
 import pneumaticCraft.common.network.PacketUpdateDebuggingDrone;
 import pneumaticCraft.lib.NBTKeys;
 import pneumaticCraft.lib.Sounds;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class RenderTarget{
 
@@ -60,13 +59,13 @@ public class RenderTarget{
         Item droppedItem = null;
         if(entity instanceof EntityLiving) {
             try {
-                droppedItem = EntityUtils.getLivingDrop((EntityLiving)entity);
+                droppedItem = null;//TODO 1.8 EntityUtils.getLivingDrop((EntityLiving)entity);
             } catch(Throwable e) {}
         }
         if(droppedItem != null) {
-            stat = new GuiAnimatedStat(null, entity.getCommandSenderName(), new ItemStack(droppedItem, 1, 0), 20, -20, 0x3000AA00, null, false);
+            stat = new GuiAnimatedStat(null, entity.getName(), new ItemStack(droppedItem, 1, 0), 20, -20, 0x3000AA00, null, false);
         } else {
-            stat = new GuiAnimatedStat(null, entity.getCommandSenderName(), "", 20, -20, 0x3000AA00, null, false);
+            stat = new GuiAnimatedStat(null, entity.getName(), "", 20, -20, 0x3000AA00, null, false);
         }
         stat.setMinDimensionsAndReset(0, 0);
     }
@@ -82,7 +81,7 @@ public class RenderTarget{
 
     public void update(){
         stat.update();
-        stat.setTitle(entity.getCommandSenderName());
+        stat.setTitle(entity.getName());
         EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
         if(ticksExisted >= 30 && !didMakeLockSound) {
             didMakeLockSound = true;
@@ -159,8 +158,8 @@ public class RenderTarget{
 
         GL11.glTranslated(x, y, z);
 
-        GL11.glRotatef(180.0F - RenderManager.instance.playerViewY, 0.0F, 1.0F, 0.0F);
-        GL11.glRotatef(180.0F - RenderManager.instance.playerViewX, 1.0F, 0.0F, 0.0F);
+        GL11.glRotatef(180.0F - Minecraft.getMinecraft().getRenderManager().playerViewY, 0.0F, 1.0F, 0.0F);
+        GL11.glRotatef(180.0F - Minecraft.getMinecraft().getRenderManager().playerViewX, 1.0F, 0.0F, 0.0F);
         GL11.glColor4d(red, green, blue, alpha);
         float renderSize = oldSize + (size - oldSize) * partialTicks;
         circle1.render(renderSize, partialTicks);
@@ -173,7 +172,7 @@ public class RenderTarget{
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);
 
-        FontRenderer fontRenderer = RenderManager.instance.getFontRenderer();
+        FontRenderer fontRenderer = Minecraft.getMinecraft().getRenderManager().getFontRenderer();
         GL11.glScaled(0.02D, 0.02D, 0.02D);
         GL11.glColor4d(red, green, blue, alpha);
         if(ticksExisted > 120) {
@@ -219,7 +218,7 @@ public class RenderTarget{
         EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
         World world = FMLClientHandler.instance().getClient().theWorld;
         Vec3 vec3 = player.getLook(1.0F).normalize();
-        Vec3 vec31 = Vec3.createVectorHelper(entity.posX - player.posX, entity.boundingBox.minY + entity.height / 2.0F - (player.posY + player.getEyeHeight()), entity.posZ - player.posZ);
+        Vec3 vec31 = new Vec3(entity.posX - player.posX, entity.getEntityBoundingBox().minY + entity.height / 2.0F - (player.posY + player.getEyeHeight()), entity.posZ - player.posZ);
         double d0 = vec31.lengthVector();
         vec31 = vec31.normalize();
         double d1 = vec3.dotProduct(vec31);

@@ -4,11 +4,11 @@ import java.util.List;
 
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetImportExport;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public abstract class ProgWidgetInventoryBase extends ProgWidgetAreaItemBase implements ISidedWidget, ICountWidget{
     private boolean[] accessingSides = new boolean[]{true, true, true, true, true, true};
@@ -87,7 +87,7 @@ public abstract class ProgWidgetInventoryBase extends ProgWidgetAreaItemBase imp
             String tip = "";
             for(int i = 0; i < 6; i++) {
                 if(accessingSides[i]) {
-                    switch(ForgeDirection.getOrientation(i)){
+                    switch(EnumFacing.getFront(i)){
                         case UP:
                             tip += "top, ";
                             break;
@@ -117,7 +117,7 @@ public abstract class ProgWidgetInventoryBase extends ProgWidgetAreaItemBase imp
     public void writeToNBT(NBTTagCompound tag){
         super.writeToNBT(tag);
         for(int i = 0; i < 6; i++) {
-            tag.setBoolean(ForgeDirection.getOrientation(i).name(), accessingSides[i]);
+            tag.setBoolean(EnumFacing.getFront(i).name(), accessingSides[i]);
         }
         tag.setBoolean("useCount", useCount);
         tag.setInteger("count", count);
@@ -127,7 +127,7 @@ public abstract class ProgWidgetInventoryBase extends ProgWidgetAreaItemBase imp
     public void readFromNBT(NBTTagCompound tag){
         super.readFromNBT(tag);
         for(int i = 0; i < 6; i++) {
-            accessingSides[i] = tag.getBoolean(ForgeDirection.getOrientation(i).name());
+            accessingSides[i] = tag.getBoolean(EnumFacing.getFront(i).name());
         }
         useCount = tag.getBoolean("useCount");
         count = tag.getInteger("count");

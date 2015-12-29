@@ -11,9 +11,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import org.lwjgl.opengl.GL11;
 
@@ -23,13 +26,10 @@ import pneumaticCraft.client.render.pneumaticArmor.HUDHandler;
 import pneumaticCraft.common.item.ItemGPSTool;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
 
 public class AreaShowManager{
     private static AreaShowManager INSTANCE = new AreaShowManager();
-    private final Map<ChunkPosition, AreaShowHandler> showHandlers = new HashMap<ChunkPosition, AreaShowHandler>();
+    private final Map<BlockPos, AreaShowHandler> showHandlers = new HashMap<BlockPos, AreaShowHandler>();
     private World world;
     private DroneDebugUpgradeHandler droneDebugger;
 
@@ -58,9 +58,9 @@ public class AreaShowManager{
 
         ItemStack curItem = player.getCurrentEquippedItem();
         if(curItem != null && curItem.getItem() == Itemss.GPSTool) {
-            ChunkPosition gpsLocation = ItemGPSTool.getGPSLocation(curItem);
+            BlockPos gpsLocation = ItemGPSTool.getGPSLocation(curItem);
             if(gpsLocation != null) {
-                Set<ChunkPosition> set = new HashSet<ChunkPosition>();
+                Set<BlockPos> set = new HashSet<BlockPos>();
                 set.add(gpsLocation);
                 GL11.glDisable(GL11.GL_DEPTH_TEST);
                 new AreaShowHandler(set, 0xFFFF00).render();
@@ -71,7 +71,7 @@ public class AreaShowManager{
         ItemStack helmet = player.getCurrentArmor(3);
         if(helmet != null && helmet.getItem() == Itemss.pneumaticHelmet) {
             if(droneDebugger == null) droneDebugger = HUDHandler.instance().getSpecificRenderer(DroneDebugUpgradeHandler.class);
-            Set<ChunkPosition> set = droneDebugger.getShowingPositions();
+            Set<BlockPos> set = droneDebugger.getShowingPositions();
             GL11.glDisable(GL11.GL_DEPTH_TEST);
             new AreaShowHandler(set, 0xFF0000).render();
             GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -83,24 +83,24 @@ public class AreaShowManager{
         GL11.glPopMatrix();
     }
 
-    public AreaShowHandler showArea(ChunkPosition[] area, int color, TileEntity areaShower){
-        return showArea(new HashSet<ChunkPosition>(Arrays.asList(area)), color, areaShower);
+    public AreaShowHandler showArea(BlockPos[] area, int color, TileEntity areaShower){
+        return showArea(new HashSet<BlockPos>(Arrays.asList(area)), color, areaShower);
     }
 
-    public AreaShowHandler showArea(Set<ChunkPosition> area, int color, TileEntity areaShower){
+    public AreaShowHandler showArea(Set<BlockPos> area, int color, TileEntity areaShower){
         if(areaShower == null) return null;
         removeHandlers(areaShower);
         AreaShowHandler handler = new AreaShowHandler(area, color);
-        showHandlers.put(new ChunkPosition(areaShower.xCoord, areaShower.yCoord, areaShower.zCoord), handler);
+        showHandlers.put(new BlockPos(areaShower.getPos().getX(), areaShower.getPos().getY(), areaShower.getPos().getZ()), handler);
         return handler;
     }
 
     public boolean isShowing(TileEntity te){
-        return showHandlers.containsKey(new ChunkPosition(te.xCoord, te.yCoord, te.zCoord));
+        return showHandlers.containsKey(new BlockPos(te.getPos().getX(), te.getPos().getY(), te.getPos().getZ()));
     }
 
     public void removeHandlers(TileEntity te){
-        showHandlers.remove(new ChunkPosition(te.xCoord, te.yCoord, te.zCoord));
+        showHandlers.remove(new BlockPos(te.getPos().getX(), te.getPos().getY(), te.getPos().getZ()));
     }
 
     @SubscribeEvent
@@ -112,10 +112,10 @@ public class AreaShowManager{
                 showHandlers.clear();
             } else {
                 if(event.phase == TickEvent.Phase.END) {
-                    Iterator<ChunkPosition> iterator = showHandlers.keySet().iterator();
+                    Iterator<BlockPos> iterator = showHandlers.keySet().iterator();
                     while(iterator.hasNext()) {
-                        ChunkPosition pos = iterator.next();
-                        if(PneumaticCraftUtils.distBetween(pos, player.posX, player.posY, player.posZ) < 32 && world.isAirBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ)) iterator.remove();
+                        BlockPos pos = iterator.next();
+                        if(PneumaticCraftUtils.distBetween(pos, player.posX, player.posY, player.posZ) < 32 && world.isAirBlock(pos)) iterator.remove();
                     }
                 }
             }

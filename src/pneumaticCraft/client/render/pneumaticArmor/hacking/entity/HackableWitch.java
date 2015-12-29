@@ -6,9 +6,9 @@ import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableEntity;
 import pneumaticCraft.lib.Log;
-import cpw.mods.fml.relauncher.ReflectionHelper;
 
 public class HackableWitch implements IHackableEntity{
     private static Field attackTimer;

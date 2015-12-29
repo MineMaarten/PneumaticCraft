@@ -15,21 +15,20 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.common.block.BlockFluidEtchingAcid;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.item.ItemPneumatic;
 import pneumaticCraft.common.item.Itemss;
-import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class Fluids{
     public static final Fluid etchingAcid = new FluidPneumaticCraft("etchacid", false){
         @Override
         public int getColor(){
-            return getBlock().colorMultiplier(null, 0, 0, 0);
+            return getBlock().colorMultiplier(null, null);
         }
     };
     public static final Fluid plastic = new FluidPlastic("plastic");
@@ -46,7 +45,7 @@ public class Fluids{
     public static void initFluids(){
 
         etchingAcid.setBlock(new BlockFluidEtchingAcid());
-        plastic.getBlock().setBlockName(plastic.getName() + "Block");
+        plastic.getBlock().setUnlocalizedName(plastic.getName() + "Block");
 
         fluids.add(plastic);
         fluids.add(etchingAcid);
@@ -106,7 +105,7 @@ public class Fluids{
                 public void getSubItems(Item item, CreativeTabs creativeTab, List items){
                     if(FluidRegistry.isFluidDefault(fluid)) super.getSubItems(item, creativeTab, items);
                 }
-            }.setContainerItem(Items.bucket).setCreativeTab(PneumaticCraft.tabPneumaticCraft).setTextureName(Textures.ICON_LOCATION + fluid.getName() + "Bucket").setUnlocalizedName(fluid.getName() + "Bucket");
+            }.setContainerItem(Items.bucket).setCreativeTab(PneumaticCraft.tabPneumaticCraft).setUnlocalizedName(fluid.getName() + "Bucket");
 
             Itemss.registerItem(fluidBucket);
 

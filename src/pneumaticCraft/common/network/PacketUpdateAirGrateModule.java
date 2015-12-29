@@ -2,9 +2,9 @@ package pneumaticCraft.common.network;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import pneumaticCraft.common.block.tubes.ModuleAirGrate;
 import pneumaticCraft.common.block.tubes.TubeModule;
-import cpw.mods.fml.common.network.ByteBufUtils;
 
 public class PacketUpdateAirGrateModule extends PacketUpdateTubeModule<PacketUpdateAirGrateModule>{
     private String entityFilter;

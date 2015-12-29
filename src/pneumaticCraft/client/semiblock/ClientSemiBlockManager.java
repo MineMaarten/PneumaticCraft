@@ -6,17 +6,17 @@ import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import org.lwjgl.opengl.GL11;
 
 import pneumaticCraft.common.semiblock.ISemiBlock;
+import pneumaticCraft.common.semiblock.SemiBlockHeatFrame;
 import pneumaticCraft.common.semiblock.SemiBlockLogistics;
 import pneumaticCraft.common.semiblock.SemiBlockManager;
-import pneumaticCraft.common.semiblock.SemiBlockHeatFrame;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class ClientSemiBlockManager{
     private static final Map<Class<? extends ISemiBlock>, ISemiBlockRenderer> renderers = new HashMap<Class<? extends ISemiBlock>, ISemiBlockRenderer>();
@@ -44,12 +44,12 @@ public class ClientSemiBlockManager{
         //  GL11.glEnable(GL11.GL_LIGHTING);
         RenderHelper.enableStandardItemLighting();
 
-        for(Map<ChunkPosition, ISemiBlock> map : SemiBlockManager.getInstance(player.worldObj).getSemiBlocks().values()) {
+        for(Map<BlockPos, ISemiBlock> map : SemiBlockManager.getInstance(player.worldObj).getSemiBlocks().values()) {
             for(ISemiBlock semiBlock : map.values()) {
                 ISemiBlockRenderer renderer = getRenderer(semiBlock);
                 if(renderer != null) {
                     GL11.glPushMatrix();
-                    GL11.glTranslated(semiBlock.getPos().chunkPosX, semiBlock.getPos().chunkPosY, semiBlock.getPos().chunkPosZ);
+                    GL11.glTranslated(semiBlock.getPos().getX(), semiBlock.getPos().getY(), semiBlock.getPos().getZ());
                     renderer.render(semiBlock, event.partialTicks);
                     GL11.glPopMatrix();
                 }

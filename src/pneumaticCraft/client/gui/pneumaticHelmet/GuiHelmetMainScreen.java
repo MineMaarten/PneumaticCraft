@@ -1,5 +1,6 @@
 package pneumaticCraft.client.gui.pneumaticHelmet;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import pneumaticCraft.api.client.pneumaticHelmet.IGuiScreen;
 import pneumaticCraft.api.client.pneumaticHelmet.IOptionPage;
 import pneumaticCraft.api.client.pneumaticHelmet.IUpgradeRenderHandler;
@@ -16,7 +18,6 @@ import pneumaticCraft.client.gui.GuiPneumaticScreenBase;
 import pneumaticCraft.client.gui.widget.GuiKeybindCheckBox;
 import pneumaticCraft.client.render.pneumaticArmor.UpgradeRenderHandlerList;
 import pneumaticCraft.common.CommonHUDHandler;
-import cpw.mods.fml.client.FMLClientHandler;
 
 public class GuiHelmetMainScreen extends GuiPneumaticScreenBase implements IGuiScreen{
 
@@ -34,7 +35,7 @@ public class GuiHelmetMainScreen extends GuiPneumaticScreenBase implements IGuiS
     public static void init(){
         instance = new GuiHelmetMainScreen();
         Minecraft minecraft = FMLClientHandler.instance().getClient();
-        ScaledResolution scaledresolution = new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight);
+        ScaledResolution scaledresolution = new ScaledResolution(minecraft);
         int width = scaledresolution.getScaledWidth();
         int height = scaledresolution.getScaledHeight();
         instance.setWorldAndResolution(minecraft, width, height);
@@ -95,7 +96,7 @@ public class GuiHelmetMainScreen extends GuiPneumaticScreenBase implements IGuiS
     }
 
     @Override
-    public void keyTyped(char par1, int par2){
+    public void keyTyped(char par1, int par2) throws IOException{
         super.keyTyped(par1, par2);
         if(par2 != 1) {
             for(IOptionPage page : upgradePages) {
@@ -115,13 +116,13 @@ public class GuiHelmetMainScreen extends GuiPneumaticScreenBase implements IGuiS
     }
 
     @Override
-    public void handleMouseInput(){
+    public void handleMouseInput() throws IOException{
         super.handleMouseInput();
         upgradePages.get(page).handleMouseInput();
     }
 
     @Override
-    protected void mouseClicked(int par1, int par2, int par3){
+    protected void mouseClicked(int par1, int par2, int par3) throws IOException{
         super.mouseClicked(par1, par2, par3);
         upgradePages.get(page).mouseClicked(par1, par2, par3);
     }

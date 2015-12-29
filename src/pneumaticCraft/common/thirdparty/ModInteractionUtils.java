@@ -4,7 +4,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.api.block.IPneumaticWrenchable;
 import pneumaticCraft.api.tileentity.IPneumaticMachine;
 import pneumaticCraft.common.block.tubes.IPneumaticPosProvider;
@@ -54,11 +54,11 @@ public class ModInteractionUtils{
         return false;
     }
 
-    public ItemStack exportStackToTEPipe(TileEntity te, ItemStack stack, ForgeDirection side){
+    public ItemStack exportStackToTEPipe(TileEntity te, ItemStack stack, EnumFacing side){
         return stack;
     }
 
-    public ItemStack exportStackToBCPipe(TileEntity te, ItemStack stack, ForgeDirection side){
+    public ItemStack exportStackToBCPipe(TileEntity te, ItemStack stack, EnumFacing side){
         return stack;
     }
 
@@ -70,7 +70,7 @@ public class ModInteractionUtils{
         return false;
     }
 
-    public boolean isMultipartWiseConnected(Object part, ForgeDirection dir){
+    public boolean isMultipartWiseConnected(Object part, EnumFacing dir){
         return false;
     }
 
@@ -88,7 +88,7 @@ public class ModInteractionUtils{
     }
 
     public void removeTube(TileEntity te){
-        te.getWorldObj().setBlockToAir(te.xCoord, te.yCoord, te.zCoord);
+        te.getWorld().setBlockToAir(te.getPos());
     }
 
     public boolean occlusionTest(AxisAlignedBB aabb, TileEntity te){

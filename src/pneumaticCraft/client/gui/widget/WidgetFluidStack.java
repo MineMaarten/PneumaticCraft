@@ -26,7 +26,7 @@ public class WidgetFluidStack extends WidgetFluidFilter{
         if(fluid != null) {
             int fluidAmount = tank.getFluidAmount() / 1000;
             String s = fluidAmount + "B";
-            if(fluidAmount > 1) Minecraft.getMinecraft().fontRenderer.drawString(s, x - Minecraft.getMinecraft().fontRenderer.getStringWidth(s) + 17, y + 9, 0xFFFFFFFF, true);
+            if(fluidAmount > 1) Minecraft.getMinecraft().fontRendererObj.drawString(s, x - Minecraft.getMinecraft().fontRendererObj.getStringWidth(s) + 17, y + 9, 0xFFFFFFFF, true);
         }
     }
 }

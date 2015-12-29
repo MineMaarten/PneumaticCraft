@@ -48,7 +48,7 @@ public abstract class DroneEntityBase<Widget extends IProgWidget, E extends Enti
     @Override
     public boolean continueExecuting(){
         if(targetedEntity.isDead) return false;
-        if(Vec3.createVectorHelper(targetedEntity.posX, targetedEntity.posY, targetedEntity.posZ).distanceTo(drone.getPosition()) < 1.5) {
+        if(new Vec3(targetedEntity.posX, targetedEntity.posY, targetedEntity.posZ).distanceTo(drone.getDronePos()) < 1.5) {
             return doAction();
         }
         return !drone.getPathNavigator().hasNoPath();

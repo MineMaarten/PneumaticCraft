@@ -1,12 +1,16 @@
 package pneumaticCraft.client.gui.tubemodule;
 
 import java.awt.Rectangle;
+import java.io.IOException;
 
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
@@ -15,13 +19,13 @@ import pneumaticCraft.client.gui.widget.GuiAnimatedStat;
 import pneumaticCraft.client.gui.widget.GuiCheckBox;
 import pneumaticCraft.client.gui.widget.IGuiWidget;
 import pneumaticCraft.client.gui.widget.WidgetTooltipArea;
+import pneumaticCraft.client.util.RenderUtils;
 import pneumaticCraft.common.block.tubes.TubeModule;
 import pneumaticCraft.common.block.tubes.TubeModuleRedstoneReceiving;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketUpdatePressureModule;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.client.FMLClientHandler;
 
 public class GuiPressureModule extends GuiTubeModule{
 
@@ -57,9 +61,9 @@ public class GuiPressureModule extends GuiTubeModule{
         String title = I18n.format("item." + module.getType() + ".name");
         addLabel(title, width / 2 - fontRendererObj.getStringWidth(title) / 2, guiTop + 5);
 
-        lowerBoundField = new GuiTextField(fontRendererObj, xStart + 10, yStart + 41, 30, 10);
+        lowerBoundField = new GuiTextField(-1, fontRendererObj, xStart + 10, yStart + 41, 30, 10);
         lowerBoundField.setText(PneumaticCraftUtils.roundNumberTo(module.lowerBound, 1));
-        higherBoundField = new GuiTextField(fontRendererObj, xStart + 140, yStart + 41, 30, 10);
+        higherBoundField = new GuiTextField(-1, fontRendererObj, xStart + 140, yStart + 41, 30, 10);
         higherBoundField.setText(PneumaticCraftUtils.roundNumberTo(module.higherBound, 1));
 
         graphLowY = guiTop + 153;
@@ -153,21 +157,21 @@ public class GuiPressureModule extends GuiTubeModule{
          */
         double zLevel = 90;
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        Tessellator t = Tessellator.instance;
-        t.startDrawing(GL11.GL_LINE_STRIP);
-        t.setColorOpaque_I(0);
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+        wr.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION);
+        RenderUtils.glColorHex(0);
         for(int i = 0; i < 16; i++) {
             double y = graphHighY + (graphLowY - graphHighY) * (15 - i) / 15;
             double x = graphLeft + (graphRight - graphLeft) * module.getThreshold(i) / 30;
-            t.addVertex(x, y, zLevel);
+            wr.pos(x, y, zLevel).endVertex();
         }
-        t.draw();
+        Tessellator.getInstance().draw();
         GL11.glEnable(GL11.GL_TEXTURE_2D);
 
     }
 
     @Override
-    protected void mouseClicked(int par1, int par2, int par3){
+    protected void mouseClicked(int par1, int par2, int par3) throws IOException{
         super.mouseClicked(par1, par2, par3);
         boolean wasFocused = lowerBoundField.isFocused();
         lowerBoundField.mouseClicked(par1, par2, par3);
@@ -195,7 +199,7 @@ public class GuiPressureModule extends GuiTubeModule{
     }
 
     @Override
-    protected void keyTyped(char par1, int par2){
+    protected void keyTyped(char par1, int par2) throws IOException{
         if(lowerBoundField.isFocused() && par2 != 1) {
             lowerBoundField.textboxKeyTyped(par1, par2);
             //  NetworkHandler.sendToServer(new PacketUpdateTextfield(te, 0));

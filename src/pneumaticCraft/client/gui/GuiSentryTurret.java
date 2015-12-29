@@ -1,17 +1,18 @@
 package pneumaticCraft.client.gui;
 
+import java.io.IOException;
 import java.util.List;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.widget.WidgetTextField;
 import pneumaticCraft.common.inventory.ContainerSentryTurret;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketUpdateTextfield;
 import pneumaticCraft.common.tileentity.TileEntitySentryTurret;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiSentryTurret extends GuiPneumaticContainerBase<TileEntitySentryTurret>{
@@ -37,7 +38,7 @@ public class GuiSentryTurret extends GuiPneumaticContainerBase<TileEntitySentryT
     }
 
     @Override
-    protected void mouseClicked(int par1, int par2, int par3){
+    protected void mouseClicked(int par1, int par2, int par3) throws IOException{
         super.mouseClicked(par1, par2, par3);
         if(!entityFilter.isFocused()) {
             te.setText(0, entityFilter.getText());

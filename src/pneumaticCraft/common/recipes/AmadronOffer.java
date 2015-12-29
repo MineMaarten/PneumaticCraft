@@ -7,11 +7,10 @@ import net.minecraft.util.StatCollector;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.common.registry.GameData;
 import pneumaticCraft.lib.Log;
 
 import com.google.gson.JsonObject;
-
-import cpw.mods.fml.common.registry.GameData;
 
 public class AmadronOffer{
     protected Object input;
@@ -107,7 +106,7 @@ public class AmadronOffer{
 
         JsonObject inputObject = new JsonObject();
         if(input instanceof ItemStack) {
-            inputObject.addProperty("id", GameData.getItemRegistry().getNameForObject(((ItemStack)input).getItem()));
+            inputObject.addProperty("id", GameData.getItemRegistry().getNameForObject(((ItemStack)input).getItem()).toString());
             inputObject.addProperty("damage", ((ItemStack)input).getItemDamage());
             inputObject.addProperty("amount", ((ItemStack)input).stackSize);
         } else {
@@ -118,7 +117,7 @@ public class AmadronOffer{
 
         JsonObject outputObject = new JsonObject();
         if(output instanceof ItemStack) {
-            outputObject.addProperty("id", GameData.getItemRegistry().getNameForObject(((ItemStack)output).getItem()));
+            outputObject.addProperty("id", GameData.getItemRegistry().getNameForObject(((ItemStack)output).getItem()).toString());
             outputObject.addProperty("damage", ((ItemStack)output).getItemDamage());
             outputObject.addProperty("amount", ((ItemStack)output).stackSize);
         } else {
@@ -134,7 +133,7 @@ public class AmadronOffer{
         JsonObject inputObject = object.getAsJsonObject("input");
         Object input;
         if(inputObject.has("damage")) {
-            Item item = GameData.getItemRegistry().getObject(inputObject.get("id").getAsString());
+            Item item = Item.getByNameOrId(inputObject.get("id").getAsString());
             if(item != null) {
                 input = new ItemStack(item, inputObject.get("amount").getAsInt(), inputObject.get("damage").getAsInt());
             } else {
@@ -154,7 +153,7 @@ public class AmadronOffer{
         JsonObject outputObject = object.getAsJsonObject("output");
         Object output;
         if(outputObject.has("damage")) {
-            Item item = GameData.getItemRegistry().getObject(outputObject.get("id").getAsString());
+            Item item = Item.getByNameOrId(outputObject.get("id").getAsString());
             if(item != null) {
                 output = new ItemStack(item, outputObject.get("amount").getAsInt(), outputObject.get("damage").getAsInt());
             } else {

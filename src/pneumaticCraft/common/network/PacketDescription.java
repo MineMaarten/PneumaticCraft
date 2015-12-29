@@ -7,10 +7,11 @@ import java.util.List;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import pneumaticCraft.common.inventory.ContainerLogistics;
 import pneumaticCraft.common.inventory.SyncedField;
 import pneumaticCraft.common.semiblock.SemiBlockManager;
-import cpw.mods.fml.common.network.ByteBufUtils;
 
 public class PacketDescription extends LocationIntPacket<PacketDescription>{
     private byte[] types;
@@ -21,7 +22,7 @@ public class PacketDescription extends LocationIntPacket<PacketDescription>{
     public PacketDescription(){}
 
     public PacketDescription(IDescSynced te){
-        super(te.getX(), te.getY(), te.getZ());
+        super(te.getPos());
         type = te.getSyncType();
         values = new Object[te.getDescriptionFields().size()];
         types = new byte[values.length];
@@ -64,13 +65,13 @@ public class PacketDescription extends LocationIntPacket<PacketDescription>{
             case TILE_ENTITY:
                 return message.getTileEntity(player.worldObj);
             case SEMI_BLOCK:
-                if(message.x == 0 && message.y == 0 && message.z == 0) {
+                if(message.pos.equals(new BlockPos(0, 0, 0))) {
                     Container container = player.openContainer;
                     if(container instanceof ContainerLogistics) {
                         return ((ContainerLogistics)container).logistics;
                     }
                 } else {
-                    return SemiBlockManager.getInstance(player.worldObj).getSemiBlock(player.worldObj, message.x, message.y, message.z);
+                    return SemiBlockManager.getInstance(player.worldObj).getSemiBlock(player.worldObj, message.pos);
                 }
         }
         return null;
@@ -78,7 +79,7 @@ public class PacketDescription extends LocationIntPacket<PacketDescription>{
 
     @Override
     public void handleClientSide(PacketDescription message, EntityPlayer player){
-        if(player.worldObj.blockExists(message.x, message.y, message.z)) {
+        if(player.worldObj.isBlockLoaded(message.pos)) {
             Object syncable = getSyncableForType(message, player, message.type);
             if(syncable instanceof IDescSynced) {
                 IDescSynced descSynced = (IDescSynced)syncable;

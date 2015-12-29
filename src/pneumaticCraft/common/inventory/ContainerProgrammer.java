@@ -6,7 +6,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.api.item.IProgrammable;
 import pneumaticCraft.common.network.PacketSendNBTPacket;
 import pneumaticCraft.common.tileentity.TileEntityProgrammer;
@@ -44,9 +44,9 @@ public class ContainerProgrammer extends ContainerPneumaticBase<TileEntityProgra
     @Override
     public void detectAndSendChanges(){
         super.detectAndSendChanges();
-        if(te.getWorldObj().getTotalWorldTime() % 20 == 0) {
-            for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
-                TileEntity neighbor = te.getWorldObj().getTileEntity(te.xCoord + d.offsetX, te.yCoord + d.offsetY, te.zCoord + d.offsetZ);
+        if(te.getWorld().getTotalWorldTime() % 20 == 0) {
+            for(EnumFacing d : EnumFacing.VALUES) {
+                TileEntity neighbor = te.getWorld().getTileEntity(te.getPos().offset(d));
                 if(neighbor instanceof IInventory) {
                     sendToCrafters(new PacketSendNBTPacket(neighbor));
                 }
@@ -58,7 +58,7 @@ public class ContainerProgrammer extends ContainerPneumaticBase<TileEntityProgra
     public ItemStack transferStackInSlot(EntityPlayer par1EntityPlayer, int par2){
 
         ItemStack var3 = null;
-        Slot var4 = (Slot)inventorySlots.get(par2);
+        Slot var4 = inventorySlots.get(par2);
 
         if(var4 != null && var4.getHasStack()) {
             ItemStack var5 = var4.getStack();

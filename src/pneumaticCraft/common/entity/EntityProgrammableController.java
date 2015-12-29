@@ -1,7 +1,7 @@
 package pneumaticCraft.common.entity;
 
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import pneumaticCraft.common.entity.living.EntityDroneBase;
 import pneumaticCraft.common.tileentity.TileEntityProgrammableController;
@@ -55,7 +55,7 @@ public class EntityProgrammableController extends EntityDroneBase{
     }
 
     @Override
-    protected ChunkPosition getDugBlock(){
+    protected BlockPos getDugBlock(){
         return controller.getDugPosition();
     }
 }

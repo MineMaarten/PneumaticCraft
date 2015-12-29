@@ -9,26 +9,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.ChunkCache;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetAreaShow;
 import pneumaticCraft.common.ai.DroneAIManager;
 import pneumaticCraft.common.ai.StringFilterEntitySelector;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+
+import com.google.common.base.Predicate;
 
 public abstract class ProgWidgetAreaItemBase extends ProgWidget implements IAreaProvider, IEntityProvider,
         IItemFiltering, IVariableWidget{
-    private List<ChunkPosition> areaListCache;
-    private Set<ChunkPosition> areaSetCache;
-    private Map<String, ChunkPosition> areaVariableStates;
+    private List<BlockPos> areaListCache;
+    private Set<BlockPos> areaSetCache;
+    private Map<String, BlockPos> areaVariableStates;
     protected DroneAIManager aiManager;
     private boolean canCache = true;
 
@@ -55,51 +57,51 @@ public abstract class ProgWidgetAreaItemBase extends ProgWidget implements IArea
         }
     }
 
-    public static IBlockAccess getCache(Collection<ChunkPosition> area, World world){
+    public static IBlockAccess getCache(Collection<BlockPos> area, World world){
         if(area.size() == 0) return world;
         int minX, minY, minZ, maxX, maxY, maxZ;
-        Iterator<ChunkPosition> iterator = area.iterator();
-        ChunkPosition p = iterator.next();
-        minX = maxX = p.chunkPosX;
-        minY = maxY = p.chunkPosY;
-        minZ = maxZ = p.chunkPosZ;
+        Iterator<BlockPos> iterator = area.iterator();
+        BlockPos p = iterator.next();
+        minX = maxX = p.getX();
+        minY = maxY = p.getY();
+        minZ = maxZ = p.getZ();
         while(iterator.hasNext()) {
             p = iterator.next();
-            minX = Math.min(minX, p.chunkPosX);
-            minY = Math.min(minY, p.chunkPosY);
-            minZ = Math.min(minZ, p.chunkPosZ);
-            maxX = Math.max(maxX, p.chunkPosX);
-            maxY = Math.max(maxY, p.chunkPosY);
-            maxZ = Math.max(maxZ, p.chunkPosZ);
+            minX = Math.min(minX, p.getX());
+            minY = Math.min(minY, p.getY());
+            minZ = Math.min(minZ, p.getZ());
+            maxX = Math.max(maxX, p.getX());
+            maxY = Math.max(maxY, p.getY());
+            maxZ = Math.max(maxZ, p.getZ());
         }
-        return new ChunkCache(world, minX, minY, minZ, maxX, maxY, maxZ, 0);
+        return new ChunkCache(world, new BlockPos(minX, minY, minZ), new BlockPos(maxX, maxY, maxZ), 0);
     }
 
-    public List<ChunkPosition> getCachedAreaList(){
+    public List<BlockPos> getCachedAreaList(){
         if(areaListCache != null) {
             if(!canCache || updateVariables()) {
-                areaSetCache = new HashSet<ChunkPosition>(areaListCache.size());
+                areaSetCache = new HashSet<BlockPos>(areaListCache.size());
                 getArea(areaSetCache);
-                areaListCache = new ArrayList<ChunkPosition>(areaSetCache.size());
+                areaListCache = new ArrayList<BlockPos>(areaSetCache.size());
                 areaListCache.addAll(areaSetCache);
             }
         } else {
-            areaSetCache = new HashSet<ChunkPosition>();
+            areaSetCache = new HashSet<BlockPos>();
             getArea(areaSetCache);
-            areaListCache = new ArrayList<ChunkPosition>(areaSetCache.size());
+            areaListCache = new ArrayList<BlockPos>(areaSetCache.size());
             areaListCache.addAll(areaSetCache);
             initializeVariableCache();
         }
         return areaListCache;
     }
 
-    public Set<ChunkPosition> getCachedAreaSet(){
+    public Set<BlockPos> getCachedAreaSet(){
         getCachedAreaList();
         return areaSetCache;
     }
 
     private void initializeVariableCache(){
-        areaVariableStates = new HashMap<String, ChunkPosition>();
+        areaVariableStates = new HashMap<String, BlockPos>();
         ProgWidgetArea whitelistWidget = (ProgWidgetArea)getConnectedParameters()[0];
         ProgWidgetArea blacklistWidget = (ProgWidgetArea)getConnectedParameters()[getParameters().length];
         if(whitelistWidget == null) return;
@@ -121,8 +123,8 @@ public abstract class ProgWidgetAreaItemBase extends ProgWidget implements IArea
 
     private boolean updateVariables(){
         boolean varChanged = false;
-        for(Map.Entry<String, ChunkPosition> entry : areaVariableStates.entrySet()) {
-            ChunkPosition newValue = aiManager.getCoordinate(entry.getKey());
+        for(Map.Entry<String, BlockPos> entry : areaVariableStates.entrySet()) {
+            BlockPos newValue = aiManager.getCoordinate(entry.getKey());
             if(!newValue.equals(entry.getValue())) {
                 varChanged = true;
                 entry.setValue(newValue);
@@ -132,11 +134,11 @@ public abstract class ProgWidgetAreaItemBase extends ProgWidget implements IArea
     }
 
     @Override
-    public void getArea(Set<ChunkPosition> area){
+    public void getArea(Set<BlockPos> area){
         getArea(area, (ProgWidgetArea)getConnectedParameters()[0], (ProgWidgetArea)getConnectedParameters()[getParameters().length]);
     }
 
-    public static void getArea(Set<ChunkPosition> area, ProgWidgetArea whitelistWidget, ProgWidgetArea blacklistWidget){
+    public static void getArea(Set<BlockPos> area, ProgWidgetArea whitelistWidget, ProgWidgetArea blacklistWidget){
         if(whitelistWidget == null) return;
         ProgWidgetArea widget = whitelistWidget;
         while(widget != null) {
@@ -144,7 +146,7 @@ public abstract class ProgWidgetAreaItemBase extends ProgWidget implements IArea
             widget = (ProgWidgetArea)widget.getConnectedParameters()[0];
         }
         widget = blacklistWidget;
-        Set<ChunkPosition> blacklistedArea = new HashSet<ChunkPosition>();
+        Set<BlockPos> blacklistedArea = new HashSet<BlockPos>();
         while(widget != null) {
             widget.getArea(blacklistedArea);
             widget = (ProgWidgetArea)widget.getConnectedParameters()[0];
@@ -154,18 +156,18 @@ public abstract class ProgWidgetAreaItemBase extends ProgWidget implements IArea
 
     @Override
     public boolean isItemValidForFilters(ItemStack item){
-        return isItemValidForFilters(item, -1);
+        return isItemValidForFilters(item, null);
     }
 
-    public boolean isItemValidForFilters(ItemStack item, int blockMetadata){
-        return ProgWidgetItemFilter.isItemValidForFilters(item, ProgWidget.getConnectedWidgetList(this, 1), ProgWidget.getConnectedWidgetList(this, getParameters().length + 1), blockMetadata);
+    public boolean isItemValidForFilters(ItemStack item, IBlockState blockState){
+        return ProgWidgetItemFilter.isItemValidForFilters(item, ProgWidget.getConnectedWidgetList(this, 1), ProgWidget.getConnectedWidgetList(this, getParameters().length + 1), blockState);
     }
 
     public boolean isItemFilterEmpty(){
         return getConnectedParameters()[1] == null && getConnectedParameters()[3] == null;
     }
 
-    public List<Entity> getEntitiesInArea(World world, IEntitySelector filter){
+    public List<Entity> getEntitiesInArea(World world, Predicate<? super Entity> filter){
         return getEntitiesInArea((ProgWidgetArea)getConnectedParameters()[0], (ProgWidgetArea)getConnectedParameters()[getParameters().length], world, filter, null);
     }
 
@@ -183,7 +185,7 @@ public abstract class ProgWidgetAreaItemBase extends ProgWidget implements IArea
     public static boolean isEntityValid(Entity entity, IProgWidget widget){
         StringFilterEntitySelector whitelistFilter = getEntityFilter((ProgWidgetString)widget.getConnectedParameters()[1], true);
         StringFilterEntitySelector blacklistFilter = getEntityFilter((ProgWidgetString)widget.getConnectedParameters()[widget.getParameters().length + 1], false);
-        return whitelistFilter.isEntityApplicable(entity) && !blacklistFilter.isEntityApplicable(entity);
+        return whitelistFilter.apply(entity) && !blacklistFilter.apply(entity);
     }
 
     @Override
@@ -204,25 +206,24 @@ public abstract class ProgWidgetAreaItemBase extends ProgWidget implements IArea
         return filter;
     }
 
-    public static List<Entity> getEntitiesInArea(ProgWidgetArea whitelistWidget, ProgWidgetArea blacklistWidget, World world, IEntitySelector whitelistFilter, IEntitySelector blacklistFilter){
+    public static List<Entity> getEntitiesInArea(ProgWidgetArea whitelistWidget, ProgWidgetArea blacklistWidget, World world, Predicate<? super Entity> whitelistPredicate, Predicate<? super Entity> blacklistPredicate){
         if(whitelistWidget == null) return new ArrayList<Entity>();
         Set<Entity> entities = new HashSet<Entity>();
         ProgWidgetArea widget = whitelistWidget;
         while(widget != null) {
-            entities.addAll(widget.getEntitiesWithinArea(world, whitelistFilter));
+            entities.addAll(widget.getEntitiesWithinArea(world, whitelistPredicate));
             widget = (ProgWidgetArea)widget.getConnectedParameters()[0];
         }
         widget = blacklistWidget;
         while(widget != null) {
-            entities.removeAll(widget.getEntitiesWithinArea(world, whitelistFilter));
+            entities.removeAll(widget.getEntitiesWithinArea(world, whitelistPredicate));
             widget = (ProgWidgetArea)widget.getConnectedParameters()[0];
         }
-        if(blacklistFilter != null) {
-            Entity[] entArray = entities.toArray(new Entity[entities.size()]);
-            for(Entity entity : entArray) {
-                if(blacklistFilter.isEntityApplicable(entity)) {
-                    entities.remove(entity);
-                }
+        if(blacklistPredicate != null) {
+            Iterator<Entity> iterator = entities.iterator();
+            while(iterator.hasNext()) {
+                Entity entity = iterator.next();
+                if(!blacklistPredicate.apply(entity)) iterator.remove();
             }
         }
         return new ArrayList<Entity>(entities);

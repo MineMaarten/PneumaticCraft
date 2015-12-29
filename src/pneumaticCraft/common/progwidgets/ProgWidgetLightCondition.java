@@ -1,7 +1,7 @@
 package pneumaticCraft.common.progwidgets;
 
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
 import pneumaticCraft.common.ai.DroneAIBlockCondition;
 import pneumaticCraft.common.ai.IDroneBase;
 import pneumaticCraft.lib.Textures;
@@ -28,8 +28,8 @@ public class ProgWidgetLightCondition extends ProgWidgetCondition{
         return new DroneAIBlockCondition(drone, (ProgWidgetAreaItemBase)widget){
 
             @Override
-            protected boolean evaluate(ChunkPosition pos){
-                int lightLevel = drone.getWorld().getBlockLightValue(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+            protected boolean evaluate(BlockPos pos){
+                int lightLevel = drone.getWorld().getLight(pos);
                 int requiredLight = ((ICondition)widget).getRequiredCount();
                 return ((ICondition)widget).getOperator() == ICondition.Operator.EQUALS ? requiredLight == lightLevel : lightLevel >= requiredLight;
             }

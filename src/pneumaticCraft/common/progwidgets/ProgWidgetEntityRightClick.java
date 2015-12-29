@@ -10,18 +10,18 @@ import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetAreaShow;
 import pneumaticCraft.common.ai.DroneAIBlockInteract;
 import pneumaticCraft.common.ai.DroneEntityBase;
 import pneumaticCraft.common.ai.IDroneBase;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetEntityRightClick extends ProgWidget implements IAreaProvider, IEntityProvider{
 
@@ -55,7 +55,7 @@ public class ProgWidgetEntityRightClick extends ProgWidget implements IAreaProvi
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.HELIUM_PLANT_DAMAGE;
+        return ItemPlastic.HELIUM_PLANT_DAMAGE;
     }
 
     @Override
@@ -82,7 +82,7 @@ public class ProgWidgetEntityRightClick extends ProgWidget implements IAreaProvi
             protected boolean doAction(){
                 visitedEntities.add(targetedEntity);
                 boolean activated = false;
-                ItemStack stack = drone.getInventory().getStackInSlot(0);
+                ItemStack stack = drone.getInv().getStackInSlot(0);
                 if(stack != null && stack.getItem().itemInteractionForEntity(stack, drone.getFakePlayer(), targetedEntity)) {
                     activated = true;
                 }
@@ -113,7 +113,7 @@ public class ProgWidgetEntityRightClick extends ProgWidget implements IAreaProvi
     }
 
     @Override
-    public void getArea(Set<ChunkPosition> area){
+    public void getArea(Set<BlockPos> area){
         ProgWidgetEntityAttack.getArea(area, (ProgWidgetArea)getConnectedParameters()[0], (ProgWidgetArea)getConnectedParameters()[2]);
     }
 }

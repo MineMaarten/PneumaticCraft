@@ -17,7 +17,7 @@ public class AirHandlerSupplier{
      * Returns a new instance of an IAirHandler. This handler handles everything pressurized air related: Air dispersion,
      * blowing up when the pressure gets too high, providing a method for releasing air into the atmosphere...
      * PROVIDED THAT THE FOLLOWING METHODS ARE FORWARDED TO THIS INSTANCE:
-     * {@link net.minecraft.tileentity.TileEntity#updateEntity()}, 
+     * {@link net.minecraft.tileentity.TileEntity#update()}, 
      * {@link net.minecraft.tileentity.TileEntity#writeToNBT(net.minecraft.nbt.NBTTagCompound)}
      * {@link net.minecraft.tileentity.TileEntity#readFromNBT(net.minecraft.nbt.NBTTagCompound)}
      * {@link net.minecraft.tileentity.TileEntity#validate()}

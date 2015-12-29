@@ -6,16 +6,16 @@ import java.util.Set;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetGoto;
 import pneumaticCraft.common.ai.DroneEntityAIGoToLocation;
 import pneumaticCraft.common.ai.IDroneBase;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetGoToLocation extends ProgWidget implements IGotoWidget, IAreaProvider{
 
@@ -76,7 +76,7 @@ public class ProgWidgetGoToLocation extends ProgWidget implements IGotoWidget, I
     }
 
     @Override
-    public void getArea(Set<ChunkPosition> area){
+    public void getArea(Set<BlockPos> area){
         ProgWidgetAreaItemBase.getArea(area, (ProgWidgetArea)getConnectedParameters()[0], (ProgWidgetArea)getConnectedParameters()[getParameters().length]);
     }
 
@@ -105,6 +105,6 @@ public class ProgWidgetGoToLocation extends ProgWidget implements IGotoWidget, I
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.CHOPPER_PLANT_DAMAGE;
+        return ItemPlastic.CHOPPER_PLANT_DAMAGE;
     }
 }

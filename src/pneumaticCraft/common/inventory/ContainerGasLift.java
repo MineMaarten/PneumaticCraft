@@ -4,7 +4,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.common.AchievementHandler;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.fluid.Fluids;
@@ -42,7 +42,7 @@ public class ContainerGasLift extends ContainerPneumaticBase<TileEntityGasLift>{
             addSlotToContainer(new Slot(inventoryPlayer, actionBarSlotIndex, 8 + actionBarSlotIndex * 18, 142));
         }
 
-        if(te.getTankInfo(ForgeDirection.UP)[0].fluid != null && te.getTankInfo(ForgeDirection.UP)[0].fluid.getFluid() == Fluids.oil) {
+        if(te.getTankInfo(EnumFacing.UP)[0].fluid != null && te.getTankInfo(EnumFacing.UP)[0].fluid.getFluid() == Fluids.oil) {
             AchievementHandler.giveAchievement(inventoryPlayer.player, new ItemStack(Fluids.getBucket(Fluids.oil)));
         }
     }

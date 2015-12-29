@@ -2,6 +2,7 @@ package pneumaticCraft.common.network;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import pneumaticCraft.common.DamageSourcePneumaticCraft;
 import pneumaticCraft.common.tileentity.TileEntitySecurityStation;
 
@@ -9,8 +10,8 @@ public class PacketSecurityStationFailedHack extends LocationIntPacket<PacketSec
 
     public PacketSecurityStationFailedHack(){}
 
-    public PacketSecurityStationFailedHack(int x, int y, int z){
-        super(x, y, z);
+    public PacketSecurityStationFailedHack(BlockPos pos){
+        super(pos);
     }
 
     @Override

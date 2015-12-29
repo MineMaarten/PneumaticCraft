@@ -1,14 +1,8 @@
 package pneumaticCraft.common.fluid;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.item.ItemDye;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fluids.FluidStack;
-import pneumaticCraft.common.item.ItemPlasticPlants;
-import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.lib.PneumaticValues;
 
 public class FluidPlastic extends FluidPneumaticCraft{
@@ -43,7 +37,7 @@ public class FluidPlastic extends FluidPneumaticCraft{
 
     public static void addDye(FluidStack plastic, int dyeMetadata){
         if(!Fluids.areFluidsEqual(plastic.getFluid(), Fluids.plastic)) throw new IllegalArgumentException("Given fluid stack isn't mixable! " + plastic);
-        int dyeColor = ItemDye.field_150922_c[dyeMetadata];
+        int dyeColor = ItemDye.dyeColors[dyeMetadata];
         int[] dyeColors = new int[]{dyeColor >> 16, dyeColor >> 8 & 255, dyeColor & 255};
         int[] plasticColor = getColor3(plastic);
         double ratio = PneumaticValues.PLASTIC_MIX_RATIO / (PneumaticValues.PLASTIC_MIX_RATIO * (plastic.amount / 1000D));
@@ -68,24 +62,5 @@ public class FluidPlastic extends FluidPneumaticCraft{
         newTag.setInteger("color", (newColor[0] << 16) + (newColor[1] << 8) + newColor[2]);
         // newTag.setInteger("temperature", (int)(ratio * getTemperatureS(plastic) + (1 - ratio) * getTemperatureS(otherPlastic)));
         return new FluidStack(Fluids.plastic, plastic.amount + otherPlastic.amount, newTag);
-    }
-
-    public static int getPlasticMeta(FluidStack plastic){
-        int[] dyeColors = ItemDye.field_150922_c;
-        int[] plasticColor = getColor3(plastic);
-        int bestMatching = -1;
-        double closestGap = Double.MAX_VALUE;
-        List<ItemStack> plasticTypes = new ArrayList<ItemStack>();
-        ((ItemPlasticPlants)Itemss.plasticPlant).addSubItems(plasticTypes);
-
-        for(ItemStack s : plasticTypes) {
-            int i = s.getItemDamage();
-            double gap = Math.pow(plasticColor[0] - (dyeColors[i] >> 16), 2) + Math.pow(plasticColor[1] - (dyeColors[i] >> 8 & 255), 2) + Math.pow(plasticColor[2] - (dyeColors[i] & 255), 2);
-            if(gap < closestGap) {
-                closestGap = gap;
-                bestMatching = i;
-            }
-        }
-        return bestMatching;
     }
 }

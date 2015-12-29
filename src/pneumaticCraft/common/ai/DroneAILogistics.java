@@ -7,10 +7,10 @@ import java.util.Set;
 
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import pneumaticCraft.common.ai.LogisticsManager.LogisticsTask;
@@ -37,22 +37,22 @@ public class DroneAILogistics extends EntityAIBase{
     @Override
     public boolean shouldExecute(){
         manager.clearLogistics();
-        Set<ChunkPosition> area = widget.getCachedAreaSet();
+        Set<BlockPos> area = widget.getCachedAreaSet();
         if(area.size() == 0) return false;
         int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE, minZ = Integer.MAX_VALUE, maxZ = Integer.MIN_VALUE;
-        for(ChunkPosition pos : area) {
-            minX = Math.min(minX, pos.chunkPosX);
-            maxX = Math.max(maxX, pos.chunkPosX);
-            minZ = Math.min(minZ, pos.chunkPosZ);
-            maxZ = Math.max(maxZ, pos.chunkPosZ);
+        for(BlockPos pos : area) {
+            minX = Math.min(minX, pos.getX());
+            maxX = Math.max(maxX, pos.getX());
+            minZ = Math.min(minZ, pos.getZ());
+            maxZ = Math.max(maxZ, pos.getZ());
         }
 
         for(int x = minX; x < maxX + 16; x += 16) {
             for(int z = minZ; z < maxZ + 16; z += 16) {
-                Chunk chunk = drone.getWorld().getChunkFromBlockCoords(x, z);
-                Map<ChunkPosition, ISemiBlock> map = SemiBlockManager.getInstance(drone.getWorld()).getSemiBlocks().get(chunk);
+                Chunk chunk = drone.getWorld().getChunkFromBlockCoords(new BlockPos(x, 0, z));
+                Map<BlockPos, ISemiBlock> map = SemiBlockManager.getInstance(drone.getWorld()).getSemiBlocks().get(chunk);
                 if(map != null) {
-                    for(Map.Entry<ChunkPosition, ISemiBlock> entry : map.entrySet()) {
+                    for(Map.Entry<BlockPos, ISemiBlock> entry : map.entrySet()) {
                         if(entry.getValue() instanceof SemiBlockLogistics && area.contains(entry.getKey())) {
                             SemiBlockLogistics logisticsBlock = (SemiBlockLogistics)entry.getValue();
                             manager.addLogisticFrame(logisticsBlock);
@@ -66,7 +66,7 @@ public class DroneAILogistics extends EntityAIBase{
     }
 
     private boolean doLogistics(){
-        ItemStack item = drone.getInventory().getStackInSlot(0);
+        ItemStack item = drone.getInv().getStackInSlot(0);
         FluidStack fluid = drone.getTank().getFluid();
         PriorityQueue<LogisticsTask> tasks = manager.getTasks(item != null ? item : fluid);
         if(tasks.size() > 0) {
@@ -98,7 +98,7 @@ public class DroneAILogistics extends EntityAIBase{
 
     private boolean clearAIAndProvideAgain(){
         curAI = null;
-        if(curTask.isStillValid(drone.getInventory().getStackInSlot(0) != null ? drone.getInventory().getStackInSlot(0) : drone.getTank().getFluid()) && execute(curTask)) {
+        if(curTask.isStillValid(drone.getInv().getStackInSlot(0) != null ? drone.getInv().getStackInSlot(0) : drone.getTank().getFluid()) && execute(curTask)) {
             return true;
         } else {
             curTask = null;
@@ -107,7 +107,7 @@ public class DroneAILogistics extends EntityAIBase{
     }
 
     public boolean execute(LogisticsTask task){
-        if(drone.getInventory().getStackInSlot(0) != null) {
+        if(drone.getInv().getStackInSlot(0) != null) {
             if(!isPosPathfindable(task.requester.getPos())) return false;
             curAI = new DroneEntityAIInventoryExport(drone, new FakeWidgetLogistics(task.requester.getPos(), task.transportingItem));
         } else if(drone.getTank().getFluidAmount() > 0) {
@@ -128,9 +128,9 @@ public class DroneAILogistics extends EntityAIBase{
         }
     }
 
-    private boolean isPosPathfindable(ChunkPosition pos){
-        for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
-            if(drone.isBlockValidPathfindBlock(pos.chunkPosX + d.offsetX, pos.chunkPosY + d.offsetY, pos.chunkPosZ + d.offsetZ)) return true;
+    private boolean isPosPathfindable(BlockPos pos){
+        for(EnumFacing d : EnumFacing.VALUES) {
+            if(drone.isBlockValidPathfindBlock(pos.offset(d))) return true;
         }
         return false;
     }
@@ -139,17 +139,17 @@ public class DroneAILogistics extends EntityAIBase{
             ILiquidFiltered{
         private ItemStack stack;
         private FluidStack fluid;
-        private final Set<ChunkPosition> area;
+        private final Set<BlockPos> area;
 
-        public FakeWidgetLogistics(ChunkPosition pos, ItemStack stack){
+        public FakeWidgetLogistics(BlockPos pos, ItemStack stack){
             this.stack = stack;
-            area = new HashSet<ChunkPosition>();
+            area = new HashSet<BlockPos>();
             area.add(pos);
         }
 
-        public FakeWidgetLogistics(ChunkPosition pos, FluidStack fluid){
+        public FakeWidgetLogistics(BlockPos pos, FluidStack fluid){
             this.fluid = fluid;
-            area = new HashSet<ChunkPosition>();
+            area = new HashSet<BlockPos>();
             area.add(pos);
         }
 
@@ -164,7 +164,7 @@ public class DroneAILogistics extends EntityAIBase{
         }
 
         @Override
-        public void getArea(Set<ChunkPosition> area){
+        public void getArea(Set<BlockPos> area){
             area.addAll(this.area);
         }
 

@@ -6,6 +6,8 @@ import java.util.List;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.widget.GuiAnimatedStat;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.inventory.ContainerAssemblyController;
@@ -16,8 +18,6 @@ import pneumaticCraft.common.tileentity.TileEntityAssemblyIOUnit;
 import pneumaticCraft.common.tileentity.TileEntityAssemblyLaser;
 import pneumaticCraft.common.tileentity.TileEntityAssemblyPlatform;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiAssemblyController extends GuiPneumaticContainerBase<TileEntityAssemblyController>{

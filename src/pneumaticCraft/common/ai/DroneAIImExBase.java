@@ -1,6 +1,6 @@
 package pneumaticCraft.common.ai;
 
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import pneumaticCraft.api.drone.IBlockInteractHandler;
 import pneumaticCraft.common.progwidgets.ICountWidget;
 import pneumaticCraft.common.progwidgets.ISidedWidget;
@@ -33,7 +33,7 @@ public abstract class DroneAIImExBase extends DroneAIBlockInteraction implements
     }
 
     @Override
-    protected boolean doBlockInteraction(ChunkPosition pos, double distToBlock){
+    protected boolean doBlockInteraction(BlockPos pos, double distToBlock){
         return !useCount() || transportCount > 0;
     }
 

@@ -3,8 +3,8 @@ package pneumaticCraft.common.network;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import pneumaticCraft.common.tileentity.IGUITextFieldSensitive;
-import cpw.mods.fml.common.network.ByteBufUtils;
 
 public class PacketUpdateTextfield extends LocationIntPacket<PacketUpdateTextfield>{
 
@@ -14,7 +14,7 @@ public class PacketUpdateTextfield extends LocationIntPacket<PacketUpdateTextfie
     public PacketUpdateTextfield(){}
 
     public PacketUpdateTextfield(TileEntity te, int textfieldID){
-        super(te.xCoord, te.yCoord, te.zCoord);
+        super(te.getPos());
         textFieldID = textfieldID;
         text = ((IGUITextFieldSensitive)te).getText(textfieldID);
     }
@@ -38,7 +38,7 @@ public class PacketUpdateTextfield extends LocationIntPacket<PacketUpdateTextfie
 
     @Override
     public void handleServerSide(PacketUpdateTextfield message, EntityPlayer player){
-        TileEntity te = player.worldObj.getTileEntity(message.x, message.y, message.z);
+        TileEntity te = message.getTileEntity(player.getEntityWorld());
         if(te instanceof IGUITextFieldSensitive) {
             ((IGUITextFieldSensitive)te).setText(message.textFieldID, message.text);
         }

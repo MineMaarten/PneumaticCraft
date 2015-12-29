@@ -180,7 +180,7 @@ public class EntityTrackHandler{
         @Override
         public void addInfo(Entity entity, List<String> curInfo){
             Entity target = ((EntityMob)entity).getAttackTarget();
-            curInfo.add("Target: " + (target != null ? target.getCommandSenderName() : "-"));
+            curInfo.add("Target: " + (target != null ? target.getName() : "-"));
         }
     }
 
@@ -213,7 +213,7 @@ public class EntityTrackHandler{
         public void addInfo(Entity entity, List<String> curInfo){
             EntityLivingBase owner = ((EntityTameable)entity).getOwner();
             if(owner != null) {
-                curInfo.add("Owner: " + owner.getCommandSenderName());
+                curInfo.add("Owner: " + owner.getName());
             } else {
                 curInfo.add("This animal can be tamed");
             }

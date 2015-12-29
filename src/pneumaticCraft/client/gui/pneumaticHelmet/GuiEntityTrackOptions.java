@@ -5,6 +5,8 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.I18n;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.api.client.pneumaticHelmet.IGuiScreen;
 import pneumaticCraft.api.client.pneumaticHelmet.IOptionPage;
@@ -12,8 +14,6 @@ import pneumaticCraft.client.render.pneumaticArmor.EntityTrackUpgradeHandler;
 import pneumaticCraft.common.item.ItemPneumaticArmor;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketUpdateEntityFilter;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.FMLCommonHandler;
 
 public class GuiEntityTrackOptions implements IOptionPage{
 
@@ -32,7 +32,7 @@ public class GuiEntityTrackOptions implements IOptionPage{
     @Override
     public void initGui(IGuiScreen gui){
         gui.getButtonList().add(new GuiButton(10, 30, 128, 150, 20, "Move Stat Screen..."));
-        textField = new GuiTextField(gui.getFontRenderer(), 35, 60, 140, 10);
+        textField = new GuiTextField(-1, gui.getFontRenderer(), 35, 60, 140, 10);
         textField.setFocused(true);
         if(PneumaticCraft.proxy.getPlayer() != null) textField.setText(ItemPneumaticArmor.getEntityFilter(PneumaticCraft.proxy.getPlayer().getCurrentArmor(3)));
     }
@@ -51,7 +51,7 @@ public class GuiEntityTrackOptions implements IOptionPage{
     @Override
     public void drawScreen(int x, int y, float partialTicks){
         textField.drawTextBox();
-        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRendererObj;
         fontRenderer.drawString(I18n.format("gui.entityFilter"), 35, 50, 0xFFFFFFFF);
     }
 

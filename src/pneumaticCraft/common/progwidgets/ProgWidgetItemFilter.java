@@ -3,28 +3,26 @@ package pneumaticCraft.common.progwidgets;
 import java.util.List;
 import java.util.Set;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
 
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetItemFilter;
 import pneumaticCraft.common.ai.DroneAIManager;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.common.registry.GameData;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetItemFilter extends ProgWidget implements IVariableWidget{
     private ItemStack filter;
@@ -74,13 +72,13 @@ public class ProgWidgetItemFilter extends ProgWidget implements IVariableWidget{
         Minecraft mc = Minecraft.getMinecraft();
         GL11.glTranslatef(0.0F, 0.0F, 32.0F);
         //  zLevel = 200.0F;
-        if(itemRender == null) itemRender = new RenderItem();
+        if(itemRender == null) itemRender = Minecraft.getMinecraft().getRenderItem(); //TODO 1.8 test
         itemRender.zLevel = 200.0F;
         FontRenderer font = null;
         if(p_146982_1_ != null) font = p_146982_1_.getItem().getFontRenderer(p_146982_1_);
-        if(font == null) font = mc.fontRenderer;
-        itemRender.renderItemAndEffectIntoGUI(font, mc.getTextureManager(), p_146982_1_, p_146982_2_, p_146982_3_);
-        itemRender.renderItemOverlayIntoGUI(font, mc.getTextureManager(), p_146982_1_, p_146982_2_, p_146982_3_, p_146982_4_);
+        if(font == null) font = mc.fontRendererObj;
+        itemRender.renderItemAndEffectIntoGUI(p_146982_1_, p_146982_2_, p_146982_3_);
+        itemRender.renderItemOverlayIntoGUI(font, p_146982_1_, p_146982_2_, p_146982_3_, p_146982_4_);
         GL11.glPopMatrix();
 
         //GL11.glEnable(GL11.GL_LIGHTING);
@@ -137,7 +135,7 @@ public class ProgWidgetItemFilter extends ProgWidget implements IVariableWidget{
     public void writeToNBT(NBTTagCompound tag){
         super.writeToNBT(tag);
         if(filter != null) {
-            saveItemStackByName(filter, tag);
+            filter.writeToNBT(tag);
         }
         tag.setBoolean("useMetadata", useMetadata);
         tag.setBoolean("useNBT", useNBT);
@@ -150,7 +148,7 @@ public class ProgWidgetItemFilter extends ProgWidget implements IVariableWidget{
     @Override
     public void readFromNBT(NBTTagCompound tag){
         super.readFromNBT(tag);
-        filter = tag.getTag("id") instanceof NBTPrimitive ? ItemStack.loadItemStackFromNBT(tag) : loadItemStackByName(tag);
+        filter = ItemStack.loadItemStackFromNBT(tag);
         useMetadata = tag.getBoolean("useMetadata");
         useNBT = tag.getBoolean("useNBT");
         useOreDict = tag.getBoolean("useOreDict");
@@ -159,38 +157,17 @@ public class ProgWidgetItemFilter extends ProgWidget implements IVariableWidget{
         variable = tag.getString("variable");
     }
 
-    private static void saveItemStackByName(ItemStack stack, NBTTagCompound tag){
-        tag.setString("id", GameData.getItemRegistry().getNameForObject(stack.getItem()));
-        tag.setByte("Count", (byte)stack.stackSize);
-        tag.setShort("Damage", (short)stack.getItemDamage());
-        if(stack.hasTagCompound()) {
-            tag.setTag("tag", stack.getTagCompound());
-        }
-    }
-
-    private static ItemStack loadItemStackByName(NBTTagCompound tag){
-        Item item = GameData.getItemRegistry().getObject(tag.getString("id"));
-        if(item == null) return null;
-        ItemStack stack = new ItemStack(item, tag.getByte("Count"), tag.getShort("Damage"));
-        if(stack.getItemDamage() < 0) stack.setItemDamage(0);
-
-        if(tag.hasKey("tag", 10)) {
-            stack.setTagCompound(tag.getCompoundTag("tag"));
-        }
-        return stack;
-    }
-
     @Override
     @SideOnly(Side.CLIENT)
     public GuiScreen getOptionWindow(GuiProgrammer guiProgrammer){
         return new GuiProgWidgetItemFilter(this, guiProgrammer);
     }
 
-    public static boolean isItemValidForFilters(ItemStack item, List<ProgWidgetItemFilter> whitelist, List<ProgWidgetItemFilter> blacklist, int blockMeta){
+    public static boolean isItemValidForFilters(ItemStack item, List<ProgWidgetItemFilter> whitelist, List<ProgWidgetItemFilter> blacklist, IBlockState blockState){
         if(blacklist != null) {
             for(ProgWidgetItemFilter black : blacklist) {
-                if(PneumaticCraftUtils.areStacksEqual(black.getFilter(), item, black.useMetadata && blockMeta == -1, black.useNBT, black.useOreDict, black.useModSimilarity)) {
-                    if(blockMeta == -1 || !black.useMetadata || black.specificMeta == blockMeta) {
+                if(PneumaticCraftUtils.areStacksEqual(black.getFilter(), item, black.useMetadata && blockState == null, black.useNBT, black.useOreDict, black.useModSimilarity)) {
+                    if(blockState == null || !black.useMetadata || black.specificMeta == blockState.getBlock().getMetaFromState(blockState)) {
                         return false;
                     }
                 }
@@ -200,8 +177,8 @@ public class ProgWidgetItemFilter extends ProgWidget implements IVariableWidget{
             return true;
         } else {
             for(ProgWidgetItemFilter white : whitelist) {
-                if(PneumaticCraftUtils.areStacksEqual(white.getFilter(), item, white.useMetadata && blockMeta == -1, white.useNBT, white.useOreDict, white.useModSimilarity)) {
-                    if(blockMeta == -1 || !white.useMetadata || white.specificMeta == blockMeta) {
+                if(PneumaticCraftUtils.areStacksEqual(white.getFilter(), item, white.useMetadata && blockState == null, white.useNBT, white.useOreDict, white.useModSimilarity)) {
+                    if(blockState == null || !white.useMetadata || white.specificMeta == blockState.getBlock().getMetaFromState(blockState)) {
                         return true;
                     }
                 }
@@ -217,7 +194,7 @@ public class ProgWidgetItemFilter extends ProgWidget implements IVariableWidget{
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.BURST_PLANT_DAMAGE;
+        return ItemPlastic.BURST_PLANT_DAMAGE;
     }
 
     @Override

@@ -8,6 +8,7 @@
 package pneumaticCraft.common.network;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.BlockPos;
 import pneumaticCraft.common.util.Debugger;
 
 /**
@@ -21,15 +22,15 @@ public class PacketDebugBlock extends LocationIntPacket<PacketDebugBlock>{
 
     }
 
-    public PacketDebugBlock(int x, int y, int z){
+    public PacketDebugBlock(BlockPos pos){
 
-        super(x, y, z);
+        super(pos);
     }
 
     @Override
     public void handleClientSide(PacketDebugBlock message, EntityPlayer player){
 
-        Debugger.indicateBlock(player.worldObj, message.x, message.y, message.z);
+        Debugger.indicateBlock(player.worldObj, message.pos);
     }
 
     @Override

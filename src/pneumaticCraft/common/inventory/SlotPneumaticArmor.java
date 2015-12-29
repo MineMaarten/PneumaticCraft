@@ -6,9 +6,8 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 class SlotPneumaticArmor extends Slot{
     /**
@@ -46,11 +45,8 @@ class SlotPneumaticArmor extends Slot{
 
     @Override
     @SideOnly(Side.CLIENT)
-    /**
-     * Returns the icon index on items.png that is used as background image of the slot.
-     */
-    public IIcon getBackgroundIconIndex(){
-        return ItemArmor.func_94602_b(armorType);
+    public String getSlotTexture(){
+        return ItemArmor.EMPTY_SLOT_NAMES[armorType];
     }
 
 }

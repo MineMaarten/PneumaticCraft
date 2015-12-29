@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.api.tileentity.IPneumaticMachine;
 import pneumaticCraft.common.thirdparty.ModInteractionUtils;
 import pneumaticCraft.common.tileentity.TileEntityPneumaticBase;
@@ -36,7 +36,7 @@ public class ModuleNetworkManager{
                 if(m != null) modules.add(m);
             }
             TileEntityCache[] cache = ((TileEntityPneumaticBase)((IPneumaticMachine)tube).getAirHandler()).getTileCache();
-            for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
+            for(EnumFacing d : EnumFacing.VALUES) {
                 if(tube.sidesConnected[d.ordinal()]) {
                     TileEntityPressureTube newTube = ModInteractionUtils.getInstance().getTube(cache[d.ordinal()].getTileEntity());
                     if(newTube != null && !traversedTubes.contains(newTube)) {

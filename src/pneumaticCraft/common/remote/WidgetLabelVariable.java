@@ -23,6 +23,6 @@ public class WidgetLabelVariable extends WidgetLabel{
 
     @Override
     public Rectangle getBounds(){
-        return new Rectangle(x, y, Minecraft.getMinecraft().fontRenderer.getStringWidth(parser.parse()), Minecraft.getMinecraft().fontRenderer.FONT_HEIGHT);
+        return new Rectangle(x, y, Minecraft.getMinecraft().fontRendererObj.getStringWidth(parser.parse()), Minecraft.getMinecraft().fontRendererObj.FONT_HEIGHT);
     }
 }

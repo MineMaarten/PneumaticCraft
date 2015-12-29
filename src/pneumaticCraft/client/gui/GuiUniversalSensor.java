@@ -1,6 +1,7 @@
 package pneumaticCraft.client.gui;
 
 import java.awt.Point;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,8 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.api.universalSensor.ISensorSetting;
 import pneumaticCraft.client.gui.widget.GuiAnimatedStat;
 import pneumaticCraft.common.block.Blockss;
@@ -22,8 +25,6 @@ import pneumaticCraft.common.sensor.SensorHandler;
 import pneumaticCraft.common.tileentity.TileEntityUniversalSensor;
 import pneumaticCraft.lib.PneumaticValues;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiUniversalSensor extends GuiPneumaticContainerBase<TileEntityUniversalSensor>{
@@ -50,7 +51,7 @@ public class GuiUniversalSensor extends GuiPneumaticContainerBase<TileEntityUniv
         sensorInfoStat = addAnimatedStat("Sensor Info", new ItemStack(Blockss.universalSensor), 0xFFFFAA00, false);
         addAnimatedStat("gui.tab.upgrades", Textures.GUI_UPGRADES_LOCATION, 0xFF0000FF, true).setText(getUpgradeText());
 
-        nameFilterField = new GuiTextField(fontRendererObj, xStart + 70, yStart + 58, 100, 10);
+        nameFilterField = new GuiTextField(-1, fontRendererObj, xStart + 70, yStart + 58, 100, 10);
         nameFilterField.setText(te.getText(0));
 
         updateButtons();//also adds the redstoneButton.
@@ -115,14 +116,14 @@ public class GuiUniversalSensor extends GuiPneumaticContainerBase<TileEntityUniv
     }
 
     @Override
-    protected void mouseClicked(int par1, int par2, int par3){
+    protected void mouseClicked(int par1, int par2, int par3) throws IOException{
         super.mouseClicked(par1, par2, par3);
 
         nameFilterField.mouseClicked(par1, par2, par3);
     }
 
     @Override
-    protected void keyTyped(char par1, int par2){
+    protected void keyTyped(char par1, int par2) throws IOException{
         if(nameFilterField.isFocused() && par2 != 1) {
             nameFilterField.textboxKeyTyped(par1, par2);
             te.setText(0, nameFilterField.getText());
@@ -243,7 +244,7 @@ public class GuiUniversalSensor extends GuiPneumaticContainerBase<TileEntityUniv
                         break;
                     }
                     int sensorRange = te.getRange();
-                    if(Math.abs(toolX - te.xCoord) > sensorRange || Math.abs(toolY - te.yCoord) > sensorRange || Math.abs(toolZ - te.zCoord) > sensorRange) {
+                    if(Math.abs(toolX - te.getPos().getX()) > sensorRange || Math.abs(toolY - te.getPos().getY()) > sensorRange || Math.abs(toolZ - te.getPos().getZ()) > sensorRange) {
                         textList.add(EnumChatFormatting.GRAY + "The stored coordinate in the GPS Tool is out of the Sensor's range!");
                         textList.add(EnumChatFormatting.BLACK + "Move the sensor closer, select a closer coordinate or insert Range Upgrades.");
                     }

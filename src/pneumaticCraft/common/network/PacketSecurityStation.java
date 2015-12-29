@@ -3,7 +3,7 @@ package pneumaticCraft.common.network;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
-import cpw.mods.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 public abstract class PacketSecurityStation<REQ extends PacketSecurityStation> extends LocationIntPacket<REQ>{
 
@@ -12,7 +12,7 @@ public abstract class PacketSecurityStation<REQ extends PacketSecurityStation> e
     public PacketSecurityStation(){}
 
     public PacketSecurityStation(TileEntity te, String player){
-        super(te.xCoord, te.yCoord, te.zCoord);
+        super(te.getPos());
         this.username = player;
     }
 
@@ -33,7 +33,7 @@ public abstract class PacketSecurityStation<REQ extends PacketSecurityStation> e
 
     @Override
     public void handleServerSide(REQ message, EntityPlayer player){
-        TileEntity te = player.worldObj.getTileEntity(message.x, message.y, message.z);
+        TileEntity te = message.getTileEntity(player.getEntityWorld());
         handleServerSide(te, message.username);
     }
 

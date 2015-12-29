@@ -7,13 +7,14 @@ import java.util.List;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
-
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiCheckBox extends Gui implements IGuiWidget{
@@ -21,7 +22,7 @@ public class GuiCheckBox extends Gui implements IGuiWidget{
     public int x, y, color;
     private final int id;
     public String text;
-    public FontRenderer fontRenderer = FMLClientHandler.instance().getClient().fontRenderer;
+    public FontRenderer fontRenderer = FMLClientHandler.instance().getClient().fontRendererObj;
     private List<String> tooltip = new ArrayList<String>();
     private IWidgetListener listener;
 
@@ -52,13 +53,12 @@ public class GuiCheckBox extends Gui implements IGuiWidget{
             } else {
                 GL11.glColor4d(0.8, 0.8, 0.8, 1);
             }
-            Tessellator t = Tessellator.instance;
-
-            t.startDrawing(GL11.GL_LINE_STRIP);
-            t.addVertex(x + 2, y + 5, zLevel);
-            t.addVertex(x + 5, y + 7, zLevel);
-            t.addVertex(x + 8, y + 3, zLevel);
-            t.draw();
+            WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+            wr.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION);
+            wr.pos(x + 2, y + 5, zLevel).endVertex();
+            wr.pos(x + 5, y + 7, zLevel).endVertex();
+            wr.pos(x + 8, y + 3, zLevel).endVertex();
+            Tessellator.getInstance().draw();
             GL11.glEnable(GL11.GL_TEXTURE_2D);
         }
         fontRenderer.drawString(I18n.format(text), x + 1 + CHECKBOX_WIDTH, y + CHECKBOX_HEIGHT / 2 - fontRenderer.FONT_HEIGHT / 2, enabled ? color : 0xFF888888);

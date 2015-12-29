@@ -8,7 +8,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
 import org.lwjgl.opengl.GL11;
 
@@ -19,16 +20,11 @@ import pneumaticCraft.common.network.PacketOpenTubeModuleGui;
 import pneumaticCraft.common.thirdparty.ModInteractionUtils;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.BBConstants;
-import pneumaticCraft.lib.ModIds;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
-import codechicken.lib.data.MCDataInput;
-import codechicken.lib.data.MCDataOutput;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.Optional;
 
 public abstract class TubeModule implements ISidedPart{
     protected IPneumaticPosProvider pressureTube;
-    protected ForgeDirection dir = ForgeDirection.UP;
+    protected EnumFacing dir = EnumFacing.UP;
     public AxisAlignedBB[] boundingBoxes = new AxisAlignedBB[6];
     protected boolean upgraded;
     public float lowerBound = 7.5F, higherBound = 0, maxValue = 30;
@@ -40,12 +36,12 @@ public abstract class TubeModule implements ISidedPart{
         double width = getWidth() / 2;
         double height = getHeight();
 
-        boundingBoxes[0] = AxisAlignedBB.getBoundingBox(0.5 - width, BBConstants.PRESSURE_PIPE_MIN_POS - height, 0.5 - width, 0.5 + width, BBConstants.PRESSURE_PIPE_MIN_POS, 0.5 + width);
-        boundingBoxes[1] = AxisAlignedBB.getBoundingBox(0.5 - width, BBConstants.PRESSURE_PIPE_MAX_POS, 0.5 - width, 0.5 + width, BBConstants.PRESSURE_PIPE_MAX_POS + height, 0.5 + width);
-        boundingBoxes[2] = AxisAlignedBB.getBoundingBox(0.5 - width, 0.5 - width, BBConstants.PRESSURE_PIPE_MIN_POS - height, 0.5 + width, 0.5 + width, BBConstants.PRESSURE_PIPE_MIN_POS);
-        boundingBoxes[3] = AxisAlignedBB.getBoundingBox(0.5 - width, 0.5 - width, BBConstants.PRESSURE_PIPE_MAX_POS, 0.5 + width, 0.5 + width, BBConstants.PRESSURE_PIPE_MAX_POS + height);
-        boundingBoxes[4] = AxisAlignedBB.getBoundingBox(BBConstants.PRESSURE_PIPE_MIN_POS - height, 0.5 - width, 0.5 - width, BBConstants.PRESSURE_PIPE_MIN_POS, 0.5 + width, 0.5 + width);
-        boundingBoxes[5] = AxisAlignedBB.getBoundingBox(BBConstants.PRESSURE_PIPE_MAX_POS, 0.5 - width, 0.5 - width, BBConstants.PRESSURE_PIPE_MAX_POS + height, 0.5 + width, 0.5 + width);
+        boundingBoxes[0] = new AxisAlignedBB(0.5 - width, BBConstants.PRESSURE_PIPE_MIN_POS - height, 0.5 - width, 0.5 + width, BBConstants.PRESSURE_PIPE_MIN_POS, 0.5 + width);
+        boundingBoxes[1] = new AxisAlignedBB(0.5 - width, BBConstants.PRESSURE_PIPE_MAX_POS, 0.5 - width, 0.5 + width, BBConstants.PRESSURE_PIPE_MAX_POS + height, 0.5 + width);
+        boundingBoxes[2] = new AxisAlignedBB(0.5 - width, 0.5 - width, BBConstants.PRESSURE_PIPE_MIN_POS - height, 0.5 + width, 0.5 + width, BBConstants.PRESSURE_PIPE_MIN_POS);
+        boundingBoxes[3] = new AxisAlignedBB(0.5 - width, 0.5 - width, BBConstants.PRESSURE_PIPE_MAX_POS, 0.5 + width, 0.5 + width, BBConstants.PRESSURE_PIPE_MAX_POS + height);
+        boundingBoxes[4] = new AxisAlignedBB(BBConstants.PRESSURE_PIPE_MIN_POS - height, 0.5 - width, 0.5 - width, BBConstants.PRESSURE_PIPE_MIN_POS, 0.5 + width, 0.5 + width);
+        boundingBoxes[5] = new AxisAlignedBB(BBConstants.PRESSURE_PIPE_MAX_POS, 0.5 - width, 0.5 - width, BBConstants.PRESSURE_PIPE_MAX_POS + height, 0.5 + width, 0.5 + width);
     }
 
     public void markFake(){
@@ -92,16 +88,16 @@ public abstract class TubeModule implements ISidedPart{
     }
 
     @Override
-    public void setDirection(ForgeDirection dir){
+    public void setDirection(EnumFacing dir){
         this.dir = dir;
     }
 
-    public ForgeDirection getDirection(){
+    public EnumFacing getDirection(){
         return dir;
     }
 
     public void readFromNBT(NBTTagCompound nbt){
-        dir = ForgeDirection.getOrientation(nbt.getInteger("dir"));
+        dir = EnumFacing.getFront(nbt.getInteger("dir"));
         upgraded = nbt.getBoolean("upgraded");
         lowerBound = nbt.getFloat("lowerBound");
         higherBound = nbt.getFloat("higherBound");
@@ -116,15 +112,15 @@ public abstract class TubeModule implements ISidedPart{
         nbt.setBoolean("advancedConfig", advancedConfig);
     }
 
-    @Optional.Method(modid = ModIds.FMP)
-    public void writeDesc(MCDataOutput data){
-        data.writeInt(dir.ordinal());
-    }
+    /* TODO FMP dep @Optional.Method(modid = ModIds.FMP)
+     public void writeDesc(MCDataOutput data){
+         data.writeInt(dir.ordinal());
+     }
 
-    @Optional.Method(modid = ModIds.FMP)
-    public void readDesc(MCDataInput data){
-        dir = ForgeDirection.getOrientation(data.readInt());
-    }
+     @Optional.Method(modid = ModIds.FMP)
+     public void readDesc(MCDataInput data){
+         dir = EnumFacing.getFront(data.readInt());
+     }*/
 
     public void update(){}
 
@@ -172,7 +168,7 @@ public abstract class TubeModule implements ISidedPart{
     }
 
     protected void updateNeighbors(){
-        pressureTube.world().notifyBlocksOfNeighborChange(pressureTube.x(), pressureTube.y(), pressureTube.z(), pressureTube.world().getBlock(pressureTube.x(), pressureTube.y(), pressureTube.z()));
+        pressureTube.world().notifyNeighborsOfStateChange(pressureTube.pos(), pressureTube.world().getBlockState(pressureTube.pos()).getBlock());
     }
 
     public boolean isInline(){
@@ -201,7 +197,7 @@ public abstract class TubeModule implements ISidedPart{
 
     public boolean onActivated(EntityPlayer player){
         if(!player.worldObj.isRemote && upgraded && getGuiId() != null) {
-            NetworkHandler.sendTo(new PacketOpenTubeModuleGui(getGuiId().ordinal(), pressureTube.x(), pressureTube.y(), pressureTube.z()), (EntityPlayerMP)player);
+            NetworkHandler.sendTo(new PacketOpenTubeModuleGui(getGuiId().ordinal(), pressureTube.pos()), (EntityPlayerMP)player);
             return true;
         }
         return false;

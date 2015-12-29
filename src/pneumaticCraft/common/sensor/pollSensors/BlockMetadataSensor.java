@@ -4,16 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.util.Rectangle;
 
 import pneumaticCraft.api.universalSensor.IBlockAndCoordinatePollSensor;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockMetadataSensor implements IBlockAndCoordinatePollSensor{
 
@@ -40,10 +42,12 @@ public class BlockMetadataSensor implements IBlockAndCoordinatePollSensor{
     }
 
     @Override
-    public int getRedstoneValue(World world, int x, int y, int z, int sensorRange, String textBoxText, Set<ChunkPosition> positions){
+    public int getRedstoneValue(World world, BlockPos pos, int sensorRange, String textBoxText, Set<BlockPos> positions){
         int metadata = 0;
-        for(ChunkPosition pos : positions) {
-            metadata = Math.max(metadata, world.getBlockMetadata(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ));
+        for(BlockPos p : positions) {
+            IBlockState state = world.getBlockState(p);
+            Block block = state.getBlock();
+            metadata = Math.max(metadata, block.getMetaFromState(state));
         }
         return metadata;
     }

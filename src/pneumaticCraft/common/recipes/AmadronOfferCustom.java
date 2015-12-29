@@ -11,9 +11,10 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.common.config.AmadronOfferSettings;
 import pneumaticCraft.common.inventory.ContainerAmadron;
@@ -24,13 +25,11 @@ import pneumaticCraft.common.util.PneumaticCraftUtils;
 
 import com.google.gson.JsonObject;
 
-import cpw.mods.fml.common.network.ByteBufUtils;
-
 public class AmadronOfferCustom extends AmadronOffer{
     private final String offeringPlayerName;
     private String offeringPlayerId;
     private int providingDimensionId, returningDimensionId;
-    private ChunkPosition providingPosition, returningPosition;
+    private BlockPos providingPosition, returningPosition;
     private int inStock;
     private int maxTrades = -1;
     private int pendingPayments;
@@ -46,14 +45,14 @@ public class AmadronOfferCustom extends AmadronOffer{
         offeringPlayerId = playerId;
     }
 
-    public AmadronOfferCustom setProvidingPosition(ChunkPosition pos, int dimensionId){
+    public AmadronOfferCustom setProvidingPosition(BlockPos pos, int dimensionId){
         providingPosition = pos;
         providingDimensionId = dimensionId;
         cachedInput = null;
         return this;
     }
 
-    public AmadronOfferCustom setReturningPosition(ChunkPosition pos, int dimensionId){
+    public AmadronOfferCustom setReturningPosition(BlockPos pos, int dimensionId){
         returningPosition = pos;
         returningDimensionId = dimensionId;
         cachedOutput = null;
@@ -130,11 +129,11 @@ public class AmadronOfferCustom extends AmadronOffer{
                         stacks.add(stack);
                         amount -= stack.stackSize;
                     }
-                    PneumaticRegistry.getInstance().deliverItemsAmazonStyle(returning.getWorldObj(), returning.xCoord, returning.yCoord, returning.zCoord, stacks.toArray(new ItemStack[stacks.size()]));
+                    PneumaticRegistry.getInstance().deliverItemsAmazonStyle(returning.getWorld(), returning.getPos(), stacks.toArray(new ItemStack[stacks.size()]));
                 } else {
                     FluidStack deliveringFluid = ((FluidStack)getInput()).copy();
                     deliveringFluid.amount *= paying;
-                    PneumaticRegistry.getInstance().deliverFluidAmazonStyle(returning.getWorldObj(), returning.xCoord, returning.yCoord, returning.zCoord, deliveringFluid);
+                    PneumaticRegistry.getInstance().deliverFluidAmazonStyle(returning.getWorld(), returning.getPos(), deliveringFluid);
                 }
             }
         }
@@ -159,11 +158,11 @@ public class AmadronOfferCustom extends AmadronOffer{
                         stacks.add(stack);
                         amount -= stack.stackSize;
                     }
-                    PneumaticRegistry.getInstance().deliverItemsAmazonStyle(provider.getWorldObj(), provider.xCoord, provider.yCoord, provider.zCoord, stacks.toArray(new ItemStack[stacks.size()]));
+                    PneumaticRegistry.getInstance().deliverItemsAmazonStyle(provider.getWorld(), provider.getPos(), stacks.toArray(new ItemStack[stacks.size()]));
                 } else {
                     FluidStack deliveringFluid = ((FluidStack)getInput()).copy();
                     deliveringFluid.amount *= stock;
-                    PneumaticRegistry.getInstance().deliverFluidAmazonStyle(provider.getWorldObj(), provider.xCoord, provider.yCoord, provider.zCoord, deliveringFluid);
+                    PneumaticRegistry.getInstance().deliverFluidAmazonStyle(provider.getWorld(), provider.getPos(), deliveringFluid);
                 }
             } else {
                 break;
@@ -199,15 +198,15 @@ public class AmadronOfferCustom extends AmadronOffer{
         tag.setInteger("pendingPayments", pendingPayments);
         if(providingPosition != null) {
             tag.setInteger("providingDimensionId", providingDimensionId);
-            tag.setInteger("providingX", providingPosition.chunkPosX);
-            tag.setInteger("providingY", providingPosition.chunkPosY);
-            tag.setInteger("providingZ", providingPosition.chunkPosZ);
+            tag.setInteger("providingX", providingPosition.getX());
+            tag.setInteger("providingY", providingPosition.getY());
+            tag.setInteger("providingZ", providingPosition.getZ());
         }
         if(returningPosition != null) {
             tag.setInteger("returningDimensionId", returningDimensionId);
-            tag.setInteger("returningX", returningPosition.chunkPosX);
-            tag.setInteger("returningY", returningPosition.chunkPosY);
-            tag.setInteger("returningZ", returningPosition.chunkPosZ);
+            tag.setInteger("returningX", returningPosition.getX());
+            tag.setInteger("returningY", returningPosition.getY());
+            tag.setInteger("returningZ", returningPosition.getZ());
         }
     }
 
@@ -218,10 +217,10 @@ public class AmadronOfferCustom extends AmadronOffer{
         custom.maxTrades = tag.getInteger("maxTrades");
         custom.pendingPayments = tag.getInteger("pendingPayments");
         if(tag.hasKey("providingDimensionId")) {
-            custom.setProvidingPosition(new ChunkPosition(tag.getInteger("providingX"), tag.getInteger("providingY"), tag.getInteger("providingZ")), tag.getInteger("providingDimensionId"));
+            custom.setProvidingPosition(new BlockPos(tag.getInteger("providingX"), tag.getInteger("providingY"), tag.getInteger("providingZ")), tag.getInteger("providingDimensionId"));
         }
         if(tag.hasKey("returningDimensionId")) {
-            custom.setReturningPosition(new ChunkPosition(tag.getInteger("returningX"), tag.getInteger("returningY"), tag.getInteger("returningZ")), tag.getInteger("returningDimensionId"));
+            custom.setReturningPosition(new BlockPos(tag.getInteger("returningX"), tag.getInteger("returningY"), tag.getInteger("returningZ")), tag.getInteger("returningDimensionId"));
         }
         return custom;
     }
@@ -231,18 +230,18 @@ public class AmadronOfferCustom extends AmadronOffer{
         ByteBufUtils.writeUTF8String(buf, offeringPlayerId);
         if(providingPosition != null) {
             buf.writeBoolean(true);
-            buf.writeInt(providingPosition.chunkPosX);
-            buf.writeInt(providingPosition.chunkPosY);
-            buf.writeInt(providingPosition.chunkPosZ);
+            buf.writeInt(providingPosition.getX());
+            buf.writeInt(providingPosition.getY());
+            buf.writeInt(providingPosition.getZ());
             buf.writeInt(providingDimensionId);
         } else {
             buf.writeBoolean(false);
         }
         if(returningPosition != null) {
             buf.writeBoolean(true);
-            buf.writeInt(returningPosition.chunkPosX);
-            buf.writeInt(returningPosition.chunkPosY);
-            buf.writeInt(returningPosition.chunkPosZ);
+            buf.writeInt(returningPosition.getX());
+            buf.writeInt(returningPosition.getY());
+            buf.writeInt(returningPosition.getZ());
             buf.writeInt(returningDimensionId);
         } else {
             buf.writeBoolean(false);
@@ -255,10 +254,10 @@ public class AmadronOfferCustom extends AmadronOffer{
     public static AmadronOfferCustom loadFromBuf(ByteBuf buf){
         AmadronOfferCustom offer = new AmadronOfferCustom(PacketSyncAmadronOffers.getFluidOrItemStack(buf), PacketSyncAmadronOffers.getFluidOrItemStack(buf), ByteBufUtils.readUTF8String(buf), ByteBufUtils.readUTF8String(buf));
         if(buf.readBoolean()) {
-            offer.setProvidingPosition(new ChunkPosition(buf.readInt(), buf.readInt(), buf.readInt()), buf.readInt());
+            offer.setProvidingPosition(new BlockPos(buf.readInt(), buf.readInt(), buf.readInt()), buf.readInt());
         }
         if(buf.readBoolean()) {
-            offer.setReturningPosition(new ChunkPosition(buf.readInt(), buf.readInt(), buf.readInt()), buf.readInt());
+            offer.setReturningPosition(new BlockPos(buf.readInt(), buf.readInt(), buf.readInt()), buf.readInt());
         }
         offer.inStock = buf.readInt();
         offer.maxTrades = buf.readInt();
@@ -276,15 +275,15 @@ public class AmadronOfferCustom extends AmadronOffer{
         json.addProperty("pendingPayments", pendingPayments);
         if(providingPosition != null) {
             json.addProperty("providingDimensionId", providingDimensionId);
-            json.addProperty("providingX", providingPosition.chunkPosX);
-            json.addProperty("providingY", providingPosition.chunkPosY);
-            json.addProperty("providingZ", providingPosition.chunkPosZ);
+            json.addProperty("providingX", providingPosition.getX());
+            json.addProperty("providingY", providingPosition.getY());
+            json.addProperty("providingZ", providingPosition.getZ());
         }
         if(returningPosition != null) {
             json.addProperty("returningDimensionId", returningDimensionId);
-            json.addProperty("returningX", returningPosition.chunkPosX);
-            json.addProperty("returningY", returningPosition.chunkPosY);
-            json.addProperty("returningZ", returningPosition.chunkPosZ);
+            json.addProperty("returningX", returningPosition.getX());
+            json.addProperty("returningY", returningPosition.getY());
+            json.addProperty("returningZ", returningPosition.getZ());
         }
         return json;
     }
@@ -298,11 +297,11 @@ public class AmadronOfferCustom extends AmadronOffer{
             custom.pendingPayments = json.get("pendingPayments").getAsInt();
             if(json.has("providingDimensionId")) {
                 custom.providingDimensionId = json.get("providingDimensionId").getAsInt();
-                custom.providingPosition = new ChunkPosition(json.get("providingX").getAsInt(), json.get("providingY").getAsInt(), json.get("providingZ").getAsInt());
+                custom.providingPosition = new BlockPos(json.get("providingX").getAsInt(), json.get("providingY").getAsInt(), json.get("providingZ").getAsInt());
             }
             if(json.has("returningDimensionId")) {
                 custom.returningDimensionId = json.get("returningDimensionId").getAsInt();
-                custom.returningPosition = new ChunkPosition(json.get("returningX").getAsInt(), json.get("returningY").getAsInt(), json.get("returningZ").getAsInt());
+                custom.returningPosition = new BlockPos(json.get("returningX").getAsInt(), json.get("returningY").getAsInt(), json.get("returningZ").getAsInt());
             }
             return custom;
         } else {

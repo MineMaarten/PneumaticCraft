@@ -4,12 +4,14 @@ import java.util.List;
 import java.util.Random;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import pneumaticCraft.common.tileentity.TileEntityAssemblyPlatform;
@@ -22,14 +24,14 @@ public class BlockAssemblyPlatform extends BlockPneumaticCraftModeled{
     }
 
     @Override
-    public void setBlockBoundsBasedOnState(IBlockAccess par1IBlockAccess, int par2, int par3, int par4){
+    public void setBlockBoundsBasedOnState(IBlockAccess par1IBlockAccess, BlockPos pos){
         setBlockBounds(BBConstants.ASSEMBLY_PLATFORM_MIN_POS, 0F, BBConstants.ASSEMBLY_PLATFORM_MIN_POS, BBConstants.ASSEMBLY_PLATFORM_MAX_POS, BBConstants.ASSEMBLY_PLATFORM_MAX_POS_TOP, BBConstants.ASSEMBLY_PLATFORM_MAX_POS);
     }
 
     @Override
-    public void addCollisionBoxesToList(World world, int i, int j, int k, AxisAlignedBB axisalignedbb, List arraylist, Entity par7Entity){
+    public void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB axisalignedbb, List arraylist, Entity par7Entity){
         setBlockBounds(BBConstants.ASSEMBLY_PLATFORM_MIN_POS, BBConstants.ASSEMBLY_PLATFORM_MIN_POS, BBConstants.ASSEMBLY_PLATFORM_MIN_POS, BBConstants.ASSEMBLY_PLATFORM_MAX_POS, BBConstants.ASSEMBLY_PLATFORM_MAX_POS_TOP, BBConstants.ASSEMBLY_PLATFORM_MAX_POS);
-        super.addCollisionBoxesToList(world, i, j, k, axisalignedbb, arraylist, par7Entity);
+        super.addCollisionBoxesToList(world, pos, state, axisalignedbb, arraylist, par7Entity);
         setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
     }
 
@@ -40,8 +42,8 @@ public class BlockAssemblyPlatform extends BlockPneumaticCraftModeled{
 
     //overriden here because the Assembly Platform isn't implementing IInventory (intentionally).
     @Override
-    protected void dropInventory(World world, int x, int y, int z){
-        TileEntity tileEntity = world.getTileEntity(x, y, z);
+    protected void dropInventory(World world, BlockPos pos){
+        TileEntity tileEntity = world.getTileEntity(pos);
         if(!(tileEntity instanceof TileEntityAssemblyPlatform)) return;
         TileEntityAssemblyPlatform inventory = (TileEntityAssemblyPlatform)tileEntity;
         Random rand = new Random();
@@ -51,7 +53,7 @@ public class BlockAssemblyPlatform extends BlockPneumaticCraftModeled{
             float dY = rand.nextFloat() * 0.8F + 0.1F;
             float dZ = rand.nextFloat() * 0.8F + 0.1F;
 
-            EntityItem entityItem = new EntityItem(world, x + dX, y + dY, z + dZ, new ItemStack(itemStack.getItem(), itemStack.stackSize, itemStack.getItemDamage()));
+            EntityItem entityItem = new EntityItem(world, pos.getX() + dX, pos.getY() + dY, pos.getZ() + dZ, new ItemStack(itemStack.getItem(), itemStack.stackSize, itemStack.getItemDamage()));
 
             if(itemStack.hasTagCompound()) {
                 entityItem.getEntityItem().setTagCompound((NBTTagCompound)itemStack.getTagCompound().copy());

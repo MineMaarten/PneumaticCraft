@@ -1,6 +1,7 @@
 package pneumaticCraft.common.tileentity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,8 +14,8 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.world.ChunkPosition;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.api.item.IProgrammable;
 import pneumaticCraft.client.AreaShowManager;
 import pneumaticCraft.common.NBTUtil;
@@ -256,10 +257,10 @@ public class TileEntityProgrammer extends TileEntityBase implements IInventory, 
                         }
                     }
                     if(left > 0) {
-                        for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
-                            IInventory neighbor = IOHelper.getInventoryForTE(getWorldObj().getTileEntity(xCoord + d.offsetX, yCoord + d.offsetY, zCoord + d.offsetZ));
+                        for(EnumFacing d : EnumFacing.VALUES) {
+                            IInventory neighbor = IOHelper.getInventoryForTE(getWorld().getTileEntity(getPos().offset(d)));
                             for(int slot : IOHelper.getAccessibleSlotsForInventory(neighbor, d.getOpposite())) {
-                                if(IOHelper.canExtractItemFromInventory(neighbor, stack, slot, d.getOpposite().ordinal())) {
+                                if(IOHelper.canExtractItemFromInventory(neighbor, stack, slot, d.getOpposite())) {
                                     ItemStack neighborStack = neighbor.getStackInSlot(slot);
                                     if(PneumaticCraftUtils.areStacksEqual(neighborStack, stack, true, true, false, false)) {
                                         left -= neighbor.decrStackSize(slot, left).stackSize;
@@ -272,9 +273,9 @@ public class TileEntityProgrammer extends TileEntityBase implements IInventory, 
                 }
                 List<ItemStack> returnedStacks = getReturnedPuzzleStacks();
                 for(ItemStack stack : returnedStacks) {
-                    for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
-                        IInventory neighbor = IOHelper.getInventoryForTE(getWorldObj().getTileEntity(xCoord + d.offsetX, yCoord + d.offsetY, zCoord + d.offsetZ));
-                        stack = IOHelper.insert(neighbor, stack, d.getOpposite().ordinal(), false);
+                    for(EnumFacing d : EnumFacing.VALUES) {
+                        IInventory neighbor = IOHelper.getInventoryForTE(getWorld().getTileEntity(getPos().offset(d)));
+                        stack = IOHelper.insert(neighbor, stack, d.getOpposite(), false);
                         if(stack == null) break;
                     }
                     if(player != null && stack != null) {
@@ -284,7 +285,7 @@ public class TileEntityProgrammer extends TileEntityBase implements IInventory, 
                         }
                     }
                     if(stack != null) {
-                        worldObj.spawnEntityInWorld(new EntityItem(worldObj, xCoord + 0.5, yCoord + 1.5, zCoord + 0.5, stack));
+                        worldObj.spawnEntityInWorld(new EntityItem(worldObj, getPos().getX() + 0.5, getPos().getY() + 1.5, getPos().getZ() + 0.5, stack));
                     }
                 }
             }
@@ -372,10 +373,10 @@ public class TileEntityProgrammer extends TileEntityBase implements IInventory, 
             }
         }
 
-        for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
-            IInventory neighbor = IOHelper.getInventoryForTE(getWorldObj().getTileEntity(xCoord + d.offsetX, yCoord + d.offsetY, zCoord + d.offsetZ));
+        for(EnumFacing d : EnumFacing.VALUES) {
+            IInventory neighbor = IOHelper.getInventoryForTE(getWorld().getTileEntity(getPos().offset(d)));
             for(int slot : IOHelper.getAccessibleSlotsForInventory(neighbor, d.getOpposite())) {
-                if(IOHelper.canExtractItemFromInventory(neighbor, stack, slot, d.getOpposite().ordinal())) {
+                if(IOHelper.canExtractItemFromInventory(neighbor, stack, slot, d.getOpposite())) {
                     ItemStack neighborStack = neighbor.getStackInSlot(slot);
                     if(PneumaticCraftUtils.areStacksEqual(neighborStack, stack, true, true, false, false)) {
                         amountLeft -= neighborStack.stackSize;
@@ -451,7 +452,7 @@ public class TileEntityProgrammer extends TileEntityBase implements IInventory, 
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
             setInventorySlotContents(slot, null);
@@ -471,7 +472,7 @@ public class TileEntityProgrammer extends TileEntityBase implements IInventory, 
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
         return Blockss.programmer.getUnlocalizedName();
     }
 
@@ -488,14 +489,14 @@ public class TileEntityProgrammer extends TileEntityBase implements IInventory, 
     }
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
     }
 
     public boolean previewArea(int widgetX, int widgetY){
         for(IProgWidget w : progWidgets) {
             if(w.getX() == widgetX && w.getY() == widgetY && w instanceof IAreaProvider) {
-                Set<ChunkPosition> area = new HashSet<ChunkPosition>();
+                Set<BlockPos> area = new HashSet<BlockPos>();
                 ((IAreaProvider)w).getArea(area);
                 AreaShowManager.getInstance().showArea(area, 0x00FF00, this);
             }
@@ -504,7 +505,7 @@ public class TileEntityProgrammer extends TileEntityBase implements IInventory, 
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 
@@ -514,10 +515,15 @@ public class TileEntityProgrammer extends TileEntityBase implements IInventory, 
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
+    }
 
     public void saveToHistory(){
         NBTTagCompound tag = new NBTTagCompound();

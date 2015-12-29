@@ -8,11 +8,12 @@ import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.util.EnumMap;
 
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
+import net.minecraftforge.fml.relauncher.Side;
 import pneumaticCraft.PneumaticCraft;
-import cpw.mods.fml.common.network.FMLEmbeddedChannel;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
-import cpw.mods.fml.relauncher.Side;
 
 @Sharable
 public class DescPacketHandler extends SimpleChannelInboundHandler<FMLProxyPacket>{
@@ -29,7 +30,7 @@ public class DescPacketHandler extends SimpleChannelInboundHandler<FMLProxyPacke
     public static FMLProxyPacket getPacket(PacketDescription packet){
         ByteBuf buf = Unpooled.buffer();
         packet.toBytes(buf);
-        return new FMLProxyPacket(buf, CHANNEL);
+        return new FMLProxyPacket(new PacketBuffer(buf), CHANNEL);
     }
 
 }

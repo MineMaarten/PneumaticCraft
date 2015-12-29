@@ -44,7 +44,7 @@ public class GuiAphorismTile extends GuiScreen{
     }
 
     @Override
-    protected void keyTyped(char par1, int par2){
+    protected void keyTyped(char par1, int par2) throws IOException{
         if(par2 == 1) {
             NetworkHandler.sendToServer(new PacketAphorismTileUpdate(tile));
         } else if(par2 == 200) {

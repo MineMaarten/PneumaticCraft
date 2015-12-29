@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.passive.EntityMooshroom;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumParticleTypes;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableEntity;
 
 public class HackableCow implements IHackableEntity{
@@ -43,7 +44,7 @@ public class HackableCow implements IHackableEntity{
             entitycow.setHealth(((EntityCow)entity).getHealth());
             entitycow.renderYawOffset = ((EntityCow)entity).renderYawOffset;
             entity.worldObj.spawnEntityInWorld(entitycow);
-            entity.worldObj.spawnParticle("largeexplode", entity.posX, entity.posY + entity.height / 2.0F, entity.posZ, 0.0D, 0.0D, 0.0D);
+            entity.worldObj.spawnParticle(EnumParticleTypes.EXPLOSION_HUGE, entity.posX, entity.posY + entity.height / 2.0F, entity.posZ, 0.0D, 0.0D, 0.0D);
         }
     }
 

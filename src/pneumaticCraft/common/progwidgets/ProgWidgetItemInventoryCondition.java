@@ -4,8 +4,8 @@ import java.util.Set;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
 import pneumaticCraft.common.ai.DroneAIBlockCondition;
 import pneumaticCraft.common.ai.IDroneBase;
 import pneumaticCraft.common.util.IOHelper;
@@ -29,8 +29,8 @@ public class ProgWidgetItemInventoryCondition extends ProgWidgetCondition{
         return new DroneAIBlockCondition(drone, (ProgWidgetAreaItemBase)widget){
 
             @Override
-            protected boolean evaluate(ChunkPosition pos){
-                IInventory inv = IOHelper.getInventoryForTE(drone.getWorld().getTileEntity(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ));
+            protected boolean evaluate(BlockPos pos){
+                IInventory inv = IOHelper.getInventoryForTE(drone.getWorld().getTileEntity(pos));
                 if(inv != null) {
                     int count = 0;
                     Set<Integer> accessibleSlots = PneumaticCraftUtils.getAccessibleSlotsForInventoryAndSides(inv, ((ISidedWidget)widget).getSides());

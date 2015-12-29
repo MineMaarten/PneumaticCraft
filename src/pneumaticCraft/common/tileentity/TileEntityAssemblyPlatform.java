@@ -21,8 +21,8 @@ public class TileEntityAssemblyPlatform extends TileEntityBase implements IAssem
     public boolean hasLaseredStack;
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
         oldClawProgress = clawProgress;
         if(!shouldClawClose && clawProgress > 0F) {
             clawProgress = Math.max(clawProgress - TileEntityConstants.ASSEMBLY_IO_UNIT_CLAW_SPEED * speed, 0);

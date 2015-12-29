@@ -2,11 +2,11 @@ package pneumaticCraft.common.semiblock;
 
 import net.minecraft.item.Item;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Loader;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.lib.ModIds;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Loader;
 
 public class SemiBlockInitializer{
     public static void init(){

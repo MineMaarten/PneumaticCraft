@@ -6,6 +6,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.api.client.IGuiAnimatedStat;
 import pneumaticCraft.api.client.pneumaticHelmet.IOptionPage;
 import pneumaticCraft.api.client.pneumaticHelmet.IUpgradeRenderHandler;
@@ -13,8 +15,6 @@ import pneumaticCraft.client.gui.pneumaticHelmet.GuiHelmetMainOptions;
 import pneumaticCraft.client.gui.widget.GuiAnimatedStat;
 import pneumaticCraft.common.CommonHUDHandler;
 import pneumaticCraft.common.config.Config;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class MainHelmetHandler implements IUpgradeRenderHandler{
     private GuiAnimatedStat powerStat;
@@ -88,7 +88,7 @@ public class MainHelmetHandler implements IUpgradeRenderHandler{
     public IGuiAnimatedStat getAnimatedStat(){
         if(powerStat == null) {
             Minecraft minecraft = Minecraft.getMinecraft();
-            ScaledResolution sr = new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight);
+            ScaledResolution sr = new ScaledResolution(minecraft);
             powerStat = new GuiAnimatedStat(null, "Helmet Pressure: ", "", powerStatX != -1 ? powerStatX : sr.getScaledWidth() - 2, powerStatY, 0x3000AA00, null, powerStatLeftSided);
             powerStat.setMinDimensionsAndReset(0, 0);
             powerStat.openWindow();

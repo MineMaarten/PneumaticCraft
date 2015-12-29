@@ -4,16 +4,16 @@ import java.util.List;
 
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiWidgetCoordinateCondition;
 import pneumaticCraft.common.ai.IDroneBase;
 import pneumaticCraft.common.progwidgets.ICondition.Operator;
 import pneumaticCraft.common.progwidgets.ProgWidgetCoordinateOperator.EnumOperator;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetCoordinateCondition extends ProgWidgetConditionBase{
 
@@ -43,11 +43,11 @@ public class ProgWidgetCoordinateCondition extends ProgWidgetConditionBase{
 
     @Override
     public boolean evaluate(IDroneBase drone, IProgWidget widget){
-        ChunkPosition pos1 = ProgWidgetCoordinateOperator.calculateCoordinate(widget, 0, EnumOperator.PLUS_MINUS);
-        ChunkPosition pos2 = ProgWidgetCoordinateOperator.calculateCoordinate(widget, 1, EnumOperator.PLUS_MINUS);
-        if(checkingAxis[0] && !evaluate(pos1.chunkPosX, pos2.chunkPosX)) return false;
-        if(checkingAxis[1] && !evaluate(pos1.chunkPosY, pos2.chunkPosY)) return false;
-        if(checkingAxis[2] && !evaluate(pos1.chunkPosZ, pos2.chunkPosZ)) return false;
+        BlockPos pos1 = ProgWidgetCoordinateOperator.calculateCoordinate(widget, 0, EnumOperator.PLUS_MINUS);
+        BlockPos pos2 = ProgWidgetCoordinateOperator.calculateCoordinate(widget, 1, EnumOperator.PLUS_MINUS);
+        if(checkingAxis[0] && !evaluate(pos1.getX(), pos2.getX())) return false;
+        if(checkingAxis[1] && !evaluate(pos1.getY(), pos2.getY())) return false;
+        if(checkingAxis[2] && !evaluate(pos1.getZ(), pos2.getZ())) return false;
         return true;
     }
 

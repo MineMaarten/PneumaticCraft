@@ -1,5 +1,7 @@
 package pneumaticCraft.client.gui.programmer;
 
+import java.io.IOException;
+
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 import pneumaticCraft.client.AreaShowManager;
@@ -24,7 +26,7 @@ public class GuiProgWidgetAreaShow<Widget extends IProgWidget> extends GuiProgWi
     }
 
     @Override
-    public void actionPerformed(GuiButton button){
+    public void actionPerformed(GuiButton button) throws IOException{
         if(widget instanceof IAreaProvider) {
             if(button.id == 1000) {
                 if(!AreaShowManager.getInstance().isShowing(guiProgrammer.te)) buttonList.add(new GuiButton(1001, guiLeft + xSize / 2 - 50, guiTop + 175, 100, 20, I18n.format("gui.programmer.button.stopShowingArea")));
@@ -36,7 +38,7 @@ public class GuiProgWidgetAreaShow<Widget extends IProgWidget> extends GuiProgWi
                 return;
             }
         }
-        // PacketDispatcher.sendPacketToServer(PacketHandlerPneumaticCraft.showDroneArea(guiProgrammer.te.xCoord, guiProgrammer.te.yCoord, guiProgrammer.te.zCoord, widget.getX(), widget.getY()));
+        // PacketDispatcher.sendPacketToServer(PacketHandlerPneumaticCraft.showDroneArea(guiProgrammer.te.getPos().getX(), guiProgrammer.te.getPos().getY(), guiProgrammer.te.getPos().getZ(), widget.getX(), widget.getY()));
         super.actionPerformed(button);
     }
 }

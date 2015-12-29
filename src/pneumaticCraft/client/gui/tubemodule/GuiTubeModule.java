@@ -1,6 +1,7 @@
 package pneumaticCraft.client.gui.tubemodule;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.BlockPos;
 import pneumaticCraft.client.gui.GuiPneumaticScreenBase;
 import pneumaticCraft.common.block.BlockPressureTube;
 import pneumaticCraft.common.block.tubes.TubeModule;
@@ -9,7 +10,7 @@ public abstract class GuiTubeModule extends GuiPneumaticScreenBase{
     protected final TubeModule module;
 
     public GuiTubeModule(EntityPlayer player, int x, int y, int z){
-        this(BlockPressureTube.getLookedModule(player.worldObj, x, y, z, player));
+        this(BlockPressureTube.getLookedModule(player.worldObj, new BlockPos(x, y, z), player));
     }
 
     public GuiTubeModule(TubeModule module){

@@ -14,12 +14,12 @@ public class WidgetLabel extends WidgetBase{
 
     @Override
     public void render(int mouseX, int mouseY, float partialTick){
-        Minecraft.getMinecraft().fontRenderer.drawString(text, x, y, 0xFF000000);
+        Minecraft.getMinecraft().fontRendererObj.drawString(text, x, y, 0xFF000000);
     }
 
     @Override
     public Rectangle getBounds(){
-        return new Rectangle(x, y, Minecraft.getMinecraft().fontRenderer.getStringWidth(text), Minecraft.getMinecraft().fontRenderer.FONT_HEIGHT);
+        return new Rectangle(x, y, Minecraft.getMinecraft().fontRendererObj.getStringWidth(text), Minecraft.getMinecraft().fontRendererObj.FONT_HEIGHT);
     }
 
 }

@@ -2,16 +2,16 @@ package pneumaticCraft.common.ai;
 
 import java.util.Comparator;
 
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.ChunkPosition;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 
-public class ChunkPositionSorter implements Comparator<ChunkPosition>{
+public class ChunkPositionSorter implements Comparator<BlockPos>{
 
     private final double x, y, z;
 
     public ChunkPositionSorter(IDroneBase entity){
-        Vec3 vec = entity.getPosition();
+        Vec3 vec = entity.getDronePos();
         x = vec.xCoord;
         y = vec.yCoord;
         z = vec.zCoord;
@@ -24,7 +24,7 @@ public class ChunkPositionSorter implements Comparator<ChunkPosition>{
     }
 
     @Override
-    public int compare(ChunkPosition c1, ChunkPosition c2){
-        return Double.compare(PneumaticCraftUtils.distBetween(c1.chunkPosX, c1.chunkPosY, c1.chunkPosZ, x, y, z), PneumaticCraftUtils.distBetween(c2.chunkPosX, c2.chunkPosY, c2.chunkPosZ, x, y, z));
+    public int compare(BlockPos c1, BlockPos c2){
+        return Double.compare(PneumaticCraftUtils.distBetween(c1.getX(), c1.getY(), c1.getZ(), x, y, z), PneumaticCraftUtils.distBetween(c2.getX(), c2.getY(), c2.getZ(), x, y, z));
     }
 }

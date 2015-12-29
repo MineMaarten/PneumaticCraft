@@ -4,14 +4,18 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityHopper;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import pneumaticCraft.common.tileentity.TileEntityElevatorBase;
+import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
 public class BlockElevatorBase extends BlockPneumaticCraftModeled{
@@ -21,9 +25,9 @@ public class BlockElevatorBase extends BlockPneumaticCraftModeled{
     }
 
     @Override
-    public void onBlockAdded(World world, int x, int y, int z){
-        super.onBlockAdded(world, x, y, z);
-        TileEntityElevatorBase elevatorBase = getCoreTileEntity(world, x, y, z);
+    public void onBlockAdded(World world, BlockPos pos, IBlockState state){
+        super.onBlockAdded(world, pos, state);
+        TileEntityElevatorBase elevatorBase = getCoreTileEntity(world, pos);
         if(elevatorBase != null) {
             elevatorBase.updateMaxElevatorHeight();
         }
@@ -40,26 +44,26 @@ public class BlockElevatorBase extends BlockPneumaticCraftModeled{
     }
 
     @Override
-    public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int par6, float par7, float par8, float par9){
-        return super.onBlockActivated(world, x, getCoreElevatorY(world, x, y, z), z, player, par6, par7, par8, par9);
+    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float par7, float par8, float par9){
+        return super.onBlockActivated(world, getCoreElevatorPos(world, pos), state, player, side, par7, par8, par9);
     }
 
     @Override
-    public void onNeighborBlockChange(World world, int x, int y, int z, Block block){
-        super.onNeighborBlockChange(world, x, y, z, block);
-        TileEntity te = world.getTileEntity(x, y, z);
+    public void onNeighborBlockChange(World world, BlockPos pos, IBlockState state, Block block){
+        super.onNeighborBlockChange(world, pos, state, block);
+        TileEntity te = world.getTileEntity(pos);
         if(te instanceof TileEntityElevatorBase) {
             TileEntityElevatorBase thisTe = (TileEntityElevatorBase)te;
             if(thisTe.isCoreElevator()) {
-                TileEntityElevatorBase teAbove = getCoreTileEntity(world, x, y, z);
+                TileEntityElevatorBase teAbove = getCoreTileEntity(world, pos);
                 if(teAbove != null && teAbove != thisTe) {
                     for(int i = 0; i < thisTe.getSizeInventory(); i++) {
                         ItemStack item = thisTe.getStackInSlot(i);
                         if(item != null) {
-                            ItemStack leftover = TileEntityHopper.func_145889_a(teAbove, item, 0);
+                            ItemStack leftover = PneumaticCraftUtils.exportStackToInventory((IInventory)teAbove, item, null);
                             thisTe.setInventorySlotContents(i, null);
                             if(leftover != null) {
-                                EntityItem entity = new EntityItem(world, teAbove.xCoord + 0.5, teAbove.yCoord + 1.5, teAbove.zCoord + 0.5, leftover);
+                                EntityItem entity = new EntityItem(world, teAbove.getPos().getX() + 0.5, teAbove.getPos().getY() + 1.5, teAbove.getPos().getZ() + 0.5, leftover);
                                 world.spawnEntityInWorld(entity);
                             }
                         }
@@ -69,36 +73,36 @@ public class BlockElevatorBase extends BlockPneumaticCraftModeled{
         }
     }
 
-    public static int getCoreElevatorY(World world, int x, int y, int z){
+    public static BlockPos getCoreElevatorPos(World world, BlockPos pos){
 
-        if(world.getBlock(x, y + 1, z) == Blockss.elevatorBase) {
-            return getCoreElevatorY(world, x, y + 1, z);
+        if(world.getBlockState(pos.offset(EnumFacing.UP)).getBlock() == Blockss.elevatorBase) {
+            return getCoreElevatorPos(world, pos.offset(EnumFacing.UP));
         } else {
-            return y;
+            return pos;
         }
     }
 
-    public static TileEntityElevatorBase getCoreTileEntity(World world, int x, int y, int z){
-        return (TileEntityElevatorBase)world.getTileEntity(x, getCoreElevatorY(world, x, y, z), z);
+    public static TileEntityElevatorBase getCoreTileEntity(World world, BlockPos pos){
+        return (TileEntityElevatorBase)world.getTileEntity(getCoreElevatorPos(world, pos));
     }
 
     @Override
-    public void breakBlock(World world, int x, int y, int z, Block block, int meta){
-        if(world.getBlock(x, y - 1, z) == Blockss.elevatorBase) {
-            TileEntity te = world.getTileEntity(x, y - 1, z);
+    public void breakBlock(World world, BlockPos pos, IBlockState state){
+        if(world.getBlockState(pos.offset(EnumFacing.DOWN)).getBlock() == Blockss.elevatorBase) {
+            TileEntity te = world.getTileEntity(pos.offset(EnumFacing.DOWN));
             ((TileEntityElevatorBase)te).moveInventoryToThis();
         }
-        TileEntityElevatorBase elevatorBase = getCoreTileEntity(world, x, y, z);
+        TileEntityElevatorBase elevatorBase = getCoreTileEntity(world, pos);
         if(elevatorBase != null) {
             elevatorBase.updateMaxElevatorHeight();
         }
-        super.breakBlock(world, x, y, z, block, meta);
+        super.breakBlock(world, pos, state);
     }
 
     @Override
-    protected void dropInventory(World world, int x, int y, int z){
+    protected void dropInventory(World world, BlockPos pos){
 
-        TileEntity tileEntity = world.getTileEntity(x, y, z);
+        TileEntity tileEntity = world.getTileEntity(pos);
 
         if(!(tileEntity instanceof TileEntityElevatorBase)) return;
 
@@ -113,7 +117,7 @@ public class BlockElevatorBase extends BlockPneumaticCraftModeled{
                 float dY = rand.nextFloat() * 0.8F + 0.1F;
                 float dZ = rand.nextFloat() * 0.8F + 0.1F;
 
-                EntityItem entityItem = new EntityItem(world, x + dX, y + dY, z + dZ, new ItemStack(itemStack.getItem(), itemStack.stackSize, itemStack.getItemDamage()));
+                EntityItem entityItem = new EntityItem(world, pos.getX() + dX, pos.getY() + dY, pos.getZ() + dZ, new ItemStack(itemStack.getItem(), itemStack.stackSize, itemStack.getItemDamage()));
 
                 if(itemStack.hasTagCompound()) {
                     entityItem.getEntityItem().setTagCompound((NBTTagCompound)itemStack.getTagCompound().copy());

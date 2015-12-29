@@ -5,14 +5,14 @@ import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetLiquidExport;
 import pneumaticCraft.common.ai.DroneAILiquidExport;
 import pneumaticCraft.common.ai.IDroneBase;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetLiquidExport extends ProgWidgetInventoryBase implements ILiquidFiltered, ILiquidExport{
 
@@ -45,7 +45,7 @@ public class ProgWidgetLiquidExport extends ProgWidgetInventoryBase implements I
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.PROPULSION_PLANT_DAMAGE;
+        return ItemPlastic.PROPULSION_PLANT_DAMAGE;
     }
 
     @Override

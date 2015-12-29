@@ -3,16 +3,20 @@ package pneumaticCraft.client;
 import java.util.Set;
 
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.BlockPos;
 
 import org.lwjgl.opengl.GL11;
 
+import pneumaticCraft.client.util.RenderUtils;
+
 public class AreaShowHandler{
-    private final Set<ChunkPosition> showingPositions;
+    private final Set<BlockPos> showingPositions;
     private final int color;
     private int renderList;
 
-    public AreaShowHandler(Set<ChunkPosition> area, int color){
+    public AreaShowHandler(Set<BlockPos> area, int color){
         showingPositions = area;
         this.color = color;
         compileRenderList();
@@ -22,88 +26,85 @@ public class AreaShowHandler{
         renderList = GL11.glGenLists(1);
         GL11.glNewList(renderList, GL11.GL_COMPILE);
 
-        Tessellator t = Tessellator.instance;
-        t.startDrawingQuads();
-        t.setColorRGBA_I(color, 150);
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+        RenderUtils.glColorHex(color, 150);
+        wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
 
-        for(ChunkPosition pos : showingPositions) {
-            t.addTranslation(pos.chunkPosX + 0.25F, pos.chunkPosY + 0.25F, pos.chunkPosZ + 0.25F);
+        for(BlockPos pos : showingPositions) {
+            wr.setTranslation(pos.getX() + 0.25F, pos.getY() + 0.25F, pos.getZ() + 0.25F);
 
-            t.addVertex(0, 0, 0);
-            t.addVertex(0, 0.5, 0);
-            t.addVertex(0.5, 0.5, 0);
-            t.addVertex(0.5, 0, 0);
+            wr.pos(0, 0, 0).endVertex();
+            wr.pos(0, 0.5, 0).endVertex();
+            wr.pos(0.5, 0.5, 0).endVertex();
+            wr.pos(0.5, 0, 0).endVertex();
 
-            t.addVertex(0.5, 0, 0.5);
-            t.addVertex(0.5, 0.5, 0.5);
-            t.addVertex(0, 0.5, 0.5);
-            t.addVertex(0, 0, 0.5);
+            wr.pos(0.5, 0, 0.5).endVertex();
+            wr.pos(0.5, 0.5, 0.5).endVertex();
+            wr.pos(0, 0.5, 0.5).endVertex();
+            wr.pos(0, 0, 0.5).endVertex();
 
-            t.addVertex(0, 0, 0);
-            t.addVertex(0, 0, 0.5);
-            t.addVertex(0, 0.5, 0.5);
-            t.addVertex(0, 0.5, 0);
+            wr.pos(0, 0, 0).endVertex();
+            wr.pos(0, 0, 0.5).endVertex();
+            wr.pos(0, 0.5, 0.5).endVertex();
+            wr.pos(0, 0.5, 0).endVertex();
 
-            t.addVertex(0.5, 0.5, 0);
-            t.addVertex(0.5, 0.5, 0.5);
-            t.addVertex(0.5, 0, 0.5);
-            t.addVertex(0.5, 0, 0);
+            wr.pos(0.5, 0.5, 0).endVertex();
+            wr.pos(0.5, 0.5, 0.5).endVertex();
+            wr.pos(0.5, 0, 0.5).endVertex();
+            wr.pos(0.5, 0, 0).endVertex();
 
-            t.addVertex(0, 0, 0);
-            t.addVertex(0.5, 0, 0);
-            t.addVertex(0.5, 0, 0.5);
-            t.addVertex(0, 0, 0.5);
+            wr.pos(0, 0, 0).endVertex();
+            wr.pos(0.5, 0, 0).endVertex();
+            wr.pos(0.5, 0, 0.5).endVertex();
+            wr.pos(0, 0, 0.5).endVertex();
 
-            t.addVertex(0, 0.5, 0.5);
-            t.addVertex(0.5, 0.5, 0.5);
-            t.addVertex(0.5, 0.5, 0);
-            t.addVertex(0, 0.5, 0);
-
-            t.addTranslation(-pos.chunkPosX - 0.25F, -pos.chunkPosY - 0.25F, -pos.chunkPosZ - 0.25F);
+            wr.pos(0, 0.5, 0.5).endVertex();
+            wr.pos(0.5, 0.5, 0.5).endVertex();
+            wr.pos(0.5, 0.5, 0).endVertex();
+            wr.pos(0, 0.5, 0).endVertex();
         }
 
-        t.draw();
+        Tessellator.getInstance().draw();
 
-        t.startDrawing(GL11.GL_LINES);
-        t.setColorRGBA_I(0, 150);
+        wr.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION);
+        RenderUtils.glColorHex(0, 150);
 
-        for(ChunkPosition pos : showingPositions) {
-            t.addTranslation(pos.chunkPosX + 0.25F, pos.chunkPosY + 0.25F, pos.chunkPosZ + 0.25F);
+        for(BlockPos pos : showingPositions) {
+            wr.setTranslation(pos.getX() + 0.25F, pos.getY() + 0.25F, pos.getZ() + 0.25F);
 
-            t.addVertex(0, 0, 0);
-            t.addVertex(0, 0.5, 0);
-            t.addVertex(0.5, 0.5, 0);
-            t.addVertex(0.5, 0, 0);
+            wr.pos(0, 0, 0).endVertex();
+            wr.pos(0, 0.5, 0).endVertex();
+            wr.pos(0.5, 0.5, 0).endVertex();
+            wr.pos(0.5, 0, 0).endVertex();
 
-            t.addVertex(0.5, 0, 0.5);
-            t.addVertex(0.5, 0.5, 0.5);
-            t.addVertex(0, 0.5, 0.5);
-            t.addVertex(0, 0, 0.5);
+            wr.pos(0.5, 0, 0.5).endVertex();
+            wr.pos(0.5, 0.5, 0.5).endVertex();
+            wr.pos(0, 0.5, 0.5).endVertex();
+            wr.pos(0, 0, 0.5).endVertex();
 
-            t.addVertex(0, 0, 0);
-            t.addVertex(0, 0, 0.5);
-            t.addVertex(0, 0.5, 0.5);
-            t.addVertex(0, 0.5, 0);
+            wr.pos(0, 0, 0).endVertex();
+            wr.pos(0, 0, 0.5).endVertex();
+            wr.pos(0, 0.5, 0.5).endVertex();
+            wr.pos(0, 0.5, 0).endVertex();
 
-            t.addVertex(0.5, 0.5, 0);
-            t.addVertex(0.5, 0.5, 0.5);
-            t.addVertex(0.5, 0, 0.5);
-            t.addVertex(0.5, 0, 0);
+            wr.pos(0.5, 0.5, 0).endVertex();
+            wr.pos(0.5, 0.5, 0.5).endVertex();
+            wr.pos(0.5, 0, 0.5).endVertex();
+            wr.pos(0.5, 0, 0).endVertex();
 
-            t.addVertex(0, 0, 0);
-            t.addVertex(0.5, 0, 0);
-            t.addVertex(0.5, 0, 0.5);
-            t.addVertex(0, 0, 0.5);
+            wr.pos(0, 0, 0).endVertex();
+            wr.pos(0.5, 0, 0).endVertex();
+            wr.pos(0.5, 0, 0.5).endVertex();
+            wr.pos(0, 0, 0.5).endVertex();
 
-            t.addVertex(0, 0.5, 0.5);
-            t.addVertex(0.5, 0.5, 0.5);
-            t.addVertex(0.5, 0.5, 0);
-            t.addVertex(0, 0.5, 0);
-
-            t.addTranslation(-pos.chunkPosX - 0.25F, -pos.chunkPosY - 0.25F, -pos.chunkPosZ - 0.25F);
+            wr.pos(0, 0.5, 0.5).endVertex();
+            wr.pos(0.5, 0.5, 0.5).endVertex();
+            wr.pos(0.5, 0.5, 0).endVertex();
+            wr.pos(0, 0.5, 0).endVertex();
         }
 
-        t.draw();
+        wr.setTranslation(0, 0, 0);
+        Tessellator.getInstance().draw();
         GL11.glEndList();
     }
 

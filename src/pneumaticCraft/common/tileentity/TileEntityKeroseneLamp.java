@@ -1,5 +1,6 @@
 package pneumaticCraft.common.tileentity;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -10,10 +11,11 @@ import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.ChunkPosition;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -22,17 +24,17 @@ import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidContainerItem;
 import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.fluids.IFluidTank;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.fluid.Fluids;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHandler, IRedstoneControlled,
         ISidedInventory{
-    private final Set<ChunkPosition> managingLights = new HashSet<ChunkPosition>();
+    private final Set<BlockPos> managingLights = new HashSet<BlockPos>();
     @DescSynced
     private boolean isOn;
     @GuiSynced
@@ -47,7 +49,7 @@ public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHand
     public static final int FUEL_PER_MB = 10000;
     private int checkingX, checkingY, checkingZ;
     @DescSynced
-    private ForgeDirection sideConnected = ForgeDirection.DOWN;
+    private EnumFacing sideConnected = EnumFacing.DOWN;
 
     @DescSynced
     private final FluidTank tank = new FluidTank(1000);
@@ -55,8 +57,8 @@ public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHand
     private final ItemStack[] inventory = new ItemStack[2];
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
         if(!worldObj.isRemote) {
             processFluidItem(0, 1);
             if(worldObj.getTotalWorldTime() % 5 == 0) {
@@ -68,7 +70,7 @@ public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHand
             }
         } else {
             if(isOn && worldObj.getTotalWorldTime() % 5 == 0) {
-                worldObj.spawnParticle("flame", xCoord + 0.4 + 0.2 * worldObj.rand.nextDouble(), yCoord + 0.2 + tank.getFluidAmount() / 1000D * 3 / 16D, zCoord + 0.4 + 0.2 * worldObj.rand.nextDouble(), 0, 0, 0);
+                worldObj.spawnParticle(EnumParticleTypes.FLAME, getPos().getX() + 0.4 + 0.2 * worldObj.rand.nextDouble(), getPos().getY() + 0.2 + tank.getFluidAmount() / 1000D * 3 / 16D, getPos().getZ() + 0.4 + 0.2 * worldObj.rand.nextDouble(), 0, 0, 0);
             }
         }
     }
@@ -84,43 +86,43 @@ public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHand
     @Override
     public void validate(){
         super.validate();
-        checkingX = xCoord;
-        checkingY = yCoord;
-        checkingZ = zCoord;
+        checkingX = getPos().getX();
+        checkingY = getPos().getY();
+        checkingZ = getPos().getZ();
     }
 
     @Override
     public void invalidate(){
         super.invalidate();
-        for(ChunkPosition pos : managingLights) {
+        for(BlockPos pos : managingLights) {
             if(isLampLight(pos)) {
-                worldObj.setBlockToAir(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+                worldObj.setBlockToAir(pos);
             }
         }
     }
 
-    private boolean isLampLight(ChunkPosition pos){
-        return worldObj.getBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ) == Blockss.keroseneLampLight;
+    private boolean isLampLight(BlockPos pos){
+        return worldObj.getBlockState(pos).getBlock() == Blockss.keroseneLampLight;
     }
 
     private void updateLights(){
         int roundedRange = range / LIGHT_SPACING * LIGHT_SPACING;
         checkingX += LIGHT_SPACING;
-        if(checkingX > xCoord + roundedRange) {
-            checkingX = xCoord - roundedRange;
+        if(checkingX > getPos().getX() + roundedRange) {
+            checkingX = getPos().getX() - roundedRange;
             checkingY += LIGHT_SPACING;
-            if(checkingY > yCoord + roundedRange) {
-                checkingY = yCoord - roundedRange;
+            if(checkingY > getPos().getY() + roundedRange) {
+                checkingY = getPos().getY() - roundedRange;
                 checkingZ += LIGHT_SPACING;
-                if(checkingZ > zCoord + roundedRange) checkingZ = zCoord - roundedRange;
+                if(checkingZ > getPos().getZ() + roundedRange) checkingZ = getPos().getZ() - roundedRange;
             }
         }
-        ChunkPosition pos = new ChunkPosition(checkingX, checkingY, checkingZ);
-        ChunkPosition lampPos = new ChunkPosition(xCoord, yCoord, zCoord);
+        BlockPos pos = new BlockPos(checkingX, checkingY, checkingZ);
+        BlockPos lampPos = new BlockPos(getPos().getX(), getPos().getY(), getPos().getZ());
         if(managingLights.contains(pos)) {
             if(isLampLight(pos)) {
                 if(!passesRaytraceTest(pos, lampPos)) {
-                    worldObj.setBlockToAir(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+                    worldObj.setBlockToAir(pos);
                     managingLights.remove(pos);
                 }
             } else {
@@ -134,12 +136,12 @@ public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHand
     private void updateRange(int targetRange){
         if(targetRange > range) {
             range++;
-            ChunkPosition lampPos = new ChunkPosition(xCoord, yCoord, zCoord);
+            BlockPos lampPos = new BlockPos(getPos().getX(), getPos().getY(), getPos().getZ());
             int roundedRange = range / LIGHT_SPACING * LIGHT_SPACING;
             for(int x = -roundedRange; x <= roundedRange; x += LIGHT_SPACING) {
                 for(int y = -roundedRange; y <= roundedRange; y += LIGHT_SPACING) {
                     for(int z = -roundedRange; z <= roundedRange; z += LIGHT_SPACING) {
-                        ChunkPosition pos = new ChunkPosition(x + xCoord, y + yCoord, z + zCoord);
+                        BlockPos pos = new BlockPos(x + getPos().getX(), y + getPos().getY(), z + getPos().getZ());
                         if(!managingLights.contains(pos)) {
                             tryAddLight(pos, lampPos);
                         }
@@ -148,14 +150,14 @@ public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHand
             }
         } else if(targetRange < range) {
             range--;
-            Iterator<ChunkPosition> iterator = managingLights.iterator();
-            ChunkPosition lampPos = new ChunkPosition(xCoord, yCoord, zCoord);
+            Iterator<BlockPos> iterator = managingLights.iterator();
+            BlockPos lampPos = new BlockPos(getPos().getX(), getPos().getY(), getPos().getZ());
             while(iterator.hasNext()) {
-                ChunkPosition pos = iterator.next();
+                BlockPos pos = iterator.next();
                 if(!isLampLight(pos)) {
                     iterator.remove();
                 } else if(PneumaticCraftUtils.distBetween(pos, lampPos) > range) {
-                    worldObj.setBlockToAir(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+                    worldObj.setBlockToAir(pos);
                     iterator.remove();
                 }
             }
@@ -163,16 +165,16 @@ public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHand
         isOn = range > 0;
     }
 
-    private boolean passesRaytraceTest(ChunkPosition pos, ChunkPosition lampPos){
-        MovingObjectPosition mop = worldObj.rayTraceBlocks(Vec3.createVectorHelper(pos.chunkPosX + 0.5, pos.chunkPosY + 0.5, pos.chunkPosZ + 0.5), Vec3.createVectorHelper(lampPos.chunkPosX + 0.5, lampPos.chunkPosY + 0.5, lampPos.chunkPosZ + 0.5));
-        return mop != null && lampPos.equals(new ChunkPosition(mop.blockX, mop.blockY, mop.blockZ));
+    private boolean passesRaytraceTest(BlockPos pos, BlockPos lampPos){
+        MovingObjectPosition mop = worldObj.rayTraceBlocks(new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), new Vec3(lampPos.getX() + 0.5, lampPos.getY() + 0.5, lampPos.getZ() + 0.5));
+        return mop != null && lampPos.equals(mop.getBlockPos());
     }
 
-    private boolean tryAddLight(ChunkPosition pos, ChunkPosition lampPos){
+    private boolean tryAddLight(BlockPos pos, BlockPos lampPos){
         if(PneumaticCraftUtils.distBetween(pos, lampPos) <= range) {
-            if(worldObj.isAirBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ) && !isLampLight(pos)) {
+            if(worldObj.isAirBlock(pos) && !isLampLight(pos)) {
                 if(passesRaytraceTest(pos, lampPos)) {
-                    worldObj.setBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, Blockss.keroseneLampLight);
+                    worldObj.setBlockState(pos, Blockss.keroseneLampLight.getDefaultState());
                     managingLights.add(pos);
                     return true;
                 }
@@ -184,13 +186,11 @@ public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHand
     @Override
     public void onNeighborBlockUpdate(){
         super.onNeighborBlockUpdate();
-        sideConnected = ForgeDirection.DOWN;
-        for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
-            int x = xCoord + d.offsetX;
-            int y = yCoord + d.offsetY;
-            int z = zCoord + d.offsetZ;
-            Block block = worldObj.getBlock(x, y, z);
-            if(block.isSideSolid(worldObj, x, y, z, d.getOpposite())) {
+        sideConnected = EnumFacing.DOWN;
+        for(EnumFacing d : EnumFacing.VALUES) {
+            BlockPos neighborPos = getPos().offset(d);
+            Block block = worldObj.getBlockState(neighborPos).getBlock();
+            if(block.isSideSolid(worldObj, neighborPos, d.getOpposite())) {
                 sideConnected = d;
                 break;
             }
@@ -198,32 +198,32 @@ public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHand
     }
 
     @Override
-    public int fill(ForgeDirection from, FluidStack resource, boolean doFill){
+    public int fill(EnumFacing from, FluidStack resource, boolean doFill){
         return canFill(from, resource.getFluid()) ? tank.fill(resource, doFill) : 0;
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain){
-        return tank.getFluid() != null && tank.getFluid().isFluidEqual(resource) ? drain(ForgeDirection.UNKNOWN, resource.amount, doDrain) : null;
+    public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain){
+        return tank.getFluid() != null && tank.getFluid().isFluidEqual(resource) ? drain(null, resource.amount, doDrain) : null;
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain){
+    public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain){
         return tank.drain(maxDrain, doDrain);
     }
 
     @Override
-    public boolean canFill(ForgeDirection from, Fluid fluid){
+    public boolean canFill(EnumFacing from, Fluid fluid){
         return Fluids.areFluidsEqual(fluid, Fluids.kerosene);
     }
 
     @Override
-    public boolean canDrain(ForgeDirection from, Fluid fluid){
+    public boolean canDrain(EnumFacing from, Fluid fluid){
         return true;
     }
 
     @Override
-    public FluidTankInfo[] getTankInfo(ForgeDirection from){
+    public FluidTankInfo[] getTankInfo(EnumFacing from){
         return new FluidTankInfo[]{new FluidTankInfo(tank)};
     }
 
@@ -231,11 +231,11 @@ public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHand
     public void writeToNBT(NBTTagCompound tag){
         super.writeToNBT(tag);
         NBTTagList lights = new NBTTagList();
-        for(ChunkPosition pos : managingLights) {
+        for(BlockPos pos : managingLights) {
             NBTTagCompound t = new NBTTagCompound();
-            t.setInteger("x", pos.chunkPosX);
-            t.setInteger("y", pos.chunkPosY);
-            t.setInteger("z", pos.chunkPosZ);
+            t.setInteger("x", pos.getX());
+            t.setInteger("y", pos.getY());
+            t.setInteger("z", pos.getZ());
             lights.appendTag(t);
         }
         tag.setTag("lights", lights);
@@ -257,13 +257,13 @@ public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHand
         NBTTagList lights = tag.getTagList("lights", 10);
         for(int i = 0; i < lights.tagCount(); i++) {
             NBTTagCompound t = lights.getCompoundTagAt(i);
-            managingLights.add(new ChunkPosition(t.getInteger("x"), t.getInteger("y"), t.getInteger("z")));
+            managingLights.add(new BlockPos(t.getInteger("x"), t.getInteger("y"), t.getInteger("z")));
         }
         tank.readFromNBT(tag.getCompoundTag("tank"));
         redstoneMode = tag.getByte("redstoneMode");
         targetRange = tag.getByte("targetRange");
         range = tag.getByte("range");
-        sideConnected = ForgeDirection.getOrientation(tag.getByte("sideConnected"));
+        sideConnected = EnumFacing.getFront(tag.getByte("sideConnected"));
         readInventoryFromNBT(tag, inventory);
     }
 
@@ -305,7 +305,7 @@ public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHand
         return fuel;
     }
 
-    public ForgeDirection getSideConnected(){
+    public EnumFacing getSideConnected(){
         return sideConnected;
     }
 
@@ -317,7 +317,7 @@ public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHand
      * Returns the name of the inventory.
      */
     @Override
-    public String getInventoryName(){
+    public String getName(){
         return Blockss.keroseneLamp.getUnlocalizedName();
     }
 
@@ -354,7 +354,7 @@ public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHand
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
             setInventorySlotContents(slot, null);
@@ -376,7 +376,7 @@ public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHand
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 
@@ -391,23 +391,28 @@ public class TileEntityKeroseneLamp extends TileEntityBase implements IFluidHand
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
 
     @Override
-    public int[] getAccessibleSlotsFromSide(int p_94128_1_){
+    public int[] getSlotsForFace(EnumFacing p_94128_1_){
         return new int[]{0, 1};
     }
 
     @Override
-    public boolean canInsertItem(int slot, ItemStack stack, int side){
+    public boolean canInsertItem(int slot, ItemStack stack, EnumFacing side){
         return isItemValidForSlot(slot, stack);
     }
 
     @Override
-    public boolean canExtractItem(int slot, ItemStack stack, int side){
+    public boolean canExtractItem(int slot, ItemStack stack, EnumFacing side){
         return slot == 1;
+    }
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
     }
 }

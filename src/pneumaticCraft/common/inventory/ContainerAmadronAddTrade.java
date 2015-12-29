@@ -3,9 +3,9 @@ package pneumaticCraft.common.inventory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.common.item.Itemss;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ContainerAmadronAddTrade extends ContainerPneumaticBase{
     private final InventoryBasic inv = new InventoryBasic("amadron", true, 2);

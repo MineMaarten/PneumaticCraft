@@ -2,8 +2,8 @@ package pneumaticCraft.common.ai;
 
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.ChunkPosition;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidHandler;
 import pneumaticCraft.common.progwidgets.ICountWidget;
@@ -19,22 +19,22 @@ public class DroneAILiquidExport extends DroneAIImExBase{
     }
 
     @Override
-    protected boolean isValidPosition(ChunkPosition pos){
+    protected boolean isValidPosition(BlockPos pos){
         return fillTank(pos, true);
     }
 
     @Override
-    protected boolean doBlockInteraction(ChunkPosition pos, double distToBlock){
+    protected boolean doBlockInteraction(BlockPos pos, double distToBlock){
         return fillTank(pos, false) && super.doBlockInteraction(pos, distToBlock);
     }
 
-    private boolean fillTank(ChunkPosition pos, boolean simulate){
+    private boolean fillTank(BlockPos pos, boolean simulate){
         if(drone.getTank().getFluidAmount() == 0) {
             drone.addDebugEntry("gui.progWidget.liquidExport.debug.emptyDroneTank");
             abort();
             return false;
         } else {
-            TileEntity te = drone.getWorld().getTileEntity(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+            TileEntity te = drone.getWorld().getTileEntity(pos);
             if(te instanceof IFluidHandler) {
                 IFluidHandler tank = (IFluidHandler)te;
 
@@ -42,11 +42,11 @@ public class DroneAILiquidExport extends DroneAIImExBase{
                 if(exportedFluid != null && ((ILiquidFiltered)widget).isFluidValid(exportedFluid.getFluid())) {
                     for(int i = 0; i < 6; i++) {
                         if(((ISidedWidget)widget).getSides()[i]) {
-                            int filledAmount = tank.fill(ForgeDirection.getOrientation(i), exportedFluid, false);
+                            int filledAmount = tank.fill(EnumFacing.getFront(i), exportedFluid, false);
                             if(filledAmount > 0) {
                                 if(((ICountWidget)widget).useCount()) filledAmount = Math.min(filledAmount, getRemainingCount());
                                 if(!simulate) {
-                                    decreaseCount(tank.fill(ForgeDirection.getOrientation(i), drone.getTank().drain(filledAmount, true), true));
+                                    decreaseCount(tank.fill(EnumFacing.getFront(i), drone.getTank().drain(filledAmount, true), true));
                                 }
                                 return true;
                             }
@@ -58,11 +58,11 @@ public class DroneAILiquidExport extends DroneAIImExBase{
                 }
             } else if(((ILiquidExport)widget).isPlacingFluidBlocks() && (!((ICountWidget)widget).useCount() || getRemainingCount() >= 1000)) {
                 Block fluidBlock = drone.getTank().getFluid().getFluid().getBlock();
-                if(drone.getTank().getFluidAmount() >= 1000 && fluidBlock != null && drone.getWorld().isAirBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ)) {
+                if(drone.getTank().getFluidAmount() >= 1000 && fluidBlock != null && drone.getWorld().isAirBlock(pos)) {
                     if(!simulate) {
                         decreaseCount(1000);
                         drone.getTank().drain(1000, true);
-                        drone.getWorld().setBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, fluidBlock);
+                        drone.getWorld().setBlockState(pos, fluidBlock.getDefaultState()); //TODO 1.8 test
                     }
                     return true;
                 }

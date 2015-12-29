@@ -3,7 +3,7 @@ package pneumaticCraft.common.remote;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import pneumaticCraft.common.ai.DroneAIManager;
 
 public class TextVariableParser{
@@ -45,10 +45,10 @@ public class TextVariableParser{
         boolean z = variable.endsWith(".z");
         if(x || y || z) variable = variable.substring(0, variable.length() - 2);
         relevantVariables.add(variable);
-        ChunkPosition pos = variableHolder != null ? variableHolder.getCoordinate(variable) : GlobalVariableManager.getInstance().getPos(variable.startsWith("#") ? variable.substring(1) : variable);
-        if(x) return pos.chunkPosX + "";
-        if(y) return pos.chunkPosY + "";
-        if(z) return pos.chunkPosZ + "";
-        return pos.chunkPosX + ", " + pos.chunkPosY + ", " + pos.chunkPosZ;
+        BlockPos pos = variableHolder != null ? variableHolder.getCoordinate(variable) : GlobalVariableManager.getInstance().getPos(variable.startsWith("#") ? variable.substring(1) : variable);
+        if(x) return pos.getX() + "";
+        if(y) return pos.getY() + "";
+        if(z) return pos.getZ() + "";
+        return pos.getX() + ", " + pos.getY() + ", " + pos.getZ();
     }
 }

@@ -1,8 +1,8 @@
 package pneumaticCraft.common.thirdparty;
 
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.lib.Log;
-import cpw.mods.fml.relauncher.ReflectionHelper;
 
 public class Chisel implements IThirdParty{
 

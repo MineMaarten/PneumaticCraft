@@ -1,5 +1,7 @@
 package pneumaticCraft.client.gui;
 
+import java.io.IOException;
+
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
@@ -156,7 +158,7 @@ public class GuiPastebin extends GuiPneumaticScreenBase{
      * Fired when a key is typed. This is the equivalent of KeyListener.keyTyped(KeyEvent e).
      */
     @Override
-    protected void keyTyped(char par1, int par2){
+    protected void keyTyped(char par1, int par2) throws IOException{
         if(par2 == 1) {
             Keyboard.enableRepeatEvents(false);
             mc.displayGuiScreen(parentScreen);

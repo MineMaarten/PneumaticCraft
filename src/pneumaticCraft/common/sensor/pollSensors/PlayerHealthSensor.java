@@ -7,6 +7,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 import org.lwjgl.util.Rectangle;
@@ -48,8 +49,8 @@ public class PlayerHealthSensor implements IPollSensorSetting{
     }
 
     @Override
-    public int getRedstoneValue(World world, int x, int y, int z, int sensorRange, String textBoxText){
-        EntityPlayer player = MinecraftServer.getServer().getConfigurationManager().func_152612_a(textBoxText);
+    public int getRedstoneValue(World world, BlockPos pos, int sensorRange, String textBoxText){
+        EntityPlayer player = MinecraftServer.getServer().getConfigurationManager().getPlayerByUsername(textBoxText);
         if(player != null) {
             return (int)(15 * player.getHealth() / player.getMaxHealth());
         } else {

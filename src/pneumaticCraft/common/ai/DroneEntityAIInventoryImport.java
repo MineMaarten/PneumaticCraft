@@ -4,7 +4,8 @@ import java.util.Set;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.common.progwidgets.ICountWidget;
 import pneumaticCraft.common.progwidgets.ISidedWidget;
 import pneumaticCraft.common.progwidgets.ProgWidgetAreaItemBase;
@@ -19,17 +20,17 @@ public class DroneEntityAIInventoryImport extends DroneAIImExBase{
     }
 
     @Override
-    protected boolean isValidPosition(ChunkPosition pos){
+    protected boolean isValidPosition(BlockPos pos){
         return importItems(pos, true);
     }
 
     @Override
-    protected boolean doBlockInteraction(ChunkPosition pos, double distToBlock){
+    protected boolean doBlockInteraction(BlockPos pos, double distToBlock){
         return importItems(pos, false) && super.doBlockInteraction(pos, distToBlock);
     }
 
-    private boolean importItems(ChunkPosition pos, boolean simulate){
-        IInventory inv = IOHelper.getInventoryForTE(drone.getWorld().getTileEntity(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ));
+    private boolean importItems(BlockPos pos, boolean simulate){
+        IInventory inv = IOHelper.getInventoryForTE(drone.getWorld().getTileEntity(pos));
         if(inv != null) {
             Set<Integer> accessibleSlots = PneumaticCraftUtils.getAccessibleSlotsForInventoryAndSides(inv, ((ISidedWidget)widget).getSides());
             for(Integer i : accessibleSlots) {
@@ -38,7 +39,7 @@ public class DroneEntityAIInventoryImport extends DroneAIImExBase{
                     if(widget.isItemValidForFilters(stack)) {
                         ItemStack importedStack = stack.copy();
                         if(((ICountWidget)widget).useCount()) importedStack.stackSize = Math.min(importedStack.stackSize, getRemainingCount());
-                        ItemStack remainder = IOHelper.insert(drone.getInventory(), importedStack.copy(), 0, simulate);
+                        ItemStack remainder = IOHelper.insert(drone.getInv(), importedStack.copy(), EnumFacing.UP, simulate);
                         int removedItems = importedStack.stackSize - (remainder != null ? remainder.stackSize : 0);
                         if(!simulate) {
                             ItemStack newStack = stack.copy();

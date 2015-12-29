@@ -3,20 +3,18 @@ package pneumaticCraft.common.block.tubes;
 import java.util.List;
 
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraftforge.common.util.ForgeDirection;
 import pneumaticCraft.client.model.IBaseModel;
-import pneumaticCraft.client.model.ModelSafetyValve;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.Names;
 
 public class ModuleSafetyValve extends TubeModuleRedstoneReceiving{
-    private final IBaseModel model = new ModelSafetyValve();
+    private final IBaseModel model = null;//TODO 1.8 new ModelSafetyValve();
 
     @Override
     public void update(){
         super.update();
         if(!pressureTube.world().isRemote) {
-            if(pressureTube.getAirHandler().getPressure(ForgeDirection.UNKNOWN) > getThreshold()) {
+            if(pressureTube.getAirHandler().getPressure(null) > getThreshold()) {
                 pressureTube.getAirHandler().airLeak(dir);
             }
         }

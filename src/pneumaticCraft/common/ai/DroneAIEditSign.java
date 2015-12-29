@@ -2,7 +2,8 @@ package pneumaticCraft.common.ai;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentText;
 import pneumaticCraft.common.progwidgets.ISignEditWidget;
 import pneumaticCraft.common.progwidgets.ProgWidgetAreaItemBase;
 import pneumaticCraft.common.tileentity.TileEntityAphorismTile;
@@ -14,15 +15,15 @@ public class DroneAIEditSign extends DroneAIBlockInteraction<ProgWidgetAreaItemB
     }
 
     @Override
-    protected boolean isValidPosition(ChunkPosition pos){
-        TileEntity te = drone.getWorld().getTileEntity(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+    protected boolean isValidPosition(BlockPos pos){
+        TileEntity te = drone.getWorld().getTileEntity(pos);
         if(te instanceof TileEntitySign) {
             TileEntitySign sign = (TileEntitySign)te;
             String[] lines = ((ISignEditWidget)widget).getLines();
             for(int i = 0; i < 4; i++) {
-                sign.signText[i] = i < lines.length ? lines[i] : "";
+                sign.signText[i] = new ChatComponentText(i < lines.length ? lines[i] : ""); //TODO 1.8 test
             }
-            drone.getWorld().markBlockForUpdate(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+            drone.getWorld().markBlockForUpdate(pos);
         } else if(te instanceof TileEntityAphorismTile) {
             TileEntityAphorismTile sign = (TileEntityAphorismTile)te;
             sign.setTextLines(((ISignEditWidget)widget).getLines());
@@ -31,7 +32,7 @@ public class DroneAIEditSign extends DroneAIBlockInteraction<ProgWidgetAreaItemB
     }
 
     @Override
-    protected boolean doBlockInteraction(ChunkPosition pos, double distToBlock){
+    protected boolean doBlockInteraction(BlockPos pos, double distToBlock){
         return false;
     }
 }

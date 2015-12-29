@@ -1,5 +1,6 @@
 package pneumaticCraft.common.tileentity;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -10,7 +11,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -20,8 +24,6 @@ import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.lib.PneumaticValues;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityAirCompressor extends TileEntityPneumaticBase implements ISidedInventory, IRedstoneControlled{
 
@@ -57,7 +59,7 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
     }
 
     @Override
-    public void updateEntity(){
+    public void update(){
         if(!worldObj.isRemote) {
             if(burnTime < curFuelUsage && inventory[0] != null && TileEntityFurnace.isItemFuel(inventory[0]) && redstoneAllows()) {
                 burnTime += TileEntityFurnace.getItemBurnTime(inventory[0]);
@@ -74,14 +76,14 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
             if(burnTime >= curFuelUsage) {
                 burnTime -= curFuelUsage;
                 if(!worldObj.isRemote) {
-                    addAir((int)(getBaseProduction() * getSpeedMultiplierFromUpgrades(getUpgradeSlots()) * getEfficiency() / 100D), ForgeDirection.UNKNOWN);
+                    addAir((int)(getBaseProduction() * getSpeedMultiplierFromUpgrades(getUpgradeSlots()) * getEfficiency() / 100D), null);
                     onFuelBurn(curFuelUsage);
                 }
             }
             isActive = burnTime > curFuelUsage;
         } else if(isActive) spawnBurningParticle();
 
-        super.updateEntity();
+        super.update();
 
     }
 
@@ -95,43 +97,30 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
         return PneumaticValues.PRODUCTION_COMPRESSOR;
     }
 
-    @Override
-    public boolean redstoneAllows(){
-        switch(redstoneMode){
-            case 0:
-                return true;
-            case 1:
-                return worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord);
-            case 2:
-                return !worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord);
-        }
-        return false;
-    }
-
     private void spawnBurningParticle(){
         Random rand = new Random();
         if(rand.nextInt(3) != 0) return;
-        float f = xCoord + 0.5F;
-        float f1 = yCoord + 0.0F + rand.nextFloat() * 6.0F / 16.0F;
-        float f2 = zCoord + 0.5F;
+        float f = getPos().getX() + 0.5F;
+        float f1 = getPos().getY() + 0.0F + rand.nextFloat() * 6.0F / 16.0F;
+        float f2 = getPos().getZ() + 0.5F;
         float f3 = 0.5F;
         float f4 = rand.nextFloat() * 0.4F - 0.2F;
-        switch(ForgeDirection.getOrientation(getBlockMetadata())){
+        switch(getRotation()){
             case EAST:
-                worldObj.spawnParticle("smoke", f - f3, f1, f2 + f4, 0.0D, 0.0D, 0.0D);
-                worldObj.spawnParticle("flame", f - f3, f1, f2 + f4, 0.0D, 0.0D, 0.0D);
+                worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, f - f3, f1, f2 + f4, 0.0D, 0.0D, 0.0D);
+                worldObj.spawnParticle(EnumParticleTypes.FLAME, f - f3, f1, f2 + f4, 0.0D, 0.0D, 0.0D);
                 break;
             case WEST:
-                worldObj.spawnParticle("smoke", f + f3, f1, f2 + f4, 0.0D, 0.0D, 0.0D);
-                worldObj.spawnParticle("flame", f + f3, f1, f2 + f4, 0.0D, 0.0D, 0.0D);
+                worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, f + f3, f1, f2 + f4, 0.0D, 0.0D, 0.0D);
+                worldObj.spawnParticle(EnumParticleTypes.FLAME, f + f3, f1, f2 + f4, 0.0D, 0.0D, 0.0D);
                 break;
             case SOUTH:
-                worldObj.spawnParticle("smoke", f + f4, f1, f2 - f3, 0.0D, 0.0D, 0.0D);
-                worldObj.spawnParticle("flame", f + f4, f1, f2 - f3, 0.0D, 0.0D, 0.0D);
+                worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, f + f4, f1, f2 - f3, 0.0D, 0.0D, 0.0D);
+                worldObj.spawnParticle(EnumParticleTypes.FLAME, f + f4, f1, f2 - f3, 0.0D, 0.0D, 0.0D);
                 break;
             case NORTH:
-                worldObj.spawnParticle("smoke", f + f4, f1, f2 + f3, 0.0D, 0.0D, 0.0D);
-                worldObj.spawnParticle("flame", f + f4, f1, f2 + f3, 0.0D, 0.0D, 0.0D);
+                worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, f + f4, f1, f2 + f3, 0.0D, 0.0D, 0.0D);
+                worldObj.spawnParticle(EnumParticleTypes.FLAME, f + f4, f1, f2 + f3, 0.0D, 0.0D, 0.0D);
                 break;
         }
     }
@@ -139,13 +128,13 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
     @Override
     protected void disperseAir(){
         super.disperseAir();
-        List<Pair<ForgeDirection, IAirHandler>> teList = getConnectedPneumatics();
-        if(teList.size() == 0) airLeak(ForgeDirection.getOrientation(getBlockMetadata()));
+        List<Pair<EnumFacing, IAirHandler>> teList = getConnectedPneumatics();
+        if(teList.size() == 0) airLeak(getRotation());
     }
 
     @Override
-    public boolean isConnectedTo(ForgeDirection side){
-        return ForgeDirection.getOrientation(getBlockMetadata()) == side;
+    public boolean isConnectedTo(EnumFacing side){
+        return getRotation() == side;
     }
 
     public int getBurnTimeRemainingScaled(int parts){
@@ -164,7 +153,7 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
     @Override
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox(){
-        return AxisAlignedBB.getBoundingBox(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 1, zCoord + 1);
+        return new AxisAlignedBB(getPos().getX(), getPos().getY(), getPos().getZ(), getPos().getX() + 1, getPos().getY() + 1, getPos().getZ() + 1);
     }
 
     /**
@@ -204,7 +193,7 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
 
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
@@ -223,7 +212,7 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
 
         return Blockss.airCompressor.getUnlocalizedName();
     }
@@ -240,10 +229,15 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
+    }
 
     @Override
     public void readFromNBT(NBTTagCompound nbtTagCompound){
@@ -292,22 +286,22 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
 
     @Override
     // upgrades in bottom, fuel in the rest.
-    public int[] getAccessibleSlotsFromSide(int var1){
+    public int[] getSlotsForFace(EnumFacing var1){
         return new int[]{0};
     }
 
     @Override
-    public boolean canInsertItem(int i, ItemStack itemstack, int j){
+    public boolean canInsertItem(int i, ItemStack itemstack, EnumFacing j){
         return true;
     }
 
     @Override
-    public boolean canExtractItem(int i, ItemStack itemstack, int j){
+    public boolean canExtractItem(int i, ItemStack itemstack, EnumFacing j){
         return true;
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 

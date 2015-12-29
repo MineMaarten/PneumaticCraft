@@ -8,21 +8,22 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.util.FluidUtils;
 import pneumaticCraft.common.util.IOHelper;
 import pneumaticCraft.lib.PneumaticValues;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityLiquidHopper extends TileEntityOmnidirectionalHopper implements IFluidHandler{
 
@@ -39,18 +40,18 @@ public class TileEntityLiquidHopper extends TileEntityOmnidirectionalHopper impl
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
         return Blockss.liquidHopper.getUnlocalizedName();
     }
 
     @Override
-    public int[] getAccessibleSlotsFromSide(int var1){
+    public int[] getSlotsForFace(EnumFacing var1){
         return new int[]{0, 1, 2, 3};
     }
 
     @Override
     protected boolean exportItem(int maxItems){
-        ForgeDirection dir = ForgeDirection.getOrientation(getBlockMetadata());
+        EnumFacing dir = getRotation();
         if(tank.getFluid() != null) {
             TileEntity neighbor = IOHelper.getNeighbor(this, dir);
             if(neighbor instanceof IFluidHandler) {
@@ -67,7 +68,7 @@ public class TileEntityLiquidHopper extends TileEntityOmnidirectionalHopper impl
             }
         }
 
-        if(worldObj.isAirBlock(xCoord + dir.offsetX, yCoord + dir.offsetY, zCoord + dir.offsetZ)) {
+        if(worldObj.isAirBlock(getPos().offset(dir))) {
             for(EntityItem entity : getNeighborItems(this, dir)) {
                 if(!entity.isDead) {
                     List<ItemStack> returnedItems = new ArrayList<ItemStack>();
@@ -87,13 +88,13 @@ public class TileEntityLiquidHopper extends TileEntityOmnidirectionalHopper impl
         }
 
         if(getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0) {
-            if(worldObj.isAirBlock(xCoord + dir.offsetX, yCoord + dir.offsetY, zCoord + dir.offsetZ)) {
-                FluidStack extractedFluid = drain(ForgeDirection.UNKNOWN, 1000, false);
+            if(worldObj.isAirBlock(getPos().offset(dir))) {
+                FluidStack extractedFluid = drain(null, 1000, false);
                 if(extractedFluid != null && extractedFluid.amount == 1000) {
                     Block fluidBlock = extractedFluid.getFluid().getBlock();
                     if(fluidBlock != null) {
-                        drain(ForgeDirection.UNKNOWN, 1000, true);
-                        worldObj.setBlock(xCoord + dir.offsetX, yCoord + dir.offsetY, zCoord + dir.offsetZ, fluidBlock);
+                        drain(null, 1000, true);
+                        worldObj.setBlockState(getPos().offset(dir), fluidBlock.getDefaultState());
                     }
                 }
             }
@@ -118,7 +119,7 @@ public class TileEntityLiquidHopper extends TileEntityOmnidirectionalHopper impl
             }
         }
 
-        if(worldObj.isAirBlock(xCoord + inputDir.offsetX, yCoord + inputDir.offsetY, zCoord + inputDir.offsetZ)) {
+        if(worldObj.isAirBlock(getPos().offset(inputDir))) {
             for(EntityItem entity : getNeighborItems(this, inputDir)) {
                 if(!entity.isDead) {
                     List<ItemStack> returnedItems = new ArrayList<ItemStack>();
@@ -137,12 +138,13 @@ public class TileEntityLiquidHopper extends TileEntityOmnidirectionalHopper impl
             }
         }
 
-        if(getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0 && worldObj.getBlockMetadata(xCoord + inputDir.offsetX, yCoord + inputDir.offsetY, zCoord + inputDir.offsetZ) == 0) {
-            Fluid fluid = FluidRegistry.lookupFluidForBlock(worldObj.getBlock(xCoord + inputDir.offsetX, yCoord + inputDir.offsetY, zCoord + inputDir.offsetZ));
-            if(fluid != null) {
-                if(fill(ForgeDirection.UNKNOWN, new FluidStack(fluid, 1000), false) == 1000) {
-                    fill(ForgeDirection.UNKNOWN, new FluidStack(fluid, 1000), true);
-                    worldObj.setBlockToAir(xCoord + inputDir.offsetX, yCoord + inputDir.offsetY, zCoord + inputDir.offsetZ);
+        if(getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0) {
+            BlockPos neighborPos = getPos().offset(inputDir);
+            Fluid fluid = FluidRegistry.lookupFluidForBlock(worldObj.getBlockState(neighborPos).getBlock());
+            if(fluid != null && FluidUtils.isSourceBlock(worldObj, neighborPos)) {
+                if(fill(null, new FluidStack(fluid, 1000), false) == 1000) {
+                    fill(null, new FluidStack(fluid, 1000), true);
+                    worldObj.setBlockToAir(neighborPos);
                     return true;
                 }
             }
@@ -152,32 +154,32 @@ public class TileEntityLiquidHopper extends TileEntityOmnidirectionalHopper impl
     }
 
     @Override
-    public int fill(ForgeDirection from, FluidStack resource, boolean doFill){
+    public int fill(EnumFacing from, FluidStack resource, boolean doFill){
         return tank.fill(resource, doFill);
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain){
-        return tank.getFluid() != null && tank.getFluid().isFluidEqual(resource) ? drain(ForgeDirection.UNKNOWN, resource.amount, doDrain) : null;
+    public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain){
+        return tank.getFluid() != null && tank.getFluid().isFluidEqual(resource) ? drain(null, resource.amount, doDrain) : null;
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain){
+    public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain){
         return tank.drain(leaveMaterial ? Math.min(maxDrain, tank.getFluidAmount() - 1000) : maxDrain, doDrain);
     }
 
     @Override
-    public boolean canFill(ForgeDirection from, Fluid fluid){
+    public boolean canFill(EnumFacing from, Fluid fluid){
         return true;
     }
 
     @Override
-    public boolean canDrain(ForgeDirection from, Fluid fluid){
+    public boolean canDrain(EnumFacing from, Fluid fluid){
         return true;
     }
 
     @Override
-    public FluidTankInfo[] getTankInfo(ForgeDirection from){
+    public FluidTankInfo[] getTankInfo(EnumFacing from){
         return new FluidTankInfo[]{new FluidTankInfo(tank)};
     }
 

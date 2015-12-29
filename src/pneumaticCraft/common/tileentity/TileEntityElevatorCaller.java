@@ -5,9 +5,10 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import pneumaticCraft.common.block.BlockElevatorCaller;
 import pneumaticCraft.common.network.DescSynced;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityElevatorCaller extends TileEntityBase{
     private ElevatorButton[] floors = new ElevatorButton[0];
@@ -26,8 +27,8 @@ public class TileEntityElevatorCaller extends TileEntityBase{
     }
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
         if(shouldUpdateNeighbors) {
             updateNeighbours();
             shouldUpdateNeighbors = false;
@@ -85,11 +86,20 @@ public class TileEntityElevatorCaller extends TileEntityBase{
 
     @Override
     public void onDescUpdate(){
-        Block newCamo = camoStack != null && camoStack.getItem() instanceof ItemBlock ? ((ItemBlock)camoStack.getItem()).field_150939_a : null;
+        Block newCamo = camoStack != null && camoStack.getItem() instanceof ItemBlock ? ((ItemBlock)camoStack.getItem()).getBlock() : null;
 
         if(newCamo != camoBlock) {
             camoBlock = newCamo;
             rerenderChunk();
+        }
+    }
+
+    @Override
+    public void onNeighborBlockUpdate(){
+        boolean wasPowered = poweredRedstone > 0;
+        super.onNeighborBlockUpdate();
+        if(poweredRedstone > 0 && !wasPowered) {
+            BlockElevatorCaller.setSurroundingElevators(worldObj, getPos(), thisFloor);
         }
     }
 
@@ -106,7 +116,7 @@ public class TileEntityElevatorCaller extends TileEntityBase{
     @Override
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox(){
-        return AxisAlignedBB.getBoundingBox(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 1, zCoord + 1);
+        return new AxisAlignedBB(getPos().getX(), getPos().getY(), getPos().getZ(), getPos().getX() + 1, getPos().getY() + 1, getPos().getZ() + 1);
     }
 
     public static class ElevatorButton{

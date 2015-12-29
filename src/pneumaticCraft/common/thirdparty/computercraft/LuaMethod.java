@@ -3,7 +3,7 @@ package pneumaticCraft.common.thirdparty.computercraft;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 public abstract class LuaMethod implements ILuaMethod{
     private final String methodName;
@@ -17,8 +17,8 @@ public abstract class LuaMethod implements ILuaMethod{
         return methodName;
     }
 
-    protected ForgeDirection getDirForString(String luaParm){
-        for(ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
+    protected EnumFacing getDirForString(String luaParm){
+        for(EnumFacing dir : EnumFacing.VALUES) {
             if(dir.toString().toLowerCase().equals(luaParm.toLowerCase())) {
                 return dir;
             }

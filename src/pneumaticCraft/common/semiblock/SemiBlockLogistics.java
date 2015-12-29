@@ -19,6 +19,8 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.fluids.IFluidTank;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.common.item.ItemLogisticsFrame;
 import pneumaticCraft.common.item.Itemss;
@@ -28,8 +30,6 @@ import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketSetSemiBlock;
 import pneumaticCraft.common.tileentity.TileEntityBase;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public abstract class SemiBlockLogistics extends SemiBlockBasic{
     protected final Map<ItemStack, Integer> incomingStacks = new HashMap<ItemStack, Integer>();
@@ -234,7 +234,7 @@ public abstract class SemiBlockLogistics extends SemiBlockBasic{
     public boolean onRightClickWithConfigurator(EntityPlayer player){
         if(getGuiID() != null) {
             NetworkHandler.sendTo(new PacketSetSemiBlock(pos, this), (EntityPlayerMP)player);
-            player.openGui(PneumaticCraft.instance, getGuiID().ordinal(), world, pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+            player.openGui(PneumaticCraft.instance, getGuiID().ordinal(), world, pos.getX(), pos.getY(), pos.getZ());
         }
         return true;
     }

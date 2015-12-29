@@ -8,21 +8,21 @@ import java.util.Set;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetForEach;
 import pneumaticCraft.common.ai.DroneAIForEachCoordinate;
 import pneumaticCraft.common.ai.IDroneBase;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetForEachCoordinate extends ProgWidgetAreaItemBase implements IJumpBackWidget, IJump,
         IVariableSetWidget{
     private String elementVariable = "";
-    private final Set<ChunkPosition> traversedPositions = new HashSet<ChunkPosition>();
+    private final Set<BlockPos> traversedPositions = new HashSet<BlockPos>();
     private DroneAIForEachCoordinate ai;
 
     @Override
@@ -32,7 +32,7 @@ public class ProgWidgetForEachCoordinate extends ProgWidgetAreaItemBase implemen
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.HELIUM_PLANT_DAMAGE;
+        return ItemPlastic.HELIUM_PLANT_DAMAGE;
     }
 
     @Override
@@ -81,8 +81,8 @@ public class ProgWidgetForEachCoordinate extends ProgWidgetAreaItemBase implemen
     @Override
     public IProgWidget getOutputWidget(IDroneBase drone, List<IProgWidget> allWidgets){
         List<String> locations = getPossibleJumpLocations();
-        if(locations.size() > 0 && ai != null && (traversedPositions.size() == 1 || !aiManager.getCoordinate(elementVariable).equals(new ChunkPosition(0, 0, 0)))) {
-            ChunkPosition pos = ai.getCurCoord();
+        if(locations.size() > 0 && ai != null && (traversedPositions.size() == 1 || !aiManager.getCoordinate(elementVariable).equals(new BlockPos(0, 0, 0)))) {
+            BlockPos pos = ai.getCurCoord();
             if(pos != null) {
                 aiManager.setCoordinate(elementVariable, pos);
                 return ProgWidgetJump.jumpToLabel(drone, allWidgets, locations.get(0));
@@ -106,7 +106,7 @@ public class ProgWidgetForEachCoordinate extends ProgWidgetAreaItemBase implemen
         return ai = new DroneAIForEachCoordinate(drone, (ProgWidgetForEachCoordinate)widget);
     }
 
-    public boolean isValidPosition(ChunkPosition pos){
+    public boolean isValidPosition(BlockPos pos){
         return traversedPositions.add(pos);
     }
 

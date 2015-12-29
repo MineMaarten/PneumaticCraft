@@ -5,20 +5,23 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.IFluidTank;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
 
+import pneumaticCraft.client.util.RenderUtils;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * This class is derived from BluePower and edited by MineMaarten:
@@ -48,7 +51,7 @@ public class WidgetTank extends WidgetBase{
         GL11.glDisable(GL11.GL_LIGHTING);
 
         Fluid fluid = tank.getFluid() != null ? tank.getFluid().getFluid() : null;
-        IIcon icon = fluid != null ? fluid.getStillIcon() : null;
+        ResourceLocation icon = fluid != null ? fluid.getStill() : null;
         int amt = tank.getFluidAmount();
         int capacity = tank.getCapacity();
         int height = 64;
@@ -65,18 +68,19 @@ public class WidgetTank extends WidgetBase{
                 GL11.glTranslated(0, height, 0);
                 GL11.glEnable(GL11.GL_BLEND);
                 while(fluidHeight > 0) {
-                    double moved = Math.min(fluidHeight, icon.getIconHeight());
+                    int iconHeight = 16; //TODO 1.8 iconHeight
+                    double moved = Math.min(fluidHeight, iconHeight);
                     GL11.glTranslated(0, -moved, 0);
-                    Tessellator t = Tessellator.instance;
-                    t.startDrawingQuads();
-                    t.setColorOpaque_I(fluid.getColor(tank.getFluid()));
+                    WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+                    wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+                    RenderUtils.glColorHex(fluid.getColor(tank.getFluid()));
                     {
-                        t.addVertexWithUV(x, y, 0, icon.getMinU(), icon.getMinV() + (icon.getMaxV() - icon.getMinV()) * (1 - moved / icon.getIconHeight()));
-                        t.addVertexWithUV(x, y + moved, 0, icon.getMinU(), icon.getMaxV());
-                        t.addVertexWithUV(x + width, y + moved, 0, icon.getMaxU(), icon.getMaxV());
-                        t.addVertexWithUV(x + width, y, 0, icon.getMaxU(), icon.getMinV() + (icon.getMaxV() - icon.getMinV()) * (1 - moved / icon.getIconHeight()));
+                        wr.pos(x, y, 0).tex(0, 0 + (1 - 0) * (1 - moved / iconHeight)).endVertex();
+                        wr.pos(x, y + moved, 0).tex(0, 1).endVertex();
+                        wr.pos(x + width, y + moved, 0).tex(1, 1).endVertex();
+                        wr.pos(x + width, y, 0).tex(1, 0 + (1 - 0) * (1 - moved / iconHeight)).endVertex();
                     }
-                    t.draw();
+                    Tessellator.getInstance().draw();
                     fluidHeight -= moved;
                 }
                 GL11.glDisable(GL11.GL_BLEND);
@@ -86,7 +90,7 @@ public class WidgetTank extends WidgetBase{
 
         GL11.glColor4d(1, 1, 1, 1);
         Minecraft.getMinecraft().getTextureManager().bindTexture(Textures.WIDGET_TANK);
-        Gui.func_146110_a(x, y, 0, 0, 16, 64, 16, 64);
+        Gui.drawModalRectWithCustomSizedTexture(x, y, 0, 0, 16, 64, 16, 64);
     }
 
     @Override

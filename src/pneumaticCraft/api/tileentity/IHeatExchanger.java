@@ -1,6 +1,6 @@
 package pneumaticCraft.api.tileentity;
 
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.api.IHeatExchangerLogic;
 
 /**
@@ -19,6 +19,6 @@ public interface IHeatExchanger{
      * @param side
      * @return
      */
-    public IHeatExchangerLogic getHeatExchangerLogic(ForgeDirection side);
+    public IHeatExchangerLogic getHeatExchangerLogic(EnumFacing side);
 
 }

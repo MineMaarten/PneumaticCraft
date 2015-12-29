@@ -1,10 +1,14 @@
 package pneumaticCraft.client.gui;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.common.TickHandlerPneumaticCraft;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.inventory.Container4UpgradeSlots;
@@ -12,8 +16,6 @@ import pneumaticCraft.common.tileentity.TileEntityElectrostaticCompressor;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.PneumaticValues;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiElectrostaticCompressor extends GuiPneumaticContainerBase<TileEntityElectrostaticCompressor>{
@@ -60,12 +62,12 @@ public class GuiElectrostaticCompressor extends GuiPneumaticContainerBase<TileEn
     public void updateScreen(){
         super.updateScreen();
         if(ticksExisted % 20 == 0) {
-            List<int[]> coordList = new ArrayList<int[]>();
-            coordList.add(new int[]{te.xCoord, te.yCoord, te.zCoord});
-            TickHandlerPneumaticCraft.getElectrostaticGrid(coordList, te.getWorldObj(), te.xCoord, te.yCoord, te.zCoord);
+            Set<BlockPos> positions = new HashSet<BlockPos>();
+            positions.add(te.getPos());
+            TickHandlerPneumaticCraft.getElectrostaticGrid(positions, te.getWorld(), te.getPos());
             connectedCompressors = 0;
-            for(int[] coord : coordList) {
-                if(te.getWorldObj().getBlock(coord[0], coord[1], coord[2]) == Blockss.electrostaticCompressor) {
+            for(BlockPos coord : positions) {
+                if(te.getWorld().getBlockState(coord).getBlock() == Blockss.electrostaticCompressor) {
                     connectedCompressors++;
                 }
             }

@@ -3,7 +3,6 @@ package pneumaticCraft.common.item;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -11,25 +10,16 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.IIcon;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.common.NBTUtil;
-import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ItemGunAmmo extends ItemPneumatic{
-    private IIcon overlay;
 
     public ItemGunAmmo(){
         super("gunAmmo");
         setMaxStackSize(1);
         setMaxDamage(1000);
-    }
-
-    @Override
-    public void registerIcons(IIconRegister iconRegister){
-        super.registerIcons(iconRegister);
-        overlay = iconRegister.registerIcon(Textures.ICON_LOCATION + "gunAmmoOverlay");
     }
 
     public static ItemStack getPotion(ItemStack ammo){
@@ -53,22 +43,13 @@ public class ItemGunAmmo extends ItemPneumatic{
         return renderPass == 0 ? super.getColorFromItemStack(itemStack, renderPass) : potion != null ? Items.potionitem.getColorFromItemStack(potion, 0) : 0x00FFFF00;
     }
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public boolean requiresMultipleRenderPasses(){
+    /* @Override
+     * TODO 1.8 check if necessary
+     @SideOnly(Side.CLIENT)
+     public boolean requiresMultipleRenderPasses(){
 
-        return true;
-    }
-
-    /**
-     * Gets an icon index based on an item's damage value and the given render pass
-     */
-    @Override
-    @SideOnly(Side.CLIENT)
-    public IIcon getIconFromDamageForRenderPass(int meta, int renderPass){
-
-        return renderPass == 0 ? super.getIconFromDamageForRenderPass(meta, renderPass) : overlay;
-    }
+         return true;
+     }*/
 
     @Override
     @SideOnly(Side.CLIENT)

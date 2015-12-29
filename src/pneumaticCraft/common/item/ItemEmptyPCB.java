@@ -3,19 +3,18 @@ package pneumaticCraft.common.item;
 import java.util.List;
 import java.util.Random;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.common.fluid.Fluids;
-import pneumaticCraft.lib.Textures;
 import pneumaticCraft.lib.TileEntityConstants;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ItemEmptyPCB extends ItemNonDespawning{
     private static Random rand = new Random();
@@ -52,16 +51,10 @@ public class ItemEmptyPCB extends ItemNonDespawning{
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IIconRegister par1IconRegister){
-        itemIcon = par1IconRegister.registerIcon(Textures.ICON_LOCATION + Textures.ITEM_EMPTY_PCB);
-    }
-
-    @Override
     public boolean onEntityItemUpdate(EntityItem entityItem){
         super.onEntityItemUpdate(entityItem);
         ItemStack stack = entityItem.getEntityItem();
-        if(Fluids.areFluidsEqual(FluidRegistry.lookupFluidForBlock(entityItem.worldObj.getBlock((int)Math.floor(entityItem.posX), (int)Math.floor(entityItem.posY), (int)Math.floor(entityItem.posZ))), Fluids.etchingAcid)) {
+        if(Fluids.areFluidsEqual(FluidRegistry.lookupFluidForBlock(entityItem.worldObj.getBlockState(new BlockPos(entityItem)).getBlock()), Fluids.etchingAcid)) {
             if(!stack.hasTagCompound()) {
                 stack.setTagCompound(new NBTTagCompound());
             }

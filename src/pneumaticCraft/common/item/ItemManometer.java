@@ -7,11 +7,12 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.item.IPressurizable;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
@@ -31,10 +32,10 @@ public class ItemManometer extends ItemPressurizable{
      * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
      */
     @Override
-    public boolean onItemUseFirst(ItemStack iStack, EntityPlayer player, World world, int x, int y, int z, int side, float par8, float par9, float par10){
+    public boolean onItemUseFirst(ItemStack iStack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float par8, float par9, float par10){
         if(world.isRemote) return false;
         if(((IPressurizable)iStack.getItem()).getPressure(iStack) > 0F) {
-            TileEntity te = world.getTileEntity(x, y, z);
+            TileEntity te = world.getTileEntity(pos);
             IPneumaticMachine machine = ModInteractionUtils.getInstance().getMachine(te);
             List<IChatComponent> curInfo = new ArrayList<IChatComponent>();
             List<String> info = new ArrayList<String>();
@@ -46,11 +47,11 @@ public class ItemManometer extends ItemPressurizable{
             for(String s : info)
                 curInfo.add(new ChatComponentTranslation(s));
             if(te instanceof IHeatExchanger) {
-                IHeatExchangerLogic exchanger = ((IHeatExchanger)te).getHeatExchangerLogic(ForgeDirection.getOrientation(side));
+                IHeatExchangerLogic exchanger = ((IHeatExchanger)te).getHeatExchangerLogic(side);
                 if(exchanger != null) {
                     curInfo.add(new ChatComponentTranslation("waila.temperature", (int)exchanger.getTemperature() - 273));
                 } else {
-                    for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
+                    for(EnumFacing d : EnumFacing.VALUES) {
                         exchanger = ((IHeatExchanger)te).getHeatExchangerLogic(d);
                         if(exchanger != null) {
                             curInfo.add(new ChatComponentTranslation("waila.temperature." + d.toString().toLowerCase(), (int)exchanger.getTemperature() - 273));

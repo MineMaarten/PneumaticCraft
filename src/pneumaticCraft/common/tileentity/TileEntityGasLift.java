@@ -1,6 +1,7 @@
 package pneumaticCraft.common.tileentity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
@@ -10,14 +11,16 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.ChunkPosition;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -28,11 +31,10 @@ import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
+import pneumaticCraft.common.util.FluidUtils;
 import pneumaticCraft.common.util.IOHelper;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.PneumaticValues;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWorkingPressure, IRedstoneControlled,
         IFluidHandler, IInventory{
@@ -47,7 +49,7 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
     public boolean[] sidesConnected = new boolean[6];
     private int workTimer;
     private int ticker;
-    private List<ChunkPosition> pumpingLake;
+    private List<BlockPos> pumpingLake;
     private static final int MAX_PUMP_RANGE = 15;
 
     public TileEntityGasLift(){
@@ -56,33 +58,33 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
     }
 
     @Override
-    public boolean isConnectedTo(ForgeDirection d){
-        return d != ForgeDirection.DOWN;
+    public boolean isConnectedTo(EnumFacing d){
+        return d != EnumFacing.DOWN;
     }
 
     @Override
     public void onNeighborTileUpdate(){
         super.onNeighborTileUpdate();
-        List<Pair<ForgeDirection, IAirHandler>> connections = getConnectedPneumatics();
+        List<Pair<EnumFacing, IAirHandler>> connections = getConnectedPneumatics();
         for(int i = 0; i < sidesConnected.length; i++)
             sidesConnected[i] = false;
-        for(Pair<ForgeDirection, IAirHandler> entry : connections) {
+        for(Pair<EnumFacing, IAirHandler> entry : connections) {
             sidesConnected[entry.getKey().ordinal()] = true;
         }
     }
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
         if(!worldObj.isRemote) {
             ticker++;
             if(currentDepth > 0) {
                 int curCheckingPipe = ticker % currentDepth;
-                if(curCheckingPipe > 0 && !isPipe(xCoord, yCoord - curCheckingPipe, zCoord)) currentDepth = curCheckingPipe - 1;
+                if(curCheckingPipe > 0 && !isPipe(getPos().add(0, -curCheckingPipe, 0))) currentDepth = curCheckingPipe - 1;
             }
             if(ticker % 400 == 0) pumpingLake = null;
 
-            if(redstoneAllows() && getPressure(ForgeDirection.UNKNOWN) >= getMinWorkingPressure()) {
+            if(redstoneAllows() && getPressure(null) >= getMinWorkingPressure()) {
                 workTimer += this.getSpeedMultiplierFromUpgrades();
                 while(workTimer > 20) {
                     workTimer -= 20;
@@ -90,10 +92,10 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
                     if(mode == 2) {
                         if(currentDepth > 0) {
                             status = 3;
-                            if(isPipe(xCoord, yCoord - currentDepth, zCoord)) {
-                                if(IOHelper.insert(this, new ItemStack(Blockss.pressureTube), 0, false) == null) {
-                                    worldObj.func_147480_a(xCoord, yCoord - currentDepth, zCoord, false);
-                                    addAir(-100, ForgeDirection.UNKNOWN);
+                            if(isPipe(getPos().add(0, -currentDepth, 0))) {
+                                if(IOHelper.insert((IInventory)this, new ItemStack(Blockss.pressureTube), null, false) == null) {
+                                    worldObj.destroyBlock(getPos().add(0, -currentDepth, 0), false);
+                                    addAir(-100, null);
                                     currentDepth--;
                                 } else {
                                     status = 0;
@@ -104,15 +106,15 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
                         }
                     } else {
                         if(!suckLiquid()) {
-                            if(yCoord - currentDepth >= 0 && !isUnbreakable(xCoord, yCoord - currentDepth - 1, zCoord)) {
+                            if(getPos().getY() - currentDepth >= 0 && !isUnbreakable(getPos().add(0, -currentDepth - 1, 0))) {
                                 status = 2;
                                 currentDepth++;
-                                if(!isPipe(xCoord, yCoord - currentDepth, zCoord)) {
+                                if(!isPipe(getPos().add(0, -currentDepth, 0))) {
                                     if(inventory[4] != null) {
                                         decrStackSize(4, 1);
-                                        worldObj.func_147480_a(xCoord, yCoord - currentDepth, zCoord, false);
-                                        worldObj.setBlock(xCoord, yCoord - currentDepth, zCoord, Blockss.pressureTube);
-                                        addAir(-100, ForgeDirection.UNKNOWN);
+                                        worldObj.destroyBlock(getPos().add(0, -currentDepth, 0), false);
+                                        worldObj.setBlockState(getPos().add(0, -currentDepth, 0), Blockss.pressureTube.getDefaultState());
+                                        addAir(-100, null);
                                     } else {
                                         status = 0;
                                         currentDepth--;
@@ -134,44 +136,44 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
         }
     }
 
-    private boolean isPipe(int x, int y, int z){
-        return worldObj.getBlock(x, y, z) == Blockss.pressureTube;
+    private boolean isPipe(BlockPos pos){
+        return worldObj.getBlockState(pos).getBlock() == Blockss.pressureTube;
     }
 
-    private boolean isUnbreakable(int x, int y, int z){
-        return worldObj.getBlock(x, y, z).getBlockHardness(worldObj, x, y, z) < 0;
+    private boolean isUnbreakable(BlockPos pos){
+        return worldObj.getBlockState(pos).getBlock().getBlockHardness(worldObj, pos) < 0;
     }
 
     public boolean suckLiquid(){
-        Block block = worldObj.getBlock(xCoord, yCoord - currentDepth - 1, zCoord);
+        Block block = worldObj.getBlockState(getPos().add(0, -currentDepth - 1, 0)).getBlock();
         Fluid fluid = FluidRegistry.lookupFluidForBlock(block);
         if(fluid != null) {
-            if(fill(ForgeDirection.UNKNOWN, new FluidStack(fluid, 1000), false) == 1000) {
+            if(fill(null, new FluidStack(fluid, 1000), false) == 1000) {
                 if(pumpingLake == null) {
-                    pumpingLake = new ArrayList<ChunkPosition>();
-                    Stack<ChunkPosition> pendingPositions = new Stack<ChunkPosition>();
-                    ChunkPosition thisPos = new ChunkPosition(xCoord, yCoord - currentDepth - 1, zCoord);
+                    pumpingLake = new ArrayList<BlockPos>();
+                    Stack<BlockPos> pendingPositions = new Stack<BlockPos>();
+                    BlockPos thisPos = new BlockPos(getPos().getX(), getPos().getY() - currentDepth - 1, getPos().getZ());
                     pendingPositions.add(thisPos);
                     pumpingLake.add(thisPos);
                     while(!pendingPositions.empty()) {
-                        ChunkPosition checkingPos = pendingPositions.pop();
-                        for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
-                            if(d == ForgeDirection.DOWN) continue;
-                            ChunkPosition newPos = new ChunkPosition(checkingPos.chunkPosX + d.offsetX, checkingPos.chunkPosY + d.offsetY, checkingPos.chunkPosZ + d.offsetZ);
-                            if(PneumaticCraftUtils.distBetween(newPos, xCoord + 0.5, yCoord - currentDepth - 1, zCoord + 0.5) <= MAX_PUMP_RANGE && worldObj.getBlock(newPos.chunkPosX, newPos.chunkPosY, newPos.chunkPosZ) == block && !pumpingLake.contains(newPos)) {
+                        BlockPos checkingPos = pendingPositions.pop();
+                        for(EnumFacing d : EnumFacing.VALUES) {
+                            if(d == EnumFacing.DOWN) continue;
+                            BlockPos newPos = new BlockPos(checkingPos.getX() + d.getFrontOffsetX(), checkingPos.getY() + d.getFrontOffsetY(), checkingPos.getZ() + d.getFrontOffsetZ());
+                            if(PneumaticCraftUtils.distBetween(newPos, getPos().getX() + 0.5, getPos().getY() - currentDepth - 1, getPos().getZ() + 0.5) <= MAX_PUMP_RANGE && worldObj.getBlockState(newPos).getBlock() == block && !pumpingLake.contains(newPos)) {
                                 pendingPositions.add(newPos);
                                 pumpingLake.add(newPos);
                             }
                         }
                     }
-                    Collections.sort(pumpingLake, new ChunkPositionSorter(xCoord + 0.5, yCoord - currentDepth - 1, zCoord + 0.5));
+                    Collections.sort(pumpingLake, new ChunkPositionSorter(getPos().getX() + 0.5, getPos().getY() - currentDepth - 1, getPos().getZ() + 0.5));
                     Collections.reverse(pumpingLake);
                 }
-                ChunkPosition curPos = null;
+                BlockPos curPos = null;
                 boolean foundSource = false;
                 while(pumpingLake.size() > 0) {
                     curPos = pumpingLake.get(0);
-                    if(worldObj.getBlock(curPos.chunkPosX, curPos.chunkPosY, curPos.chunkPosZ) == block && worldObj.getBlockMetadata(curPos.chunkPosX, curPos.chunkPosY, curPos.chunkPosZ) == 0) {
+                    if(worldObj.getBlockState(curPos).getBlock() == block && FluidUtils.isSourceBlock(worldObj, curPos)) {
                         foundSource = true;
                         break;
                     }
@@ -180,9 +182,9 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
                 if(pumpingLake.size() == 0) {
                     pumpingLake = null;
                 } else if(foundSource) {
-                    worldObj.setBlockToAir(curPos.chunkPosX, curPos.chunkPosY, curPos.chunkPosZ);
-                    fill(ForgeDirection.UNKNOWN, new FluidStack(fluid, 1000), true);
-                    addAir(-100, ForgeDirection.UNKNOWN);
+                    worldObj.setBlockToAir(curPos);
+                    fill(null, new FluidStack(fluid, 1000), true);
+                    addAir(-100, null);
                     status = 1;
                 }
             }
@@ -237,32 +239,32 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
     }
 
     @Override
-    public int fill(ForgeDirection from, FluidStack resource, boolean doFill){
+    public int fill(EnumFacing from, FluidStack resource, boolean doFill){
         return tank.fill(resource, doFill);
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain){
-        return tank.getFluid() != null && tank.getFluid().isFluidEqual(resource) ? drain(ForgeDirection.UNKNOWN, resource.amount, doDrain) : null;
+    public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain){
+        return tank.getFluid() != null && tank.getFluid().isFluidEqual(resource) ? drain(null, resource.amount, doDrain) : null;
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain){
+    public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain){
         return mode == 0 ? tank.drain(maxDrain, doDrain) : tank.drain(Math.min(tank.getFluidAmount() - 1000, maxDrain), doDrain);
     }
 
     @Override
-    public boolean canFill(ForgeDirection from, Fluid fluid){
+    public boolean canFill(EnumFacing from, Fluid fluid){
         return false;
     }
 
     @Override
-    public boolean canDrain(ForgeDirection from, Fluid fluid){
+    public boolean canDrain(EnumFacing from, Fluid fluid){
         return true;
     }
 
     @Override
-    public FluidTankInfo[] getTankInfo(ForgeDirection from){
+    public FluidTankInfo[] getTankInfo(EnumFacing from){
         return new FluidTankInfo[]{new FluidTankInfo(tank)};
     }
 
@@ -275,7 +277,7 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
      * Returns the name of the inventory.
      */
     @Override
-    public String getInventoryName(){
+    public String getName(){
         return Blockss.gasLift.getUnlocalizedName();
     }
 
@@ -312,7 +314,7 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
             setInventorySlotContents(slot, null);
@@ -334,7 +336,7 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 
@@ -349,9 +351,14 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
+    }
 
 }

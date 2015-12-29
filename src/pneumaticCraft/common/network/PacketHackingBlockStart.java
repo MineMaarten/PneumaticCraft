@@ -2,6 +2,7 @@ package pneumaticCraft.common.network;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.BlockPos;
 import pneumaticCraft.client.render.pneumaticArmor.BlockTrackUpgradeHandler;
 import pneumaticCraft.client.render.pneumaticArmor.HUDHandler;
 import pneumaticCraft.client.render.pneumaticArmor.RenderBlockTarget;
@@ -12,8 +13,8 @@ public class PacketHackingBlockStart extends LocationIntPacket<PacketHackingBloc
 
     public PacketHackingBlockStart(){}
 
-    public PacketHackingBlockStart(int x, int y, int z){
-        super(x, y, z);
+    public PacketHackingBlockStart(BlockPos pos){
+        super(pos);
     }
 
     @Override
@@ -28,14 +29,14 @@ public class PacketHackingBlockStart extends LocationIntPacket<PacketHackingBloc
 
     @Override
     public void handleClientSide(PacketHackingBlockStart message, EntityPlayer player){
-        CommonHUDHandler.getHandlerForPlayer(player).setHackedBlock(new WorldAndCoord(player.worldObj, message.x, message.y, message.z));
-        RenderBlockTarget target = HUDHandler.instance().getSpecificRenderer(BlockTrackUpgradeHandler.class).getTargetForCoord(message.x, message.y, message.z);
+        CommonHUDHandler.getHandlerForPlayer(player).setHackedBlock(new WorldAndCoord(player.worldObj, message.pos));
+        RenderBlockTarget target = HUDHandler.instance().getSpecificRenderer(BlockTrackUpgradeHandler.class).getTargetForCoord(message.pos);
         if(target != null) target.onHackConfirmServer();
     }
 
     @Override
     public void handleServerSide(PacketHackingBlockStart message, EntityPlayer player){
-        CommonHUDHandler.getHandlerForPlayer(player).setHackedBlock(new WorldAndCoord(player.worldObj, message.x, message.y, message.z));
+        CommonHUDHandler.getHandlerForPlayer(player).setHackedBlock(new WorldAndCoord(player.worldObj, message.pos));
         NetworkHandler.sendToAllAround(message, player.worldObj);
     }
 

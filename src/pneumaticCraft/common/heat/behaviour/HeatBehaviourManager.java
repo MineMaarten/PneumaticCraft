@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.tileentity.HeatBehaviour;
@@ -53,13 +54,13 @@ public class HeatBehaviourManager{
         }
     }
 
-    public void addHeatBehaviours(World world, int x, int y, int z, IHeatExchangerLogic logic, List<HeatBehaviour> list){
+    public void addHeatBehaviours(World world, BlockPos pos, IHeatExchangerLogic logic, List<HeatBehaviour> list){
         for(HeatBehaviour behaviour : behaviours.values()) {
-            behaviour.initialize(logic, world, x, y, z);
+            behaviour.initialize(logic, world, pos);
             if(behaviour.isApplicable()) {
                 try {
                     behaviour = behaviour.getClass().newInstance();
-                    behaviour.initialize(logic, world, x, y, z);
+                    behaviour.initialize(logic, world, pos);
                     list.add(behaviour);
                 } catch(Exception e) {
                     e.printStackTrace();

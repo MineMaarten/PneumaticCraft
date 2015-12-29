@@ -8,16 +8,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import pneumaticCraft.common.config.Config;
 import pneumaticCraft.lib.Log;
 import pneumaticCraft.lib.Versions;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
 
 public class UpdateChecker extends Thread{
 
@@ -175,7 +176,7 @@ public class UpdateChecker extends Thread{
         }
 
         @Override
-        public void processCommand(ICommandSender icommandsender, String[] astring){
+        public void processCommand(ICommandSender icommandsender, String[] astring) throws CommandException{
             if(astring.length > 0 && astring[0].equalsIgnoreCase("changelog")) {
                 if(astring.length > 1) {
                     if(astring[1].equalsIgnoreCase("additions")) {

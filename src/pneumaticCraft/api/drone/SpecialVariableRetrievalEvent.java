@@ -1,8 +1,8 @@
 package pneumaticCraft.api.drone;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.ChunkPosition;
-import cpw.mods.fml.common.eventhandler.Event;
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 /**
  * Fired when a Drone is trying to get a special coordinate, by accessing a variable with '$' prefix.
@@ -25,7 +25,7 @@ public abstract class SpecialVariableRetrievalEvent extends Event{
     }
 
     public static abstract class CoordinateVariable extends SpecialVariableRetrievalEvent{
-        public ChunkPosition coordinate;
+        public BlockPos coordinate;
 
         public CoordinateVariable(String specialVarName){
             super(specialVarName);

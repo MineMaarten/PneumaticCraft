@@ -1,8 +1,8 @@
 package pneumaticCraft.common.ai;
 
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.ChunkPosition;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -20,33 +20,33 @@ public class DroneAILiquidImport extends DroneAIImExBase{
     }
 
     @Override
-    protected boolean isValidPosition(ChunkPosition pos){
+    protected boolean isValidPosition(BlockPos pos){
         return emptyTank(pos, true);
     }
 
     @Override
-    protected boolean doBlockInteraction(ChunkPosition pos, double distToBlock){
+    protected boolean doBlockInteraction(BlockPos pos, double distToBlock){
         return emptyTank(pos, false) && super.doBlockInteraction(pos, distToBlock);
     }
 
-    private boolean emptyTank(ChunkPosition pos, boolean simulate){
+    private boolean emptyTank(BlockPos pos, boolean simulate){
         if(drone.getTank().getFluidAmount() == drone.getTank().getCapacity()) {
             drone.addDebugEntry("gui.progWidget.liquidImport.debug.fullDroneTank");
             abort();
             return false;
         } else {
-            TileEntity te = drone.getWorld().getTileEntity(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+            TileEntity te = drone.getWorld().getTileEntity(pos);
             if(te instanceof IFluidHandler) {
                 IFluidHandler tank = (IFluidHandler)te;
                 for(int i = 0; i < 6; i++) {
                     if(((ISidedWidget)widget).getSides()[i]) {
-                        FluidStack importedFluid = tank.drain(ForgeDirection.getOrientation(i), Integer.MAX_VALUE, false);
+                        FluidStack importedFluid = tank.drain(EnumFacing.getFront(i), Integer.MAX_VALUE, false);
                         if(importedFluid != null && ((ILiquidFiltered)widget).isFluidValid(importedFluid.getFluid())) {
                             int filledAmount = drone.getTank().fill(importedFluid, false);
                             if(filledAmount > 0) {
                                 if(((ICountWidget)widget).useCount()) filledAmount = Math.min(filledAmount, getRemainingCount());
                                 if(!simulate) {
-                                    decreaseCount(drone.getTank().fill(tank.drain(ForgeDirection.getOrientation(i), filledAmount, true), true));
+                                    decreaseCount(drone.getTank().fill(tank.drain(EnumFacing.getFront(i), filledAmount, true), true));
                                 }
                                 return true;
                             }
@@ -55,12 +55,12 @@ public class DroneAILiquidImport extends DroneAIImExBase{
                 }
                 drone.addDebugEntry("gui.progWidget.liquidImport.debug.emptiedToMax", pos);
             } else if(!((ICountWidget)widget).useCount() || getRemainingCount() >= 1000) {
-                Fluid fluid = FluidRegistry.lookupFluidForBlock(drone.getWorld().getBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ));
-                if(fluid != null && ((ILiquidFiltered)widget).isFluidValid(fluid) && drone.getTank().fill(new FluidStack(fluid, 1000), false) == 1000 && FluidUtils.isSourceBlock(drone.getWorld(), pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ)) {
+                Fluid fluid = FluidRegistry.lookupFluidForBlock(drone.getWorld().getBlockState(pos).getBlock());
+                if(fluid != null && ((ILiquidFiltered)widget).isFluidValid(fluid) && drone.getTank().fill(new FluidStack(fluid, 1000), false) == 1000 && FluidUtils.isSourceBlock(drone.getWorld(), pos)) {
                     if(!simulate) {
                         decreaseCount(1000);
                         drone.getTank().fill(new FluidStack(fluid, 1000), true);
-                        drone.getWorld().setBlockToAir(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+                        drone.getWorld().setBlockToAir(pos);
                     }
                     return true;
                 }

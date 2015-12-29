@@ -2,13 +2,12 @@ package pneumaticCraft.common.recipes;
 
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
 import pneumaticCraft.api.item.IPressurizable;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.lib.PneumaticValues;
 
-public class RecipePneumaticHelmet implements IRecipe{
+public class RecipePneumaticHelmet extends AbstractRecipe{
 
     @Override
     public boolean matches(InventoryCrafting inventory, World world){

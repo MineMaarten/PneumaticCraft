@@ -2,15 +2,18 @@ package pneumaticCraft.common.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.api.item.IPressurizable;
 import pneumaticCraft.api.item.IProgrammable;
 import pneumaticCraft.common.NBTUtil;
@@ -21,8 +24,6 @@ import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.Log;
 import pneumaticCraft.lib.PneumaticValues;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ItemDrone extends ItemPneumatic implements IPressurizable, IChargingStationGUIHolderItem, IProgrammable{
 
@@ -31,14 +32,12 @@ public class ItemDrone extends ItemPneumatic implements IPressurizable, IChargin
     }
 
     @Override
-    public void registerIcons(IIconRegister par1IconRegister){}
-
-    @Override
-    public boolean onItemUse(ItemStack iStack, EntityPlayer player, World world, int x, int y, int z, int side, float vecX, float vecY, float vecZ){
+    public boolean onItemUse(ItemStack iStack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float vecX, float vecY, float vecZ){
         if(!world.isRemote) {
             EntityDrone drone = new EntityDrone(world, player);
-            ForgeDirection dir = ForgeDirection.getOrientation(side);
-            drone.setPosition(x + 0.5 + dir.offsetX, y + 0.5 + dir.offsetY, z + 0.5 + dir.offsetZ);
+
+            BlockPos placePos = pos.offset(side);
+            drone.setPosition(placePos.getX() + 0.5, placePos.getY() + 0.5, placePos.getZ() + 0.5);
             world.spawnEntityInWorld(drone);
 
             NBTTagCompound stackTag = iStack.getTagCompound();
@@ -55,7 +54,8 @@ public class ItemDrone extends ItemPneumatic implements IPressurizable, IChargin
             if(iStack.hasDisplayName()) drone.setCustomNameTag(iStack.getDisplayName());
 
             drone.naturallySpawned = false;
-            drone.onSpawnWithEgg(null);
+            //TODO 1.8 check if valid replacement drone.onSpawnWithEgg(null);
+            drone.onInitialSpawn(world.getDifficultyForLocation(placePos), (IEntityLivingData)null);
             iStack.stackSize--;
         }
         return true;

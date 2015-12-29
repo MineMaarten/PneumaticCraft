@@ -7,10 +7,12 @@ import java.util.Set;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.lwjgl.util.Rectangle;
@@ -19,8 +21,6 @@ import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 import pneumaticCraft.api.universalSensor.IBlockAndCoordinatePollSensor;
 import pneumaticCraft.common.tileentity.TileEntityCompressedIronBlock;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockHeatSensor implements IBlockAndCoordinatePollSensor{
 
@@ -47,13 +47,13 @@ public class BlockHeatSensor implements IBlockAndCoordinatePollSensor{
     }
 
     @Override
-    public int getRedstoneValue(World world, int x, int y, int z, int sensorRange, String textBoxText, Set<ChunkPosition> positions){
+    public int getRedstoneValue(World world, BlockPos pos, int sensorRange, String textBoxText, Set<BlockPos> positions){
         double temperature = Double.MIN_VALUE;
-        for(ChunkPosition pos : positions) {
-            TileEntity te = world.getTileEntity(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+        for(BlockPos p : positions) {
+            TileEntity te = world.getTileEntity(p);
             if(te instanceof IHeatExchanger) {
                 IHeatExchanger exchanger = (IHeatExchanger)te;
-                for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
+                for(EnumFacing d : EnumFacing.VALUES) {
                     IHeatExchangerLogic logic = exchanger.getHeatExchangerLogic(d);
                     if(logic != null) temperature = Math.max(temperature, logic.getTemperature());
                 }

@@ -1,13 +1,15 @@
 package pneumaticCraft.client.render;
 
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.inventory.Slot;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
 
 import pneumaticCraft.client.gui.GuiSecurityStationBase;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class RenderProgressingLine{
     public double startX;
@@ -83,20 +85,20 @@ public class RenderProgressingLine{
 
     @SideOnly(Side.CLIENT)
     public void render(){
-        Tessellator tess = Tessellator.instance;
-        tess.startDrawing(GL11.GL_LINES);
-        tess.addVertex(startX, startY, startZ);
-        tess.addVertex(startX + (endX - startX) * progress, startY + (endY - startY) * progress, startZ + (endZ - startZ) * progress);
-        tess.draw();
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+        wr.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION);
+        wr.pos(startX, startY, startZ).endVertex();
+        wr.pos(startX + (endX - startX) * progress, startY + (endY - startY) * progress, startZ + (endZ - startZ) * progress).endVertex();
+        Tessellator.getInstance().draw();
     }
 
     @SideOnly(Side.CLIENT)
     public void renderInterpolated(RenderProgressingLine lastTickLine, float partialTick){
-        Tessellator tess = Tessellator.instance;
-        tess.startDrawing(GL11.GL_LINES);
-        tess.addVertex(getInter(startX, lastTickLine.startX, partialTick), getInter(startY, lastTickLine.startY, partialTick), getInter(startZ, lastTickLine.startZ, partialTick));
-        tess.addVertex(getInter(startX, lastTickLine.startX, partialTick) + (getInter(endX, lastTickLine.endX, partialTick) - getInter(startX, lastTickLine.startX, partialTick)) * progress, getInter(startY, lastTickLine.startY, partialTick) + (getInter(startY, lastTickLine.startY, partialTick) - getInter(endY, lastTickLine.endY, partialTick)) * progress, getInter(startZ, lastTickLine.startZ, partialTick) + (getInter(endZ, lastTickLine.endZ, partialTick) - getInter(startZ, lastTickLine.startZ, partialTick)) * progress);
-        tess.draw();
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+        wr.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION);
+        wr.pos(getInter(startX, lastTickLine.startX, partialTick), getInter(startY, lastTickLine.startY, partialTick), getInter(startZ, lastTickLine.startZ, partialTick)).endVertex();
+        wr.pos(getInter(startX, lastTickLine.startX, partialTick) + (getInter(endX, lastTickLine.endX, partialTick) - getInter(startX, lastTickLine.startX, partialTick)) * progress, getInter(startY, lastTickLine.startY, partialTick) + (getInter(startY, lastTickLine.startY, partialTick) - getInter(endY, lastTickLine.endY, partialTick)) * progress, getInter(startZ, lastTickLine.startZ, partialTick) + (getInter(endZ, lastTickLine.endZ, partialTick) - getInter(startZ, lastTickLine.startZ, partialTick)) * progress).endVertex();
+        Tessellator.getInstance().draw();
     }
 
     protected double getInter(double cur, double old, float partialTick){

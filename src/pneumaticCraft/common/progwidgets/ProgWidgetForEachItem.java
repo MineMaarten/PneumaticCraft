@@ -8,14 +8,14 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetForEach;
 import pneumaticCraft.common.ai.DroneAIManager;
 import pneumaticCraft.common.ai.IDroneBase;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetForEachItem extends ProgWidget implements IJumpBackWidget, IJump, IVariableSetWidget{
     private String elementVariable = "";
@@ -29,7 +29,7 @@ public class ProgWidgetForEachItem extends ProgWidget implements IJumpBackWidget
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.HELIUM_PLANT_DAMAGE;
+        return ItemPlastic.HELIUM_PLANT_DAMAGE;
     }
 
     @Override

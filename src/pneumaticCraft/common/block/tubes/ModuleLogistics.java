@@ -11,15 +11,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.StatCollector;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidHandler;
 
 import org.lwjgl.opengl.GL11;
 
 import pneumaticCraft.client.model.IBaseModel;
-import pneumaticCraft.client.model.tubemodules.ModelLogisticsModule;
 import pneumaticCraft.client.util.RenderUtils;
 import pneumaticCraft.common.ai.LogisticsManager;
 import pneumaticCraft.common.ai.LogisticsManager.LogisticsTask;
@@ -35,7 +34,7 @@ import pneumaticCraft.lib.Names;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
 public class ModuleLogistics extends TubeModule{
-    private static final ModelLogisticsModule model = new ModelLogisticsModule();
+    private static final IBaseModel model = null;////TODO 1.8 ModelLogisticsModule model = new ModelLogisticsModule();
     private SemiBlockLogistics cachedFrame;
     private int colorChannel;
     private int ticksSinceAction = -1;//client sided timer used to display the blue color when doing a logistic task.
@@ -63,21 +62,21 @@ public class ModuleLogistics extends TubeModule{
 
     @Override
     public IBaseModel getModel(){
-        if(ticksSinceAction >= 0) {
-            model.base1 = model.action;
-        } else if(ticksSinceNotEnoughAir >= 0) {
-            model.base1 = model.notEnoughAir;
-        } else {
-            model.base1 = hasPower() ? model.powered : model.notPowered;
-        }
+        /*TODO 1.8 if(ticksSinceAction >= 0) {
+             model.base1 = model.action;
+         } else if(ticksSinceNotEnoughAir >= 0) {
+             model.base1 = model.notEnoughAir;
+         } else {
+             model.base1 = hasPower() ? model.powered : model.notPowered;
+         }*/
         return model;
     }
 
     @Override
     protected void renderModule(){
         super.renderModule();
-        RenderUtils.glColorHex(0xFF000000 | ItemDye.field_150922_c[getColorChannel()]);
-        model.renderChannelColorFrame(1 / 16F);
+        RenderUtils.glColorHex(0xFF000000 | ItemDye.dyeColors[getColorChannel()]);
+        //TODO 1.8  model.renderChannelColorFrame(1 / 16F);
         GL11.glColor4d(1, 1, 1, 1);
     }
 
@@ -121,7 +120,7 @@ public class ModuleLogistics extends TubeModule{
 
     public SemiBlockLogistics getFrame(){
         if(cachedFrame == null) {
-            ISemiBlock semiBlock = SemiBlockManager.getInstance(getTube().world()).getSemiBlock(getTube().world(), getTube().x() + dir.offsetX, getTube().y() + dir.offsetY, getTube().z() + dir.offsetZ);
+            ISemiBlock semiBlock = SemiBlockManager.getInstance(getTube().world()).getSemiBlock(getTube().world(), getTube().pos().offset(dir));
             if(semiBlock instanceof SemiBlockLogistics) cachedFrame = (SemiBlockLogistics)semiBlock;
         }
         return cachedFrame;
@@ -178,7 +177,7 @@ public class ModuleLogistics extends TubeModule{
                                 if(extractedStack != null) {
                                     ModuleLogistics provider = frameToModuleMap.get(task.provider);
                                     ModuleLogistics requester = frameToModuleMap.get(task.requester);
-                                    int airUsed = (int)(ITEM_TRANSPORT_COST * extractedStack.stackSize * Math.pow(PneumaticCraftUtils.distBetweenSq(provider.getTube().x(), provider.getTube().y(), provider.getTube().z(), requester.getTube().x(), requester.getTube().y(), requester.getTube().z()), 0.25));
+                                    int airUsed = (int)(ITEM_TRANSPORT_COST * extractedStack.stackSize * Math.pow(PneumaticCraftUtils.distBetweenSq(provider.getTube().pos(), requester.getTube().pos()), 0.25));
                                     if(requester.getTube().getAirHandler().getCurrentAir(null) > airUsed) {
                                         sendModuleUpdate(provider, true);
                                         sendModuleUpdate(requester, true);
@@ -199,7 +198,7 @@ public class ModuleLogistics extends TubeModule{
                                 IFluidHandler provider = (IFluidHandler)task.provider.getTileEntity();
                                 IFluidHandler requester = (IFluidHandler)task.requester.getTileEntity();
 
-                                for(ForgeDirection di : ForgeDirection.VALID_DIRECTIONS) {
+                                for(EnumFacing di : EnumFacing.VALUES) {
                                     int amountFilled = requester.fill(di, task.transportingFluid.stack, false);
                                     if(amountFilled > 0) {
                                         FluidStack drainingFluid = task.transportingFluid.stack.copy();
@@ -208,10 +207,10 @@ public class ModuleLogistics extends TubeModule{
                                         ModuleLogistics p = frameToModuleMap.get(task.provider);
                                         ModuleLogistics r = frameToModuleMap.get(task.requester);
                                         int airUsed = 0;
-                                        for(ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
+                                        for(EnumFacing d : EnumFacing.VALUES) {
                                             extractedFluid = provider.drain(d, drainingFluid, false);
                                             if(extractedFluid != null) {
-                                                airUsed = (int)(FLUID_TRANSPORT_COST * extractedFluid.amount * PneumaticCraftUtils.distBetween(p.getTube().x(), p.getTube().y(), p.getTube().z(), r.getTube().x(), r.getTube().y(), r.getTube().z()));
+                                                airUsed = (int)(FLUID_TRANSPORT_COST * extractedFluid.amount * PneumaticCraftUtils.distBetweenSq(p.getTube().pos(), r.getTube().pos()));
                                                 if(r.getTube().getAirHandler().getCurrentAir(null) > airUsed) {
                                                     extractedFluid = provider.drain(d, drainingFluid, true);
                                                     break;
@@ -268,6 +267,6 @@ public class ModuleLogistics extends TubeModule{
             status = "waila.logisticsModule.noPower";
         }
         curInfo.add(StatCollector.translateToLocal("hud.msg.state") + ": " + StatCollector.translateToLocal(status));
-        curInfo.add(StatCollector.translateToLocal("waila.logisticsModule.channel") + " " + EnumChatFormatting.YELLOW + StatCollector.translateToLocal("item.fireworksCharge." + ItemDye.field_150923_a[colorChannel]));
+        curInfo.add(StatCollector.translateToLocal("waila.logisticsModule.channel") + " " + EnumChatFormatting.YELLOW + StatCollector.translateToLocal("item.fireworksCharge." + ItemDye.dyeColors[colorChannel]));
     }
 }

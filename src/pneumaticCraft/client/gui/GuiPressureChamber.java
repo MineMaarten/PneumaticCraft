@@ -7,14 +7,14 @@ import java.util.List;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.client.gui.widget.GuiAnimatedStat;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.inventory.Container4UpgradeSlots;
 import pneumaticCraft.common.tileentity.TileEntityPressureChamberValve;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiPressureChamber extends GuiPneumaticContainerBase<TileEntityPressureChamberValve>{
@@ -35,7 +35,7 @@ public class GuiPressureChamber extends GuiPneumaticContainerBase<TileEntityPres
     @Override
     protected void drawGuiContainerForegroundLayer(int x, int y){
         super.drawGuiContainerForegroundLayer(x, y);
-        String containerName = te.hasCustomInventoryName() ? te.getInventoryName() : I18n.format("gui.pressureChamberTitle", te.multiBlockSize + "x" + te.multiBlockSize + "x" + te.multiBlockSize);
+        String containerName = te.hasCustomName() ? te.getName() : I18n.format("gui.pressureChamberTitle", te.multiBlockSize + "x" + te.multiBlockSize + "x" + te.multiBlockSize);
         fontRendererObj.drawString(containerName, xSize / 2 - fontRendererObj.getStringWidth(containerName) / 2, 6, 4210752);
         fontRendererObj.drawString("Upgr.", 53, 19, 4210752);
     }

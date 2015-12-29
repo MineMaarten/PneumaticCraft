@@ -1,5 +1,6 @@
 package pneumaticCraft.client.gui.programmer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class GuiProgWidgetLiquidFilter extends GuiProgWidgetOptionBase<ProgWidge
             }
         }
 
-        searchField = new WidgetTextField(Minecraft.getMinecraft().fontRenderer, guiLeft + 10, guiTop + 30, 90, 10);
+        searchField = new WidgetTextField(Minecraft.getMinecraft().fontRendererObj, guiLeft + 10, guiTop + 30, 90, 10);
         addWidget(searchField);
 
         scrollbar = new WidgetVerticalScrollbar(guiLeft + 155, guiTop + 47, 112);
@@ -90,7 +91,7 @@ public class GuiProgWidgetLiquidFilter extends GuiProgWidgetOptionBase<ProgWidge
     }
 
     @Override
-    public void keyTyped(char key, int keyCode){
+    public void keyTyped(char key, int keyCode) throws IOException{
         super.keyTyped(key, keyCode);
         addValidFluids();
     }

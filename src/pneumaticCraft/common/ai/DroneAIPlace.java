@@ -1,13 +1,13 @@
 package pneumaticCraft.common.ai;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.ChunkPosition;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 import pneumaticCraft.common.entity.living.EntityDrone;
 import pneumaticCraft.common.progwidgets.ISidedWidget;
 import pneumaticCraft.common.progwidgets.ProgWidgetAreaItemBase;
@@ -31,35 +31,24 @@ public class DroneAIPlace extends DroneAIBlockInteraction{
     }
 
     @Override
-    protected boolean isValidPosition(ChunkPosition pos){
-        if(drone.getWorld().isAirBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ)) {
+    protected boolean isValidPosition(BlockPos pos){
+        if(drone.getWorld().isAirBlock(pos)) {
             boolean failedOnPlacement = false;
-            for(int i = 0; i < drone.getInventory().getSizeInventory(); i++) {
-                ItemStack droneStack = drone.getInventory().getStackInSlot(i);
+            for(int i = 0; i < drone.getInv().getSizeInventory(); i++) {
+                ItemStack droneStack = drone.getInv().getStackInSlot(i);
                 if(droneStack != null && droneStack.getItem() instanceof ItemBlock) {
                     if(widget.isItemValidForFilters(droneStack)) {
-                        if(((ItemBlock)droneStack.getItem()).field_150939_a.canPlaceBlockOnSide(drone.getWorld(), pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, ProgWidgetPlace.getDirForSides(((ISidedWidget)widget).getSides()).ordinal())) {
-                            if(drone instanceof EntityDrone) {
-                                EntityDrone entity = (EntityDrone)drone;
-                                entity.setPosition(entity.posX, entity.posY + 200, entity.posZ);//Teleport the drone to make sure it isn't in the way of placing a block.
-                            }
-                            if(drone.getWorld().canPlaceEntityOnSide(((ItemBlock)droneStack.getItem()).field_150939_a, pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, false, 0, null, droneStack)) {
-                                if(drone instanceof EntityDrone) {
-                                    EntityDrone entity = (EntityDrone)drone;
-                                    entity.setPosition(entity.posX, entity.posY - 200, entity.posZ);
-                                }
-                                return true;
-                            } else {
-                                if(drone instanceof EntityDrone) {
-                                    EntityDrone entity = (EntityDrone)drone;
-                                    entity.setPosition(entity.posX, entity.posY - 200, entity.posZ);
-                                }
-                                drone.addDebugEntry("gui.progWidget.place.debug.entityInWay", pos);
-                                failedOnPlacement = true;
-                            }
+                        Block placingBlock = ((ItemBlock)droneStack.getItem()).getBlock();
+                        EnumFacing side = ProgWidgetPlace.getDirForSides(((ISidedWidget)widget).getSides());
+                        if(drone.getWorld().canBlockBePlaced(placingBlock, pos, false, side, drone instanceof EntityDrone ? (EntityDrone)drone : null, droneStack)) {
+                            return true;
                         } else {
+                            if(drone.getWorld().canBlockBePlaced(placingBlock, pos, true, side, drone instanceof EntityDrone ? (EntityDrone)drone : null, droneStack)) {
+                                drone.addDebugEntry("gui.progWidget.place.debug.cantPlaceBlock", pos);
+                            } else {
+                                drone.addDebugEntry("gui.progWidget.place.debug.entityInWay", pos);
+                            }
                             failedOnPlacement = true;
-                            drone.addDebugEntry("gui.progWidget.place.debug.cantPlaceBlock", pos);
                         }
                     }
                 }
@@ -69,39 +58,29 @@ public class DroneAIPlace extends DroneAIBlockInteraction{
         return false;
     }
 
+    //TODO 1.8 test
     @Override
-    protected boolean doBlockInteraction(ChunkPosition pos, double distToBlock){
+    protected boolean doBlockInteraction(BlockPos pos, double distToBlock){
         if(drone.getPathNavigator().hasNoPath()) {
-            ForgeDirection side = ProgWidgetPlace.getDirForSides(((ISidedWidget)widget).getSides());
-            for(int i = 0; i < drone.getInventory().getSizeInventory(); i++) {
-                ItemStack droneStack = drone.getInventory().getStackInSlot(i);
-                if(droneStack != null && droneStack.getItem() instanceof ItemBlock && ((ItemBlock)droneStack.getItem()).field_150939_a.canPlaceBlockOnSide(drone.getWorld(), pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, ProgWidgetPlace.getDirForSides(((ISidedWidget)widget).getSides()).ordinal())) {
+            EnumFacing side = ProgWidgetPlace.getDirForSides(((ISidedWidget)widget).getSides());
+            for(int i = 0; i < drone.getInv().getSizeInventory(); i++) {
+                ItemStack droneStack = drone.getInv().getStackInSlot(i);
+                if(droneStack != null && droneStack.getItem() instanceof ItemBlock && ((ItemBlock)droneStack.getItem()).getBlock().canPlaceBlockOnSide(drone.getWorld(), pos, ProgWidgetPlace.getDirForSides(((ISidedWidget)widget).getSides()))) {
                     if(widget.isItemValidForFilters(droneStack)) {
-                        if(drone instanceof EntityDrone) {
-                            EntityDrone entity = (EntityDrone)drone;
-                            entity.setPosition(entity.posX, entity.posY + 200, entity.posZ);//Teleport the drone to make sure it isn't in the way of placing a block.
-                        }
-                        if(drone.getWorld().canPlaceEntityOnSide(((ItemBlock)droneStack.getItem()).field_150939_a, pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, false, 0, null, droneStack)) {
-                            Block block = Block.getBlockFromItem(droneStack.getItem());
-                            int meta = droneStack.getItem().getMetadata(droneStack.getItemDamage());
-                            int newMeta = block.onBlockPlaced(drone.getWorld(), pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, side.ordinal(), side.offsetX, side.offsetY, side.offsetZ, meta);
+                        ItemBlock itemBlock = (ItemBlock)droneStack.getItem();
+                        Block block = itemBlock.getBlock();
+                        if(drone.getWorld().canBlockBePlaced(block, pos, false, side, drone instanceof EntityDrone ? (EntityDrone)drone : null, droneStack)) {
+                            int newMeta = itemBlock.getMetadata(droneStack.getMetadata());
                             setFakePlayerAccordingToDir();
-                            if(placeBlockAt(droneStack, drone.getFakePlayer(), drone.getWorld(), pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, side.ordinal(), 0, 0, 0, newMeta)) {
+                            IBlockState iblockstate1 = block.onBlockPlaced(drone.getWorld(), pos, side, side.getFrontOffsetX(), side.getFrontOffsetY(), side.getFrontOffsetZ(), newMeta, drone.getFakePlayer());
+                            if(itemBlock.placeBlockAt(droneStack, drone.getFakePlayer(), drone.getWorld(), pos, side, side.getFrontOffsetX(), side.getFrontOffsetY(), side.getFrontOffsetZ(), iblockstate1)) {
                                 drone.addAir(null, -PneumaticValues.DRONE_USAGE_PLACE);
-                                drone.getWorld().playSoundEffect(pos.chunkPosX + 0.5F, pos.chunkPosY + 0.5F, pos.chunkPosZ + 0.5F, block.stepSound.func_150496_b(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
+                                drone.getWorld().playSoundEffect(pos.getX() + 0.5F, pos.getY() + 0.5F, pos.getZ() + 0.5F, block.stepSound.getPlaceSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getFrequency() * 0.8F);
                                 if(--droneStack.stackSize <= 0) {
-                                    drone.getInventory().setInventorySlotContents(i, null);
+                                    drone.getInv().setInventorySlotContents(i, null);
                                 }
                             }
-                            if(drone instanceof EntityDrone) {
-                                EntityDrone entity = (EntityDrone)drone;
-                                entity.setPosition(entity.posX, entity.posY - 200, entity.posZ);
-                            }
                             return false;
-                        }
-                        if(drone instanceof EntityDrone) {
-                            EntityDrone entity = (EntityDrone)drone;
-                            entity.setPosition(entity.posX, entity.posY - 200, entity.posZ);
                         }
                     }
                 }
@@ -114,7 +93,7 @@ public class DroneAIPlace extends DroneAIBlockInteraction{
 
     private void setFakePlayerAccordingToDir(){
         EntityPlayer fakePlayer = drone.getFakePlayer();
-        Vec3 pos = drone.getPosition();
+        Vec3 pos = drone.getDronePos();
         fakePlayer.posX = pos.xCoord;
         fakePlayer.posZ = pos.zCoord;
         switch(ProgWidgetPlace.getDirForSides(((ISidedWidget)widget).getSides())){
@@ -143,26 +122,6 @@ public class DroneAIPlace extends DroneAIBlockInteraction{
                 fakePlayer.posY = pos.yCoord;//do this for PistonBase.determineDirection()
                 break;
         }
-    }
-
-    /**
-     * Called to actually place the block, after the location is determined
-     * and all permission checks have been made.
-     *
-     * @param stack The item stack that was used to place the block. This can be changed inside the method.
-     * @param player The player who is placing the block. Can be null if the block is not being placed by a player.
-     * @param side The side the player (or machine) right-clicked on.
-     */
-    private boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata){
-        Block block = Block.getBlockFromItem(stack.getItem());
-        if(!world.setBlock(x, y, z, block, metadata, 3)) {
-            return false;
-        }
-
-        block.onBlockPlacedBy(world, x, y, z, player, stack);
-        block.onPostBlockPlaced(world, x, y, z, metadata);
-
-        return true;
     }
 
 }

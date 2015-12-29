@@ -1,6 +1,7 @@
 package pneumaticCraft.common.tileentity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,6 +13,9 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.client.render.RenderRangeLines;
 import pneumaticCraft.common.block.Blockss;
@@ -25,9 +29,6 @@ import pneumaticCraft.lib.TileEntityConstants;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
 import com.mojang.authlib.GameProfile;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntitySecurityStation extends TileEntityBase implements ISidedInventory, IGUITextFieldSensitive,
         IRangeLineShower, IRedstoneControl{
@@ -58,7 +59,7 @@ public class TileEntitySecurityStation extends TileEntityBase implements ISidedI
     }
 
     @Override
-    public void updateEntity(){
+    public void update(){
         if(rebootTimer > 0) {
             rebootTimer--;
             if(!worldObj.isRemote) {
@@ -81,7 +82,7 @@ public class TileEntitySecurityStation extends TileEntityBase implements ISidedI
 
         securityRange = Math.min(2 + getUpgrades(ItemMachineUpgrade.UPGRADE_RANGE, getUpgradeSlots()), TileEntityConstants.SECURITY_STATION_MAX_RANGE);
 
-        super.updateEntity();
+        super.update();
 
     }
 
@@ -122,7 +123,7 @@ public class TileEntitySecurityStation extends TileEntityBase implements ISidedI
             if(!hasValidNetwork()) {
                 player.addChatComponentMessage(new ChatComponentTranslation(EnumChatFormatting.GREEN + "This Security Station is out of order: Its network hasn't been properly configured."));
             } else {
-                player.openGui(PneumaticCraft.instance, EnumGuiId.HACKING.ordinal(), worldObj, xCoord, yCoord, zCoord);
+                player.openGui(PneumaticCraft.instance, EnumGuiId.HACKING.ordinal(), worldObj, getPos().getX(), getPos().getY(), getPos().getZ());
             }
         } else if(buttonID > 3 && buttonID - 4 < sharedUsers.size()) {
             sharedUsers.remove(buttonID - 4);
@@ -176,7 +177,7 @@ public class TileEntitySecurityStation extends TileEntityBase implements ISidedI
     public AxisAlignedBB getRenderBoundingBox(){
         if(!rangeLineRenderer.isCurrentlyRendering()) return super.getRenderBoundingBox();
         int range = getSecurityRange();
-        return AxisAlignedBB.getBoundingBox(xCoord - range, yCoord - range, zCoord - range, xCoord + 1 + range, yCoord + 1 + range, zCoord + 1 + range);
+        return new AxisAlignedBB(getPos().getX() - range, getPos().getY() - range, getPos().getZ() - range, getPos().getX() + 1 + range, getPos().getY() + 1 + range, getPos().getZ() + 1 + range);
     }
 
     public int getSecurityRange(){
@@ -217,7 +218,7 @@ public class TileEntitySecurityStation extends TileEntityBase implements ISidedI
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
             setInventorySlotContents(slot, null);
@@ -235,7 +236,7 @@ public class TileEntitySecurityStation extends TileEntityBase implements ISidedI
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
         return Blockss.securityStation.getUnlocalizedName();
     }
 
@@ -329,18 +330,23 @@ public class TileEntitySecurityStation extends TileEntityBase implements ISidedI
 
     @Override
     // upgrades in bottom, fuel in the rest.
-    public int[] getAccessibleSlotsFromSide(int var1){
+    public int[] getSlotsForFace(EnumFacing var1){
         return new int[0];
     }
 
     @Override
-    public boolean canInsertItem(int i, ItemStack itemstack, int j){
+    public boolean canInsertItem(int i, ItemStack itemstack, EnumFacing j){
         return false;
     }
 
     @Override
-    public boolean canExtractItem(int i, ItemStack itemstack, int j){
+    public boolean canExtractItem(int i, ItemStack itemstack, EnumFacing j){
         return false;
+    }
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
     }
 
     @Override
@@ -368,7 +374,7 @@ public class TileEntitySecurityStation extends TileEntityBase implements ISidedI
             if(gameProfileEquals(user, player.getGameProfile())) {
                 if(user.getId() == null && player.getGameProfile().getId() != null) {
                     sharedUsers.set(i, player.getGameProfile());
-                    Log.info("Legacy conversion: Security Station shared username '" + player.getCommandSenderName() + "' is now using UUID '" + player.getGameProfile().getId() + "'.");
+                    Log.info("Legacy conversion: Security Station shared username '" + player.getName() + "' is now using UUID '" + player.getGameProfile().getId() + "'.");
                 }
                 return true;
             }
@@ -382,7 +388,7 @@ public class TileEntitySecurityStation extends TileEntityBase implements ISidedI
             if(gameProfileEquals(user, player.getGameProfile())) {
                 if(user.getId() == null && player.getGameProfile().getId() != null) {
                     hackedUsers.set(i, player.getGameProfile());
-                    Log.info("Legacy conversion: Security Station hacked username '" + player.getCommandSenderName() + "' is now using UUID '" + player.getGameProfile().getId() + "'.");
+                    Log.info("Legacy conversion: Security Station hacked username '" + player.getName() + "' is now using UUID '" + player.getGameProfile().getId() + "'.");
                 }
                 return true;
             }
@@ -472,7 +478,7 @@ public class TileEntitySecurityStation extends TileEntityBase implements ISidedI
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 
@@ -483,14 +489,14 @@ public class TileEntitySecurityStation extends TileEntityBase implements ISidedI
 
     @Override
     public boolean isGuiUseableByPlayer(EntityPlayer par1EntityPlayer){
-        return worldObj.getTileEntity(xCoord, yCoord, zCoord) == this;
+        return worldObj.getTileEntity(getPos()) == this;
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
 
     @Override
     public int getRedstoneMode(){

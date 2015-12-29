@@ -8,14 +8,14 @@ import java.util.Random;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.common.config.AmadronOfferPeriodicConfig;
 import pneumaticCraft.common.entity.living.EntityDrone;
 import pneumaticCraft.common.inventory.ContainerAmadron;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class AmadronOfferManager{
     private static AmadronOfferManager CLIENT_INSTANCE = new AmadronOfferManager();
@@ -112,8 +112,8 @@ public class AmadronOfferManager{
                 TileEntity output = custom.getReturningTileEntity();
                 int possiblePickups = ContainerAmadron.capShoppingAmount(custom.invert(), 50, input instanceof IInventory ? (IInventory)input : null, output instanceof IInventory ? (IInventory)output : null, input instanceof IFluidHandler ? (IFluidHandler)input : null, output instanceof IFluidHandler ? (IFluidHandler)output : null, null);
                 if(possiblePickups > 0) {
-                    ChunkPosition pos = new ChunkPosition(input.xCoord, input.yCoord, input.zCoord);
-                    EntityDrone drone = ContainerAmadron.retrieveOrderItems(custom, possiblePickups, input.getWorldObj(), pos, input.getWorldObj(), pos);
+                    BlockPos pos = new BlockPos(input.getPos().getX(), input.getPos().getY(), input.getPos().getZ());
+                    EntityDrone drone = ContainerAmadron.retrieveOrderItems(custom, possiblePickups, input.getWorld(), pos, input.getWorld(), pos);
                     if(drone != null) {
                         drone.setHandlingOffer(custom.copy(), possiblePickups, null, "Restock");
                     }

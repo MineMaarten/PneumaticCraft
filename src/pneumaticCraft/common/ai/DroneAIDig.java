@@ -1,18 +1,16 @@
 package pneumaticCraft.common.ai;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import pneumaticCraft.common.progwidgets.ProgWidgetAreaItemBase;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
-import pneumaticCraft.lib.Log;
-import cpw.mods.fml.relauncher.ReflectionHelper;
 
 public class DroneAIDig extends DroneAIBlockInteraction{
 
@@ -27,18 +25,18 @@ public class DroneAIDig extends DroneAIBlockInteraction{
     }
 
     @Override
-    protected boolean isValidPosition(ChunkPosition pos){
-        Block block = worldCache.getBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
-        if(!worldCache.isAirBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ) && !ignoreBlock(block)) {
-            int meta = worldCache.getBlockMetadata(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+    protected boolean isValidPosition(BlockPos pos){
+        IBlockState blockState = worldCache.getBlockState(pos);
+        Block block = blockState.getBlock();
+        if(!worldCache.isAirBlock(pos) && !ignoreBlock(block)) {
             List<ItemStack> droppedStacks;
-            if(block.canSilkHarvest(drone.getWorld(), drone.getFakePlayer(), pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, meta)) {
-                droppedStacks = Arrays.asList(new ItemStack[]{getSilkTouchBlock(block, meta)});
+            if(block.canSilkHarvest(drone.getWorld(), pos, blockState, drone.getFakePlayer())) {
+                droppedStacks = Arrays.asList(new ItemStack[]{getSilkTouchBlock(block, blockState)});
             } else {
-                droppedStacks = block.getDrops(drone.getWorld(), pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, meta, 0);
+                droppedStacks = block.getDrops(drone.getWorld(), pos, blockState, 0);
             }
             for(ItemStack droppedStack : droppedStacks) {
-                if(widget.isItemValidForFilters(droppedStack, meta)) {
+                if(widget.isItemValidForFilters(droppedStack, blockState)) {
                     swapBestItemToFirstSlot(block, pos);
                     return true;
                 }
@@ -52,75 +50,69 @@ public class DroneAIDig extends DroneAIBlockInteraction{
         return true;
     }
 
-    private void swapBestItemToFirstSlot(Block block, ChunkPosition pos){
+    private void swapBestItemToFirstSlot(Block block, BlockPos pos){
         int bestSlot = 0;
         float bestSoftness = Float.MIN_VALUE;
-        ItemStack oldCurrentStack = drone.getInventory().getStackInSlot(0);
-        for(int i = 0; i < drone.getInventory().getSizeInventory(); i++) {
-            drone.getInventory().setInventorySlotContents(0, drone.getInventory().getStackInSlot(i));
-            float softness = block.getPlayerRelativeBlockHardness(drone.getFakePlayer(), drone.getWorld(), pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+        ItemStack oldCurrentStack = drone.getInv().getStackInSlot(0);
+        for(int i = 0; i < drone.getInv().getSizeInventory(); i++) {
+            drone.getInv().setInventorySlotContents(0, drone.getInv().getStackInSlot(i));
+            float softness = block.getPlayerRelativeBlockHardness(drone.getFakePlayer(), drone.getWorld(), pos);
             if(softness > bestSoftness) {
                 bestSlot = i;
                 bestSoftness = softness;
             }
         }
-        drone.getInventory().setInventorySlotContents(0, oldCurrentStack);
+        drone.getInv().setInventorySlotContents(0, oldCurrentStack);
         if(bestSlot != 0) {
-            ItemStack bestItem = drone.getInventory().getStackInSlot(bestSlot);
-            drone.getInventory().setInventorySlotContents(bestSlot, drone.getInventory().getStackInSlot(0));
-            drone.getInventory().setInventorySlotContents(0, bestItem);
+            ItemStack bestItem = drone.getInv().getStackInSlot(bestSlot);
+            drone.getInv().setInventorySlotContents(bestSlot, drone.getInv().getStackInSlot(0));
+            drone.getInv().setInventorySlotContents(0, bestItem);
         }
     }
 
     @Override
-    protected boolean doBlockInteraction(ChunkPosition pos, double distToBlock){
+    protected boolean doBlockInteraction(BlockPos pos, double distToBlock){
         if(!((FakePlayerItemInWorldManager)drone.getFakePlayer().theItemInWorldManager).isDigging() || !((FakePlayerItemInWorldManager)drone.getFakePlayer().theItemInWorldManager).isAcknowledged()) {
-            int x = pos.chunkPosX;
-            int y = pos.chunkPosY;
-            int z = pos.chunkPosZ;
-
-            Block block = worldCache.getBlock(x, y, z);
+            IBlockState blockState = worldCache.getBlockState(pos);
+            Block block = blockState.getBlock();
             if(!ignoreBlock(block) && isBlockValidForFilter(worldCache, drone, pos, widget)) {
-                if(block.getBlockHardness(drone.getWorld(), x, y, z) < 0) {
+                if(block.getBlockHardness(drone.getWorld(), pos) < 0) {
                     addToBlacklist(pos);
                     drone.addDebugEntry("gui.progWidget.dig.debug.cantDigBlock", pos);
-                    drone.setDugBlock(0, 0, 0);
+                    drone.setDugBlock(null);
                     return false;
                 }
                 FakePlayerItemInWorldManager manager = (FakePlayerItemInWorldManager)drone.getFakePlayer().theItemInWorldManager;
-                manager.onBlockClicked(x, y, z, 0);
+                manager.onBlockClicked(pos, EnumFacing.DOWN);
                 if(!manager.isAccepted) {
                     addToBlacklist(pos);
                     drone.addDebugEntry("gui.progWidget.dig.debug.cantDigBlock", pos);
-                    drone.setDugBlock(0, 0, 0);
+                    drone.setDugBlock(null);
                     return false;
                 }
-                drone.setDugBlock(x, y, z);
+                drone.setDugBlock(pos);
                 return true;
             }
-            drone.setDugBlock(0, 0, 0);
+            drone.setDugBlock(null);
             return false;
         } else {
             return true;
         }
     }
 
-    public static boolean isBlockValidForFilter(IBlockAccess worldCache, IDroneBase drone, ChunkPosition pos, ProgWidgetAreaItemBase widget){
-        int x = pos.chunkPosX;
-        int y = pos.chunkPosY;
-        int z = pos.chunkPosZ;
-        Block block = worldCache.getBlock(x, y, z);
+    public static boolean isBlockValidForFilter(IBlockAccess worldCache, IDroneBase drone, BlockPos pos, ProgWidgetAreaItemBase widget){
+        IBlockState blockState = worldCache.getBlockState(pos);
+        Block block = blockState.getBlock();
 
-        if(!block.isAir(worldCache, x, y, z)) {
-            int meta = worldCache.getBlockMetadata(x, y, z);
+        if(!block.isAir(worldCache, pos)) {
             List<ItemStack> droppedStacks;
-            if(block.canSilkHarvest(drone.getWorld(), drone.getFakePlayer(), x, y, z, meta)) {
-                droppedStacks = Arrays.asList(new ItemStack[]{getSilkTouchBlock(block, meta)});
+            if(block.canSilkHarvest(drone.getWorld(), pos, blockState, drone.getFakePlayer())) {
+                droppedStacks = Arrays.asList(new ItemStack[]{getSilkTouchBlock(block, blockState)});
             } else {
-                droppedStacks = block.getDrops(drone.getWorld(), x, y, z, meta, 0);
+                droppedStacks = block.getDrops(drone.getWorld(), pos, blockState, 0);
             }
             for(ItemStack droppedStack : droppedStacks) {
-                if(widget.isItemValidForFilters(droppedStack, meta)) {
+                if(widget.isItemValidForFilters(droppedStack, blockState)) {
                     return true;
                 }
             }
@@ -128,21 +120,9 @@ public class DroneAIDig extends DroneAIBlockInteraction{
         return false;
     }
 
-    private static final HashMap<Integer, ItemStack> silkTouchBlocks = new HashMap<Integer, ItemStack>();
-
-    private static ItemStack getSilkTouchBlock(Block block, int meta){
-        ItemStack stack = silkTouchBlocks.get(Block.getIdFromBlock(block));
-        if(stack == null) {
-            Method method = ReflectionHelper.findMethod(Block.class, block, new String[]{"func_149644_j", "createStackedBlock"}, int.class);
-            try {
-                stack = (ItemStack)method.invoke(block, meta);
-            } catch(Exception e) {
-                Log.error("Reflection failed when trying to get a silk touch block!");
-                e.printStackTrace();
-            }
-            silkTouchBlocks.put(Block.getIdFromBlock(block), stack);
-        }
-        return stack.copy();
+    private static ItemStack getSilkTouchBlock(Block block, IBlockState state){
+        return null;//TODO 1.8 return block.createStackedBlock(state);
+        //  return SilkTouchBlockGetter.getSilkTouchStack(block, state);
     }
 
     private static boolean ignoreBlock(Block block){

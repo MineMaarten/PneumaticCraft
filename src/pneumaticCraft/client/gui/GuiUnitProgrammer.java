@@ -11,6 +11,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.fml.common.Loader;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.lwjgl.input.Mouse;
@@ -21,7 +22,6 @@ import pneumaticCraft.common.progwidgets.IJump;
 import pneumaticCraft.common.progwidgets.ILabel;
 import pneumaticCraft.common.progwidgets.IProgWidget;
 import pneumaticCraft.lib.ModIds;
-import cpw.mods.fml.common.Loader;
 
 public class GuiUnitProgrammer extends GuiScreen{
     private final FontRenderer fontRendererObj;
@@ -44,8 +44,7 @@ public class GuiUnitProgrammer extends GuiScreen{
         this.progWidgets = progWidgets;
         this.guiLeft = guiLeft;
         this.guiTop = guiTop;
-        this.width = width;
-        this.height = height;
+        setWorldAndResolution(Minecraft.getMinecraft(), width, height);
         this.xSize = xSize;
         this.startX = startX;
         this.startY = startY;
@@ -152,7 +151,7 @@ public class GuiUnitProgrammer extends GuiScreen{
         }
         lastZoom = scaleScroll.getState();
 
-        ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
+        ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
         GL11.glScissor((guiLeft + startX) * sr.getScaleFactor(), (sr.getScaledHeight() - areaHeight - (guiTop + startY)) * sr.getScaleFactor(), areaWidth * sr.getScaleFactor(), areaHeight * sr.getScaleFactor());
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
 
@@ -253,15 +252,14 @@ public class GuiUnitProgrammer extends GuiScreen{
                                         double midY = (y2 + y1) / 2D;
                                         GL11.glVertex3d(guiLeft + x1, guiTop + y1, zLevel);
                                         GL11.glVertex3d(guiLeft + x2, guiTop + y2, zLevel);
-                                        Vec3 arrowVec = Vec3.createVectorHelper(x1 - x2, y1 - y2, 0).normalize();
+                                        Vec3 arrowVec = new Vec3(x1 - x2, y1 - y2, 0).normalize();
                                         float arrowAngle = (float)Math.toRadians(30);
                                         float arrowSize = 5;
-                                        arrowVec.xCoord *= arrowSize;
-                                        arrowVec.yCoord *= arrowSize;
-                                        arrowVec.rotateAroundZ(arrowAngle);
+                                        arrowVec = new Vec3(arrowVec.xCoord * arrowSize, arrowVec.yCoord * arrowSize, 0);
+                                        arrowVec.rotatePitch(arrowAngle); //TODO 1.8 rotateZ == rotatePitch?
                                         GL11.glVertex3d(guiLeft + midX, guiTop + midY, zLevel);
                                         GL11.glVertex3d(guiLeft + midX + arrowVec.xCoord, guiTop + midY + arrowVec.yCoord, zLevel);
-                                        arrowVec.rotateAroundZ(-2 * arrowAngle);
+                                        arrowVec.rotatePitch(-2 * arrowAngle); //TODO 1.8 rotateZ == rotatePitch?
                                         GL11.glVertex3d(guiLeft + midX, guiTop + midY, zLevel);
                                         GL11.glVertex3d(guiLeft + midX + arrowVec.xCoord, guiTop + midY + arrowVec.yCoord, zLevel);
                                     }

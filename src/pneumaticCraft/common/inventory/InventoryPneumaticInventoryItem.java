@@ -3,6 +3,7 @@
 
 package pneumaticCraft.common.inventory;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -50,7 +51,7 @@ public class InventoryPneumaticInventoryItem extends InventoryBasic{
      * content of the inventory and its title.
      */
     @Override
-    public void openInventory(){
+    public void openInventory(EntityPlayer player){
         loadInventory();
     }
 
@@ -59,7 +60,7 @@ public class InventoryPneumaticInventoryItem extends InventoryBasic{
      * out every backpack which is inside the backpack and saves the inventory.
      */
     @Override
-    public void closeInventory(){
+    public void closeInventory(EntityPlayer player){
         saveInventory();
     }
 
@@ -67,7 +68,7 @@ public class InventoryPneumaticInventoryItem extends InventoryBasic{
      * Returns the name of the inventory.
      */
     @Override
-    public String getInventoryName(){
+    public String getName(){
         return "Pneumatic Helmet";
     }
 

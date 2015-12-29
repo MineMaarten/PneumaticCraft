@@ -1,6 +1,6 @@
 package pneumaticCraft.common.ai;
 
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import pneumaticCraft.common.progwidgets.ICondition;
 import pneumaticCraft.common.progwidgets.ProgWidgetAreaItemBase;
 
@@ -23,7 +23,7 @@ public abstract class DroneAIBlockCondition extends DroneAIBlockInteraction{
     }
 
     @Override
-    protected boolean isValidPosition(ChunkPosition pos){
+    protected boolean isValidPosition(BlockPos pos){
         if(evaluate(pos) != ((ICondition)widget).isAndFunction()) {
             result = !result;
             if(result) {
@@ -45,10 +45,10 @@ public abstract class DroneAIBlockCondition extends DroneAIBlockInteraction{
         }
     }
 
-    protected abstract boolean evaluate(ChunkPosition pos);
+    protected abstract boolean evaluate(BlockPos pos);
 
     @Override
-    protected boolean doBlockInteraction(ChunkPosition pos, double distToBlock){
+    protected boolean doBlockInteraction(BlockPos pos, double distToBlock){
         return false;
     }
 

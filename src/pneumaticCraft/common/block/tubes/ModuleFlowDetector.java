@@ -5,12 +5,11 @@ import java.util.List;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import pneumaticCraft.client.model.IBaseModel;
-import pneumaticCraft.client.model.tubemodules.ModelFlowDetector;
 import pneumaticCraft.lib.Names;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
 public class ModuleFlowDetector extends TubeModuleRedstoneEmitting implements IInfluenceDispersing{
-    private final IBaseModel model = new ModelFlowDetector(this);
+    private final IBaseModel model = null;//TODO 1.8 new ModelFlowDetector(this);
     public float rotation, oldRotation;
     private int flow;
     private int oldFlow;

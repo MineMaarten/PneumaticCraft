@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import pneumaticCraft.api.tileentity.IManoMeasurable;
 import pneumaticCraft.common.network.DescSynced;
 
@@ -24,7 +25,7 @@ public class TileEntityPressureChamberWall extends TileEntityBase implements IMa
         if(teValve == null && (valveX != 0 || valveY != 0 || valveZ != 0)) {// when the saved TE equals null, check if we can
             // retrieve the TE from the NBT saved coords.
 
-            TileEntity te = worldObj.getTileEntity(valveX, valveY, valveZ);
+            TileEntity te = worldObj.getTileEntity(new BlockPos(valveX, valveY, valveZ));
             setCore(te instanceof TileEntityPressureChamberValve ? (TileEntityPressureChamberValve)te : null);
         }
         return teValve;
@@ -41,9 +42,9 @@ public class TileEntityPressureChamberWall extends TileEntityBase implements IMa
 
         if(!worldObj.isRemote) {
             if(te != null) {
-                valveX = te.xCoord;
-                valveY = te.yCoord;
-                valveZ = te.zCoord;
+                valveX = te.getPos().getX();
+                valveY = te.getPos().getY();
+                valveZ = te.getPos().getZ();
             } else {
                 valveX = 0;
                 valveY = 0;

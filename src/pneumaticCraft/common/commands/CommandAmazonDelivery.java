@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -11,6 +12,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.common.util.IOHelper;
@@ -28,7 +30,7 @@ public class CommandAmazonDelivery extends CommandBase{
     }
 
     @Override
-    public void processCommand(ICommandSender sender, String[] args){
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException{
         if(args.length < 2) throw new WrongUsageException("command.deliverAmazon.args");
         int x, y, z;
         int curArg;
@@ -41,7 +43,7 @@ public class CommandAmazonDelivery extends CommandBase{
             z = Integer.parseInt(args[2]);
             curArg = 3;
         } else {
-            EntityPlayerMP player = MinecraftServer.getServer().getConfigurationManager().func_152612_a(args[0]);
+            EntityPlayerMP player = MinecraftServer.getServer().getConfigurationManager().getPlayerByUsername(args[0]);
             if(player != null) {
                 x = (int)Math.floor(player.posX);
                 y = (int)Math.floor(player.posY) + 1;
@@ -54,7 +56,7 @@ public class CommandAmazonDelivery extends CommandBase{
 
         if(args.length < curArg + 3) throw new WrongUsageException("command.deliverAmazon.args");
         if(!args[curArg].matches(regex) || !args[curArg + 1].matches(regex) || !args[curArg + 2].matches(regex)) throw new WrongUsageException("command.deliverAmazon.coords");
-        TileEntity te = sender.getEntityWorld().getTileEntity(Integer.parseInt(args[curArg]), Integer.parseInt(args[curArg + 1]), Integer.parseInt(args[curArg + 2]));
+        TileEntity te = sender.getEntityWorld().getTileEntity(new BlockPos(Integer.parseInt(args[curArg]), Integer.parseInt(args[curArg + 1]), Integer.parseInt(args[curArg + 2])));
         IInventory inv = IOHelper.getInventoryForTE(te);
         if(inv != null) {
             List<ItemStack> deliveredStacks = new ArrayList<ItemStack>();
@@ -62,7 +64,7 @@ public class CommandAmazonDelivery extends CommandBase{
                 if(inv.getStackInSlot(i) != null) deliveredStacks.add(inv.getStackInSlot(i));
             }
             if(deliveredStacks.size() > 0) {
-                PneumaticRegistry.getInstance().deliverItemsAmazonStyle(sender.getEntityWorld(), x, y, z, deliveredStacks.toArray(new ItemStack[deliveredStacks.size()]));
+                PneumaticRegistry.getInstance().deliverItemsAmazonStyle(sender.getEntityWorld(), new BlockPos(x, y, z), deliveredStacks.toArray(new ItemStack[deliveredStacks.size()]));
                 sender.addChatMessage(new ChatComponentTranslation("command.deliverAmazon.success"));
             } else {
                 sender.addChatMessage(new ChatComponentTranslation("command.deliverAmazon.noItems"));
@@ -77,7 +79,7 @@ public class CommandAmazonDelivery extends CommandBase{
      * Adds the strings available in this command to the given list of tab completion options.
      */
     @Override
-    public List addTabCompletionOptions(ICommandSender p_71516_1_, String[] p_71516_2_){
+    public List<String> addTabCompletionOptions(ICommandSender p_71516_1_, String[] p_71516_2_, BlockPos pos){
         return p_71516_2_.length >= 1 ? getListOfStringsMatchingLastWord(p_71516_2_, MinecraftServer.getServer().getAllUsernames()) : null;
     }
 

@@ -6,12 +6,13 @@ import java.util.List;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.render.pneumaticArmor.EntityTrackUpgradeHandler;
 import pneumaticCraft.client.render.pneumaticArmor.HUDHandler;
 import pneumaticCraft.client.render.pneumaticArmor.RenderTarget;
 import pneumaticCraft.common.entity.living.EntityDrone;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class PacketShowWireframe extends LocationIntPacket<PacketShowWireframe>{
 
@@ -19,8 +20,8 @@ public class PacketShowWireframe extends LocationIntPacket<PacketShowWireframe>{
 
     public PacketShowWireframe(){}
 
-    public PacketShowWireframe(EntityDrone entity, int x, int y, int z){
-        super(x, y, z);
+    public PacketShowWireframe(EntityDrone entity, BlockPos pos){
+        super(pos);
         entityId = entity.getEntityId();
     }
 
@@ -40,16 +41,16 @@ public class PacketShowWireframe extends LocationIntPacket<PacketShowWireframe>{
     public void handleClientSide(PacketShowWireframe message, EntityPlayer player){
         Entity ent = player.worldObj.getEntityByID(message.entityId);
         if(ent instanceof EntityDrone) {
-            addToHudHandler((EntityDrone)ent, message.x, message.y, message.z);
+            addToHudHandler((EntityDrone)ent, message.pos);
         }
     }
 
     @SideOnly(Side.CLIENT)
-    private void addToHudHandler(EntityDrone drone, int x, int y, int z){
+    private void addToHudHandler(EntityDrone drone, BlockPos pos){
         List<RenderTarget> targets = HUDHandler.instance().getSpecificRenderer(EntityTrackUpgradeHandler.class).getTargets();
         for(RenderTarget target : targets) {
             if(target.entity == drone) {
-                target.getDroneAIRenderer().addBlackListEntry(drone.worldObj, x, y, z);
+                target.getDroneAIRenderer().addBlackListEntry(drone.worldObj, pos);
             }
         }
     }

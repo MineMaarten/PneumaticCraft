@@ -5,21 +5,21 @@ import java.util.List;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetPlace;
 import pneumaticCraft.common.ai.DroneAIPlace;
 import pneumaticCraft.common.ai.IDroneBase;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.Log;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetPlace extends ProgWidgetDigAndPlace implements ISidedWidget{
-    public ForgeDirection placeDir = ForgeDirection.DOWN;
+    public EnumFacing placeDir = EnumFacing.DOWN;
 
     public ProgWidgetPlace(){
         super(ProgWidgetDigAndPlace.EnumOrder.LOW_TO_HIGH);
@@ -35,17 +35,17 @@ public class ProgWidgetPlace extends ProgWidgetDigAndPlace implements ISidedWidg
         return getSidesFromDir(placeDir);
     }
 
-    public static ForgeDirection getDirForSides(boolean[] sides){
+    public static EnumFacing getDirForSides(boolean[] sides){
         for(int i = 0; i < sides.length; i++) {
             if(sides[i]) {
-                return ForgeDirection.getOrientation(i);
+                return EnumFacing.getFront(i);
             }
         }
         Log.error("[ProgWidgetPlace] Sides boolean array empty!");
-        return ForgeDirection.DOWN;
+        return EnumFacing.DOWN;
     }
 
-    public static boolean[] getSidesFromDir(ForgeDirection dir){
+    public static boolean[] getSidesFromDir(EnumFacing dir){
         boolean[] dirs = new boolean[6];
         dirs[dir.ordinal()] = true;
         return dirs;
@@ -87,12 +87,12 @@ public class ProgWidgetPlace extends ProgWidgetDigAndPlace implements ISidedWidg
     @Override
     public void readFromNBT(NBTTagCompound tag){
         super.readFromNBT(tag);
-        placeDir = ForgeDirection.getOrientation(tag.getInteger("dir"));
+        placeDir = EnumFacing.getFront(tag.getInteger("dir"));
     }
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.HELIUM_PLANT_DAMAGE;
+        return ItemPlastic.HELIUM_PLANT_DAMAGE;
     }
 
 }

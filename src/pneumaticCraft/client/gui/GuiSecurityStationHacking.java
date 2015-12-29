@@ -1,6 +1,7 @@
 package pneumaticCraft.client.gui;
 
 import java.awt.Point;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +10,9 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
 
@@ -23,9 +27,6 @@ import pneumaticCraft.common.network.PacketUseItem;
 import pneumaticCraft.common.tileentity.TileEntitySecurityStation;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiSecurityStationHacking extends GuiSecurityStationBase{
@@ -184,7 +185,7 @@ public class GuiSecurityStationHacking extends GuiSecurityStationBase{
     }
 
     @Override
-    protected void mouseClicked(int par1, int par2, int par3){
+    protected void mouseClicked(int par1, int par2, int par3) throws IOException{
         if(par3 != 2) super.mouseClicked(par1, par2, par3);
         hackerBridges.mouseClicked(par1, par2, par3, getSlotAtPosition(par1, par2));
         if(aiBridges.isTracing() && par1 >= guiLeft + 155 && par1 <= guiLeft + 171 && par2 >= guiTop + 55 && par2 <= guiTop + 75) {
@@ -249,7 +250,7 @@ public class GuiSecurityStationHacking extends GuiSecurityStationBase{
 
     @Override
     public void onGuiClosed(){
-        if(aiBridges.isTracing() && !hackerBridges.hackedSuccessfully) NetworkHandler.sendToServer(new PacketSecurityStationFailedHack(te.xCoord, te.yCoord, te.zCoord));
+        if(aiBridges.isTracing() && !hackerBridges.hackedSuccessfully) NetworkHandler.sendToServer(new PacketSecurityStationFailedHack(te.getPos()));
         removeUpdatesOnConnectionHandlers();
         super.onGuiClosed();
     }

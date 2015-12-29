@@ -7,10 +7,10 @@ import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import pneumaticCraft.common.entity.living.EntityDrone;
 import pneumaticCraft.common.progwidgets.IProgWidget;
 import pneumaticCraft.common.tileentity.TileEntityProgrammer;
-import cpw.mods.fml.common.network.ByteBufUtils;
 
 public class PacketSyncDroneEntityProgWidgets extends AbstractPacket<PacketSyncDroneEntityProgWidgets>{
 

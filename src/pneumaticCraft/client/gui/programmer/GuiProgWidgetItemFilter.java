@@ -1,8 +1,10 @@
 package pneumaticCraft.client.gui.programmer;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import net.minecraft.client.gui.GuiButton;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import pneumaticCraft.client.gui.GuiInventorySearcher;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.GuiSearcher;
@@ -12,7 +14,6 @@ import pneumaticCraft.client.gui.widget.WidgetComboBox;
 import pneumaticCraft.common.config.Config;
 import pneumaticCraft.common.progwidgets.IProgWidget;
 import pneumaticCraft.common.progwidgets.ProgWidgetItemFilter;
-import cpw.mods.fml.client.FMLClientHandler;
 
 public class GuiProgWidgetItemFilter extends GuiProgWidgetOptionBase{
     private GuiSearcher searchGui;
@@ -81,7 +82,7 @@ public class GuiProgWidgetItemFilter extends GuiProgWidgetOptionBase{
     }
 
     @Override
-    public void keyTyped(char key, int keyCode){
+    public void keyTyped(char key, int keyCode) throws IOException{
         if(keyCode == 1) {
             widg.setVariable(variableField.getText());
         }
@@ -89,7 +90,7 @@ public class GuiProgWidgetItemFilter extends GuiProgWidgetOptionBase{
     }
 
     @Override
-    public void actionPerformed(GuiButton button){
+    public void actionPerformed(GuiButton button) throws IOException{
         if(button.id == 0) {
             searchGui = new GuiSearcher(FMLClientHandler.instance().getClient().thePlayer);
             searchGui.setSearchStack(widg.getFilter());

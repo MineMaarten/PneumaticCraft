@@ -2,8 +2,8 @@ package pneumaticCraft.common.network;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import pneumaticCraft.common.inventory.ContainerRemote;
-import cpw.mods.fml.common.network.ByteBufUtils;
 
 public class PacketNotifyVariablesRemote extends AbstractPacket<PacketNotifyVariablesRemote>{
     private String[] variables;

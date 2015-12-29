@@ -2,6 +2,9 @@ package pneumaticCraft.client.render.pneumaticArmor;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 import org.lwjgl.opengl.GL11;
@@ -9,10 +12,10 @@ import org.lwjgl.opengl.GL11;
 public class RenderBlockArrows{
     public int ticksExisted;
 
-    public void render(World world, int x, int y, int z, float partialTicks){
+    public void render(World world, BlockPos pos, float partialTicks){
         // if(true) return;
-        Block block = world.getBlock(x, y, z);
-        block.setBlockBoundsBasedOnState(world, x, y, z);
+        Block block = world.getBlockState(pos).getBlock();
+        block.setBlockBoundsBasedOnState(world, pos);
         double minX = block.getBlockBoundsMinX();
         double minY = block.getBlockBoundsMinY();
         double minZ = block.getBlockBoundsMinZ();
@@ -94,16 +97,16 @@ public class RenderBlockArrows{
         GL11.glPushMatrix();
         GL11.glScaled(scale, scale, scale);
         GL11.glTranslatef(0, progress * 4, 0);
-        Tessellator tess = Tessellator.instance;
-        tess.startDrawing(GL11.GL_LINE_STRIP);
-        tess.addVertex(-arrowBaseWidth, -arrowLength * 0.5D, 0);
-        tess.addVertex(-arrowBaseWidth, -arrowLength * 0.5D + arrowBaseLength, 0);
-        tess.addVertex(-arrowWidth, -arrowLength * 0.5D + arrowBaseLength, 0);
-        tess.addVertex(0, arrowLength * 0.5D, 0);
-        tess.addVertex(arrowWidth, -arrowLength * 0.5D + arrowBaseLength, 0);
-        tess.addVertex(arrowBaseWidth, -arrowLength * 0.5D + arrowBaseLength, 0);
-        tess.addVertex(arrowBaseWidth, -arrowLength * 0.5D, 0);
-        tess.draw();
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+        wr.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION);
+        wr.pos(-arrowBaseWidth, -arrowLength * 0.5D, 0).endVertex();
+        wr.pos(-arrowBaseWidth, -arrowLength * 0.5D + arrowBaseLength, 0).endVertex();
+        wr.pos(-arrowWidth, -arrowLength * 0.5D + arrowBaseLength, 0).endVertex();
+        wr.pos(0, arrowLength * 0.5D, 0).endVertex();
+        wr.pos(arrowWidth, -arrowLength * 0.5D + arrowBaseLength, 0).endVertex();
+        wr.pos(arrowBaseWidth, -arrowLength * 0.5D + arrowBaseLength, 0).endVertex();
+        wr.pos(arrowBaseWidth, -arrowLength * 0.5D, 0).endVertex();
+        Tessellator.getInstance().draw();
         GL11.glPopMatrix();
     }
 }

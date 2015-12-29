@@ -12,12 +12,15 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
@@ -28,7 +31,6 @@ import pneumaticCraft.client.gui.GuiPneumaticContainerBase;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.GuiConstants;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.client.FMLClientHandler;
 
 /**
  *  IMPORTANT: WHEN CHANGING THE PACKAGE OF THIS CLASS, ALSO EDIT GUIANIMATEDSTATSUPPLIER.JAVA!!
@@ -82,7 +84,7 @@ public class GuiAnimatedStat implements IGuiAnimatedStat, IGuiWidget, IWidgetLis
         texture = "";
         this.leftSided = leftSided;
         if(gui != null) {
-            ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
+            ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
             if(sr.getScaledWidth() < 520) {
                 textSize = (sr.getScaledWidth() - 220) * 0.0033F;
             } else {
@@ -236,7 +238,7 @@ public class GuiAnimatedStat implements IGuiAnimatedStat, IGuiWidget, IWidgetLis
         oldWidth = width;
         oldHeight = height;
 
-        FontRenderer fontRenderer = FMLClientHandler.instance().getClient().fontRenderer;
+        FontRenderer fontRenderer = FMLClientHandler.instance().getClient().fontRendererObj;
         doneExpanding = true;
         if(isClicked) {
             // calculate the width and height needed for the box to fit the
@@ -294,7 +296,7 @@ public class GuiAnimatedStat implements IGuiAnimatedStat, IGuiWidget, IWidgetLis
         lastMouseX = mouseX;
         lastMouseY = mouseY;
         float zLevel = 0;
-        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRendererObj;
         int renderBaseX = (int)(oldBaseX + (baseX - oldBaseX) * partialTicks);
         int renderAffectedY = (int)(oldAffectedY + (affectedY - oldAffectedY) * partialTicks);
         int renderWidth = (int)(oldWidth + (width - oldWidth) * partialTicks);
@@ -305,13 +307,13 @@ public class GuiAnimatedStat implements IGuiAnimatedStat, IGuiWidget, IWidgetLis
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glLineWidth(3.0F);
         GL11.glColor4d(0, 0, 0, 1);
-        Tessellator tess = Tessellator.instance;
-        tess.startDrawing(GL11.GL_LINE_LOOP);
-        tess.addVertex(renderBaseX, renderAffectedY, zLevel);
-        tess.addVertex(renderBaseX + renderWidth, renderAffectedY, zLevel);
-        tess.addVertex(renderBaseX + renderWidth, renderAffectedY + renderHeight, zLevel);
-        tess.addVertex(renderBaseX, renderAffectedY + renderHeight, zLevel);
-        tess.draw();
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+        wr.begin(GL11.GL_LINE_LOOP, DefaultVertexFormats.POSITION);
+        wr.pos(renderBaseX, renderAffectedY, zLevel).endVertex();
+        wr.pos(renderBaseX + renderWidth, renderAffectedY, zLevel).endVertex();
+        wr.pos(renderBaseX + renderWidth, renderAffectedY + renderHeight, zLevel).endVertex();
+        wr.pos(renderBaseX, renderAffectedY + renderHeight, zLevel).endVertex();
+        Tessellator.getInstance().draw();
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         if(leftSided) renderWidth *= -1;
         // if done expanding, draw the information
@@ -349,13 +351,13 @@ public class GuiAnimatedStat implements IGuiAnimatedStat, IGuiWidget, IWidgetLis
                     fontRenderer.drawString(texture, renderBaseX - (leftSided ? 16 : 0), renderAffectedY, 0xFFFFFFFF);
                 }
             } else if(gui != null || !(iStack.getItem() instanceof ItemBlock)) {
-                if(itemRenderer == null) itemRenderer = new RenderItem();
+                if(itemRenderer == null) itemRenderer = Minecraft.getMinecraft().getRenderItem(); //TODO 1.8 test
                 itemRenderer.zLevel = 1;
                 GL11.glPushMatrix();
                 GL11.glTranslated(0, 0, -50);
                 GL11.glEnable(GL12.GL_RESCALE_NORMAL);
                 RenderHelper.enableGUIStandardItemLighting();
-                itemRenderer.renderItemAndEffectIntoGUI(fontRenderer, FMLClientHandler.instance().getClient().renderEngine, iStack, renderBaseX - (leftSided ? 16 : 0), renderAffectedY);
+                itemRenderer.renderItemAndEffectIntoGUI(iStack, renderBaseX - (leftSided ? 16 : 0), renderAffectedY);
                 GL11.glEnable(GL11.GL_ALPHA_TEST);
                 RenderHelper.disableStandardItemLighting();
                 GL11.glDisable(GL12.GL_RESCALE_NORMAL);

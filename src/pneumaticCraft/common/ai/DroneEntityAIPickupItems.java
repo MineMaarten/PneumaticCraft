@@ -3,17 +3,18 @@ package pneumaticCraft.common.ai;
 import java.util.Collections;
 import java.util.List;
 
-import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Vec3;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import pneumaticCraft.common.EventHandlerPneumaticCraft;
 import pneumaticCraft.common.progwidgets.ProgWidgetAreaItemBase;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
+
+import com.google.common.base.Predicate;
 
 public class DroneEntityAIPickupItems extends EntityAIBase{
     private final IDroneBase drone;
@@ -33,9 +34,9 @@ public class DroneEntityAIPickupItems extends EntityAIBase{
      */
     @Override
     public boolean shouldExecute(){
-        List<Entity> pickableItems = itemPickupWidget.getEntitiesInArea(drone.getWorld(), new IEntitySelector(){
+        List<Entity> pickableItems = itemPickupWidget.getEntitiesInArea(drone.getWorld(), new Predicate<Entity>(){
             @Override
-            public boolean isEntityApplicable(Entity entity){
+            public boolean apply(Entity entity){
                 return entity instanceof EntityItem && entity.isEntityAlive();
             }
         });
@@ -44,8 +45,8 @@ public class DroneEntityAIPickupItems extends EntityAIBase{
         for(Entity ent : pickableItems) {
             ItemStack stack = ((EntityItem)ent).getEntityItem();
             if(itemPickupWidget.isItemValidForFilters(stack)) {
-                for(int i = 0; i < drone.getInventory().getSizeInventory(); i++) {
-                    ItemStack droneStack = drone.getInventory().getStackInSlot(i);
+                for(int i = 0; i < drone.getInv().getSizeInventory(); i++) {
+                    ItemStack droneStack = drone.getInv().getStackInSlot(i);
                     if(droneStack == null || droneStack.isItemEqual(stack) && droneStack.stackSize < droneStack.getMaxStackSize()) {
                         if(drone.getPathNavigator().moveToEntity(ent)) {
                             curPickingUpEntity = (EntityItem)ent;
@@ -67,12 +68,12 @@ public class DroneEntityAIPickupItems extends EntityAIBase{
     @Override
     public boolean continueExecuting(){
         if(curPickingUpEntity.isDead) return false;
-        if(Vec3.createVectorHelper(curPickingUpEntity.posX, curPickingUpEntity.posY, curPickingUpEntity.posZ).distanceTo(drone.getPosition()) < 1.5) {
+        if(new Vec3(curPickingUpEntity.posX, curPickingUpEntity.posY, curPickingUpEntity.posZ).distanceTo(drone.getDronePos()) < 1.5) {
             ItemStack stack = curPickingUpEntity.getEntityItem();
             if(itemPickupWidget.isItemValidForFilters(stack)) {
                 new EventHandlerPneumaticCraft().onPlayerPickup(new EntityItemPickupEvent(drone.getFakePlayer(), curPickingUpEntity));//not posting the event globally, as I don't have a way of handling a canceled event.
                 int stackSize = stack.stackSize;
-                ItemStack remainder = PneumaticCraftUtils.exportStackToInventory(drone.getInventory(), stack, ForgeDirection.UP);//side doesn't matter, drones aren't ISided.
+                ItemStack remainder = PneumaticCraftUtils.exportStackToInventory(drone.getInv(), stack, EnumFacing.UP);//side doesn't matter, drones aren't ISided.
                 if(remainder == null) {
                     drone.onItemPickupEvent(curPickingUpEntity, stackSize);
                     curPickingUpEntity.setDead();

@@ -10,6 +10,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCache;
 import net.minecraft.world.IBlockAccess;
@@ -94,21 +95,22 @@ public class BlockTrackUpgradeHandler implements IUpgradeRenderHandler{
         baseY = MathHelper.clamp_int(baseY, 0, 255);
         maxY = MathHelper.clamp_int(maxY, 0, 255);
         int baseZ = (int)Math.floor(player.posZ) - blockTrackRange;
-        IBlockAccess chunkCache = new ChunkCache(player.worldObj, baseX, baseY, baseZ, baseX + 2 * blockTrackRange, maxY, baseZ + 2 * blockTrackRange, 0);
+        IBlockAccess chunkCache = new ChunkCache(player.worldObj, new BlockPos(baseX, baseY, baseZ), new BlockPos(baseX + 2 * blockTrackRange, maxY, baseZ + 2 * blockTrackRange), 0);
         for(int i = baseX; i <= baseX + 2 * blockTrackRange; i++) {
             for(int j = baseY; j < maxY; j++) {
                 for(int k = baseZ; k <= baseZ + 2 * blockTrackRange; k++) {
                     if(player.getDistance(i, j, k) > blockTrackRange) continue;
-                    TileEntity te = chunkCache.getTileEntity(i, j, k);
-                    if(MinecraftForge.EVENT_BUS.post(new BlockTrackEvent(player.worldObj, i, j, k, te))) continue;
+                    BlockPos pos = new BlockPos(i, j, k);
+                    TileEntity te = chunkCache.getTileEntity(pos);
+                    if(MinecraftForge.EVENT_BUS.post(new BlockTrackEvent(player.worldObj, pos, te))) continue;
                     if(searchHandler != null && te instanceof IInventory) {
                         searchHandler.checkInventoryForItems(te);
                     }
-                    List<IBlockTrackEntry> entries = BlockTrackEntryList.instance.getEntriesForCoordinate(chunkCache, i, j, k, te);
+                    List<IBlockTrackEntry> entries = BlockTrackEntryList.instance.getEntriesForCoordinate(chunkCache, pos, te);
                     if(entries.isEmpty()) continue;
                     boolean inList = false;
                     for(int l = 0; l < blockTargets.size(); l++) {
-                        if(blockTargets.get(l).isSameTarget(player.worldObj, i, j, k)) {
+                        if(blockTargets.get(l).isSameTarget(player.worldObj, pos)) {
                             inList = true;
                             blockTargets.get(l).ticksExisted = Math.abs(blockTargets.get(l).ticksExisted);// cancel lost targets
                             blockTargets.get(l).setTileEntity(te);
@@ -120,12 +122,12 @@ public class BlockTrackUpgradeHandler implements IUpgradeRenderHandler{
                         for(IBlockTrackEntry entry : entries) {
                             if(entry.shouldBeUpdatedFromServer(te)) {
                                 if(!sentUpdate) {
-                                    NetworkHandler.sendToServer(new PacketDescriptionPacketRequest(i, j, k));
+                                    NetworkHandler.sendToServer(new PacketDescriptionPacketRequest(pos));
                                     sentUpdate = true;
                                 }
                             }
                         }
-                        addBlockTarget(new RenderBlockTarget(player.worldObj, player, i, j, k, te, this));
+                        addBlockTarget(new RenderBlockTarget(player.worldObj, player, pos, te, this));
                         for(IBlockTrackEntry entry : entries) {
                             if(countBlockTrackersOfType(entry) == entry.spamThreshold() + 1) {
                                 HUDHandler.instance().addMessage(new ArmorMessage(I18n.format("blockTracker.message.stopSpam", I18n.format(entry.getEntryName())), new ArrayList<String>(), 60, 0x7700AA00));
@@ -250,7 +252,7 @@ public class BlockTrackUpgradeHandler implements IUpgradeRenderHandler{
     public GuiAnimatedStat getAnimatedStat(){
         if(blockTrackInfo == null) {
             Minecraft minecraft = Minecraft.getMinecraft();
-            ScaledResolution sr = new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight);
+            ScaledResolution sr = new ScaledResolution(minecraft);
             blockTrackInfo = new GuiAnimatedStat(null, "Current tracked blocks:", new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_BLOCK_TRACKER), statX != -1 ? statX : sr.getScaledWidth() - 2, statY, 0x3000AA00, null, statLeftSided);
             blockTrackInfo.setMinDimensionsAndReset(0, 0);
         }
@@ -264,9 +266,9 @@ public class BlockTrackUpgradeHandler implements IUpgradeRenderHandler{
         }
     }
 
-    public RenderBlockTarget getTargetForCoord(int x, int y, int z){
+    public RenderBlockTarget getTargetForCoord(BlockPos pos){
         for(RenderBlockTarget target : blockTargets) {
-            if(target.isSameTarget(null, x, y, z)) return target;
+            if(target.isSameTarget(null, pos)) return target;
         }
         return null;
     }

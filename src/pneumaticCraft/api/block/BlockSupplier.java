@@ -1,7 +1,7 @@
 package pneumaticCraft.api.block;
 
 import net.minecraft.block.Block;
-import cpw.mods.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 public class BlockSupplier{
     // private static Class blockClass;

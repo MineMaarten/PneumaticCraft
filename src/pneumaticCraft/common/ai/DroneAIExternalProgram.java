@@ -10,7 +10,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import pneumaticCraft.api.item.IProgrammable;
 import pneumaticCraft.common.progwidgets.IProgWidget;
 import pneumaticCraft.common.progwidgets.ProgWidgetExternalProgram;
@@ -20,7 +20,7 @@ import pneumaticCraft.common.util.IOHelper;
 public class DroneAIExternalProgram extends DroneAIBlockInteraction<ProgWidgetExternalProgram>{
 
     private final DroneAIManager subAI, mainAI;
-    private final Set<ChunkPosition> traversedPositions = new HashSet<ChunkPosition>();
+    private final Set<BlockPos> traversedPositions = new HashSet<BlockPos>();
     private int curSlot;
     private NBTTagCompound curProgramTag; //Used to see if changes have been made to the program while running it.
 
@@ -46,18 +46,18 @@ public class DroneAIExternalProgram extends DroneAIBlockInteraction<ProgWidgetEx
     }
 
     @Override
-    protected boolean isValidPosition(ChunkPosition pos){
+    protected boolean isValidPosition(BlockPos pos){
         if(traversedPositions.add(pos)) {
             curSlot = 0;
-            TileEntity te = drone.getWorld().getTileEntity(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+            TileEntity te = drone.getWorld().getTileEntity(pos);
             return te instanceof IInventory;
         }
         return false;
     }
 
     @Override
-    protected boolean doBlockInteraction(ChunkPosition pos, double distToBlock){
-        IInventory inv = IOHelper.getInventoryForTE(drone.getWorld().getTileEntity(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ));
+    protected boolean doBlockInteraction(BlockPos pos, double distToBlock){
+        IInventory inv = IOHelper.getInventoryForTE(drone.getWorld().getTileEntity(pos));
         if(inv == null) return false;
         if(curProgramTag != null) {
             if(curSlot < inv.getSizeInventory()) {

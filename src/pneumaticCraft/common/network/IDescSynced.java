@@ -3,6 +3,7 @@ package pneumaticCraft.common.network;
 import java.util.List;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import pneumaticCraft.common.inventory.SyncedField;
 
 public interface IDescSynced{
@@ -18,11 +19,7 @@ public interface IDescSynced{
 
     public void readFromPacket(NBTTagCompound tag);
 
-    public int getX();
-
-    public int getY();
-
-    public int getZ();
+    public BlockPos getPos();
 
     public void onDescUpdate();
 }

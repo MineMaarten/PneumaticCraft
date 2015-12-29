@@ -1,5 +1,6 @@
 package pneumaticCraft.common.heat.behaviour;
 
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.tileentity.HeatBehaviour;
@@ -13,8 +14,8 @@ public class HeatBehaviourHeatFrame extends HeatBehaviour{
     private ISemiBlock semiBlock;
 
     @Override
-    public void initialize(IHeatExchangerLogic connectedHeatLogic, World world, int x, int y, int z){
-        super.initialize(connectedHeatLogic, world, x, y, z);
+    public void initialize(IHeatExchangerLogic connectedHeatLogic, World world, BlockPos pos){
+        super.initialize(connectedHeatLogic, world, pos);
         semiBlock = null;
     }
 
@@ -25,7 +26,7 @@ public class HeatBehaviourHeatFrame extends HeatBehaviour{
 
     private ISemiBlock getSemiBlock(){
         if(semiBlock == null) {
-            semiBlock = SemiBlockManager.getInstance(getWorld()).getSemiBlock(getWorld(), getX(), getY(), getZ());
+            semiBlock = SemiBlockManager.getInstance(getWorld()).getSemiBlock(getWorld(), getPos());
         }
         return semiBlock;
     }

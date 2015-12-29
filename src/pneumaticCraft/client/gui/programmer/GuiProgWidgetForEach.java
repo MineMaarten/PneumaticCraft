@@ -1,5 +1,7 @@
 package pneumaticCraft.client.gui.programmer;
 
+import java.io.IOException;
+
 import net.minecraft.client.resources.I18n;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.widget.WidgetComboBox;
@@ -25,7 +27,7 @@ public class GuiProgWidgetForEach extends GuiProgWidgetAreaShow{
     }
 
     @Override
-    public void keyTyped(char chr, int keyCode){
+    public void keyTyped(char chr, int keyCode) throws IOException{
         if(keyCode == 1) {
             ((IVariableSetWidget)widget).setVariable(variableField.getText());
         }

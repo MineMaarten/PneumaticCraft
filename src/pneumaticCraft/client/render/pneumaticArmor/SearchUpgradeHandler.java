@@ -7,7 +7,6 @@ import java.util.Map;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -15,6 +14,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -32,9 +34,6 @@ import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.PneumaticValues;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class SearchUpgradeHandler implements IUpgradeRenderHandler{
     private int totalSearchedItemCount;
@@ -122,11 +121,11 @@ public class SearchUpgradeHandler implements IUpgradeRenderHandler{
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        RenderManager.instance.renderEngine.bindTexture(Textures.GLOW_RESOURCE);
+        Minecraft.getMinecraft().getRenderManager().renderEngine.bindTexture(Textures.GLOW_RESOURCE);
         //  mc.func_110434_K().func_110577_a(Textures.GLOW_RESOURCE);
         for(Map.Entry<EntityItem, Integer> entry : searchedItems.entrySet()) {
             EntityItem item = entry.getKey();
-            float height = MathHelper.sin((item.age + partialTicks) / 10.0F + item.hoverStart) * 0.1F + 0.2F;
+            float height = MathHelper.sin((item.getAge() + partialTicks) / 10.0F + item.hoverStart) * 0.1F + 0.2F;
             RenderSearchItemBlock.renderSearch(item.lastTickPosX + (item.posX - item.lastTickPosX) * partialTicks, item.lastTickPosY + (item.posY - item.lastTickPosY) * partialTicks + height, item.lastTickPosZ + (item.posZ - item.lastTickPosZ) * partialTicks, entry.getValue(), totalSearchedItemCount);
         }
         for(int i = 0; i < searchedBlocks.size(); i++) {
@@ -187,12 +186,12 @@ public class SearchUpgradeHandler implements IUpgradeRenderHandler{
             if(hasFoundItem) {
                 boolean inList = false;
                 for(RenderSearchItemBlock trackedBlock : searchedBlocks) {
-                    if(trackedBlock.isAlreadyTrackingCoord(te.xCoord, te.yCoord, te.zCoord)) {
+                    if(trackedBlock.isAlreadyTrackingCoord(te.getPos())) {
                         inList = true;
                         break;
                     }
                 }
-                if(!inList) searchedBlocks.add(new RenderSearchItemBlock(te.getWorldObj(), te.xCoord, te.yCoord, te.zCoord));
+                if(!inList) searchedBlocks.add(new RenderSearchItemBlock(te.getWorld(), te.getPos()));
             }
         } catch(Throwable e) {
 
@@ -225,7 +224,7 @@ public class SearchUpgradeHandler implements IUpgradeRenderHandler{
     public GuiAnimatedStat getAnimatedStat(){
         if(searchInfo == null) {
             Minecraft minecraft = Minecraft.getMinecraft();
-            ScaledResolution sr = new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight);
+            ScaledResolution sr = new ScaledResolution(minecraft);
             searchInfo = new GuiAnimatedStat(null, "Currently searching for:", new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_SEARCH_DAMAGE), statX != -1 ? statX : sr.getScaledWidth() - 2, statY, 0x3000AA00, null, statLeftSided);
             searchInfo.setMinDimensionsAndReset(0, 0);
         }

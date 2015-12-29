@@ -9,9 +9,11 @@ import java.util.Set;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -61,33 +63,33 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
     }
 
     @Override
-    public void updateEntity(){
+    public void update(){
         // volume calculations
         if(!worldObj.isRemote && getUpgradeSlots() != null) {
             int upgradeVolume = getVolumeFromUpgrades(getUpgradeSlots());
             setVolume(DEFAULT_VOLUME + upgradeVolume);
 
             if(getUpgrades(ItemMachineUpgrade.UPGRADE_SECURITY, getUpgradeSlots()) > 0) {
-                if(getPressure(ForgeDirection.UNKNOWN) >= DANGER_PRESSURE - 0.1) {
-                    airLeak(ForgeDirection.DOWN);
+                if(getPressure() >= DANGER_PRESSURE - 0.1) {
+                    airLeak(EnumFacing.DOWN);
                 }
 
                 //Remove the remaining air if there is any still.
-                int excessAir = getCurrentAir(ForgeDirection.UNKNOWN) - (int)(getVolume() * (DANGER_PRESSURE - 0.1));
+                int excessAir = getCurrentAir() - (int)(getVolume() * (DANGER_PRESSURE - 0.1));
                 if(excessAir > 0) {
-                    addAir(-excessAir, ForgeDirection.DOWN);
-                    onAirDispersion(-excessAir, ForgeDirection.DOWN);
+                    addAir(-excessAir, EnumFacing.DOWN);
+                    onAirDispersion(-excessAir, EnumFacing.DOWN);
                 }
             }
         }
 
-        super.updateEntity();
+        super.update();
         // if(!worldObj.isRemote ) System.out.println("currentPressure: " +
         // getPressure());
-        for(ForgeDirection pneumaticSide : ForgeDirection.values()) {
+        for(EnumFacing pneumaticSide : EnumFacing.values()) {
             if(!worldObj.isRemote && getPressure(pneumaticSide) > maxPressure) {
-                worldObj.createExplosion(null, xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, 1.0F, true);
-                worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+                worldObj.createExplosion(null, getPos().getX() + 0.5D, getPos().getY() + 0.5D, getPos().getZ() + 0.5D, 1.0F, true);
+                worldObj.setBlockToAir(getPos());
             }
         }
         if(!worldObj.isRemote) disperseAir();
@@ -103,7 +105,7 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
         disperseAir(getConnectedPneumatics());
     }
 
-    private void disperseAir(List<Pair<ForgeDirection, IAirHandler>> teList){
+    private void disperseAir(List<Pair<EnumFacing, IAirHandler>> teList){
 
         boolean shouldRepeat = false;
         List<Pair<Integer, Integer>> dispersion = new ArrayList<Pair<Integer, Integer>>();
@@ -112,15 +114,15 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
             //Add up every volume and air.
             int totalVolume = getVolume();
             int totalAir = currentAir;
-            for(Pair<ForgeDirection, IAirHandler> entry : teList) {
+            for(Pair<EnumFacing, IAirHandler> entry : teList) {
                 IAirHandler airHandler = entry.getValue();
                 totalVolume += airHandler.getVolume();
                 totalAir += airHandler.getCurrentAir(entry.getKey().getOpposite());
             }
             //Only go push based, ignore any machines that have a higher pressure than this block.
-            Iterator<Pair<ForgeDirection, IAirHandler>> iterator = teList.iterator();
+            Iterator<Pair<EnumFacing, IAirHandler>> iterator = teList.iterator();
             while(iterator.hasNext()) {
-                Pair<ForgeDirection, IAirHandler> entry = iterator.next();
+                Pair<EnumFacing, IAirHandler> entry = iterator.next();
                 IAirHandler airHandler = entry.getValue();
                 int totalMachineAir = (int)((long)totalAir * airHandler.getVolume() / totalVolume);//Calculate the total air the machine is going to get.
                 int airDispersed = totalMachineAir - airHandler.getCurrentAir(entry.getKey().getOpposite());
@@ -175,7 +177,7 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
      * @param key
      * @return
      */
-    protected int getMaxDispersion(ForgeDirection side){
+    protected int getMaxDispersion(EnumFacing side){
         return Integer.MAX_VALUE;
     }
 
@@ -186,26 +188,26 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
      * @param side
      * @return
      */
-    protected void onAirDispersion(int amount, ForgeDirection side){}
+    protected void onAirDispersion(int amount, EnumFacing side){}
 
     /**
      * Method to release air in the air. It takes air from a specific side, plays a sound effect, and spawns smoke particles.
      * @param side
      */
     @Override
-    public void airLeak(ForgeDirection side){
+    public void airLeak(EnumFacing side){
         if(worldObj.isRemote || Math.abs(getPressure(side)) < 0.01F) return;
-        double motionX = side.offsetX;
-        double motionY = side.offsetY;
-        double motionZ = side.offsetZ;
+        double motionX = side.getFrontOffsetX();
+        double motionY = side.getFrontOffsetY();
+        double motionZ = side.getFrontOffsetZ();
         if(soundCounter <= 0) {
             soundCounter = 20;
-            NetworkHandler.sendToAllAround(new PacketPlaySound(Sounds.LEAKING_GAS_SOUND, xCoord, yCoord, zCoord, 0.1F, 1.0F, true), worldObj);
+            NetworkHandler.sendToAllAround(new PacketPlaySound(Sounds.LEAKING_GAS_SOUND, getPos().getX(), getPos().getY(), getPos().getZ(), 0.1F, 1.0F, true), worldObj);
         }
 
         if(getPressure(side) < 0) {
             double speed = getPressure(side) * 0.1F - 0.1F;
-            NetworkHandler.sendToAllAround(new PacketSpawnParticle("smoke", xCoord + 0.5D + motionX / 2D, yCoord + 0.5D + motionY / 2D, zCoord + 0.5D + motionZ / 2D, motionX * speed, motionY * speed, motionZ * speed), worldObj);
+            NetworkHandler.sendToAllAround(new PacketSpawnParticle(EnumParticleTypes.SMOKE_NORMAL, getPos().getX() + 0.5D + motionX / 2D, getPos().getY() + 0.5D + motionY / 2D, getPos().getZ() + 0.5D + motionZ / 2D, motionX * speed, motionY * speed, motionZ * speed), worldObj);
 
             int dispersedAmount = -(int)(getPressure(side) * PneumaticValues.AIR_LEAK_FACTOR) + 20;
             if(getCurrentAir(side) > dispersedAmount) dispersedAmount = -getCurrentAir(side);
@@ -214,9 +216,9 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
         } else {
             double speed = getPressure(side) * 0.1F + 0.1F;
             // if(DateEventHandler.isEvent()) {
-            //DateEventHandler.spawnFirework(worldObj, xCoord + 0.5D + motionX / 2D, yCoord + 0.5D + motionY / 2D, zCoord + 0.5D + motionZ / 2D);
+            //DateEventHandler.spawnFirework(worldObj, getPos().getX() + 0.5D + motionX / 2D, getPos().getY() + 0.5D + motionY / 2D, getPos().getZ() + 0.5D + motionZ / 2D);
             // } else {
-            NetworkHandler.sendToAllAround(new PacketSpawnParticle("smoke", xCoord + 0.5D + motionX / 2D, yCoord + 0.5D + motionY / 2D, zCoord + 0.5D + motionZ / 2D, motionX * speed, motionY * speed, motionZ * speed), worldObj);
+            NetworkHandler.sendToAllAround(new PacketSpawnParticle(EnumParticleTypes.SMOKE_NORMAL, getPos().getX() + 0.5D + motionX / 2D, getPos().getY() + 0.5D + motionY / 2D, getPos().getZ() + 0.5D + motionZ / 2D, motionX * speed, motionY * speed, motionZ * speed), worldObj);
             // }
 
             int dispersedAmount = (int)(getPressure(side) * PneumaticValues.AIR_LEAK_FACTOR) + 20;
@@ -231,12 +233,12 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
         * @return
         */
     @Override
-    public List<Pair<ForgeDirection, IAirHandler>> getConnectedPneumatics(){
-        List<Pair<ForgeDirection, IAirHandler>> teList = new ArrayList<Pair<ForgeDirection, IAirHandler>>();
+    public List<Pair<EnumFacing, IAirHandler>> getConnectedPneumatics(){
+        List<Pair<EnumFacing, IAirHandler>> teList = new ArrayList<Pair<EnumFacing, IAirHandler>>();
         for(IAirHandler specialConnection : specialConnectedHandlers) {
-            teList.add(new ImmutablePair(ForgeDirection.UNKNOWN, specialConnection));
+            teList.add(new ImmutablePair(null, specialConnection));
         }
-        for(ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS) {
+        for(EnumFacing direction : EnumFacing.VALUES) {
             TileEntity te = getTileCache()[direction.ordinal()].getTileEntity();
             IPneumaticMachine machine = ModInteractionUtils.getInstance().getMachine(te);
             if(machine != null && isConnectedTo(direction) && machine.isConnectedTo(direction.getOpposite())) {
@@ -257,7 +259,7 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
      * @return
      */
     @Override
-    public boolean isConnectedTo(ForgeDirection side){
+    public boolean isConnectedTo(EnumFacing side){
         if(parentTile == null) {
             return true;
         } else if(parentTile instanceof IPneumaticMachine) {
@@ -274,13 +276,17 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
      */
     @Override
     @Deprecated
-    public void addAir(float amount, ForgeDirection side){
+    public void addAir(float amount, EnumFacing side){
         addAir((int)amount, side);
     }
 
     @Override
-    public void addAir(int amount, ForgeDirection side){
+    public void addAir(int amount, EnumFacing side){
         currentAir += amount;
+    }
+
+    public void addAir(int amount){
+        addAir(amount, null);
     }
 
     @Override
@@ -303,8 +309,12 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
     }
 
     @Override
-    public float getPressure(ForgeDirection sideRequested){
+    public float getPressure(EnumFacing sideRequested){
         return (float)currentAir / volume;
+    }
+
+    public float getPressure(){
+        return getPressure(null);
     }
 
     @Override
@@ -349,7 +359,7 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
 
     @Override
     public void printManometerMessage(EntityPlayer player, List<String> curInfo){
-        curInfo.add(EnumChatFormatting.GREEN + "Current pressure: " + PneumaticCraftUtils.roundNumberTo(getPressure(ForgeDirection.UNKNOWN), 1) + " bar.");
+        curInfo.add(EnumChatFormatting.GREEN + "Current pressure: " + PneumaticCraftUtils.roundNumberTo(getPressure(), 1) + " bar.");
     }
 
     @Override
@@ -363,8 +373,12 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
     }
 
     @Override
-    public int getCurrentAir(ForgeDirection sideRequested){
+    public int getCurrentAir(EnumFacing sideRequested){
         return currentAir;
+    }
+
+    public int getCurrentAir(){
+        return getCurrentAir(null);
     }
 
     @Override
@@ -374,17 +388,17 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
 
     @Override
     public int getXCoord(){
-        return xCoord;
+        return getPos().getX();
     }
 
     @Override
     public int getYCoord(){
-        return yCoord;
+        return getPos().getY();
     }
 
     @Override
     public int getZCoord(){
-        return zCoord;
+        return getPos().getZ();
     }
 
     @Override
@@ -394,7 +408,7 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
             @Override
             public Object[] call(Object[] args) throws Exception{
                 if(args.length == 0) {
-                    return new Object[]{getPressure(ForgeDirection.UNKNOWN)};
+                    return new Object[]{getPressure()};
                 } else if(args.length == 1) {
                     return new Object[]{getPressure(getDirForString((String)args[0]))};
                 } else {
@@ -414,7 +428,7 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
 
     @Override
     public void updateEntityI(){
-        updateEntity();
+        update();
     }
 
     @Override
@@ -430,10 +444,8 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
     @Override
     public void validateI(TileEntity parent){
         parentTile = parent;
-        worldObj = parent.getWorldObj();
-        xCoord = parent.xCoord;
-        yCoord = parent.yCoord;
-        zCoord = parent.zCoord;
+        worldObj = parent.getWorld();
+        setPos(parent.getPos());
     }
 
     @Override
@@ -444,21 +456,6 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
     @Override
     public World world(){
         return worldObj;
-    }
-
-    @Override
-    public int x(){
-        return xCoord;
-    }
-
-    @Override
-    public int y(){
-        return yCoord;
-    }
-
-    @Override
-    public int z(){
-        return zCoord;
     }
 
     @Override
@@ -475,5 +472,10 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IManoMeas
         if(specialConnectedHandlers.remove(otherHandler)) {
             otherHandler.removeConnection(this);
         }
+    }
+
+    @Override
+    public BlockPos pos(){
+        return getPos();
     }
 }

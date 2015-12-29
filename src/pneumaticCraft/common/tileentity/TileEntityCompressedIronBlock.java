@@ -1,6 +1,6 @@
 package pneumaticCraft.common.tileentity;
 
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
@@ -20,7 +20,7 @@ public class TileEntityCompressedIronBlock extends TileEntityBase implements IHe
     }
 
     @Override
-    public IHeatExchangerLogic getHeatExchangerLogic(ForgeDirection side){
+    public IHeatExchangerLogic getHeatExchangerLogic(EnumFacing side){
         return heatExchanger;
     }
 
@@ -29,8 +29,8 @@ public class TileEntityCompressedIronBlock extends TileEntityBase implements IHe
     }
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
 
         if(!worldObj.isRemote) {
             heatLevel = getHeatLevelForTemperature(heatExchanger.getTemperature());
@@ -80,7 +80,7 @@ public class TileEntityCompressedIronBlock extends TileEntityBase implements IHe
     }
 
     @Override
-    public int getComparatorValue(ForgeDirection side){
+    public int getComparatorValue(){
         return getComparatorOutput((int)heatExchanger.getTemperature());
     }
 

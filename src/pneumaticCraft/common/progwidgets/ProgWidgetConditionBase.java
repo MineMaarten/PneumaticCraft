@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pneumaticCraft.common.ai.IDroneBase;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 
 public abstract class ProgWidgetConditionBase extends ProgWidget implements IJump{
 
@@ -62,7 +62,7 @@ public abstract class ProgWidgetConditionBase extends ProgWidget implements IJum
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.LIGHTNING_PLANT_DAMAGE;
+        return ItemPlastic.LIGHTNING_PLANT_DAMAGE;
     }
 
 }

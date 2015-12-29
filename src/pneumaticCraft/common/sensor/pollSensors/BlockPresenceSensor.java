@@ -5,15 +5,15 @@ import java.util.List;
 import java.util.Set;
 
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.util.Rectangle;
 
 import pneumaticCraft.api.universalSensor.IBlockAndCoordinatePollSensor;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockPresenceSensor implements IBlockAndCoordinatePollSensor{
 
@@ -40,9 +40,9 @@ public class BlockPresenceSensor implements IBlockAndCoordinatePollSensor{
     }
 
     @Override
-    public int getRedstoneValue(World world, int x, int y, int z, int sensorRange, String textBoxText, Set<ChunkPosition> positions){
-        for(ChunkPosition pos : positions) {
-            if(!world.isAirBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ)) return 15;
+    public int getRedstoneValue(World world, BlockPos pos, int sensorRange, String textBoxText, Set<BlockPos> positions){
+        for(BlockPos p : positions) {
+            if(!world.isAirBlock(p)) return 15;
         }
         return 0;
     }

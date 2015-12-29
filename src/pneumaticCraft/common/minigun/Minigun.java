@@ -12,6 +12,8 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
 
@@ -22,8 +24,6 @@ import pneumaticCraft.common.config.Config;
 import pneumaticCraft.common.item.ItemGunAmmo;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.Sounds;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public abstract class Minigun{
     private final boolean requiresTarget;
@@ -309,7 +309,7 @@ public abstract class Minigun{
             RenderUtils.glColorHex(0xFF000000 | getAmmoColor());
             for(int i = 0; i < 5; i++) {
 
-                Vec3 vec = Vec3.createVectorHelper(attackTarget.posX - x, attackTarget.posY - y, attackTarget.posZ - z).normalize();
+                Vec3 vec = new Vec3(attackTarget.posX - x, attackTarget.posY - y, attackTarget.posZ - z).normalize();
                 minigunFire.startX = x + vec.xCoord * gunRadius;
                 minigunFire.startY = y + vec.yCoord * gunRadius;
                 minigunFire.startZ = z + vec.zCoord * gunRadius;

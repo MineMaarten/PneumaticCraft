@@ -8,9 +8,10 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -27,7 +28,6 @@ import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketAmadronTradeAdd;
 import pneumaticCraft.common.recipes.AmadronOfferCustom;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.client.FMLClientHandler;
 
 public class GuiAmadronAddTrade extends GuiPneumaticContainerBase{
     private GuiSearcher searchGui;
@@ -43,7 +43,7 @@ public class GuiAmadronAddTrade extends GuiPneumaticContainerBase{
     private WidgetLabel inputNumberLabel, outputNumberLabel;
     private GuiButton addButton;
 
-    private ChunkPosition inputPosition, outputPosition;
+    private BlockPos inputPosition, outputPosition;
 
     public GuiAmadronAddTrade(){
         super(new ContainerAmadronAddTrade(), null, Textures.GUI_WIDGET_OPTIONS_STRING);
@@ -174,7 +174,7 @@ public class GuiAmadronAddTrade extends GuiPneumaticContainerBase{
                 output = new FluidStack(outputFluid.getFluid(), outputNumber.getValue());
             }
             AmadronOfferCustom trade = new AmadronOfferCustom(input, output, player);
-            ChunkPosition pos = getInputPosition();
+            BlockPos pos = getInputPosition();
             int dimensionId = getInputDimension();
             trade.setProvidingPosition(pos, dimensionId);
             pos = getOutputPosition();
@@ -192,46 +192,37 @@ public class GuiAmadronAddTrade extends GuiPneumaticContainerBase{
             gpsSearchGui = new GuiInventorySearcher(FMLClientHandler.instance().getClientPlayerEntity());
             isSettingInput = widget.getID() == 6;
             ItemStack gps = new ItemStack(Itemss.GPSTool);
-            ChunkPosition pos;
+            BlockPos pos;
             if(widget.getID() == 6) {
                 pos = getInputPosition();
             } else {
                 pos = getOutputPosition();
             }
-            if(pos != null) ItemGPSTool.setGPSLocation(gps, pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+            if(pos != null) ItemGPSTool.setGPSLocation(gps, pos);
             gpsSearchGui.setSearchStack(ItemGPSTool.getGPSLocation(gps) != null ? gps : null);
             FMLClientHandler.instance().showGuiScreen(gpsSearchGui);
         }
         super.actionPerformed(widget);
     }
 
-    private ChunkPosition getInputPosition(){
+    private BlockPos getInputPosition(){
         EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
         return inputPosition != null ? inputPosition : ((ContainerAmadronAddTrade)inventorySlots).getStack(0) != null ? ItemAmadronTablet.getItemProvidingLocation(player.getCurrentEquippedItem()) : ItemAmadronTablet.getLiquidProvidingLocation(player.getCurrentEquippedItem());
     }
 
-    private ChunkPosition getOutputPosition(){
+    private BlockPos getOutputPosition(){
         EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
         return outputPosition != null ? outputPosition : ((ContainerAmadronAddTrade)inventorySlots).getStack(1) != null ? ItemAmadronTablet.getItemProvidingLocation(player.getCurrentEquippedItem()) : ItemAmadronTablet.getLiquidProvidingLocation(player.getCurrentEquippedItem());
     }
 
     private int getInputDimension(){
         EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
-        return inputPosition != null ? player.worldObj.provider.dimensionId : ((ContainerAmadronAddTrade)inventorySlots).getStack(0) != null ? ItemAmadronTablet.getItemProvidingDimension(player.getCurrentEquippedItem()) : ItemAmadronTablet.getLiquidProvidingDimension(player.getCurrentEquippedItem());
+        return inputPosition != null ? player.worldObj.provider.getDimensionId() : ((ContainerAmadronAddTrade)inventorySlots).getStack(0) != null ? ItemAmadronTablet.getItemProvidingDimension(player.getCurrentEquippedItem()) : ItemAmadronTablet.getLiquidProvidingDimension(player.getCurrentEquippedItem());
     }
 
     private int getOutputDimension(){
         EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
-        return outputPosition != null ? player.worldObj.provider.dimensionId : ((ContainerAmadronAddTrade)inventorySlots).getStack(1) != null ? ItemAmadronTablet.getItemProvidingDimension(player.getCurrentEquippedItem()) : ItemAmadronTablet.getLiquidProvidingDimension(player.getCurrentEquippedItem());
-    }
-
-    @Override
-    protected void keyTyped(char key, int keyCode){
-        /* if(keyCode == 1) {
-
-         } else {*/
-        super.keyTyped(key, keyCode);
-        //}
+        return outputPosition != null ? player.worldObj.provider.getDimensionId() : ((ContainerAmadronAddTrade)inventorySlots).getStack(1) != null ? ItemAmadronTablet.getItemProvidingDimension(player.getCurrentEquippedItem()) : ItemAmadronTablet.getLiquidProvidingDimension(player.getCurrentEquippedItem());
     }
 
     @Override

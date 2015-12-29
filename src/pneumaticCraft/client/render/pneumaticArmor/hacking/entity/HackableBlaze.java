@@ -3,7 +3,6 @@ package pneumaticCraft.client.render.pneumaticArmor.hacking.entity;
 import java.util.List;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableEntity;
 
@@ -39,8 +38,15 @@ public class HackableBlaze implements IHackableEntity{
 
     @Override
     public boolean afterHackTick(Entity entity){
-        ((EntityLivingBase)entity).attackTime = 20;
+        /*EntityAITasks tasks = ((EntityLiving)entity).tasks;
+        for(EntityAITasks.EntityAITaskEntry task : tasks.taskEntries){
+            if(task.action instanceof EntityBlaze.AIFireballAttack){
+                tasks.removeTask(task.action);
+                break;
+            }
+        }
+        for(int i = 0; i < )
+        ((EntityLivingBase)entity).attackTime = 20;*///TODO 1.8 fix
         return true;
     }
-
 }

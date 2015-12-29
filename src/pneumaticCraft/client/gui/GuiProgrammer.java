@@ -4,6 +4,7 @@ import igwmod.gui.GuiWiki;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,16 +13,20 @@ import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
-import net.minecraft.world.ChunkPosition;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Optional;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -48,12 +53,6 @@ import pneumaticCraft.common.tileentity.TileEntityProgrammer;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.ModIds;
 import pneumaticCraft.lib.Textures;
-import codechicken.nei.VisiblityData;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiProgrammer extends GuiPneumaticContainerBase<TileEntityProgrammer>{
@@ -219,7 +218,7 @@ public class GuiProgrammer extends GuiPneumaticContainerBase<TileEntityProgramme
         buttonList.add(clearAllButton);
         buttonList.add(convertToRelativeButton);
 
-        String containerName = te.hasCustomInventoryName() ? te.getInventoryName() : StatCollector.translateToLocal(te.getInventoryName() + ".name");
+        String containerName = te.hasCustomName() ? te.getName() : StatCollector.translateToLocal(te.getName() + ".name");
         addLabel(containerName, guiLeft + 7, guiTop + 5);
 
         nameField = new WidgetTextField(fontRendererObj, guiLeft + 200, guiTop + 5, 98, fontRendererObj.FONT_HEIGHT);
@@ -270,7 +269,7 @@ public class GuiProgrammer extends GuiPneumaticContainerBase<TileEntityProgramme
     }
 
     @Override
-    protected void keyTyped(char key, int keyCode){
+    protected void keyTyped(char key, int keyCode) throws IOException{
         super.keyTyped(key, keyCode);
 
         if(Keyboard.KEY_I == keyCode && Loader.isModLoaded(ModIds.IGWMOD)) {
@@ -331,7 +330,7 @@ public class GuiProgrammer extends GuiPneumaticContainerBase<TileEntityProgramme
         bindGuiTexture();
         int xStart = (width - xSize) / 2;
         int yStart = (height - ySize) / 2;
-        func_146110_a(xStart, yStart, 0, 0, xSize, ySize, xSize, ySize);
+        drawModalRectWithCustomSizedTexture(xStart, yStart, 0, 0, xSize, ySize, xSize, ySize);
 
         programmerUnit.getScrollBar().setEnabled(showingWidgetProgress == 0);
         super.drawGuiContainerBackgroundLayer(partialTicks, x, y);
@@ -352,9 +351,9 @@ public class GuiProgrammer extends GuiPneumaticContainerBase<TileEntityProgramme
             bindGuiTexture();
             int width = oldShowingWidgetProgress + (int)((showingWidgetProgress - oldShowingWidgetProgress) * partialTicks);
             for(int i = 0; i < width; i++) {
-                func_146110_a(xStart + 320 - i, yStart + 36, 323, 36, 1, 136, xSize, ySize);
+                drawModalRectWithCustomSizedTexture(xStart + 320 - i, yStart + 36, 323, 36, 1, 136, xSize, ySize);
             }
-            func_146110_a(xStart + 319 - width, yStart + 36, 319, 36, 2, 136, xSize, ySize);
+            drawModalRectWithCustomSizedTexture(xStart + 319 - width, yStart + 36, 319, 36, 2, 136, xSize, ySize);
 
             if(showingAllWidgets && draggingWidget != null) toggleShowWidgets();
         }
@@ -803,32 +802,32 @@ public class GuiProgrammer extends GuiPneumaticContainerBase<TileEntityProgramme
      * @return true if successful
      */
     private boolean generateRelativeOperators(ProgWidgetCoordinateOperator baseWidget, List<String> tooltip, boolean simulate){
-        ChunkPosition baseCoord = ProgWidgetCoordinateOperator.calculateCoordinate(baseWidget, 0, baseWidget.getOperator());
-        Map<ChunkPosition, String> offsetToVariableNames = new HashMap<ChunkPosition, String>();
+        BlockPos baseCoord = ProgWidgetCoordinateOperator.calculateCoordinate(baseWidget, 0, baseWidget.getOperator());
+        Map<BlockPos, String> offsetToVariableNames = new HashMap<BlockPos, String>();
         for(IProgWidget widget : te.progWidgets) {
             if(widget instanceof ProgWidgetArea) {
                 ProgWidgetArea area = (ProgWidgetArea)widget;
                 if(area.getCoord1Variable().equals("") && (area.x1 != 0 || area.y1 != 0 || area.z1 != 0)) {
-                    ChunkPosition offset = new ChunkPosition(area.x1 - baseCoord.chunkPosX, area.y1 - baseCoord.chunkPosY, area.z1 - baseCoord.chunkPosZ);
+                    BlockPos offset = new BlockPos(area.x1 - baseCoord.getX(), area.y1 - baseCoord.getY(), area.z1 - baseCoord.getZ());
                     String var = getOffsetVariable(offsetToVariableNames, baseWidget.getVariable(), offset);
                     if(!simulate) area.setCoord1Variable(var);
                 }
                 if(area.getCoord2Variable().equals("") && (area.x2 != 0 || area.y2 != 0 || area.z2 != 0)) {
-                    ChunkPosition offset = new ChunkPosition(area.x2 - baseCoord.chunkPosX, area.y2 - baseCoord.chunkPosY, area.z2 - baseCoord.chunkPosZ);
+                    BlockPos offset = new BlockPos(area.x2 - baseCoord.getX(), area.y2 - baseCoord.getY(), area.z2 - baseCoord.getZ());
                     String var = getOffsetVariable(offsetToVariableNames, baseWidget.getVariable(), offset);
                     if(!simulate) area.setCoord2Variable(var);
                 }
             } else if(widget instanceof ProgWidgetCoordinate && baseWidget.getConnectedParameters()[0] != widget) {
                 ProgWidgetCoordinate coordinate = (ProgWidgetCoordinate)widget;
                 if(!coordinate.isUsingVariable()) {
-                    ChunkPosition c = coordinate.getCoordinate();
-                    String chunkString = "(" + c.chunkPosX + ", " + c.chunkPosY + ", " + c.chunkPosZ + ")";
+                    BlockPos c = coordinate.getCoordinate();
+                    String chunkString = "(" + c.getX() + ", " + c.getY() + ", " + c.getZ() + ")";
                     if(PneumaticCraftUtils.distBetween(c, 0, 0, 0) < 64) { //When the coordinate value is close to 0, there's a low chance it means a position, and rather an offset.
                         if(tooltip != null) tooltip.add(I18n.format("gui.programmer.button.convertToRelative.coordIsNotChangedWarning", chunkString));
                     } else {
                         if(tooltip != null) tooltip.add(I18n.format("gui.programmer.button.convertToRelative.coordIsChangedWarning", chunkString));
                         if(!simulate) {
-                            ChunkPosition offset = new ChunkPosition(c.chunkPosX - baseCoord.chunkPosX, c.chunkPosY - baseCoord.chunkPosY, c.chunkPosZ - baseCoord.chunkPosZ);
+                            BlockPos offset = new BlockPos(c.getX() - baseCoord.getX(), c.getY() - baseCoord.getY(), c.getZ() - baseCoord.getZ());
                             String var = getOffsetVariable(offsetToVariableNames, baseWidget.getVariable(), offset);
                             if(!simulate) {
                                 coordinate.setVariable(var);
@@ -843,7 +842,7 @@ public class GuiProgrammer extends GuiPneumaticContainerBase<TileEntityProgramme
             ProgWidgetCoordinateOperator firstOperator = null;
             ProgWidgetCoordinateOperator prevOperator = baseWidget;
             int x = baseWidget.getX();
-            for(Map.Entry<ChunkPosition, String> entry : offsetToVariableNames.entrySet()) {
+            for(Map.Entry<BlockPos, String> entry : offsetToVariableNames.entrySet()) {
                 ProgWidgetCoordinateOperator operator = new ProgWidgetCoordinateOperator();
                 operator.setVariable(entry.getValue());
 
@@ -883,8 +882,8 @@ public class GuiProgrammer extends GuiPneumaticContainerBase<TileEntityProgramme
         }
     }
 
-    private String getOffsetVariable(Map<ChunkPosition, String> offsetToVariableNames, String baseVariable, ChunkPosition offset){
-        if(offset.equals(new ChunkPosition(0, 0, 0))) return baseVariable;
+    private String getOffsetVariable(Map<BlockPos, String> offsetToVariableNames, String baseVariable, BlockPos offset){
+        if(offset.equals(new BlockPos(0, 0, 0))) return baseVariable;
         String var = offsetToVariableNames.get(offset);
         if(var == null) {
             var = "var" + (offsetToVariableNames.size() + 1);
@@ -894,7 +893,7 @@ public class GuiProgrammer extends GuiPneumaticContainerBase<TileEntityProgramme
     }
 
     @Override
-    protected void mouseClicked(int x, int y, int par3){
+    protected void mouseClicked(int x, int y, int par3) throws IOException{
         ItemStack programmedItem = te.getStackInSlot(TileEntityProgrammer.PROGRAM_SLOT);
         if(nameField.isFocused() && programmedItem != null) {
             programmedItem.setStackDisplayName(nameField.getText());
@@ -921,11 +920,12 @@ public class GuiProgrammer extends GuiPneumaticContainerBase<TileEntityProgramme
         super.onGuiClosed();
     }
 
-    @Override
-    @Optional.Method(modid = ModIds.NEI)
-    public VisiblityData modifyVisiblity(GuiContainer gui, VisiblityData currentVisibility){
-        currentVisibility.showNEI = false;
-        return currentVisibility;
-    }
+    /* @Override
+     * TODO NEI dep
+     @Optional.Method(modid = ModIds.NEI)
+     public VisiblityData modifyVisiblity(GuiContainer gui, VisiblityData currentVisibility){
+         currentVisibility.showNEI = false;
+         return currentVisibility;
+     }*/
 
 }

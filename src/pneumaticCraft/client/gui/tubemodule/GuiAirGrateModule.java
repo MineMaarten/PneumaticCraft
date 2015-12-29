@@ -1,5 +1,7 @@
 package pneumaticCraft.client.gui.tubemodule;
 
+import java.io.IOException;
+
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
@@ -23,7 +25,7 @@ public class GuiAirGrateModule extends GuiTubeModule{
         super.initGui();
         addLabel(I18n.format("gui.entityFilter"), guiLeft + 10, guiTop + 14);
 
-        textfield = new GuiTextField(fontRendererObj, guiLeft + 10, guiTop + 25, 160, 10);
+        textfield = new GuiTextField(-1, fontRendererObj, guiLeft + 10, guiTop + 25, 160, 10);
         textfield.setText(((ModuleAirGrate)module).entityFilter);
     }
 
@@ -35,13 +37,13 @@ public class GuiAirGrateModule extends GuiTubeModule{
     }
 
     @Override
-    protected void mouseClicked(int x, int y, int par3){
+    protected void mouseClicked(int x, int y, int par3) throws IOException{
         super.mouseClicked(x, y, par3);
         textfield.mouseClicked(x, y, par3);
     }
 
     @Override
-    public void keyTyped(char par1, int par2){
+    public void keyTyped(char par1, int par2) throws IOException{
         if(textfield.isFocused() && par2 != 1) {
             textfield.textboxKeyTyped(par1, par2);
             ((ModuleAirGrate)module).entityFilter = textfield.getText();

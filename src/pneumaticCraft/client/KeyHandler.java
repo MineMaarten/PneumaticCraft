@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
 
 import org.lwjgl.input.Keyboard;
 
 import pneumaticCraft.client.render.pneumaticArmor.HUDHandler;
 import pneumaticCraft.lib.Names;
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.InputEvent.KeyInputEvent;
 
 public class KeyHandler{
     private static KeyHandler INSTANCE = new KeyHandler();

@@ -76,13 +76,13 @@ public class WidgetVerticalScrollbar extends WidgetBase{
         if(dragging) currentScroll = (float)(mouseY - 7 - getBounds().y) / (getBounds().height - 17);
         currentScroll = MathHelper.clamp_float(currentScroll, 0, 1);
         Minecraft.getMinecraft().getTextureManager().bindTexture(scrollTexture);
-        Gui.func_146110_a(x, y, 12, 0, getBounds().width, 1, 26, 15);
+        Gui.drawModalRectWithCustomSizedTexture(x, y, 12, 0, getBounds().width, 1, 26, 15);
         for(int i = 0; i < getBounds().height - 2; i++)
-            Gui.func_146110_a(x, y + 1 + i, 12, 1, getBounds().width, 1, 26, 15);
-        Gui.func_146110_a(x, y + getBounds().height - 1, 12, 14, getBounds().width, 1, 26, 15);
+            Gui.drawModalRectWithCustomSizedTexture(x, y + 1 + i, 12, 1, getBounds().width, 1, 26, 15);
+        Gui.drawModalRectWithCustomSizedTexture(x, y + getBounds().height - 1, 12, 14, getBounds().width, 1, 26, 15);
 
         if(!enabled) GL11.glColor4d(0.6, 0.6, 0.6, 1);
-        Gui.func_146110_a(x + 1, y + 1 + (int)((getBounds().height - 17) * currentScroll), 0, 0, 12, 15, 26, 15);
+        Gui.drawModalRectWithCustomSizedTexture(x + 1, y + 1 + (int)((getBounds().height - 17) * currentScroll), 0, 0, 12, 15, 26, 15);
         GL11.glColor4d(1, 1, 1, 1);
     }
 

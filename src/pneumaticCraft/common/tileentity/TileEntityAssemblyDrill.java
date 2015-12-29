@@ -3,7 +3,7 @@ package pneumaticCraft.common.tileentity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.api.recipe.AssemblyRecipe;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.LazySynced;
@@ -22,9 +22,9 @@ public class TileEntityAssemblyDrill extends TileEntityAssemblyRobot{
     private int drillStep;
 
     @Override
-    public void updateEntity(){
+    public void update(){
         oldDrillRotation = drillRotation;
-        super.updateEntity();
+        super.update();
         if(isDrillOn) {
             drillSpeed = Math.min(drillSpeed + TileEntityConstants.ASSEMBLY_DRILL_ACCELERATION * speed, TileEntityConstants.ASSEMBLY_DRILL_MAX_SPEED);
         } else {
@@ -36,7 +36,7 @@ public class TileEntityAssemblyDrill extends TileEntityAssemblyRobot{
         }
 
         if(!worldObj.isRemote && drillStep > 0) {
-            ForgeDirection[] platformDirection = getPlatformDirection();
+            EnumFacing[] platformDirection = getPlatformDirection();
             if(platformDirection == null) drillStep = 1;
             switch(drillStep){
                 case 1:

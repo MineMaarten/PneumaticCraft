@@ -4,7 +4,7 @@ import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.util.ResourceLocation;
 import pneumaticCraft.common.ai.DroneAILogistics;
 import pneumaticCraft.common.ai.IDroneBase;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
 
 public class ProgWidgetLogistics extends ProgWidgetAreaItemBase{
@@ -16,7 +16,7 @@ public class ProgWidgetLogistics extends ProgWidgetAreaItemBase{
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.ENDER_PLANT_DAMAGE;
+        return ItemPlastic.ENDER_PLANT_DAMAGE;
     }
 
     @Override

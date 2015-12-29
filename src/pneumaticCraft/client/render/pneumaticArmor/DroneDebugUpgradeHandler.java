@@ -5,7 +5,7 @@ import java.util.Set;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import net.minecraftforge.common.config.Configuration;
 import pneumaticCraft.api.client.IGuiAnimatedStat;
 import pneumaticCraft.api.client.pneumaticHelmet.IOptionPage;
@@ -16,9 +16,9 @@ import pneumaticCraft.common.item.ItemPneumaticArmor;
 import pneumaticCraft.common.item.Itemss;
 
 public class DroneDebugUpgradeHandler implements IUpgradeRenderHandler{
-    private final Set<ChunkPosition> shownPositions = new HashSet<ChunkPosition>();
+    private final Set<BlockPos> shownPositions = new HashSet<BlockPos>();
 
-    public Set<ChunkPosition> getShowingPositions(){
+    public Set<BlockPos> getShowingPositions(){
         return shownPositions;
     }
 

@@ -2,11 +2,10 @@ package pneumaticCraft.common.recipes;
 
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
 import pneumaticCraft.common.item.Itemss;
 
-public class RecipeManometer implements IRecipe{
+public class RecipeManometer extends AbstractRecipe{
 
     @Override
     public boolean matches(InventoryCrafting inventory, World world){

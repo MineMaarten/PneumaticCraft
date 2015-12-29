@@ -13,8 +13,8 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.world.ChunkPosition;
 
 import org.lwjgl.input.Keyboard;
 
@@ -94,15 +94,15 @@ public class GuiDroneDebuggerOptions extends Gui implements IOptionPage{
     @Override
     public void drawScreen(int x, int y, float partialTicks){
         if(selectedDrone != null) {
-            Minecraft.getMinecraft().fontRenderer.drawString("Drone name: " + selectedDrone.getCommandSenderName(), 20, screenHeight - 15, 0xFFFFFFFF, true);
-            Minecraft.getMinecraft().fontRenderer.drawString("Routine: " + selectedDrone.getLabel(), screenWidth / 2, screenHeight - 15, 0xFFFFFFFF, true);
+            Minecraft.getMinecraft().fontRendererObj.drawString("Drone name: " + selectedDrone.getName(), 20, screenHeight - 15, 0xFFFFFFFF, true);
+            Minecraft.getMinecraft().fontRendererObj.drawString("Routine: " + selectedDrone.getLabel(), screenWidth / 2, screenHeight - 15, 0xFFFFFFFF, true);
         }
 
         programmerUnit.render(x, y, true, true, true);
         programmerUnit.renderForeground(x, y, null);
 
         if(selectedDrone == null) {
-            drawCenteredString(Minecraft.getMinecraft().fontRenderer, "Press '" + Keyboard.getKeyName(KeyHandler.getInstance().keybindDebuggingDrone.getKeyCode()) + "' on a Drone when tracked by an Entity Tracker to debug the Drone.", screenWidth / 2, screenHeight / 2, 0xFFFF0000);
+            drawCenteredString(Minecraft.getMinecraft().fontRendererObj, "Press '" + Keyboard.getKeyName(KeyHandler.getInstance().keybindDebuggingDrone.getKeyCode()) + "' on a Drone when tracked by an Entity Tracker to debug the Drone.", screenWidth / 2, screenHeight / 2, 0xFFFF0000);
         }
 
         IProgWidget widget = programmerUnit.getHoveredWidget(x, y);
@@ -111,7 +111,7 @@ public class GuiDroneDebuggerOptions extends Gui implements IOptionPage{
         if(widget != null) {
             int widgetId = selectedDrone.getProgWidgets().indexOf(widget);
             for(DebugEntry entry : selectedDrone.getDebugEntries()) {
-                if(entry.getProgWidgetId() == widgetId && !entry.getPos().equals(new ChunkPosition(0, 0, 0))) {
+                if(entry.getProgWidgetId() == widgetId && !entry.getPos().equals(new BlockPos(0, 0, 0))) {
                     upgradeHandler.getShowingPositions().add(entry.getPos());
                 }
             }
@@ -153,7 +153,7 @@ public class GuiDroneDebuggerOptions extends Gui implements IOptionPage{
                     Integer oldTimes = messageTimesMap.get(entry.getMessage());
                     if(oldTimes == null) oldTimes = 0;
                     messageTimesMap.put(entry.getMessage(), oldTimes + 1);
-                    if(!entry.getPos().equals(new ChunkPosition(0, 0, 0))) {
+                    if(!entry.getPos().equals(new BlockPos(0, 0, 0))) {
                         hasCoords = true;
                     }
                 }

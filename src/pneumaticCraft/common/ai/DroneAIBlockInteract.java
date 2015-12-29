@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemRedstone;
 import net.minecraft.item.ItemReed;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
@@ -23,7 +24,7 @@ import pneumaticCraft.lib.Log;
 
 public class DroneAIBlockInteract extends DroneAIBlockInteraction{
 
-    private final List<ChunkPosition> visitedPositions = new ArrayList<ChunkPosition>();
+    private final List<BlockPos> visitedPositions = new ArrayList<BlockPos>();
 
     public DroneAIBlockInteract(IDroneBase drone, ProgWidgetAreaItemBase widget){
         super(drone, widget);
@@ -31,12 +32,12 @@ public class DroneAIBlockInteract extends DroneAIBlockInteraction{
     }
 
     @Override
-    protected boolean isValidPosition(ChunkPosition pos){
+    protected boolean isValidPosition(BlockPos pos){
         return !visitedPositions.contains(pos) && (widget.isItemFilterEmpty() || DroneAIDig.isBlockValidForFilter(drone.getWorld(), drone, pos, widget));
     }
 
     @Override
-    protected boolean doBlockInteraction(ChunkPosition pos, double distToBlock){
+    protected boolean doBlockInteraction(BlockPos pos, double distToBlock){
         visitedPositions.add(pos);
         boolean result = rightClick(pos);
         if(drone.getFakePlayer().getCurrentEquippedItem() != null && drone.getFakePlayer().getCurrentEquippedItem().stackSize <= 0) {
@@ -51,7 +52,7 @@ public class DroneAIBlockInteract extends DroneAIBlockInteraction{
         for(int j = 1; j < drone.getFakePlayer().inventory.mainInventory.length; j++) {
             ItemStack excessStack = drone.getFakePlayer().inventory.mainInventory[j];
             if(excessStack != null) {
-                ItemStack remainder = PneumaticCraftUtils.exportStackToInventory(drone.getInventory(), excessStack, ForgeDirection.UNKNOWN);
+                ItemStack remainder = PneumaticCraftUtils.exportStackToInventory(drone.getInv(), excessStack, null);
                 if(remainder != null) {
                     drone.dropItem(remainder);
                 }
@@ -61,23 +62,17 @@ public class DroneAIBlockInteract extends DroneAIBlockInteraction{
 
     }
 
-    private boolean rightClick(ChunkPosition pos){
-        int xCoord = pos.chunkPosX;
-        int yCoord = pos.chunkPosY;
-        int zCoord = pos.chunkPosZ;
+    private boolean rightClick(BlockPos pos){
 
-        ForgeDirection faceDir = ProgWidgetPlace.getDirForSides(((ISidedWidget)widget).getSides());
+        EnumFacing faceDir = ProgWidgetPlace.getDirForSides(((ISidedWidget)widget).getSides());
         EntityPlayer player = drone.getFakePlayer();
         World worldObj = drone.getWorld();
-        int dx = faceDir.offsetX;
-        int dy = faceDir.offsetY;
-        int dz = faceDir.offsetZ;
-        int x = xCoord /*+ dx*/;
-        int y = yCoord /*+ dy*/;
-        int z = zCoord /*+ dz*/;
+        int dx = faceDir.getFrontOffsetX();
+        int dy = faceDir.getFrontOffsetY();
+        int dz = faceDir.getFrontOffsetZ();
 
-        player.setPosition(x + 0.5, y + 0.5 - player.eyeHeight, z + 0.5);
-        player.rotationPitch = faceDir.offsetY * -90;
+        player.setPosition(pos.getX() + 0.5, pos.getY() + 0.5 - player.eyeHeight, pos.getZ() + 0.5);
+        player.rotationPitch = faceDir.getFrontOffsetY() * -90;
         switch(faceDir){
             case NORTH:
                 player.rotationYaw = 180;
@@ -93,25 +88,23 @@ public class DroneAIBlockInteract extends DroneAIBlockInteraction{
         }
 
         try {
-            PlayerInteractEvent event = ForgeEventFactory.onPlayerInteract(player, Action.RIGHT_CLICK_AIR, x, y, z, faceDir.ordinal(), worldObj);
+            PlayerInteractEvent event = ForgeEventFactory.onPlayerInteract(player, Action.RIGHT_CLICK_AIR, worldObj, pos, faceDir);
             if(event.isCanceled()) return false;
 
-            Block block = worldObj.getBlock(x, y, z);
+            IBlockState state = worldObj.getBlockState(pos);
+            Block block = state.getBlock();
 
             ItemStack stack = player.getCurrentEquippedItem();
-            if(stack != null && stack.getItem().onItemUseFirst(stack, player, worldObj, x, y, z, faceDir.ordinal(), dx, dy, dz)) return false;
+            if(stack != null && stack.getItem().onItemUseFirst(stack, player, worldObj, pos, faceDir, dx, dy, dz)) return false;
 
-            if(!worldObj.isAirBlock(x, y, z) && block.onBlockActivated(worldObj, x, y, z, player, faceDir.ordinal(), dx, dy, dz)) return false;
+            if(!worldObj.isAirBlock(pos) && block.onBlockActivated(worldObj, pos, state, player, faceDir, dx, dy, dz)) return false;
 
             if(stack != null) {
                 boolean isGoingToShift = false;
                 if(stack.getItem() instanceof ItemReed || stack.getItem() instanceof ItemRedstone) {
                     isGoingToShift = true;
                 }
-                int useX = isGoingToShift ? xCoord : x;
-                int useY = isGoingToShift ? yCoord : y;
-                int useZ = isGoingToShift ? zCoord : z;
-                if(stack.getItem().onItemUse(stack, player, worldObj, useX, useY, useZ, faceDir.ordinal(), dx, dy, dz)) return false;
+                if(stack.getItem().onItemUse(stack, player, worldObj, pos, faceDir, dx, dy, dz)) return false;
 
                 ItemStack copy = stack.copy();
                 player.setCurrentItemOrArmor(0, stack.getItem().onItemRightClick(stack, worldObj, player));

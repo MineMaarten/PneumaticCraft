@@ -2,15 +2,15 @@ package pneumaticCraft.common.semiblock;
 
 import java.util.List;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import pneumaticCraft.common.inventory.SyncedField;
 import pneumaticCraft.common.network.DescSynced;
@@ -22,14 +22,14 @@ import pneumaticCraft.common.tileentity.IGUIButtonSensitive;
 
 public class SemiBlockBasic implements ISemiBlock, IDescSynced, IGUIButtonSensitive{
     protected World world;
-    protected ChunkPosition pos;
+    protected BlockPos pos;
     private boolean isInvalid;
     private TileEntity cachedTE;
     private List<SyncedField> descriptionFields;
     private boolean descriptionPacketScheduled;
 
     @Override
-    public void initialize(World world, ChunkPosition pos){
+    public void initialize(World world, BlockPos pos){
         this.world = world;
         this.pos = pos;
     }
@@ -72,20 +72,20 @@ public class SemiBlockBasic implements ISemiBlock, IDescSynced, IGUIButtonSensit
     }
 
     protected void drop(){
-        SemiBlockManager.getInstance(world).breakSemiBlock(world, pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+        SemiBlockManager.getInstance(world).breakSemiBlock(world, pos);
     }
 
     protected boolean isAirBlock(){
-        return world.isAirBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+        return world.isAirBlock(pos);
     }
 
-    public Block getBlock(){
-        return world.getBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+    public IBlockState getBlockState(){
+        return world.getBlockState(pos);
     }
 
     public TileEntity getTileEntity(){
         if(cachedTE == null || cachedTE.isInvalid()) {
-            cachedTE = world.getTileEntity(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
+            cachedTE = world.getTileEntity(pos);
         }
         return cachedTE;
     }
@@ -106,7 +106,7 @@ public class SemiBlockBasic implements ISemiBlock, IDescSynced, IGUIButtonSensit
     }
 
     @Override
-    public ChunkPosition getPos(){
+    public BlockPos getPos(){
         return pos;
     }
 
@@ -167,21 +167,6 @@ public class SemiBlockBasic implements ISemiBlock, IDescSynced, IGUIButtonSensit
     @Override
     public void readFromPacket(NBTTagCompound tag){
 
-    }
-
-    @Override
-    public int getX(){
-        return pos.chunkPosX;
-    }
-
-    @Override
-    public int getY(){
-        return pos.chunkPosY;
-    }
-
-    @Override
-    public int getZ(){
-        return pos.chunkPosZ;
     }
 
     @Override

@@ -241,7 +241,7 @@ public class ModelDrone extends ModelBase{
             RenderUtils.glColorHex(0xFFFF0000);
             double s = 3 / 16D;
             double y = 17 / 16D;
-            SemiBlockRendererLogistics.renderFrame(AxisAlignedBB.getBoundingBox(-s, y - s, -s, s, y + s, s), 1 / 32D);
+            SemiBlockRendererLogistics.renderFrame(new AxisAlignedBB(-s, y - s, -s, s, y + s, s), 1 / 32D);
             GL11.glEnable(GL11.GL_TEXTURE_2D);
         }
     }

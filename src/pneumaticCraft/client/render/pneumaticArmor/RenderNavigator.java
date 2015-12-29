@@ -1,37 +1,37 @@
 package pneumaticCraft.client.render.pneumaticArmor;
 
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.pathfinding.PathPoint;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
 import org.lwjgl.opengl.GL11;
 
-import cpw.mods.fml.client.FMLClientHandler;
+import pneumaticCraft.common.util.PneumaticCraftUtils;
 
 public class RenderNavigator{
-    private final int targetX;
-    private final int targetY;
-    private final int targetZ;
+    private final BlockPos targetPos;
     private final World worldObj;
     private PathEntity path;
     private boolean increaseAlpha;
     private double alphaValue = 0.2D;
 
-    public RenderNavigator(World world, int targetX, int targetY, int targetZ){
-        this.targetX = targetX;
-        this.targetY = targetY;
-        this.targetZ = targetZ;
+    public RenderNavigator(World world, BlockPos targetPos){
+        this.targetPos = targetPos;
         worldObj = world;
         updatePath();
     }
 
     public void updatePath(){
         EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
-        path = worldObj.getEntityPathToXYZ(player, targetX, targetY, targetZ, CoordTrackUpgradeHandler.SEARCH_RANGE, true, true, false, true);
+        path = PneumaticCraftUtils.getPathFinder().createEntityPathTo(player.worldObj, player, targetPos, CoordTrackUpgradeHandler.SEARCH_RANGE);
         if(!tracedToDestination()) {
-            path = CoordTrackUpgradeHandler.getDronePath(player, targetX, targetY, targetZ);
+            path = CoordTrackUpgradeHandler.getDronePath(player, targetPos);
         }
     }
 
@@ -49,7 +49,7 @@ public class RenderNavigator{
 
         boolean noDestinationPath = !tracedToDestination();
 
-        Tessellator tess = Tessellator.instance;
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
 
         GL11.glPushMatrix();
         GL11.glTranslated(0, 0.01D, 0);
@@ -68,11 +68,11 @@ public class RenderNavigator{
                 GL11.glColor4d(red, 1 - red, 0, 0.5D);
                 PathPoint lastPoint = path.getPathPointFromIndex(i - 1);
                 PathPoint pathPoint = path.getPathPointFromIndex(i);
-                tess.startDrawing(GL11.GL_LINE_STRIP);
-                tess.addVertex(lastPoint.xCoord + 0.5D, lastPoint.yCoord, lastPoint.zCoord + 0.5D);
-                tess.addVertex((lastPoint.xCoord + pathPoint.xCoord) / 2D + 0.5D, Math.max(lastPoint.yCoord, pathPoint.yCoord), (lastPoint.zCoord + pathPoint.zCoord) / 2D + 0.5D);
-                tess.addVertex(pathPoint.xCoord + 0.5D, pathPoint.yCoord, pathPoint.zCoord + 0.5D);
-                tess.draw();
+                wr.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION);
+                wr.pos(lastPoint.xCoord + 0.5D, lastPoint.yCoord, lastPoint.zCoord + 0.5D).endVertex();
+                wr.pos((lastPoint.xCoord + pathPoint.xCoord) / 2D + 0.5D, Math.max(lastPoint.yCoord, pathPoint.yCoord), (lastPoint.zCoord + pathPoint.zCoord) / 2D + 0.5D).endVertex();
+                wr.pos(pathPoint.xCoord + 0.5D, pathPoint.yCoord, pathPoint.zCoord + 0.5D).endVertex();
+                Tessellator.getInstance().draw();
             }
         } else {
             if(noDestinationPath) {
@@ -93,12 +93,12 @@ public class RenderNavigator{
                 }
                 GL11.glColor4d(red, 1 - red, 0, alphaValue);
                 PathPoint pathPoint = path.getPathPointFromIndex(i);
-                tess.startDrawingQuads();
-                tess.addVertex(pathPoint.xCoord, pathPoint.yCoord, pathPoint.zCoord);
-                tess.addVertex(pathPoint.xCoord, pathPoint.yCoord, pathPoint.zCoord + 1);
-                tess.addVertex(pathPoint.xCoord + 1, pathPoint.yCoord, pathPoint.zCoord + 1);
-                tess.addVertex(pathPoint.xCoord + 1, pathPoint.yCoord, pathPoint.zCoord);
-                tess.draw();
+                wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
+                wr.pos(pathPoint.xCoord, pathPoint.yCoord, pathPoint.zCoord).endVertex();
+                wr.pos(pathPoint.xCoord, pathPoint.yCoord, pathPoint.zCoord + 1).endVertex();
+                wr.pos(pathPoint.xCoord + 1, pathPoint.yCoord, pathPoint.zCoord + 1).endVertex();
+                wr.pos(pathPoint.xCoord + 1, pathPoint.yCoord, pathPoint.zCoord).endVertex();
+                Tessellator.getInstance().draw();
             }
         }
 
@@ -114,6 +114,6 @@ public class RenderNavigator{
     public boolean tracedToDestination(){
         if(path == null) return false;
         PathPoint finalPoint = path.getFinalPathPoint();
-        return finalPoint.xCoord == targetX && finalPoint.yCoord == targetY && finalPoint.zCoord == targetZ;
+        return targetPos.equals(new BlockPos(finalPoint.xCoord, finalPoint.yCoord, finalPoint.zCoord));
     }
 }

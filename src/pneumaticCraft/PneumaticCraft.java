@@ -8,6 +8,22 @@ import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.IFuelHandler;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.Mod.Instance;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent;
+import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent.MissingMapping;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.client.CreativeTabPneumaticCraft;
 import pneumaticCraft.client.render.pneumaticArmor.UpgradeRenderHandlerList;
@@ -17,7 +33,6 @@ import pneumaticCraft.common.EventHandlerPneumaticCraft;
 import pneumaticCraft.common.EventHandlerUniversalSensor;
 import pneumaticCraft.common.PneumaticCraftAPIHandler;
 import pneumaticCraft.common.TickHandlerPneumaticCraft;
-import pneumaticCraft.common.VillagerHandler;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.block.tubes.ModuleRegistrator;
 import pneumaticCraft.common.commands.PCCommandManager;
@@ -44,22 +59,6 @@ import pneumaticCraft.lib.ModIds;
 import pneumaticCraft.lib.Names;
 import pneumaticCraft.lib.Versions;
 import pneumaticCraft.proxy.CommonProxy;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.IFuelHandler;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.Mod.Instance;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLMissingMappingsEvent;
-import cpw.mods.fml.common.event.FMLMissingMappingsEvent.MissingMapping;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartedEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.registry.GameRegistry;
 
 @Mod(modid = Names.MOD_ID, name = "PneumaticCraft", guiFactory = "pneumaticCraft.client.GuiConfigHandler", dependencies = "required-after:Forge@[10.13.3.1388,);" + "after:Forestry")
 public class PneumaticCraft{
@@ -99,12 +98,11 @@ public class PneumaticCraft{
         EntityRegistrator.init();
         SemiBlockInitializer.init();
         CraftingRegistrator.init();
-        VillagerHandler.instance().init();
+        //TODO 1.8 fix  VillagerHandler.instance().init();
         GameRegistry.registerWorldGenerator(new WorldGeneratorPneumaticCraft(), 0);
         AchievementHandler.init();
         HeatBehaviourManager.getInstance().init();
 
-        proxy.registerRenders();
         proxy.registerHandlers();
         tickHandler = new TickHandlerPneumaticCraft();
         FMLCommonHandler.instance().bus().register(tickHandler);
@@ -141,6 +139,7 @@ public class PneumaticCraft{
         }
 
         proxy.init();
+        proxy.registerRenders();
         ThirdPartyManager.instance().init();
     }
 

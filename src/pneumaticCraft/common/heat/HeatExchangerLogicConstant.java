@@ -1,8 +1,9 @@
 package pneumaticCraft.common.heat;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 import pneumaticCraft.api.IHeatExchangerLogic;
 
 /**
@@ -25,7 +26,7 @@ public class HeatExchangerLogicConstant implements IHeatExchangerLogic{
     public void update(){}
 
     @Override
-    public void initializeAsHull(World world, int x, int y, int z, ForgeDirection... validSides){}
+    public void initializeAsHull(World world, BlockPos pos, EnumFacing... validSides){}
 
     @Override
     public void addConnectedExchanger(IHeatExchangerLogic exchanger){}

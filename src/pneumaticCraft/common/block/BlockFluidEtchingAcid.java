@@ -2,16 +2,13 @@ package pneumaticCraft.common.block;
 
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.MaterialLiquid;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import pneumaticCraft.common.DamageSourcePneumaticCraft;
 import pneumaticCraft.common.fluid.Fluids;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockFluidEtchingAcid extends BlockFluidPneumaticCraft{
 
@@ -22,27 +19,20 @@ public class BlockFluidEtchingAcid extends BlockFluidPneumaticCraft{
                 return 1;
             }
         });
-        setBlockName("etchingAcid");
+        setUnlocalizedName("etchingAcid");
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public IIcon getIcon(int side, int meta){
-        return net.minecraft.init.Blocks.flowing_water.getIcon(side, meta);
-    }
-
-    @Override
-    public int colorMultiplier(IBlockAccess iblockaccess, int x, int y, int z){
+    //TODO 1.8 test verify renderpass
+    public int colorMultiplier(IBlockAccess iblockaccess, BlockPos pos, int renderPass){
         return 0x501c00;
     }
 
     @Override
-    public void onEntityCollidedWithBlock(World world, int x, int y, int z, Entity entity){
+    public void onEntityCollidedWithBlock(World world, BlockPos pos, Entity entity){
         if(entity instanceof EntityLivingBase && entity.ticksExisted % 10 == 0) {
             ((EntityLivingBase)entity).attackEntityFrom(DamageSourcePneumaticCraft.etchingAcid, 1);
         }
     }
 
-    @Override
-    public void registerBlockIcons(IIconRegister par1IconRegister){}
 }

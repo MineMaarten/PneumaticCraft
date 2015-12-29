@@ -16,7 +16,7 @@ public class WidgetTextField extends GuiTextField implements IGuiWidget{
     private boolean passwordBox;
 
     public WidgetTextField(FontRenderer fontRenderer, int x, int y, int width, int height){
-        super(fontRenderer, x, y, width, height);
+        super(-1, fontRenderer, x, y, width, height);
     }
 
     @Override

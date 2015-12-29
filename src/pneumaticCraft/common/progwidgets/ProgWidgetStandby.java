@@ -4,7 +4,7 @@ import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.util.ResourceLocation;
 import pneumaticCraft.common.ai.IDroneBase;
 import pneumaticCraft.common.entity.living.EntityDrone;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
 
 public class ProgWidgetStandby extends ProgWidget{
@@ -30,7 +30,7 @@ public class ProgWidgetStandby extends ProgWidget{
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.REPULSION_PLANT_DAMAGE;
+        return ItemPlastic.REPULSION_PLANT_DAMAGE;
     }
 
     @Override

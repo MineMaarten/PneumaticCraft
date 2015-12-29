@@ -5,11 +5,10 @@ import java.util.Set;
 
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 import org.lwjgl.util.Rectangle;
-
-import cpw.mods.fml.common.eventhandler.Event;
 
 public interface IBlockAndCoordinateEventSensor{
     /**
@@ -26,7 +25,7 @@ public interface IBlockAndCoordinateEventSensor{
      * @param positions When only one GPS Tool is inserted this contains the position of just that tool. If two GPS Tools are inserted, These are both corners of a box, and every coordinate in this box is added to the positions argument.
      * @return
      */
-    public int emitRedstoneOnEvent(Event event, TileEntity sensor, int range, Set<ChunkPosition> positions);
+    public int emitRedstoneOnEvent(Event event, TileEntity sensor, int range, Set<BlockPos> positions);
 
     /**
      * See {@link IEventSensorSetting#getRedstonePulseLength()}

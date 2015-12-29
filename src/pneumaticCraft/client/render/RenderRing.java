@@ -1,12 +1,15 @@
 package pneumaticCraft.client.render;
 
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
 
+import pneumaticCraft.client.util.RenderUtils;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class RenderRing extends RenderProgressingLine{
     private final int color;
@@ -23,15 +26,15 @@ public class RenderRing extends RenderProgressingLine{
         GL11.glTranslated((getInter(endX, lastTickLine.endX, partialTick) - startX) * renderProgress, (getInter(endY, lastTickLine.endY, partialTick) - startY) * renderProgress, (getInter(endZ, lastTickLine.endZ, partialTick) - startZ) * renderProgress);
         GL11.glRotatef(rotationYaw, 0.0F, 1.0F, 0.0F);
         GL11.glRotatef(rotationPitch, 0.0F, 0.0F, 1.0F);
-        Tessellator tess = Tessellator.instance;
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
-        tess.startDrawing(GL11.GL_LINE_LOOP);
-        tess.setColorOpaque_I(color);
+        wr.begin(GL11.GL_LINE_LOOP, DefaultVertexFormats.POSITION);
+        RenderUtils.glColorHex(color);
         double size = 5 / 16D;
         for(int i = 0; i < PneumaticCraftUtils.circlePoints; i++) {
-            tess.addVertex(0, PneumaticCraftUtils.sin[i] * size, PneumaticCraftUtils.cos[i] * size);
+            wr.pos(0, PneumaticCraftUtils.sin[i] * size, PneumaticCraftUtils.cos[i] * size).endVertex();
         }
-        tess.draw();
+        Tessellator.getInstance().draw();
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
         GL11.glPopMatrix();
     }

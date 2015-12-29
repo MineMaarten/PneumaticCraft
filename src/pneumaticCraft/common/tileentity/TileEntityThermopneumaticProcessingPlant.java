@@ -1,15 +1,19 @@
 package pneumaticCraft.common.tileentity;
 
+import java.util.Arrays;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.api.recipe.IThermopneumaticProcessingPlantRecipe;
@@ -21,8 +25,6 @@ import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.recipes.PneumaticRecipeRegistry;
 import pneumaticCraft.lib.PneumaticValues;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityThermopneumaticProcessingPlant extends TileEntityPneumaticBase implements IFluidHandler,
         IHeatExchanger, IMinWorkingPressure, IRedstoneControlled, IInventory{
@@ -55,25 +57,25 @@ public class TileEntityThermopneumaticProcessingPlant extends TileEntityPneumati
     }
 
     @Override
-    public boolean isConnectedTo(ForgeDirection dir){
-        return getRotation().getOpposite() != dir && dir != ForgeDirection.UP;
+    public boolean isConnectedTo(EnumFacing dir){
+        return getRotation().getOpposite() != dir && dir != EnumFacing.UP;
     }
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
         if(!worldObj.isRemote) {
             IThermopneumaticProcessingPlantRecipe recipe = getValidRecipe();
             hasRecipe = recipe != null;
             if(hasRecipe) {
                 requiredPressure = recipe.getRequiredPressure(inputTank.getFluid(), inventory[4]);
                 requiredTemperature = recipe.getRequiredTemperature(inputTank.getFluid(), inventory[4]);
-                if(redstoneAllows() && heatExchanger.getTemperature() >= requiredTemperature && getPressure(ForgeDirection.UNKNOWN) >= getMinWorkingPressure()) {
+                if(redstoneAllows() && heatExchanger.getTemperature() >= requiredTemperature && getPressure(null) >= getMinWorkingPressure()) {
                     craftingProgress++;
                     if(craftingProgress >= CRAFTING_TIME) {
                         outputTank.fill(recipe.getRecipeOutput(inputTank.getFluid(), inventory[4]).copy(), true);
                         recipe.useRecipeItems(inputTank.getFluid(), inventory[4]);
-                        addAir(-recipe.airUsed(inputTank.getFluid(), inventory[4]), ForgeDirection.UNKNOWN);
+                        addAir(-recipe.airUsed(inputTank.getFluid(), inventory[4]), null);
                         heatExchanger.addHeat(-recipe.heatUsed(inputTank.getFluid(), inventory[4]));
                         if(inputTank.getFluid() != null && inputTank.getFluid().amount <= 0) inputTank.setFluid(null);
                         if(inventory[4] != null && inventory[4].stackSize <= 0) inventory[4] = null;
@@ -108,32 +110,32 @@ public class TileEntityThermopneumaticProcessingPlant extends TileEntityPneumati
     }
 
     @Override
-    public int fill(ForgeDirection from, FluidStack resource, boolean doFill){
+    public int fill(EnumFacing from, FluidStack resource, boolean doFill){
         return inputTank.fill(resource, doFill);
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain){
+    public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain){
         return outputTank.getFluid() != null && outputTank.getFluid().isFluidEqual(resource) ? outputTank.drain(resource.amount, doDrain) : null;
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain){
+    public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain){
         return outputTank.drain(maxDrain, doDrain);
     }
 
     @Override
-    public boolean canFill(ForgeDirection from, Fluid fluid){
+    public boolean canFill(EnumFacing from, Fluid fluid){
         return true;
     }
 
     @Override
-    public boolean canDrain(ForgeDirection from, Fluid fluid){
+    public boolean canDrain(EnumFacing from, Fluid fluid){
         return true;
     }
 
     @Override
-    public FluidTankInfo[] getTankInfo(ForgeDirection from){
+    public FluidTankInfo[] getTankInfo(EnumFacing from){
         return new FluidTankInfo[]{new FluidTankInfo(inputTank), new FluidTankInfo(outputTank)};
     }
 
@@ -179,7 +181,7 @@ public class TileEntityThermopneumaticProcessingPlant extends TileEntityPneumati
     }
 
     @Override
-    public IHeatExchangerLogic getHeatExchangerLogic(ForgeDirection side){
+    public IHeatExchangerLogic getHeatExchangerLogic(EnumFacing side){
         return heatExchanger;
     }
 
@@ -205,7 +207,7 @@ public class TileEntityThermopneumaticProcessingPlant extends TileEntityPneumati
      * Returns the name of the inventory.
      */
     @Override
-    public String getInventoryName(){
+    public String getName(){
         return Blockss.thermopneumaticProcessingPlant.getUnlocalizedName();
     }
 
@@ -242,7 +244,7 @@ public class TileEntityThermopneumaticProcessingPlant extends TileEntityPneumati
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
             setInventorySlotContents(slot, null);
@@ -264,7 +266,7 @@ public class TileEntityThermopneumaticProcessingPlant extends TileEntityPneumati
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 
@@ -279,8 +281,13 @@ public class TileEntityThermopneumaticProcessingPlant extends TileEntityPneumati
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
+    }
 }

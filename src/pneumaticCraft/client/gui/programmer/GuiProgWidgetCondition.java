@@ -5,7 +5,7 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiLabel;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -33,7 +33,7 @@ public class GuiProgWidgetCondition extends GuiProgWidgetAreaShow<ProgWidget>{
 
         if(isSidedWidget()) {
             for(int i = 0; i < 6; i++) {
-                String sideName = PneumaticCraftUtils.getOrientationName(ForgeDirection.getOrientation(i));
+                String sideName = PneumaticCraftUtils.getOrientationName(EnumFacing.getFront(i));
                 GuiCheckBox checkBox = new GuiCheckBox(i, guiLeft + 4, guiTop + 30 + i * 12, 0xFF000000, sideName);
                 checkBox.checked = ((ISidedWidget)widget).getSides()[i];
                 addWidget(checkBox);
@@ -70,7 +70,7 @@ public class GuiProgWidgetCondition extends GuiProgWidgetAreaShow<ProgWidget>{
                 radioButton.otherChoices = radioButtons;
             }
 
-            textField = new WidgetTextField(Minecraft.getMinecraft().fontRenderer, guiLeft + baseX, guiTop + baseY + 30, 50, 11);
+            textField = new WidgetTextField(Minecraft.getMinecraft().fontRendererObj, guiLeft + baseX, guiTop + baseY + 30, 50, 11);
             textField.setText(((ICondition)widget).getRequiredCount() + "");
             addWidget(textField);
         }

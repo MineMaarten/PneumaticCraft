@@ -2,6 +2,7 @@ package pneumaticCraft.common.semiblock;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class ItemSemiBlockBase extends Item implements ISemiBlockItem{
@@ -17,7 +18,7 @@ public class ItemSemiBlockBase extends Item implements ISemiBlockItem{
     }
 
     @Override
-    public ISemiBlock getSemiBlock(World world, int x, int y, int z, ItemStack stack){
+    public ISemiBlock getSemiBlock(World world, BlockPos pos, ItemStack stack){
         return SemiBlockManager.getSemiBlockForKey(semiBlockId);
     }
 

@@ -1,9 +1,10 @@
 package pneumaticCraft.api.tileentity;
 
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 /**
  * Deprecated: Use ISidedPneumaticMachine in favor of this one. In Minecraft 1.8+ that ISidedPneumaticMachine will be renamed to IPneumaticMachine, and therefore will be sided by default.
+ * TODO 1.8 remove
  */
 @Deprecated
 public interface IPneumaticMachine{
@@ -11,10 +12,10 @@ public interface IPneumaticMachine{
     /**
      * In your TileEntity class which is implementing this interface you should keep a reference of an IAirHandler.
      * You can retrieve one by calling {@link AirHandlerSupplier#getAirHandler(net.minecraft.tileentity.TileEntity, float, float, float, float)}.
-     * Do this when your TileEntity is initialized, i.e. xCoord,yCoord,zCoord and worldObj have a value. 
+     * Do this when your TileEntity is initialized, i.e. getPos().getX(),getPos().getY(),getPos().getZ() and worldObj have a value. 
      * In this method you need to return this reference.
      * 
-     * IMPORTANT: You need to forward the {@link net.minecraft.tileentity.TileEntity#updateEntity()}, 
+     * IMPORTANT: You need to forward the {@link net.minecraft.tileentity.TileEntity#update()}, 
      * {@link net.minecraft.tileentity.TileEntity#writeToNBT(net.minecraft.nbt.NBTTagCompound)} , 
      * {@link net.minecraft.tileentity.TileEntity#readFromNBT(net.minecraft.nbt.NBTTagCompound)} and
      * {@link net.minecraft.tileentity.TileEntity#validate()} (with the implementing TileEntity as additional parameter)
@@ -30,5 +31,5 @@ public interface IPneumaticMachine{
      * @param side
      * @return
      */
-    public boolean isConnectedTo(ForgeDirection side);
+    public boolean isConnectedTo(EnumFacing side);
 }

@@ -5,16 +5,16 @@ import java.util.Set;
 
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetCoordinateOperator;
 import pneumaticCraft.common.ai.DroneAIManager;
 import pneumaticCraft.common.ai.IDroneBase;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetCoordinateOperator extends ProgWidget implements IVariableSetWidget{
     public enum EnumOperator{
@@ -59,7 +59,7 @@ public class ProgWidgetCoordinateOperator extends ProgWidget implements IVariabl
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.BURST_PLANT_DAMAGE;
+        return ItemPlastic.BURST_PLANT_DAMAGE;
     }
 
     @Override
@@ -83,58 +83,58 @@ public class ProgWidgetCoordinateOperator extends ProgWidget implements IVariabl
     @Override
     public IProgWidget getOutputWidget(IDroneBase drone, List<IProgWidget> allWidgets){
         if(!variable.equals("")) {
-            ChunkPosition curPos = calculateCoordinate(this, 0, operator);
+            BlockPos curPos = calculateCoordinate(this, 0, operator);
             aiManager.setCoordinate(variable, curPos);
         }
         return super.getOutputWidget(drone, allWidgets);
     }
 
-    public static ChunkPosition calculateCoordinate(IProgWidget widget, int argIndex, EnumOperator operator){
-        ChunkPosition curPos = null;
+    public static BlockPos calculateCoordinate(IProgWidget widget, int argIndex, EnumOperator operator){
+        BlockPos curPos = null;
         switch(operator){
             case MULIPLY_DIVIDE:
-                curPos = new ChunkPosition(1, 1, 1);
+                curPos = new BlockPos(1, 1, 1);
                 ProgWidgetCoordinate coordinateWidget = (ProgWidgetCoordinate)widget.getConnectedParameters()[argIndex];
                 while(coordinateWidget != null) {
-                    ChunkPosition pos = coordinateWidget.getCoordinate();
-                    curPos = new ChunkPosition(curPos.chunkPosX * pos.chunkPosX, curPos.chunkPosY * pos.chunkPosY, curPos.chunkPosZ * pos.chunkPosZ);
+                    BlockPos pos = coordinateWidget.getCoordinate();
+                    curPos = new BlockPos(curPos.getX() * pos.getX(), curPos.getY() * pos.getY(), curPos.getZ() * pos.getZ());
                     coordinateWidget = (ProgWidgetCoordinate)coordinateWidget.getConnectedParameters()[0];
                 }
                 coordinateWidget = (ProgWidgetCoordinate)widget.getConnectedParameters()[widget.getParameters().length + argIndex];
                 while(coordinateWidget != null) {
-                    ChunkPosition pos = coordinateWidget.getCoordinate();
-                    if(pos.chunkPosX != 0 && pos.chunkPosY != 0 && pos.chunkPosZ != 0) curPos = new ChunkPosition(curPos.chunkPosX / pos.chunkPosX, curPos.chunkPosY / pos.chunkPosY, curPos.chunkPosZ / pos.chunkPosZ);
+                    BlockPos pos = coordinateWidget.getCoordinate();
+                    if(pos.getX() != 0 && pos.getY() != 0 && pos.getZ() != 0) curPos = new BlockPos(curPos.getX() / pos.getX(), curPos.getY() / pos.getY(), curPos.getZ() / pos.getZ());
                     coordinateWidget = (ProgWidgetCoordinate)coordinateWidget.getConnectedParameters()[0];
                 }
                 break;
             case PLUS_MINUS:
-                curPos = new ChunkPosition(0, 0, 0);
+                curPos = new BlockPos(0, 0, 0);
                 coordinateWidget = (ProgWidgetCoordinate)widget.getConnectedParameters()[argIndex];
                 while(coordinateWidget != null) {
-                    ChunkPosition pos = coordinateWidget.getCoordinate();
-                    curPos = new ChunkPosition(curPos.chunkPosX + pos.chunkPosX, curPos.chunkPosY + pos.chunkPosY, curPos.chunkPosZ + pos.chunkPosZ);
+                    BlockPos pos = coordinateWidget.getCoordinate();
+                    curPos = new BlockPos(curPos.getX() + pos.getX(), curPos.getY() + pos.getY(), curPos.getZ() + pos.getZ());
                     coordinateWidget = (ProgWidgetCoordinate)coordinateWidget.getConnectedParameters()[0];
                 }
                 coordinateWidget = (ProgWidgetCoordinate)widget.getConnectedParameters()[widget.getParameters().length + argIndex];
                 while(coordinateWidget != null) {
-                    ChunkPosition pos = coordinateWidget.getCoordinate();
-                    curPos = new ChunkPosition(curPos.chunkPosX - pos.chunkPosX, curPos.chunkPosY - pos.chunkPosY, curPos.chunkPosZ - pos.chunkPosZ);
+                    BlockPos pos = coordinateWidget.getCoordinate();
+                    curPos = new BlockPos(curPos.getX() - pos.getX(), curPos.getY() - pos.getY(), curPos.getZ() - pos.getZ());
                     coordinateWidget = (ProgWidgetCoordinate)coordinateWidget.getConnectedParameters()[0];
                 }
                 break;
             case MAX_MIN:
-                curPos = new ChunkPosition(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+                curPos = new BlockPos(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
                 coordinateWidget = (ProgWidgetCoordinate)widget.getConnectedParameters()[argIndex];
                 while(coordinateWidget != null) {
-                    ChunkPosition pos = coordinateWidget.getCoordinate();
-                    curPos = new ChunkPosition(Math.max(curPos.chunkPosX, pos.chunkPosX), Math.max(curPos.chunkPosY, pos.chunkPosY), Math.max(curPos.chunkPosZ, pos.chunkPosZ));
+                    BlockPos pos = coordinateWidget.getCoordinate();
+                    curPos = new BlockPos(Math.max(curPos.getX(), pos.getX()), Math.max(curPos.getY(), pos.getY()), Math.max(curPos.getZ(), pos.getZ()));
                     coordinateWidget = (ProgWidgetCoordinate)coordinateWidget.getConnectedParameters()[0];
                 }
-                if(curPos.equals(new ChunkPosition(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE))) curPos = new ChunkPosition(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+                if(curPos.equals(new BlockPos(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE))) curPos = new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
                 coordinateWidget = (ProgWidgetCoordinate)widget.getConnectedParameters()[widget.getParameters().length + argIndex];
                 while(coordinateWidget != null) {
-                    ChunkPosition pos = coordinateWidget.getCoordinate();
-                    curPos = new ChunkPosition(Math.min(curPos.chunkPosX, pos.chunkPosX), Math.min(curPos.chunkPosY, pos.chunkPosY), Math.min(curPos.chunkPosZ, pos.chunkPosZ));
+                    BlockPos pos = coordinateWidget.getCoordinate();
+                    curPos = new BlockPos(Math.min(curPos.getX(), pos.getX()), Math.min(curPos.getY(), pos.getY()), Math.min(curPos.getZ(), pos.getZ()));
                     coordinateWidget = (ProgWidgetCoordinate)coordinateWidget.getConnectedParameters()[0];
                 }
                 break;

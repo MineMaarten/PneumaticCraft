@@ -17,7 +17,6 @@ import org.lwjgl.opengl.GL12;
 
 import pneumaticCraft.client.gui.widget.IGuiWidget;
 import pneumaticCraft.client.gui.widget.IWidgetListener;
-import cpw.mods.fml.client.FMLClientHandler;
 
 /**
  * Extension of GuiButton that allows a invisible clickable field. It can be added in Gui's like buttons (with the buttonList).
@@ -28,7 +27,7 @@ public class GuiButtonSpecial extends GuiButton implements IGuiWidget{
     private ItemStack[] renderedStacks;
     private ResourceLocation resLoc;
     private List<String> tooltipText = new ArrayList<String>();
-    private final RenderItem itemRenderer = new RenderItem();
+    private final RenderItem itemRenderer = Minecraft.getMinecraft().getRenderItem(); //TODO 1.8 test
     private int invisibleHoverColor;
     private boolean thisVisible = true;
     private IWidgetListener listener;
@@ -96,14 +95,14 @@ public class GuiButtonSpecial extends GuiButton implements IGuiWidget{
                 GL11.glEnable(GL12.GL_RESCALE_NORMAL);
                 RenderHelper.enableGUIStandardItemLighting();
                 for(int i = 0; i < renderedStacks.length; i++) {
-                    itemRenderer.renderItemAndEffectIntoGUI(FMLClientHandler.instance().getClient().fontRenderer, FMLClientHandler.instance().getClient().renderEngine, renderedStacks[i], startX + i * 18, yPosition + 2);
+                    itemRenderer.renderItemAndEffectIntoGUI(renderedStacks[i], startX + i * 18, yPosition + 2);
                 }
                 RenderHelper.disableStandardItemLighting();
                 GL11.glDisable(GL12.GL_RESCALE_NORMAL);
             }
             if(resLoc != null) {
                 mc.getTextureManager().bindTexture(resLoc);
-                func_146110_a(xPosition + width / 2 - 8, yPosition + 2, 0, 0, 16, 16, 16, 16);
+                drawModalRectWithCustomSizedTexture(xPosition + width / 2 - 8, yPosition + 2, 0, 0, 16, 16, 16, 16);
             }
             if(enabled && !thisVisible && x >= xPosition && y >= yPosition && x < xPosition + width && y < yPosition + height) {
                 Gui.drawRect(xPosition, yPosition, xPosition + width, yPosition + height, invisibleHoverColor);
@@ -129,7 +128,7 @@ public class GuiButtonSpecial extends GuiButton implements IGuiWidget{
     @Override
     public void onMouseClicked(int mouseX, int mouseY, int button){
         if(mousePressed(Minecraft.getMinecraft(), mouseX, mouseY)) {
-            func_146113_a(Minecraft.getMinecraft().getSoundHandler());
+            playPressSound(Minecraft.getMinecraft().getSoundHandler());
             listener.actionPerformed(this);
         }
     }

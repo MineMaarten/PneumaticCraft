@@ -15,7 +15,7 @@ public class PacketSendNBTPacket extends LocationIntPacket<PacketSendNBTPacket>{
     public PacketSendNBTPacket(){}
 
     public PacketSendNBTPacket(TileEntity te){
-        super(te.xCoord, te.yCoord, te.zCoord);
+        super(te.getPos());
         tag = new NBTTagCompound();
         te.writeToNBT(tag);
     }
@@ -44,7 +44,7 @@ public class PacketSendNBTPacket extends LocationIntPacket<PacketSendNBTPacket>{
 
     @Override
     public void handleClientSide(PacketSendNBTPacket message, EntityPlayer player){
-        TileEntity te = player.worldObj.getTileEntity(message.x, message.y, message.z);
+        TileEntity te = message.getTileEntity(player.getEntityWorld());
         if(te != null) {
             try {
                 te.readFromNBT(message.tag);

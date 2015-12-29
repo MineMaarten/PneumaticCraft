@@ -4,13 +4,12 @@ import net.minecraft.init.Blocks;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import pneumaticCraft.common.item.Itemss;
 
-public class RecipeGun implements IRecipe{
+public class RecipeGun extends AbstractRecipe{
     private final String dyeName;
     private final Item output;
 

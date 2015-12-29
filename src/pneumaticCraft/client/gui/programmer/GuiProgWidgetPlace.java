@@ -3,7 +3,7 @@ package pneumaticCraft.client.gui.programmer;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.widget.GuiRadioButton;
 import pneumaticCraft.client.gui.widget.IGuiWidget;
@@ -21,7 +21,7 @@ public class GuiProgWidgetPlace<Widget extends ProgWidgetPlace> extends GuiProgW
         super.initGui();
         List<GuiRadioButton> radioButtons = new ArrayList<GuiRadioButton>();
         for(int i = 0; i < 6; i++) {
-            GuiRadioButton radioButton = new GuiRadioButton(i + 10, guiLeft + 4, guiTop + 80 + i * 12, 0xFF000000, PneumaticCraftUtils.getOrientationName(ForgeDirection.getOrientation(i)));
+            GuiRadioButton radioButton = new GuiRadioButton(i + 10, guiLeft + 4, guiTop + 80 + i * 12, 0xFF000000, PneumaticCraftUtils.getOrientationName(EnumFacing.getFront(i)));
             radioButton.checked = widget.placeDir.ordinal() == i;
             addWidget(radioButton);
             radioButtons.add(radioButton);
@@ -36,7 +36,7 @@ public class GuiProgWidgetPlace<Widget extends ProgWidgetPlace> extends GuiProgW
 
     @Override
     public void actionPerformed(IGuiWidget guiWidget){
-        if(guiWidget.getID() >= 10 && guiWidget.getID() < 16) widget.placeDir = ForgeDirection.getOrientation(guiWidget.getID() - 10);
+        if(guiWidget.getID() >= 10 && guiWidget.getID() < 16) widget.placeDir = EnumFacing.getFront(guiWidget.getID() - 10);
         super.actionPerformed(guiWidget);
     }
 

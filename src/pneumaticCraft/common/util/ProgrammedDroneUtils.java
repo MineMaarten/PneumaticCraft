@@ -6,6 +6,7 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
@@ -58,7 +59,7 @@ public class ProgrammedDroneUtils{
         return drone;
     }
 
-    public static EntityCreature deliverItemsAmazonStyle(World world, int x, int y, int z, ItemStack... deliveredStacks){
+    public static EntityCreature deliverItemsAmazonStyle(World world, BlockPos pos, ItemStack... deliveredStacks){
         if(world.isRemote) return null;
         if(deliveredStacks.length == 0) throw new IllegalArgumentException("You need to deliver at least 1 stack!");
         if(deliveredStacks.length > 65) throw new IllegalArgumentException("You can only deliver up to 65 stacks at once!");
@@ -70,8 +71,8 @@ public class ProgrammedDroneUtils{
         EntityDrone drone = getChargedDispenserUpgradeDrone(world);
 
         //Program the drone
-        int startY = world.getHeightValue(x + 30, z) + 30;
-        drone.setPosition(x + 30, startY, z);
+        int startY = world.getHeight(pos.add(30, 0, 0)).getY() + 30;
+        drone.setPosition(pos.getX() + 30, startY, pos.getZ());
         List<IProgWidget> widgets = drone.progWidgets;
 
         ProgWidgetStart start = new ProgWidgetStart();
@@ -102,44 +103,44 @@ public class ProgrammedDroneUtils{
         ProgWidgetArea area = new ProgWidgetArea();
         area.setX(107);
         area.setY(52);
-        area.x1 = x;
-        area.y1 = y;
-        area.z1 = z;
+        area.x1 = pos.getX();
+        area.y1 = pos.getY();
+        area.z1 = pos.getZ();
         widgets.add(area);
 
         area = new ProgWidgetArea();
         area.setX(107);
         area.setY(74);
-        area.x1 = x;
-        area.z1 = z;
-        if(drone.isBlockValidPathfindBlock(x, y, z)) {
-            for(int i = 0; i < 5 && drone.isBlockValidPathfindBlock(area.x1, i + y + 1, area.z1); i++) {
-                area.y1 = y + i;
+        area.x1 = pos.getX();
+        area.z1 = pos.getZ();
+        if(drone.isBlockValidPathfindBlock(pos)) {
+            for(int i = 0; i < 5 && drone.isBlockValidPathfindBlock(new BlockPos(area.x1, area.y1, area.z1)); i++) {
+                area.y1 = pos.getY() + i;
             }
         } else {
-            area.y1 = world.getHeightValue(x, z) + 10;
-            if(!drone.isBlockValidPathfindBlock(area.x1, area.y1, area.z1)) area.y1 = 260;//Worst case scenario, there are definately no blocks here.
+            area.y1 = world.getHeight(pos).getY() + 10;
+            if(!drone.isBlockValidPathfindBlock(new BlockPos(area.x1, area.y1, area.z1))) area.y1 = 260;//Worst case scenario, there are definately no blocks here.
         }
         widgets.add(area);
 
         area = new ProgWidgetArea();
         area.setX(107);
         area.setY(96);
-        area.x1 = x + 30;
+        area.x1 = pos.getX() + 30;
         area.y1 = startY;
-        area.z1 = z;
+        area.z1 = pos.getZ();
         widgets.add(area);
 
         TileEntityProgrammer.updatePuzzleConnections(widgets);
 
         for(int i = 0; i < deliveredStacks.length; i++) {
-            drone.getInventory().setInventorySlotContents(i, deliveredStacks[i].copy());
+            drone.getInv().setInventorySlotContents(i, deliveredStacks[i].copy());
         }
         world.spawnEntityInWorld(drone);
         return drone;
     }
 
-    public static EntityCreature deliverFluidAmazonStyle(World world, int x, int y, int z, FluidStack deliveredFluid){
+    public static EntityCreature deliverFluidAmazonStyle(World world, BlockPos pos, FluidStack deliveredFluid){
         if(world.isRemote) return null;
         if(deliveredFluid == null) throw new IllegalArgumentException("Can't deliver a null FluidStack");
         if(deliveredFluid.amount <= 0) throw new IllegalArgumentException("Can't deliver a FluidStack with an amount of <= 0");
@@ -147,8 +148,8 @@ public class ProgrammedDroneUtils{
         EntityDrone drone = getChargedDispenserUpgradeDrone(world);
 
         //Program the drone
-        int startY = world.getHeightValue(x + 30, z) + 30;
-        drone.setPosition(x + 30, startY, z);
+        int startY = world.getHeight(pos.add(30, 0, 0)).getY() + 30;
+        drone.setPosition(pos.getX() + 30, startY, pos.getZ());
         List<IProgWidget> widgets = drone.progWidgets;
 
         ProgWidgetStart start = new ProgWidgetStart();
@@ -174,17 +175,17 @@ public class ProgrammedDroneUtils{
         ProgWidgetArea area = new ProgWidgetArea();
         area.setX(107);
         area.setY(52);
-        area.x1 = x;
-        area.y1 = y;
-        area.z1 = z;
+        area.x1 = pos.getX();
+        area.y1 = pos.getY();
+        area.z1 = pos.getZ();
         widgets.add(area);
 
         area = new ProgWidgetArea();
         area.setX(107);
         area.setY(74);
-        area.x1 = x + 30;
+        area.x1 = pos.getX() + 30;
         area.y1 = startY;
-        area.z1 = z;
+        area.z1 = pos.getZ();
         widgets.add(area);
 
         TileEntityProgrammer.updatePuzzleConnections(widgets);
@@ -194,7 +195,7 @@ public class ProgrammedDroneUtils{
         return drone;
     }
 
-    public static EntityCreature retrieveItemsAmazonStyle(World world, int x, int y, int z, ItemStack... queriedStacks){
+    public static EntityCreature retrieveItemsAmazonStyle(World world, BlockPos pos, ItemStack... queriedStacks){
         if(world.isRemote) return null;
         if(queriedStacks.length == 0) throw new IllegalArgumentException("You need to query at least 1 stack!");
         if(queriedStacks.length > 65) throw new IllegalArgumentException("You can only query up to 65 stacks at once!");
@@ -206,8 +207,8 @@ public class ProgrammedDroneUtils{
         EntityDrone drone = getChargedDispenserUpgradeDrone(world);
 
         //Program the drone
-        int startY = world.getHeightValue(x + 30, z) + 30;
-        drone.setPosition(x + 30, startY, z);
+        int startY = world.getHeight(pos.add(30, 0, 0)).getY() + 30;
+        drone.setPosition(pos.getX() + 30, startY, pos.getZ());
         List<IProgWidget> widgets = drone.progWidgets;
 
         ProgWidgetStart start = new ProgWidgetStart();
@@ -228,9 +229,9 @@ public class ProgrammedDroneUtils{
             ProgWidgetArea area = new ProgWidgetArea();
             area.setX(107);
             area.setY(yBase);
-            area.x1 = x;
-            area.y1 = y;
-            area.z1 = z;
+            area.x1 = pos.getX();
+            area.y1 = pos.getY();
+            area.z1 = pos.getZ();
             widgets.add(area);
 
             ProgWidgetItemFilter filter = new ProgWidgetItemFilter();
@@ -252,9 +253,9 @@ public class ProgrammedDroneUtils{
         ProgWidgetArea area = new ProgWidgetArea();
         area.setX(107);
         area.setY(yBase);
-        area.x1 = x + 30;
+        area.x1 = pos.getX() + 30;
         area.y1 = startY;
-        area.z1 = z;
+        area.z1 = pos.getZ();
         widgets.add(area);
 
         ProgWidgetSuicide suicide = new ProgWidgetSuicide();
@@ -268,7 +269,7 @@ public class ProgrammedDroneUtils{
         return drone;
     }
 
-    public static EntityCreature retrieveFluidAmazonStyle(World world, int x, int y, int z, FluidStack queriedFluid){
+    public static EntityCreature retrieveFluidAmazonStyle(World world, BlockPos pos, FluidStack queriedFluid){
         if(world.isRemote) return null;
         if(queriedFluid == null) throw new IllegalArgumentException("Can't query a null FluidStack");
         if(queriedFluid.amount <= 0) throw new IllegalArgumentException("Can't query a FluidStack with an amount of <= 0");
@@ -276,8 +277,8 @@ public class ProgrammedDroneUtils{
         EntityDrone drone = getChargedDispenserUpgradeDrone(world);
 
         //Program the drone
-        int startY = world.getHeightValue(x + 30, z) + 30;
-        drone.setPosition(x + 30, startY, z);
+        int startY = world.getHeight(pos.add(30, 0, 0)).getY() + 30;
+        drone.setPosition(pos.getX() + 30, startY, pos.getZ());
         List<IProgWidget> widgets = drone.progWidgets;
 
         ProgWidgetStart start = new ProgWidgetStart();
@@ -297,9 +298,9 @@ public class ProgrammedDroneUtils{
         ProgWidgetArea area = new ProgWidgetArea();
         area.setX(107);
         area.setY(yBase);
-        area.x1 = x;
-        area.y1 = y;
-        area.z1 = z;
+        area.x1 = pos.getX();
+        area.y1 = pos.getY();
+        area.z1 = pos.getZ();
         widgets.add(area);
 
         ProgWidgetLiquidFilter filter = new ProgWidgetLiquidFilter();
@@ -318,9 +319,9 @@ public class ProgrammedDroneUtils{
         area = new ProgWidgetArea();
         area.setX(107);
         area.setY(yBase);
-        area.x1 = x + 30;
+        area.x1 = pos.getX() + 30;
         area.y1 = startY;
-        area.z1 = z;
+        area.z1 = pos.getZ();
         widgets.add(area);
 
         ProgWidgetSuicide suicide = new ProgWidgetSuicide();

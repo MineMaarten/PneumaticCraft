@@ -1,6 +1,8 @@
 package pneumaticCraft.client.semiblock;
 
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.AxisAlignedBB;
 
 import org.lwjgl.opengl.GL11;
@@ -22,13 +24,13 @@ public class SemiBlockRendererLogistics implements ISemiBlockRenderer<SemiBlockL
         double fw = 1 / 32D;
         AxisAlignedBB aabb;
         if(semiBlock.getWorld() != null) {
-            semiBlock.getBlock().setBlockBoundsBasedOnState(semiBlock.getWorld(), semiBlock.getPos().chunkPosX, semiBlock.getPos().chunkPosY, semiBlock.getPos().chunkPosZ);
-            aabb = semiBlock.getBlock().getSelectedBoundingBoxFromPool(semiBlock.getWorld(), semiBlock.getPos().chunkPosX, semiBlock.getPos().chunkPosY, semiBlock.getPos().chunkPosZ);
+            semiBlock.getBlockState().getBlock().setBlockBoundsBasedOnState(semiBlock.getWorld(), semiBlock.getPos());
+            aabb = semiBlock.getBlockState().getBlock().getSelectedBoundingBox(semiBlock.getWorld(), semiBlock.getPos());
         } else {
-            aabb = AxisAlignedBB.getBoundingBox(0 + fw, 0 + fw, 0 + fw, 1 - fw, 1 - fw, 1 - fw);
+            aabb = new AxisAlignedBB(0 + fw, 0 + fw, 0 + fw, 1 - fw, 1 - fw, 1 - fw);
         }
 
-        if(semiBlock.getPos() != null) GL11.glTranslated(-semiBlock.getPos().chunkPosX, -semiBlock.getPos().chunkPosY, -semiBlock.getPos().chunkPosZ);
+        if(semiBlock.getPos() != null) GL11.glTranslated(-semiBlock.getPos().getX(), -semiBlock.getPos().getY(), -semiBlock.getPos().getZ());
 
         renderFrame(aabb, fw);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -37,57 +39,57 @@ public class SemiBlockRendererLogistics implements ISemiBlockRenderer<SemiBlockL
     }
 
     public static void renderFrame(AxisAlignedBB aabb, double fw){
-        renderOffsetAABB(AxisAlignedBB.getBoundingBox(aabb.minX + fw, aabb.minY - fw, aabb.minZ - fw, aabb.maxX - fw, aabb.minY + fw, aabb.minZ + fw), 0, 0, 0);
-        renderOffsetAABB(AxisAlignedBB.getBoundingBox(aabb.minX + fw, aabb.maxY - fw, aabb.minZ - fw, aabb.maxX - fw, aabb.maxY + fw, aabb.minZ + fw), 0, 0, 0);
-        renderOffsetAABB(AxisAlignedBB.getBoundingBox(aabb.minX + fw, aabb.minY - fw, aabb.maxZ - fw, aabb.maxX - fw, aabb.minY + fw, aabb.maxZ + fw), 0, 0, 0);
-        renderOffsetAABB(AxisAlignedBB.getBoundingBox(aabb.minX + fw, aabb.maxY - fw, aabb.maxZ - fw, aabb.maxX - fw, aabb.maxY + fw, aabb.maxZ + fw), 0, 0, 0);
+        renderOffsetAABB(new AxisAlignedBB(aabb.minX + fw, aabb.minY - fw, aabb.minZ - fw, aabb.maxX - fw, aabb.minY + fw, aabb.minZ + fw), 0, 0, 0);
+        renderOffsetAABB(new AxisAlignedBB(aabb.minX + fw, aabb.maxY - fw, aabb.minZ - fw, aabb.maxX - fw, aabb.maxY + fw, aabb.minZ + fw), 0, 0, 0);
+        renderOffsetAABB(new AxisAlignedBB(aabb.minX + fw, aabb.minY - fw, aabb.maxZ - fw, aabb.maxX - fw, aabb.minY + fw, aabb.maxZ + fw), 0, 0, 0);
+        renderOffsetAABB(new AxisAlignedBB(aabb.minX + fw, aabb.maxY - fw, aabb.maxZ - fw, aabb.maxX - fw, aabb.maxY + fw, aabb.maxZ + fw), 0, 0, 0);
 
-        renderOffsetAABB(AxisAlignedBB.getBoundingBox(aabb.minX - fw, aabb.minY - fw, aabb.minZ + fw, aabb.minX + fw, aabb.minY + fw, aabb.maxZ - fw), 0, 0, 0);
-        renderOffsetAABB(AxisAlignedBB.getBoundingBox(aabb.minX - fw, aabb.maxY - fw, aabb.minZ + fw, aabb.minX + fw, aabb.maxY + fw, aabb.maxZ - fw), 0, 0, 0);
-        renderOffsetAABB(AxisAlignedBB.getBoundingBox(aabb.maxX - fw, aabb.minY - fw, aabb.minZ + fw, aabb.maxX + fw, aabb.minY + fw, aabb.maxZ - fw), 0, 0, 0);
-        renderOffsetAABB(AxisAlignedBB.getBoundingBox(aabb.maxX - fw, aabb.maxY - fw, aabb.minZ + fw, aabb.maxX + fw, aabb.maxY + fw, aabb.maxZ - fw), 0, 0, 0);
+        renderOffsetAABB(new AxisAlignedBB(aabb.minX - fw, aabb.minY - fw, aabb.minZ + fw, aabb.minX + fw, aabb.minY + fw, aabb.maxZ - fw), 0, 0, 0);
+        renderOffsetAABB(new AxisAlignedBB(aabb.minX - fw, aabb.maxY - fw, aabb.minZ + fw, aabb.minX + fw, aabb.maxY + fw, aabb.maxZ - fw), 0, 0, 0);
+        renderOffsetAABB(new AxisAlignedBB(aabb.maxX - fw, aabb.minY - fw, aabb.minZ + fw, aabb.maxX + fw, aabb.minY + fw, aabb.maxZ - fw), 0, 0, 0);
+        renderOffsetAABB(new AxisAlignedBB(aabb.maxX - fw, aabb.maxY - fw, aabb.minZ + fw, aabb.maxX + fw, aabb.maxY + fw, aabb.maxZ - fw), 0, 0, 0);
 
-        renderOffsetAABB(AxisAlignedBB.getBoundingBox(aabb.minX - fw, aabb.minY - fw, aabb.minZ - fw, aabb.minX + fw, aabb.maxY + fw, aabb.minZ + fw), 0, 0, 0);
-        renderOffsetAABB(AxisAlignedBB.getBoundingBox(aabb.maxX - fw, aabb.minY - fw, aabb.minZ - fw, aabb.maxX + fw, aabb.maxY + fw, aabb.minZ + fw), 0, 0, 0);
-        renderOffsetAABB(AxisAlignedBB.getBoundingBox(aabb.minX - fw, aabb.minY - fw, aabb.maxZ - fw, aabb.minX + fw, aabb.maxY + fw, aabb.maxZ + fw), 0, 0, 0);
-        renderOffsetAABB(AxisAlignedBB.getBoundingBox(aabb.maxX - fw, aabb.minY - fw, aabb.maxZ - fw, aabb.maxX + fw, aabb.maxY + fw, aabb.maxZ + fw), 0, 0, 0);
+        renderOffsetAABB(new AxisAlignedBB(aabb.minX - fw, aabb.minY - fw, aabb.minZ - fw, aabb.minX + fw, aabb.maxY + fw, aabb.minZ + fw), 0, 0, 0);
+        renderOffsetAABB(new AxisAlignedBB(aabb.maxX - fw, aabb.minY - fw, aabb.minZ - fw, aabb.maxX + fw, aabb.maxY + fw, aabb.minZ + fw), 0, 0, 0);
+        renderOffsetAABB(new AxisAlignedBB(aabb.minX - fw, aabb.minY - fw, aabb.maxZ - fw, aabb.minX + fw, aabb.maxY + fw, aabb.maxZ + fw), 0, 0, 0);
+        renderOffsetAABB(new AxisAlignedBB(aabb.maxX - fw, aabb.minY - fw, aabb.maxZ - fw, aabb.maxX + fw, aabb.maxY + fw, aabb.maxZ + fw), 0, 0, 0);
     }
 
     public static void renderOffsetAABB(AxisAlignedBB p_76978_0_, double p_76978_1_, double p_76978_3_, double p_76978_5_){
-        Tessellator tessellator = Tessellator.instance;
-        tessellator.startDrawingQuads();
-        tessellator.setTranslation(p_76978_1_, p_76978_3_, p_76978_5_);
-        tessellator.setNormal(0.0F, 0.0F, -1.0F);
-        tessellator.addVertex(p_76978_0_.minX, p_76978_0_.maxY, p_76978_0_.minZ);
-        tessellator.addVertex(p_76978_0_.maxX, p_76978_0_.maxY, p_76978_0_.minZ);
-        tessellator.addVertex(p_76978_0_.maxX, p_76978_0_.minY, p_76978_0_.minZ);
-        tessellator.addVertex(p_76978_0_.minX, p_76978_0_.minY, p_76978_0_.minZ);
-        tessellator.setNormal(0.0F, 0.0F, 1.0F);
-        tessellator.addVertex(p_76978_0_.minX, p_76978_0_.minY, p_76978_0_.maxZ);
-        tessellator.addVertex(p_76978_0_.maxX, p_76978_0_.minY, p_76978_0_.maxZ);
-        tessellator.addVertex(p_76978_0_.maxX, p_76978_0_.maxY, p_76978_0_.maxZ);
-        tessellator.addVertex(p_76978_0_.minX, p_76978_0_.maxY, p_76978_0_.maxZ);
-        tessellator.setNormal(0.0F, -1.0F, 0.0F);
-        tessellator.addVertex(p_76978_0_.minX, p_76978_0_.minY, p_76978_0_.minZ);
-        tessellator.addVertex(p_76978_0_.maxX, p_76978_0_.minY, p_76978_0_.minZ);
-        tessellator.addVertex(p_76978_0_.maxX, p_76978_0_.minY, p_76978_0_.maxZ);
-        tessellator.addVertex(p_76978_0_.minX, p_76978_0_.minY, p_76978_0_.maxZ);
-        tessellator.setNormal(0.0F, 1.0F, 0.0F);
-        tessellator.addVertex(p_76978_0_.minX, p_76978_0_.maxY, p_76978_0_.maxZ);
-        tessellator.addVertex(p_76978_0_.maxX, p_76978_0_.maxY, p_76978_0_.maxZ);
-        tessellator.addVertex(p_76978_0_.maxX, p_76978_0_.maxY, p_76978_0_.minZ);
-        tessellator.addVertex(p_76978_0_.minX, p_76978_0_.maxY, p_76978_0_.minZ);
-        tessellator.setNormal(-1.0F, 0.0F, 0.0F);
-        tessellator.addVertex(p_76978_0_.minX, p_76978_0_.minY, p_76978_0_.maxZ);
-        tessellator.addVertex(p_76978_0_.minX, p_76978_0_.maxY, p_76978_0_.maxZ);
-        tessellator.addVertex(p_76978_0_.minX, p_76978_0_.maxY, p_76978_0_.minZ);
-        tessellator.addVertex(p_76978_0_.minX, p_76978_0_.minY, p_76978_0_.minZ);
-        tessellator.setNormal(1.0F, 0.0F, 0.0F);
-        tessellator.addVertex(p_76978_0_.maxX, p_76978_0_.minY, p_76978_0_.minZ);
-        tessellator.addVertex(p_76978_0_.maxX, p_76978_0_.maxY, p_76978_0_.minZ);
-        tessellator.addVertex(p_76978_0_.maxX, p_76978_0_.maxY, p_76978_0_.maxZ);
-        tessellator.addVertex(p_76978_0_.maxX, p_76978_0_.minY, p_76978_0_.maxZ);
-        tessellator.setTranslation(0.0D, 0.0D, 0.0D);
-        tessellator.draw();
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+        wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_NORMAL);
+        wr.setTranslation(p_76978_1_, p_76978_3_, p_76978_5_);
+
+        wr.pos(p_76978_0_.minX, p_76978_0_.maxY, p_76978_0_.minZ).normal(0, 0, -1).endVertex();
+        wr.pos(p_76978_0_.maxX, p_76978_0_.maxY, p_76978_0_.minZ).normal(0, 0, -1).endVertex();
+        wr.pos(p_76978_0_.maxX, p_76978_0_.minY, p_76978_0_.minZ).normal(0, 0, -1).endVertex();
+        wr.pos(p_76978_0_.minX, p_76978_0_.minY, p_76978_0_.minZ).normal(0, 0, -1).endVertex();
+
+        wr.pos(p_76978_0_.minX, p_76978_0_.minY, p_76978_0_.maxZ).normal(0, 0, 1).endVertex();
+        wr.pos(p_76978_0_.maxX, p_76978_0_.minY, p_76978_0_.maxZ).normal(0, 0, 1).endVertex();
+        wr.pos(p_76978_0_.maxX, p_76978_0_.maxY, p_76978_0_.maxZ).normal(0, 0, 1).endVertex();
+        wr.pos(p_76978_0_.minX, p_76978_0_.maxY, p_76978_0_.maxZ).normal(0, 0, 1).endVertex();
+
+        wr.pos(p_76978_0_.minX, p_76978_0_.minY, p_76978_0_.minZ).normal(0, -1, 0).endVertex();
+        wr.pos(p_76978_0_.maxX, p_76978_0_.minY, p_76978_0_.minZ).normal(0, -1, 0).endVertex();
+        wr.pos(p_76978_0_.maxX, p_76978_0_.minY, p_76978_0_.maxZ).normal(0, -1, 0).endVertex();
+        wr.pos(p_76978_0_.minX, p_76978_0_.minY, p_76978_0_.maxZ).normal(0, -1, 0).endVertex();
+
+        wr.pos(p_76978_0_.minX, p_76978_0_.maxY, p_76978_0_.maxZ).normal(0, 1, 0).endVertex();
+        wr.pos(p_76978_0_.maxX, p_76978_0_.maxY, p_76978_0_.maxZ).normal(0, 1, 0).endVertex();
+        wr.pos(p_76978_0_.maxX, p_76978_0_.maxY, p_76978_0_.minZ).normal(0, 1, 0).endVertex();
+        wr.pos(p_76978_0_.minX, p_76978_0_.maxY, p_76978_0_.minZ).normal(0, 1, 0).endVertex();
+
+        wr.pos(p_76978_0_.minX, p_76978_0_.minY, p_76978_0_.maxZ).normal(-1, 0, 0).endVertex();
+        wr.pos(p_76978_0_.minX, p_76978_0_.maxY, p_76978_0_.maxZ).normal(-1, 0, 0).endVertex();
+        wr.pos(p_76978_0_.minX, p_76978_0_.maxY, p_76978_0_.minZ).normal(-1, 0, 0).endVertex();
+        wr.pos(p_76978_0_.minX, p_76978_0_.minY, p_76978_0_.minZ).normal(-1, 0, 0).endVertex();
+
+        wr.pos(p_76978_0_.maxX, p_76978_0_.minY, p_76978_0_.minZ).normal(1, 0, 0).endVertex();
+        wr.pos(p_76978_0_.maxX, p_76978_0_.maxY, p_76978_0_.minZ).normal(1, 0, 0).endVertex();
+        wr.pos(p_76978_0_.maxX, p_76978_0_.maxY, p_76978_0_.maxZ).normal(1, 0, 0).endVertex();
+        wr.pos(p_76978_0_.maxX, p_76978_0_.minY, p_76978_0_.maxZ).normal(1, 0, 0).endVertex();
+        wr.setTranslation(0.0D, 0.0D, 0.0D);
+        Tessellator.getInstance().draw();
     }
 }

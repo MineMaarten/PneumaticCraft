@@ -7,8 +7,8 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.StatCollector;
-import net.minecraftforge.common.util.ForgeDirection;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -93,7 +93,7 @@ public class SemiBlockHeatFrame extends SemiBlockBasic implements IHeatExchanger
     private boolean tryCookSlot(IInventory inv, int slot){
         ItemStack stack = inv.getStackInSlot(slot);
         if(stack != null) {
-            ItemStack result = FurnaceRecipes.smelting().getSmeltingResult(stack);
+            ItemStack result = FurnaceRecipes.instance().getSmeltingResult(stack);
             if(result != null) {
                 ItemStack remainder = IOHelper.insert(getTileEntity(), result, true);
                 if(remainder == null) {
@@ -162,18 +162,18 @@ public class SemiBlockHeatFrame extends SemiBlockBasic implements IHeatExchanger
     @Override
     public void onPlaced(EntityPlayer player, ItemStack stack){
         super.onPlaced(player, stack);
-        getWorld().notifyBlocksOfNeighborChange(getX(), getY(), getZ(), getBlock());
+        getWorld().notifyNeighborsOfStateChange(getPos(), getBlockState().getBlock());
     }
 
     @Override
-    public IHeatExchangerLogic getHeatExchangerLogic(ForgeDirection side){
+    public IHeatExchangerLogic getHeatExchangerLogic(EnumFacing side){
         return logic;
     }
 
     @Override
     public void invalidate(){
         super.invalidate();
-        getWorld().notifyBlocksOfNeighborChange(getX(), getY(), getZ(), getBlock());
+        getWorld().notifyNeighborsOfStateChange(getPos(), getBlockState().getBlock());
     }
 
     @Override

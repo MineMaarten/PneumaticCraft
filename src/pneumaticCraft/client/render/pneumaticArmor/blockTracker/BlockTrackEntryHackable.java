@@ -2,9 +2,10 @@ package pneumaticCraft.client.render.pneumaticArmor.blockTracker;
 
 import java.util.List;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import pneumaticCraft.PneumaticCraft;
@@ -18,8 +19,8 @@ import pneumaticCraft.client.render.pneumaticArmor.hacking.HackableHandler;
 public class BlockTrackEntryHackable implements IBlockTrackEntry{
 
     @Override
-    public boolean shouldTrackWithThisEntry(IBlockAccess world, int x, int y, int z, Block block, TileEntity te){
-        return HackUpgradeRenderHandler.enabledForPlayer(PneumaticCraft.proxy.getPlayer()) && HackableHandler.getHackableForCoord(world, x, y, z, PneumaticCraft.proxy.getPlayer()) != null;
+    public boolean shouldTrackWithThisEntry(IBlockAccess world, BlockPos pos, IBlockState state, TileEntity te){
+        return HackUpgradeRenderHandler.enabledForPlayer(PneumaticCraft.proxy.getPlayer()) && HackableHandler.getHackableForCoord(world, pos, PneumaticCraft.proxy.getPlayer()) != null;
     }
 
     @Override
@@ -33,20 +34,20 @@ public class BlockTrackEntryHackable implements IBlockTrackEntry{
     }
 
     @Override
-    public void addInformation(World world, int x, int y, int z, TileEntity te, List<String> infoList){
-        IHackableBlock hackableBlock = HackableHandler.getHackableForCoord(world, x, y, z, PneumaticCraft.proxy.getPlayer());
-        int hackTime = HUDHandler.instance().getSpecificRenderer(BlockTrackUpgradeHandler.class).getTargetForCoord(x, y, z).getHackTime();
+    public void addInformation(World world, BlockPos pos, TileEntity te, List<String> infoList){
+        IHackableBlock hackableBlock = HackableHandler.getHackableForCoord(world, pos, PneumaticCraft.proxy.getPlayer());
+        int hackTime = HUDHandler.instance().getSpecificRenderer(BlockTrackUpgradeHandler.class).getTargetForCoord(pos).getHackTime();
         if(hackTime == 0) {
-            hackableBlock.addInfo(world, x, y, z, infoList, PneumaticCraft.proxy.getPlayer());
+            hackableBlock.addInfo(world, pos, infoList, PneumaticCraft.proxy.getPlayer());
         } else {
-            int requiredHackTime = hackableBlock.getHackTime(world, x, y, z, PneumaticCraft.proxy.getPlayer());
+            int requiredHackTime = hackableBlock.getHackTime(world, pos, PneumaticCraft.proxy.getPlayer());
             int percentageComplete = hackTime * 100 / requiredHackTime;
             if(percentageComplete < 100) {
                 infoList.add(I18n.format("pneumaticHelmet.hacking.hacking") + " (" + percentageComplete + "%%)");
             } else if(hackTime < requiredHackTime + 20) {
-                hackableBlock.addPostHackInfo(world, x, y, z, infoList, PneumaticCraft.proxy.getPlayer());
+                hackableBlock.addPostHackInfo(world, pos, infoList, PneumaticCraft.proxy.getPlayer());
             } else {
-                hackableBlock.addInfo(world, x, y, z, infoList, PneumaticCraft.proxy.getPlayer());
+                hackableBlock.addInfo(world, pos, infoList, PneumaticCraft.proxy.getPlayer());
             }
         }
     }

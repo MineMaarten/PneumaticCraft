@@ -2,12 +2,11 @@ package pneumaticCraft.common.recipes;
 
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import pneumaticCraft.common.item.Itemss;
 
-public class RecipeLogisticToDrone implements IRecipe{
+public class RecipeLogisticToDrone extends AbstractRecipe{
 
     @Override
     public boolean matches(InventoryCrafting inventoryCrafting, World world){

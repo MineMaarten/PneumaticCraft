@@ -2,7 +2,7 @@ package pneumaticCraft.common.remote;
 
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 import pneumaticCraft.client.gui.GuiButtonSpecial;
 import pneumaticCraft.client.gui.GuiRemoteEditor;
 import pneumaticCraft.client.gui.remote.GuiRemoteButton;
@@ -11,7 +11,7 @@ import pneumaticCraft.common.network.PacketSetGlobalVariable;
 
 public class ActionWidgetButton extends ActionWidgetVariable<GuiButtonSpecial> implements IActionWidgetLabeled{
 
-    public ChunkPosition settingCoordinate = new ChunkPosition(0, 0, 0);//The coordinate the variable is set to when the button is pressed.
+    public BlockPos settingCoordinate = new BlockPos(0, 0, 0);//The coordinate the variable is set to when the button is pressed.
 
     public ActionWidgetButton(){
         super();
@@ -25,7 +25,7 @@ public class ActionWidgetButton extends ActionWidgetVariable<GuiButtonSpecial> i
     public void readFromNBT(NBTTagCompound tag, int guiLeft, int guiTop){
         super.readFromNBT(tag, guiLeft, guiTop);
         widget = new GuiButtonSpecial(-1, tag.getInteger("x") + guiLeft, tag.getInteger("y") + guiTop, tag.getInteger("width"), tag.getInteger("height"), tag.getString("text"));
-        settingCoordinate = new ChunkPosition(tag.getInteger("settingX"), tag.getInteger("settingY"), tag.getInteger("settingZ"));
+        settingCoordinate = new BlockPos(tag.getInteger("settingX"), tag.getInteger("settingY"), tag.getInteger("settingZ"));
         widget.setTooltipText(tag.getString("tooltip"));
     }
 
@@ -37,9 +37,9 @@ public class ActionWidgetButton extends ActionWidgetVariable<GuiButtonSpecial> i
         tag.setInteger("width", widget.width);
         tag.setInteger("height", widget.height);
         tag.setString("text", widget.displayString);
-        tag.setInteger("settingX", settingCoordinate.chunkPosX);
-        tag.setInteger("settingY", settingCoordinate.chunkPosY);
-        tag.setInteger("settingZ", settingCoordinate.chunkPosZ);
+        tag.setInteger("settingX", settingCoordinate.getX());
+        tag.setInteger("settingY", settingCoordinate.getY());
+        tag.setInteger("settingZ", settingCoordinate.getZ());
         tag.setString("tooltip", widget.getTooltip());
         return tag;
     }

@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import pneumaticCraft.common.NBTUtil;
 
@@ -13,9 +14,9 @@ public class PacketCoordTrackUpdate extends LocationIntPacket<PacketCoordTrackUp
 
     public PacketCoordTrackUpdate(){}
 
-    public PacketCoordTrackUpdate(World world, int x, int y, int z){
-        super(x, y, z);
-        dimensionID = world.provider.dimensionId;
+    public PacketCoordTrackUpdate(World world, BlockPos pos){
+        super(pos);
+        dimensionID = world.provider.getDimensionId();
     }
 
     @Override
@@ -39,9 +40,7 @@ public class PacketCoordTrackUpdate extends LocationIntPacket<PacketCoordTrackUp
         if(stack != null) {
             NBTTagCompound tag = NBTUtil.getCompoundTag(stack, "CoordTracker");
             tag.setInteger("dimID", message.dimensionID);
-            tag.setInteger("x", message.x);
-            tag.setInteger("y", message.y);
-            tag.setInteger("z", message.z);
+            NBTUtil.setPos(tag, message.pos);
         }
     }
 

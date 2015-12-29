@@ -1,20 +1,21 @@
 package pneumaticCraft.client.render.pneumaticArmor;
 
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 import org.lwjgl.opengl.GL11;
 
 public class RenderCoordWireframe{
-    public final int x, y, z;
+    public final BlockPos pos;
     public final World worldObj;
     public int ticksExisted;
 
-    public RenderCoordWireframe(World worldObj, int x, int y, int z){
+    public RenderCoordWireframe(World worldObj, BlockPos pos){
         this.worldObj = worldObj;
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        this.pos = pos;
     }
 
     public void render(float partialTicks){
@@ -47,41 +48,40 @@ public class RenderCoordWireframe{
         GL11.glColor4d(0, progress < 0.5F ? progress + 0.5F : 1.5 - progress, 1, 1);
         GL11.glPushMatrix();
         // GL11.glTranslated(-0.5D, -0.5D, -0.5D);
-        GL11.glTranslated(x, y, z);
-        Tessellator tess = Tessellator.instance;
+        GL11.glTranslated(pos.getX(), pos.getY(), pos.getZ());
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+        wr.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION);
+        wr.pos(minX, minY, minZ).endVertex();
+        wr.pos(minX, maxY, minZ).endVertex();
+        wr.pos(minX, minY, maxZ).endVertex();
+        wr.pos(minX, maxY, maxZ).endVertex();
 
-        tess.startDrawing(GL11.GL_LINES);
-        tess.addVertex(minX, minY, minZ);
-        tess.addVertex(minX, maxY, minZ);
-        tess.addVertex(minX, minY, maxZ);
-        tess.addVertex(minX, maxY, maxZ);
+        wr.pos(maxX, minY, minZ).endVertex();
+        wr.pos(maxX, maxY, minZ).endVertex();
+        wr.pos(maxX, minY, maxZ).endVertex();
+        wr.pos(maxX, maxY, maxZ).endVertex();
 
-        tess.addVertex(maxX, minY, minZ);
-        tess.addVertex(maxX, maxY, minZ);
-        tess.addVertex(maxX, minY, maxZ);
-        tess.addVertex(maxX, maxY, maxZ);
+        wr.pos(minX, minY, minZ).endVertex();
+        wr.pos(maxX, minY, minZ).endVertex();
+        wr.pos(minX, minY, maxZ).endVertex();
+        wr.pos(maxX, minY, maxZ).endVertex();
 
-        tess.addVertex(minX, minY, minZ);
-        tess.addVertex(maxX, minY, minZ);
-        tess.addVertex(minX, minY, maxZ);
-        tess.addVertex(maxX, minY, maxZ);
+        wr.pos(minX, maxY, minZ).endVertex();
+        wr.pos(maxX, maxY, minZ).endVertex();
+        wr.pos(minX, maxY, maxZ).endVertex();
+        wr.pos(maxX, maxY, maxZ).endVertex();
 
-        tess.addVertex(minX, maxY, minZ);
-        tess.addVertex(maxX, maxY, minZ);
-        tess.addVertex(minX, maxY, maxZ);
-        tess.addVertex(maxX, maxY, maxZ);
+        wr.pos(minX, minY, minZ).endVertex();
+        wr.pos(minX, minY, maxZ).endVertex();
+        wr.pos(maxX, minY, minZ).endVertex();
+        wr.pos(maxX, minY, maxZ).endVertex();
 
-        tess.addVertex(minX, minY, minZ);
-        tess.addVertex(minX, minY, maxZ);
-        tess.addVertex(maxX, minY, minZ);
-        tess.addVertex(maxX, minY, maxZ);
+        wr.pos(minX, maxY, minZ).endVertex();
+        wr.pos(minX, maxY, maxZ).endVertex();
+        wr.pos(maxX, maxY, minZ).endVertex();
+        wr.pos(maxX, maxY, maxZ).endVertex();
 
-        tess.addVertex(minX, maxY, minZ);
-        tess.addVertex(minX, maxY, maxZ);
-        tess.addVertex(maxX, maxY, minZ);
-        tess.addVertex(maxX, maxY, maxZ);
-
-        tess.draw();
+        Tessellator.getInstance().draw();
 
         GL11.glPopMatrix();
         GL11.glEnable(GL11.GL_CULL_FACE);

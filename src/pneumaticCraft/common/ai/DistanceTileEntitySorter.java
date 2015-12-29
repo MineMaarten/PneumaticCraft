@@ -18,7 +18,7 @@ public class DistanceTileEntitySorter implements Comparator{
     public int compare(Object arg0, Object arg1){
         TileEntity c1 = (TileEntity)arg0;
         TileEntity c2 = (TileEntity)arg0;
-        return Double.compare(PneumaticCraftUtils.distBetween(c1.xCoord, c1.yCoord, c1.zCoord, entity.posX, entity.posY, entity.posZ), PneumaticCraftUtils.distBetween(c2.xCoord, c2.yCoord, c2.zCoord, entity.posX, entity.posY, entity.posZ));
+        return Double.compare(PneumaticCraftUtils.distBetween(c1.getPos().getX(), c1.getPos().getY(), c1.getPos().getZ(), entity.posX, entity.posY, entity.posZ), PneumaticCraftUtils.distBetween(c2.getPos().getX(), c2.getPos().getY(), c2.getPos().getZ(), entity.posX, entity.posY, entity.posZ));
     }
 
 }

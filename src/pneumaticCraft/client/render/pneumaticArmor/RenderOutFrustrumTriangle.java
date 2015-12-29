@@ -3,7 +3,8 @@ package pneumaticCraft.client.render.pneumaticArmor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 
 import org.lwjgl.opengl.GL11;
@@ -11,18 +12,18 @@ import org.lwjgl.opengl.GL12;
 
 public class RenderOutFrustrumTriangle{
     public static void renderTriangle(Entity entity){
-        double playerYaw = -RenderManager.instance.playerViewY;
+        double playerYaw = -Minecraft.getMinecraft().getRenderManager().playerViewY;
         while(playerYaw >= 360D) {
             playerYaw -= 360;
         }
         while(playerYaw < 0) {
             playerYaw += 360;
         }
-        double angle = playerYaw * Math.sin(Math.toRadians(RenderManager.instance.viewerPosX));
+        double angle = playerYaw * Math.sin(Math.toRadians(Minecraft.getMinecraft().getRenderManager().viewerPosX));
         //  double angle = playerYaw;
-        // System.out.println("viewY: " + RenderManager.instance.playerViewY);
+        // System.out.println("viewY: " + Minecraft.getMinecraft().getRenderManager().playerViewY);
 
-        ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
+        ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
         int middleX = sr.getScaledWidth() / 2;
         int middleY = sr.getScaledHeight() / 2;
         int triangleX;
@@ -51,7 +52,7 @@ public class RenderOutFrustrumTriangle{
             triangleY = middleY + (int)(Math.tan(Math.toRadians(270 - angle)) * middleX);
         }
 
-        Tessellator tessellator = Tessellator.instance;
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
         GL11.glPushMatrix();
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
@@ -63,11 +64,11 @@ public class RenderOutFrustrumTriangle{
 
         GL11.glTranslated(triangleX, triangleY, 0);
         GL11.glRotatef(triangleAngle, 0, 0, 1);
-        tessellator.startDrawing(GL11.GL_LINE_LOOP);
-        tessellator.addVertex(5, 5, -90F);
-        tessellator.addVertex(15, 5, -90F);
-        tessellator.addVertex(10, 0, -90F);
-        tessellator.draw();
+        wr.begin(GL11.GL_LINE_LOOP, DefaultVertexFormats.POSITION);
+        wr.pos(5, 5, -90F).endVertex();
+        wr.pos(15, 5, -90F).endVertex();
+        wr.pos(10, 0, -90F).endVertex();
+        Tessellator.getInstance().draw();
 
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
         GL11.glDisable(GL11.GL_BLEND);

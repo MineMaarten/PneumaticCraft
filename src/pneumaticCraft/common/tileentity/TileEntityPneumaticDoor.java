@@ -3,10 +3,11 @@ package pneumaticCraft.common.tileentity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.LazySynced;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityPneumaticDoor extends TileEntityBase{
     @DescSynced
@@ -21,9 +22,9 @@ public class TileEntityPneumaticDoor extends TileEntityBase{
         this.rotation = rotation;
         TileEntity te = null;
         if(getBlockMetadata() < 6) {
-            te = worldObj.getTileEntity(xCoord, yCoord + 1, zCoord);
+            te = worldObj.getTileEntity(getPos().offset(EnumFacing.UP));
         } else {
-            te = worldObj.getTileEntity(xCoord, yCoord - 1, zCoord);
+            te = worldObj.getTileEntity(getPos().offset(EnumFacing.DOWN));
         }
         if(te instanceof TileEntityPneumaticDoor) {
             TileEntityPneumaticDoor door = (TileEntityPneumaticDoor)te;
@@ -51,6 +52,6 @@ public class TileEntityPneumaticDoor extends TileEntityBase{
     @Override
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox(){
-        return AxisAlignedBB.getBoundingBox(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 2, zCoord + 1);
+        return new AxisAlignedBB(getPos().getX(), getPos().getY(), getPos().getZ(), getPos().getX() + 1, getPos().getY() + 2, getPos().getZ() + 1);
     }
 }

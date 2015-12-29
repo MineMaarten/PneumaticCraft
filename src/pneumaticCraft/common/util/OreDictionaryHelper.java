@@ -13,7 +13,7 @@ public class OreDictionaryHelper{
     public static List<ItemStack> getOreDictEntries(String oreDictName){
         List<ItemStack> list = entryCache.get(oreDictName);
         if(list == null) {
-            list = OreDictionary.getOres(oreDictName, true);
+            list = OreDictionary.getOres(oreDictName);
             entryCache.put(oreDictName, list);
         }
         return list;

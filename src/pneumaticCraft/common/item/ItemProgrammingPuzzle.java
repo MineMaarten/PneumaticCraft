@@ -3,7 +3,6 @@ package pneumaticCraft.common.item;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -12,21 +11,18 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.common.NBTUtil;
 import pneumaticCraft.common.progwidgets.IProgWidget;
 import pneumaticCraft.common.progwidgets.WidgetRegistrator;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ItemProgrammingPuzzle extends ItemPneumatic{
 
     public ItemProgrammingPuzzle(){
         hasSubtypes = true;
     }
-
-    @Override
-    public void registerIcons(IIconRegister par1IconRegister){}
 
     @Override
     @SideOnly(Side.CLIENT)
@@ -40,7 +36,7 @@ public class ItemProgrammingPuzzle extends ItemPneumatic{
 
     @Override
     public String getUnlocalizedName(ItemStack stack){
-        return super.getUnlocalizedName(stack) + "." + ItemDye.field_150923_a[MathHelper.clamp_int(stack.getItemDamage(), 0, 15)];
+        return super.getUnlocalizedName(stack) + "." + ItemDye.dyeColors[MathHelper.clamp_int(stack.getItemDamage(), 0, 15)];
     }
 
     @Override

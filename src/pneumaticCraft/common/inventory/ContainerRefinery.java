@@ -4,7 +4,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.common.AchievementHandler;
 import pneumaticCraft.common.fluid.Fluids;
 import pneumaticCraft.common.tileentity.TileEntityRefinery;
@@ -16,8 +16,8 @@ public class ContainerRefinery extends ContainerPneumaticBase<TileEntityRefinery
 
         TileEntityRefinery refinery = te;
         refinery.onNeighborTileUpdate();
-        while(refinery.getTileCache()[ForgeDirection.UP.ordinal()].getTileEntity() instanceof TileEntityRefinery) {
-            refinery = (TileEntityRefinery)refinery.getTileCache()[ForgeDirection.UP.ordinal()].getTileEntity();
+        while(refinery.getTileCache()[EnumFacing.UP.ordinal()].getTileEntity() instanceof TileEntityRefinery) {
+            refinery = (TileEntityRefinery)refinery.getTileCache()[EnumFacing.UP.ordinal()].getTileEntity();
             addSyncedFields(refinery);
             refinery.onNeighborTileUpdate();
         }
@@ -34,7 +34,7 @@ public class ContainerRefinery extends ContainerPneumaticBase<TileEntityRefinery
             addSlotToContainer(new Slot(inventoryPlayer, actionBarSlotIndex, 8 + actionBarSlotIndex * 18, 142));
         }
 
-        if(te.getTankInfo(ForgeDirection.UP)[0].fluid != null && te.getTankInfo(ForgeDirection.UP)[0].fluid.getFluid() == Fluids.oil) {
+        if(te.getTankInfo(EnumFacing.UP)[0].fluid != null && te.getTankInfo(EnumFacing.UP)[0].fluid.getFluid() == Fluids.oil) {
             AchievementHandler.giveAchievement(inventoryPlayer.player, new ItemStack(Fluids.getBucket(Fluids.oil)));
         }
     }

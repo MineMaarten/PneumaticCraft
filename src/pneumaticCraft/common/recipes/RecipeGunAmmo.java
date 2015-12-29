@@ -3,12 +3,11 @@ package pneumaticCraft.common.recipes;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
 import pneumaticCraft.common.item.ItemGunAmmo;
 import pneumaticCraft.common.item.Itemss;
 
-public class RecipeGunAmmo implements IRecipe{
+public class RecipeGunAmmo extends AbstractRecipe{
 
     @Override
     public boolean matches(InventoryCrafting invCrafting, World world){

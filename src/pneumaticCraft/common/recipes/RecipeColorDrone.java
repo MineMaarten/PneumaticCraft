@@ -3,13 +3,12 @@ package pneumaticCraft.common.recipes;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.tileentity.TileEntityPlasticMixer;
 
-public class RecipeColorDrone implements IRecipe{
+public class RecipeColorDrone extends AbstractRecipe{
 
     @Override
     public boolean matches(InventoryCrafting inventoryCrafting, World world){
@@ -48,7 +47,7 @@ public class RecipeColorDrone implements IRecipe{
             droneTag = new NBTTagCompound();
             drone.setTagCompound(droneTag);
         }
-        droneTag.setInteger("color", ItemDye.field_150922_c[dyeIndex]);
+        droneTag.setInteger("color", ItemDye.dyeColors[dyeIndex]);
         return drone;
     }
 

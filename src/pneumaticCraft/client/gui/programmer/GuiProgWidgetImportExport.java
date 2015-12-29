@@ -2,7 +2,7 @@ package pneumaticCraft.client.gui.programmer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.widget.GuiCheckBox;
 import pneumaticCraft.client.gui.widget.IGuiWidget;
@@ -27,7 +27,7 @@ public class GuiProgWidgetImportExport<Widget extends IProgWidget> extends GuiPr
 
         if(showSides()) {
             for(int i = 0; i < 6; i++) {
-                String sideName = PneumaticCraftUtils.getOrientationName(ForgeDirection.getOrientation(i));
+                String sideName = PneumaticCraftUtils.getOrientationName(EnumFacing.getFront(i));
                 GuiCheckBox checkBox = new GuiCheckBox(i, guiLeft + 4, guiTop + 30 + i * 12, 0xFF000000, sideName);
                 checkBox.checked = ((ProgWidgetInventoryBase)widget).getSides()[i];
                 addWidget(checkBox);
@@ -38,7 +38,7 @@ public class GuiProgWidgetImportExport<Widget extends IProgWidget> extends GuiPr
         useItemCount.setTooltip("gui.progWidget.itemFilter.useItemCount.tooltip");
         useItemCount.checked = ((ICountWidget)widget).useCount();
         addWidget(useItemCount);
-        textField = new WidgetTextFieldNumber(Minecraft.getMinecraft().fontRenderer, guiLeft + 7, guiTop + (showSides() ? 128 : 43), 50, 11);
+        textField = new WidgetTextFieldNumber(Minecraft.getMinecraft().fontRendererObj, guiLeft + 7, guiTop + (showSides() ? 128 : 43), 50, 11);
         textField.setValue(((ICountWidget)widget).getCount());
         textField.setEnabled(useItemCount.checked);
         addWidget(textField);

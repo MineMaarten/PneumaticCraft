@@ -5,6 +5,12 @@ import java.util.HashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableBlock;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableEntity;
@@ -18,12 +24,6 @@ import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketHackingBlockFinish;
 import pneumaticCraft.common.network.PacketHackingEntityFinish;
 import pneumaticCraft.common.util.WorldAndCoord;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class CommonHUDHandler{
     private final HashMap<String, CommonHUDHandler> playerHudHandlers = new HashMap<String, CommonHUDHandler>();
@@ -39,9 +39,9 @@ public class CommonHUDHandler{
     private Entity hackedEntity;
 
     public static CommonHUDHandler getHandlerForPlayer(EntityPlayer player){
-        CommonHUDHandler handler = PneumaticCraft.proxy.getCommonHudHandler().playerHudHandlers.get(player.getCommandSenderName());
+        CommonHUDHandler handler = PneumaticCraft.proxy.getCommonHudHandler().playerHudHandlers.get(player.getName());
         if(handler != null) return handler;
-        PneumaticCraft.proxy.getCommonHudHandler().playerHudHandlers.put(player.getCommandSenderName(), new CommonHUDHandler());
+        PneumaticCraft.proxy.getCommonHudHandler().playerHudHandlers.put(player.getName(), new CommonHUDHandler());
         return getHandlerForPlayer(player);
     }
 
@@ -82,8 +82,8 @@ public class CommonHUDHandler{
         if(hackedBlock != null) {
             IHackableBlock hackableBlock = HackableHandler.getHackableForCoord(hackedBlock, player);
             if(hackableBlock != null) {
-                if(++hackTime >= hackableBlock.getHackTime(hackedBlock.world, hackedBlock.x, hackedBlock.y, hackedBlock.z, player)) {
-                    hackableBlock.onHackFinished(player.worldObj, hackedBlock.x, hackedBlock.y, hackedBlock.z, player);
+                if(++hackTime >= hackableBlock.getHackTime(hackedBlock.world, hackedBlock.pos, player)) {
+                    hackableBlock.onHackFinished(player.worldObj, hackedBlock.pos, player);
                     PneumaticCraft.proxy.getHackTickHandler().trackBlock(hackedBlock, hackableBlock);
                     NetworkHandler.sendToAllAround(new PacketHackingBlockFinish(hackedBlock), player.worldObj);
                     setHackedBlock(null);
@@ -97,7 +97,7 @@ public class CommonHUDHandler{
                 if(++hackTime >= hackableEntity.getHackTime(hackedEntity, player)) {
                     hackableEntity.onHackFinished(hackedEntity, player);
                     PneumaticCraft.proxy.getHackTickHandler().trackEntity(hackedEntity, hackableEntity);
-                    NetworkHandler.sendToAllAround(new PacketHackingEntityFinish(hackedEntity), new NetworkRegistry.TargetPoint(hackedEntity.worldObj.provider.dimensionId, hackedEntity.posX, hackedEntity.posY, hackedEntity.posZ, 64));
+                    NetworkHandler.sendToAllAround(new PacketHackingEntityFinish(hackedEntity), new NetworkRegistry.TargetPoint(hackedEntity.worldObj.provider.getDimensionId(), hackedEntity.posX, hackedEntity.posY, hackedEntity.posZ, 64));
                     setHackedEntity(null);
                 }
             } else {

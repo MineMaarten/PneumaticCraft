@@ -2,16 +2,13 @@ package pneumaticCraft.common.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.api.item.IProgrammable;
-import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ItemNetworkComponents extends ItemPneumatic implements IProgrammable{
     public static final int COMPONENT_AMOUNT = 6;
@@ -23,27 +20,8 @@ public class ItemNetworkComponents extends ItemPneumatic implements IProgrammabl
     public static final int NETWORK_REGISTRY = 4;
     public static final int NETWORK_NODE = 5;
 
-    private IIcon[] texture;
-
     public ItemNetworkComponents(){
         setHasSubtypes(true);
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IIconRegister par1IconRegister){
-        texture = new IIcon[COMPONENT_AMOUNT];
-        texture[0] = par1IconRegister.registerIcon(Textures.ITEM_DIAGNOSTIC_SUBROUTINE);
-        texture[1] = par1IconRegister.registerIcon(Textures.ITEM_NETWORK_API);
-        texture[2] = par1IconRegister.registerIcon(Textures.ITEM_NETWORK_DATA_STORAGE);
-        texture[3] = par1IconRegister.registerIcon(Textures.ITEM_NETWORK_IO_PORT);
-        texture[4] = par1IconRegister.registerIcon(Textures.ITEM_NETWORK_REGISTRY);
-        texture[5] = par1IconRegister.registerIcon(Textures.ITEM_NETWORK_NODE);
-    }
-
-    @Override
-    public IIcon getIconFromDamage(int meta){
-        return texture[meta < texture.length ? meta : 0];
     }
 
     @Override

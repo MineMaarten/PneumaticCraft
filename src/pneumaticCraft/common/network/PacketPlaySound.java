@@ -2,7 +2,8 @@ package pneumaticCraft.common.network;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
-import cpw.mods.fml.common.network.ByteBufUtils;
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 /**
  * MineChess
@@ -23,6 +24,10 @@ public class PacketPlaySound extends LocationDoublePacket<PacketPlaySound>{
         this.sound = sound;
         this.volume = volume;
         this.pitch = pitch;
+    }
+
+    public PacketPlaySound(String sound, BlockPos pos, float volume, float pitch, boolean bool){
+        this(sound, pos.getX(), pos.getY(), pos.getZ(), volume, pitch, bool);
     }
 
     @Override

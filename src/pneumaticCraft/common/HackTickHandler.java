@@ -2,19 +2,18 @@ package pneumaticCraft.common;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableBlock;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableEntity;
 import pneumaticCraft.client.render.pneumaticArmor.hacking.HackableHandler.HackingEntityProperties;
 import pneumaticCraft.common.util.WorldAndCoord;
 import pneumaticCraft.lib.Log;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
 
 public class HackTickHandler{
     private final Map<WorldAndCoord, IHackableBlock> hackedBlocks = new HashMap<WorldAndCoord, IHackableBlock>();
@@ -32,7 +31,7 @@ public class HackTickHandler{
                 for(Map.Entry<Block, Class<? extends IHackableBlock>> registeredEntry : PneumaticCraftAPIHandler.getInstance().hackableBlocks.entrySet()) {
                     if(hackableBlock.getClass() == registeredEntry.getValue()) {
                         if(hackedBlock.getBlock() == registeredEntry.getKey()) {
-                            if(!hackableBlock.afterHackTick((World)hackedBlock.world, hackedBlock.x, hackedBlock.y, hackedBlock.z)) {
+                            if(!hackableBlock.afterHackTick((World)hackedBlock.world, hackedBlock.pos)) {
                                 blockIterator.remove();
                             }
                             found = true;
@@ -49,12 +48,12 @@ public class HackTickHandler{
     public void worldTick(TickEvent.WorldTickEvent event){
         if(event.phase == TickEvent.Phase.END) {
             try {
-                for(Entity entity : (List<Entity>)event.world.loadedEntityList) {
+                for(Entity entity : event.world.loadedEntityList) {
                     HackingEntityProperties hackingProps = (HackingEntityProperties)entity.getExtendedProperties("PneumaticCraftHacking");
                     if(hackingProps != null) {
                         hackingProps.update(entity);
                     } else {
-                        Log.warning("Extended entity props HackingEntityProperties couldn't be found in the entity " + entity.getCommandSenderName());
+                        Log.warning("Extended entity props HackingEntityProperties couldn't be found in the entity " + entity.getName());
                     }
                 }
             } catch(Throwable e) {
@@ -73,7 +72,7 @@ public class HackTickHandler{
             if(hackingProps != null) {
                 hackingProps.addHackable(iHackable);
             } else {
-                Log.warning("Extended entity props HackingEntityProperties couldn't be found in the entity " + entity.getCommandSenderName());
+                Log.warning("Extended entity props HackingEntityProperties couldn't be found in the entity " + entity.getName());
             }
         }
     }

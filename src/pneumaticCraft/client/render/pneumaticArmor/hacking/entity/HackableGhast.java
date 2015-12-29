@@ -3,7 +3,6 @@ package pneumaticCraft.client.render.pneumaticArmor.hacking.entity;
 import java.util.List;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.monster.EntityGhast;
 import net.minecraft.entity.player.EntityPlayer;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableEntity;
 
@@ -38,7 +37,7 @@ public class HackableGhast implements IHackableEntity{
 
     @Override
     public boolean afterHackTick(Entity entity){
-        ((EntityGhast)entity).attackCounter = 0;
+        ///TODO 1.8 fix ((EntityGhast)entity).attackCounter = 0;
         return true;
     }
 

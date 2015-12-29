@@ -6,7 +6,9 @@ import java.util.List;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -17,8 +19,6 @@ import pneumaticCraft.common.inventory.ContainerAirCannon;
 import pneumaticCraft.common.tileentity.TileEntityAirCannon;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiAirCannon extends GuiPneumaticContainerBase<TileEntityAirCannon>{
@@ -102,7 +102,7 @@ public class GuiAirCannon extends GuiPneumaticContainerBase<TileEntityAirCannon>
 
     @Override
     protected void addProblems(List<String> textList){
-        List<Pair<ForgeDirection, IAirHandler>> teSurrounding = te.getConnectedPneumatics();
+        List<Pair<EnumFacing, IAirHandler>> teSurrounding = te.getConnectedPneumatics();
         super.addProblems(textList);
 
         if(teSurrounding.isEmpty()) {

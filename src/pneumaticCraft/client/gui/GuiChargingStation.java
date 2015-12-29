@@ -5,9 +5,12 @@ import java.util.List;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
 
@@ -19,8 +22,6 @@ import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.GuiConstants;
 import pneumaticCraft.lib.PneumaticValues;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiChargingStation extends GuiPneumaticContainerBase<TileEntityChargingStation>{
@@ -111,10 +112,10 @@ public class GuiChargingStation extends GuiPneumaticContainerBase<TileEntityChar
         } else {
             ItemStack chargeStack = te.getStackInSlot(TileEntityChargingStation.CHARGE_INVENTORY_INDEX);
             IPressurizable chargeItem = (IPressurizable)chargeStack.getItem();
-            if(chargeItem.getPressure(chargeStack) > te.getPressure(ForgeDirection.UNKNOWN) + 0.01F && chargeItem.getPressure(chargeStack) <= 0) {
+            if(chargeItem.getPressure(chargeStack) > te.getPressure(null) + 0.01F && chargeItem.getPressure(chargeStack) <= 0) {
                 textList.addAll(PneumaticCraftUtils.convertStringIntoList("\u00a77The put in item can't be discharged", GuiConstants.maxCharPerLineLeft));
                 textList.add("\u00a70The item is empty.");
-            } else if(chargeItem.getPressure(chargeStack) < te.getPressure(ForgeDirection.UNKNOWN) - 0.01F && chargeItem.getPressure(chargeStack) >= chargeItem.maxPressure(chargeStack)) {
+            } else if(chargeItem.getPressure(chargeStack) < te.getPressure(null) - 0.01F && chargeItem.getPressure(chargeStack) >= chargeItem.maxPressure(chargeStack)) {
                 textList.addAll(PneumaticCraftUtils.convertStringIntoList("\u00a77The put in item can't be charged", GuiConstants.maxCharPerLineLeft));
                 textList.add("\u00a70The item is full.");
             } else if(!te.charging && !te.disCharging) {
@@ -151,10 +152,10 @@ public class GuiChargingStation extends GuiPneumaticContainerBase<TileEntityChar
             x -= 18;
             y -= (particleProgress - 0.7F) * 70;
         }
-        Tessellator tess = Tessellator.instance;
-        tess.startDrawing(GL11.GL_LINES);
-        tess.addVertex(x, y, zLevel);
-        tess.addVertex(x, y + 1D, zLevel);
-        tess.draw();
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+        wr.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION); //TODO 1.8 test, and convert to point?
+        wr.pos(x, y, zLevel).endVertex();
+        wr.pos(x, y + 1D, zLevel).endVertex();
+        Tessellator.getInstance().draw();
     }
 }

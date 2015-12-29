@@ -3,8 +3,8 @@ package pneumaticCraft.client.gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
 import pneumaticCraft.client.gui.widget.WidgetTextField;
 import pneumaticCraft.client.gui.widget.WidgetTextFieldNumber;
 import pneumaticCraft.common.item.Itemss;
@@ -16,11 +16,11 @@ public class GuiGPSTool extends GuiPneumaticScreenBase{
     private final WidgetTextFieldNumber[] textFields = new WidgetTextFieldNumber[3];
     private WidgetTextField variableField;
     private static final int TEXTFIELD_WIDTH = 40;
-    private final ChunkPosition oldGPSLoc;
+    private final BlockPos oldGPSLoc;
     private String oldVarName;
     private static final int[] BUTTON_ACTIONS = {-10, -1, 1, 10};
 
-    public GuiGPSTool(ChunkPosition gpsLoc, String oldVarName){
+    public GuiGPSTool(BlockPos gpsLoc, String oldVarName){
         oldGPSLoc = gpsLoc;
         this.oldVarName = oldVarName;
     }
@@ -30,9 +30,9 @@ public class GuiGPSTool extends GuiPneumaticScreenBase{
         super.initGui();
         int[] oldText = new int[3];
         if(textFields[0] == null) {
-            oldText[0] = oldGPSLoc.chunkPosX;
-            oldText[1] = oldGPSLoc.chunkPosY;
-            oldText[2] = oldGPSLoc.chunkPosZ;
+            oldText[0] = oldGPSLoc.getX();
+            oldText[1] = oldGPSLoc.getY();
+            oldText[2] = oldGPSLoc.getZ();
         } else {
             for(int i = 0; i < 3; i++)
                 oldText[i] = textFields[i].getValue();
@@ -87,8 +87,8 @@ public class GuiGPSTool extends GuiPneumaticScreenBase{
 
     @Override
     public void onGuiClosed(){
-        ChunkPosition newPos = new ChunkPosition(textFields[0].getValue(), textFields[1].getValue(), textFields[2].getValue());
-        NetworkHandler.sendToServer(new PacketChangeGPSToolCoordinate(newPos.chunkPosX, newPos.equals(oldGPSLoc) ? -1 : newPos.chunkPosY, newPos.chunkPosZ, variableField.getText()));
+        BlockPos newPos = new BlockPos(textFields[0].getValue(), textFields[1].getValue(), textFields[2].getValue());
+        NetworkHandler.sendToServer(new PacketChangeGPSToolCoordinate(newPos.equals(oldGPSLoc) ? new BlockPos(-1, -1, -1) : newPos, variableField.getText()));
     }
 
     @Override

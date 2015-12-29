@@ -8,7 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.api.recipe.AssemblyRecipe;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.LazySynced;
@@ -30,6 +30,8 @@ public class TileEntityAssemblyIOUnit extends TileEntityAssemblyRobot{
     private byte state = 0;
     private byte tickCounter = 0;
     private boolean hasSwitchedThisTick;
+    @DescSynced
+    private boolean exporting;
 
     private final static byte SLEEP_TICKS = 50;
 
@@ -41,8 +43,8 @@ public class TileEntityAssemblyIOUnit extends TileEntityAssemblyRobot{
     private final static byte STATE_MAX = 127;
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
         hasSwitchedThisTick = false;
         if(worldObj.isRemote) {
             if(!isClawDone()) moveClaw();
@@ -136,7 +138,7 @@ public class TileEntityAssemblyIOUnit extends TileEntityAssemblyRobot{
     private boolean findPickupLocation(){
         if(shouldSleep()) return false;
 
-        ForgeDirection[] inventoryDir = null;
+        EnumFacing[] inventoryDir = null;
 
         if(isImportUnit()) {
             searchedItemStack = null;
@@ -182,7 +184,7 @@ public class TileEntityAssemblyIOUnit extends TileEntityAssemblyRobot{
     private boolean findDropOffLocation(){
         if(shouldSleep()) return false;
 
-        ForgeDirection[] inventoryDir = null;
+        EnumFacing[] inventoryDir = null;
 
         if(isImportUnit()) {
             inventoryDir = getPlatformDirection();
@@ -278,7 +280,7 @@ public class TileEntityAssemblyIOUnit extends TileEntityAssemblyRobot{
             else {
                 int startSize = inventory[0].stackSize;
                 for(int i = 0; i < 6; i++) {
-                    inventory[0] = PneumaticCraftUtils.exportStackToInventory(inv, inventory[0], ForgeDirection.getOrientation(i));
+                    inventory[0] = PneumaticCraftUtils.exportStackToInventory(inv, inventory[0], EnumFacing.getFront(i));
                     if(inventory[0] == null) break;
                 }
                 if(inventory[0] == null || startSize != inventory[0].stackSize) sendDescriptionPacket(); // TODO - is this still needed? Shouldn't @DescSynced on inventory take care of this?
@@ -324,7 +326,7 @@ public class TileEntityAssemblyIOUnit extends TileEntityAssemblyRobot{
     }
 
     private boolean isImportUnit(){
-        return getBlockMetadata() == 0;
+        return !exporting;
     }
 
     public IInventory getInventoryForCurrentDirection(){
@@ -336,7 +338,7 @@ public class TileEntityAssemblyIOUnit extends TileEntityAssemblyRobot{
     public boolean switchMode(){
         if(state <= STATE_SEARCH_SRC) {
             if(!hasSwitchedThisTick) {
-                worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1 - getBlockMetadata(), 3);
+                exporting = !exporting;
                 hasSwitchedThisTick = true;
             }
             return true;
@@ -371,22 +373,20 @@ public class TileEntityAssemblyIOUnit extends TileEntityAssemblyRobot{
         */
     }
 
-    public ForgeDirection[] getInventoryDirectionForItem(ItemStack searchedItem){
+    public EnumFacing[] getInventoryDirectionForItem(ItemStack searchedItem){
         if(searchedItem != null && (inventory[0] == null || inventory[0].isItemEqual(searchedItem))) {
-            for(ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
-                if(dir != ForgeDirection.UP && dir != ForgeDirection.DOWN) {
-                    TileEntity te = worldObj.getTileEntity(xCoord + dir.offsetX, yCoord, zCoord + dir.offsetZ);
-                    if(te instanceof IInventory) {
-                        if(IOHelper.extract(te, ForgeDirection.UP, searchedItem, true, true) != null) return new ForgeDirection[]{dir, ForgeDirection.UNKNOWN};
-                    }
+            for(EnumFacing dir : EnumFacing.HORIZONTALS) {
+                TileEntity te = worldObj.getTileEntity(getPos().offset(dir));
+                if(te instanceof IInventory) {
+                    if(IOHelper.extract(te, EnumFacing.UP, searchedItem, true, true) != null) return new EnumFacing[]{dir, null};
                 }
             }
             if(canMoveToDiagonalNeighbours()) {
-                for(ForgeDirection secDir : new ForgeDirection[]{ForgeDirection.WEST, ForgeDirection.EAST}) {
-                    for(ForgeDirection primDir : new ForgeDirection[]{ForgeDirection.NORTH, ForgeDirection.SOUTH}) {
-                        TileEntity te = worldObj.getTileEntity(xCoord + primDir.offsetX + secDir.offsetX, yCoord, zCoord + primDir.offsetZ + secDir.offsetZ);
+                for(EnumFacing secDir : new EnumFacing[]{EnumFacing.WEST, EnumFacing.EAST}) {
+                    for(EnumFacing primDir : new EnumFacing[]{EnumFacing.NORTH, EnumFacing.SOUTH}) {
+                        TileEntity te = worldObj.getTileEntity(getPos().offset(primDir).offset(secDir));
                         if(te instanceof IInventory) {
-                            if(IOHelper.extract(te, ForgeDirection.UP, searchedItem, true, true) != null) return new ForgeDirection[]{primDir, secDir};
+                            if(IOHelper.extract(te, EnumFacing.UP, searchedItem, true, true) != null) return new EnumFacing[]{primDir, secDir};
                         }
                     }
                 }
@@ -402,28 +402,28 @@ public class TileEntityAssemblyIOUnit extends TileEntityAssemblyRobot{
      * @return
      */
     public IInventory getInventory(ItemStack searchedItem){
-        ForgeDirection[] inventoryDir = getInventoryDirectionForItem(searchedItem);
-        return (IInventory)worldObj.getTileEntity(xCoord + inventoryDir[0].offsetX + inventoryDir[1].offsetX, yCoord, zCoord + inventoryDir[0].offsetZ + inventoryDir[1].offsetZ);
+        EnumFacing[] inventoryDir = getInventoryDirectionForItem(searchedItem);
+        return (IInventory)worldObj.getTileEntity(getPos().offset(inventoryDir[0]).offset(inventoryDir[1], inventoryDir[1] != null ? 1 : 0));
     }
 
-    public ForgeDirection[] getExportLocationForItem(ItemStack exportedItem){
+    public EnumFacing[] getExportLocationForItem(ItemStack exportedItem){
         if(exportedItem != null) {
-            for(ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
-                if(dir != ForgeDirection.UP && dir != ForgeDirection.DOWN) {
-                    TileEntity te = worldObj.getTileEntity(xCoord + dir.offsetX, yCoord, zCoord + dir.offsetZ);
+            for(EnumFacing dir : EnumFacing.VALUES) {
+                if(dir != EnumFacing.UP && dir != EnumFacing.DOWN) {
+                    TileEntity te = worldObj.getTileEntity(getPos().offset(dir));
                     if(te instanceof IInventory) {
                         int slot = getInventoryPlaceLocation(exportedItem, (IInventory)te);
-                        if(slot >= 0) return new ForgeDirection[]{dir, ForgeDirection.UNKNOWN};
+                        if(slot >= 0) return new EnumFacing[]{dir, null};
                     }
                 }
             }
             if(canMoveToDiagonalNeighbours()) {
-                for(ForgeDirection secDir : new ForgeDirection[]{ForgeDirection.WEST, ForgeDirection.EAST}) {
-                    for(ForgeDirection primDir : new ForgeDirection[]{ForgeDirection.NORTH, ForgeDirection.SOUTH}) {
-                        TileEntity te = worldObj.getTileEntity(xCoord + primDir.offsetX + secDir.offsetX, yCoord, zCoord + primDir.offsetZ + secDir.offsetZ);
+                for(EnumFacing secDir : new EnumFacing[]{EnumFacing.WEST, EnumFacing.EAST}) {
+                    for(EnumFacing primDir : new EnumFacing[]{EnumFacing.NORTH, EnumFacing.SOUTH}) {
+                        TileEntity te = worldObj.getTileEntity(getPos().offset(primDir).offset(secDir));
                         if(te instanceof IInventory) {
                             int slot = getInventoryPlaceLocation(exportedItem, (IInventory)te);
-                            if(slot >= 0) return new ForgeDirection[]{primDir, secDir};
+                            if(slot >= 0) return new EnumFacing[]{primDir, secDir};
                         }
                     }
                 }
@@ -440,7 +440,7 @@ public class TileEntityAssemblyIOUnit extends TileEntityAssemblyRobot{
      */
     public static int getInventoryPlaceLocation(ItemStack exportedItem, IInventory inventory){
         if(inventory instanceof ISidedInventory) {
-            int[] slotsInTop = ((ISidedInventory)inventory).getAccessibleSlotsFromSide(ForgeDirection.UP.ordinal());
+            int[] slotsInTop = ((ISidedInventory)inventory).getSlotsForFace(EnumFacing.UP);
             for(int slot : slotsInTop) {
                 if(inventory.isItemValidForSlot(slot, exportedItem)) {
                     ItemStack stack = inventory.getStackInSlot(slot);
@@ -465,8 +465,8 @@ public class TileEntityAssemblyIOUnit extends TileEntityAssemblyRobot{
      * @return
      */
     public IInventory getExportInventory(ItemStack exportedItem){
-        ForgeDirection[] inventoryDir = getExportLocationForItem(exportedItem);
-        return (IInventory)worldObj.getTileEntity(xCoord + inventoryDir[0].offsetX + inventoryDir[1].offsetX, yCoord, zCoord + inventoryDir[0].offsetZ + inventoryDir[1].offsetZ);
+        EnumFacing[] inventoryDir = getExportLocationForItem(exportedItem);
+        return (IInventory)worldObj.getTileEntity(getPos().offset(inventoryDir[0]).offset(inventoryDir[1], inventoryDir[1] != null ? 1 : 0));
     }
 
     @Override
@@ -475,6 +475,7 @@ public class TileEntityAssemblyIOUnit extends TileEntityAssemblyRobot{
         clawProgress = tag.getFloat("clawProgress");
         shouldClawClose = tag.getBoolean("clawClosing");
         state = tag.getByte("state");
+        exporting = tag.getBoolean("exporting");
         // Read in the ItemStacks in the inventory from NBT
         NBTTagList tagList = tag.getTagList("Items", 10);
         inventory = new ItemStack[1];
@@ -493,6 +494,7 @@ public class TileEntityAssemblyIOUnit extends TileEntityAssemblyRobot{
         tag.setFloat("clawProgress", clawProgress);
         tag.setBoolean("clawClosing", shouldClawClose);
         tag.setByte("state", state);
+        tag.setBoolean("exporting", exporting);
         // Write the ItemStacks in the inventory to NBT
         NBTTagList tagList = new NBTTagList();
         for(int currentIndex = 0; currentIndex < inventory.length; ++currentIndex) {

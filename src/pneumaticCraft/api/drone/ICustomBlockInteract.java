@@ -1,7 +1,7 @@
 package pneumaticCraft.api.drone;
 
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.ChunkPosition;
 
 /**
  * Implement this and register it to PneumaticRegistry.registerCustomBlockInteractor().
@@ -35,7 +35,7 @@ public interface ICustomBlockInteract{
      * @param simulate  will be true when trying to figure out whether or not the drone should navigate to this block, false when next to this block.
      * @return
      */
-    public boolean doInteract(ChunkPosition pos, IDrone drone, IBlockInteractHandler interactHandler, boolean simulate);
+    public boolean doInteract(BlockPos pos, IDrone drone, IBlockInteractHandler interactHandler, boolean simulate);
 
     /**
      * Used for crafting, categorizes the puzzle piece.

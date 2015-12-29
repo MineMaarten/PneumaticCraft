@@ -3,13 +3,13 @@ package pneumaticCraft.common.tileentity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.LazySynced;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.TileEntityConstants;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public abstract class TileEntityAssemblyRobot extends TileEntityBase implements IAssemblyMachine, IResettable{
     public float[] oldAngles = new float[5];
@@ -18,7 +18,7 @@ public abstract class TileEntityAssemblyRobot extends TileEntityBase implements 
     public float[] angles = new float[5];
     @DescSynced
     public float[] targetAngles = new float[5];
-    public ForgeDirection[] targetDirection = new ForgeDirection[]{ForgeDirection.UNKNOWN, ForgeDirection.UNKNOWN};
+    public EnumFacing[] targetDirection = new EnumFacing[]{null, null};
     @DescSynced
     public boolean slowMode; //used for the drill when drilling, the slowmode moves the arm 10x as slow as normal.
     @DescSynced
@@ -37,8 +37,8 @@ public abstract class TileEntityAssemblyRobot extends TileEntityBase implements 
     }
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
         //set the old angles to the last tick calculated angles (used in rendering)
         // while(isDone()) {
         // gotoNeighbour(ForgeDirection.SOUTH, ForgeDirection.EAST);
@@ -74,8 +74,8 @@ public abstract class TileEntityAssemblyRobot extends TileEntityBase implements 
         return isDoneMoving();
     }
 
-    public void gotoNeighbour(ForgeDirection direction){
-        gotoNeighbour(direction, ForgeDirection.UNKNOWN);
+    public void gotoNeighbour(EnumFacing direction){
+        gotoNeighbour(direction, null);
     }
 
     /**
@@ -85,16 +85,16 @@ public abstract class TileEntityAssemblyRobot extends TileEntityBase implements 
      * @return
      */
     @SuppressWarnings("incomplete-switch")
-    public boolean gotoNeighbour(ForgeDirection primaryDir, ForgeDirection secondaryDir){
-        targetDirection = new ForgeDirection[]{primaryDir, secondaryDir};
+    public boolean gotoNeighbour(EnumFacing primaryDir, EnumFacing secondaryDir){
+        targetDirection = new EnumFacing[]{primaryDir, secondaryDir};
         boolean diagonal = true;
         boolean diagonalAllowed = canMoveToDiagonalNeighbours();
         switch(primaryDir){
             case SOUTH:
-                if(secondaryDir == ForgeDirection.EAST && diagonalAllowed) {
+                if(secondaryDir == EnumFacing.EAST && diagonalAllowed) {
                     targetAngles[EnumAngles.TURN.ordinal()] = -45F;
                     targetAngles[EnumAngles.HEAD.ordinal()] = 40F;
-                } else if(secondaryDir == ForgeDirection.WEST && diagonalAllowed) {
+                } else if(secondaryDir == EnumFacing.WEST && diagonalAllowed) {
                     targetAngles[EnumAngles.TURN.ordinal()] = 45F;
                     targetAngles[EnumAngles.HEAD.ordinal()] = -40F;
                 } else {
@@ -109,10 +109,10 @@ public abstract class TileEntityAssemblyRobot extends TileEntityBase implements 
                 diagonal = false;
                 break;
             case NORTH:
-                if(secondaryDir == ForgeDirection.EAST && diagonalAllowed) {
+                if(secondaryDir == EnumFacing.EAST && diagonalAllowed) {
                     targetAngles[EnumAngles.TURN.ordinal()] = -135F;
                     targetAngles[EnumAngles.HEAD.ordinal()] = -40F;
-                } else if(secondaryDir == ForgeDirection.WEST && diagonalAllowed) {
+                } else if(secondaryDir == EnumFacing.WEST && diagonalAllowed) {
                     targetAngles[EnumAngles.TURN.ordinal()] = 135F;
                     targetAngles[EnumAngles.HEAD.ordinal()] = 40F;
                 } else {
@@ -145,12 +145,12 @@ public abstract class TileEntityAssemblyRobot extends TileEntityBase implements 
         return this.hoverOverNeighbour(targetDirection);
     }
 
-    public boolean hoverOverNeighbour(ForgeDirection[] directions){
+    public boolean hoverOverNeighbour(EnumFacing[] directions){
         hoverOverNeighbour(directions[0], directions[1]);
         return isDoneMoving();
     }
 
-    public void hoverOverNeighbour(ForgeDirection primaryDir, ForgeDirection secondaryDir){
+    public void hoverOverNeighbour(EnumFacing primaryDir, EnumFacing secondaryDir){
         boolean diagonal = gotoNeighbour(primaryDir, secondaryDir);
         if(diagonal) {
             targetAngles[EnumAngles.BASE.ordinal()] = 160F;
@@ -167,12 +167,12 @@ public abstract class TileEntityAssemblyRobot extends TileEntityBase implements 
         return getTileEntityForDirection(targetDirection[0], targetDirection[1]);
     }
 
-    public TileEntity getTileEntityForDirection(ForgeDirection[] directions){
+    public TileEntity getTileEntityForDirection(EnumFacing[] directions){
         return getTileEntityForDirection(directions[0], directions[1]);
     }
 
-    public TileEntity getTileEntityForDirection(ForgeDirection firstDir, ForgeDirection secondDir){
-        return worldObj.getTileEntity(xCoord + firstDir.offsetX + secondDir.offsetX, yCoord + firstDir.offsetY + secondDir.offsetY, zCoord + firstDir.offsetZ + secondDir.offsetZ);
+    public TileEntity getTileEntityForDirection(EnumFacing firstDir, EnumFacing secondDir){
+        return worldObj.getTileEntity(getPos().offset(firstDir).offset(secondDir, secondDir != null ? 1 : 0));
     }
 
     protected boolean isDoneMoving(){
@@ -195,8 +195,8 @@ public abstract class TileEntityAssemblyRobot extends TileEntityBase implements 
         }
         slowMode = tag.getBoolean("slowMode");
         speed = tag.getFloat("speed");
-        targetDirection[0] = ForgeDirection.values()[tag.getInteger("targetDir1")];
-        targetDirection[1] = ForgeDirection.values()[tag.getInteger("targetDir2")];
+        targetDirection[0] = EnumFacing.values()[tag.getInteger("targetDir1")];
+        targetDirection[1] = EnumFacing.values()[tag.getInteger("targetDir2")];
 
     }
 
@@ -219,17 +219,18 @@ public abstract class TileEntityAssemblyRobot extends TileEntityBase implements 
 
     public abstract boolean canMoveToDiagonalNeighbours();
 
-    public ForgeDirection[] getPlatformDirection(){
-        for(ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
-            if(dir != ForgeDirection.UP && dir != ForgeDirection.DOWN) {
-                if(worldObj.getTileEntity(xCoord + dir.offsetX, yCoord, zCoord + dir.offsetZ) instanceof TileEntityAssemblyPlatform) return new ForgeDirection[]{dir, ForgeDirection.UNKNOWN};
-            }
+    public EnumFacing[] getPlatformDirection(){
+        for(EnumFacing dir : EnumFacing.HORIZONTALS) {
+            if(worldObj.getTileEntity(getPos().offset(dir)) instanceof TileEntityAssemblyPlatform) return new EnumFacing[]{dir, null};
         }
         if(canMoveToDiagonalNeighbours()) {
-            if(worldObj.getTileEntity(xCoord + ForgeDirection.NORTH.offsetX + ForgeDirection.WEST.offsetX, yCoord, zCoord + ForgeDirection.NORTH.offsetZ + ForgeDirection.WEST.offsetZ) instanceof TileEntityAssemblyPlatform) return new ForgeDirection[]{ForgeDirection.NORTH, ForgeDirection.WEST};
-            if(worldObj.getTileEntity(xCoord + ForgeDirection.NORTH.offsetX + ForgeDirection.EAST.offsetX, yCoord, zCoord + ForgeDirection.NORTH.offsetZ + ForgeDirection.EAST.offsetZ) instanceof TileEntityAssemblyPlatform) return new ForgeDirection[]{ForgeDirection.NORTH, ForgeDirection.EAST};
-            if(worldObj.getTileEntity(xCoord + ForgeDirection.SOUTH.offsetX + ForgeDirection.WEST.offsetX, yCoord, zCoord + ForgeDirection.SOUTH.offsetZ + ForgeDirection.WEST.offsetZ) instanceof TileEntityAssemblyPlatform) return new ForgeDirection[]{ForgeDirection.SOUTH, ForgeDirection.WEST};
-            if(worldObj.getTileEntity(xCoord + ForgeDirection.SOUTH.offsetX + ForgeDirection.EAST.offsetX, yCoord, zCoord + ForgeDirection.SOUTH.offsetZ + ForgeDirection.EAST.offsetZ) instanceof TileEntityAssemblyPlatform) return new ForgeDirection[]{ForgeDirection.SOUTH, ForgeDirection.EAST};
+            for(EnumFacing secDir : new EnumFacing[]{EnumFacing.WEST, EnumFacing.EAST}) {
+                for(EnumFacing primDir : new EnumFacing[]{EnumFacing.NORTH, EnumFacing.SOUTH}) {
+                    if(worldObj.getTileEntity(getPos().offset(primDir).offset(secDir)) instanceof TileEntityAssemblyPlatform) {
+                        return new EnumFacing[]{primDir, secDir};
+                    }
+                }
+            }
         }
         return null;
     }
@@ -237,7 +238,7 @@ public abstract class TileEntityAssemblyRobot extends TileEntityBase implements 
     @Override
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox(){
-        return AxisAlignedBB.getBoundingBox(xCoord - 1, yCoord - 1, zCoord - 1, xCoord + 2, yCoord + 2, zCoord + 2);
+        return new AxisAlignedBB(getPos().getX() - 1, getPos().getY() - 1, getPos().getZ() - 1, getPos().getX() + 2, getPos().getY() + 2, getPos().getZ() + 2);
     }
 
     @Override

@@ -12,8 +12,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.IFluidHandler;
 import pneumaticCraft.PneumaticCraft;
@@ -47,18 +48,18 @@ public class ItemAmadronTablet extends ItemPressurizable implements IAmadronInte
     }
 
     @Override
-    public boolean onItemUse(ItemStack tablet, EntityPlayer player, World world, int x, int y, int z, int par7, float par8, float par9, float par10){
+    public boolean onItemUse(ItemStack tablet, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float par8, float par9, float par10){
 
-        TileEntity te = world.getTileEntity(x, y, z);
+        TileEntity te = world.getTileEntity(pos);
         if(te instanceof IFluidHandler) {
             if(!world.isRemote) {
-                setLiquidProvidingLocation(tablet, x, y, z, world.provider.dimensionId);
-                player.addChatComponentMessage(new ChatComponentTranslation("message.amadronTable.setLiquidProvidingLocation", x, y, z, world.provider.dimensionId, world.provider.getDimensionName()));
+                setLiquidProvidingLocation(tablet, pos, world.provider.getDimensionId());
+                player.addChatComponentMessage(new ChatComponentTranslation("message.amadronTable.setLiquidProvidingLocation", pos.getX(), pos.getY(), pos.getZ(), world.provider.getDimensionId(), world.provider.getDimensionName()));
             }
         } else if(te instanceof IInventory) {
             if(!world.isRemote) {
-                setItemProvidingLocation(tablet, x, y, z, world.provider.dimensionId);
-                player.addChatComponentMessage(new ChatComponentTranslation("message.amadronTable.setItemProvidingLocation", x, y, z, world.provider.dimensionId, world.provider.getDimensionName()));
+                setItemProvidingLocation(tablet, pos, world.provider.getDimensionId());
+                player.addChatComponentMessage(new ChatComponentTranslation("message.amadronTable.setItemProvidingLocation", pos.getX(), pos.getY(), pos.getZ(), world.provider.getDimensionId(), world.provider.getDimensionName()));
             }
         } else {
             return false;
@@ -70,10 +71,10 @@ public class ItemAmadronTablet extends ItemPressurizable implements IAmadronInte
     @Override
     public void addInformation(ItemStack stack, EntityPlayer player, List infoList, boolean par4){
         super.addInformation(stack, player, infoList, par4);
-        ChunkPosition pos = getItemProvidingLocation(stack);
+        BlockPos pos = getItemProvidingLocation(stack);
         if(pos != null) {
             int dim = getItemProvidingDimension(stack);
-            infoList.add(I18n.format("gui.tooltip.amadronTablet.itemLocation", pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, dim));
+            infoList.add(I18n.format("gui.tooltip.amadronTablet.itemLocation", pos.getX(), pos.getY(), pos.getZ(), dim));
         } else {
             infoList.add(I18n.format("gui.tooltip.amadronTablet.selectItemLocation"));
         }
@@ -81,14 +82,14 @@ public class ItemAmadronTablet extends ItemPressurizable implements IAmadronInte
         pos = getLiquidProvidingLocation(stack);
         if(pos != null) {
             int dim = getLiquidProvidingDimension(stack);
-            infoList.add(I18n.format("gui.tooltip.amadronTablet.fluidLocation", pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, dim));
+            infoList.add(I18n.format("gui.tooltip.amadronTablet.fluidLocation", pos.getX(), pos.getY(), pos.getZ(), dim));
         } else {
             infoList.add(I18n.format("gui.tooltip.amadronTablet.selectFluidLocation"));
         }
     }
 
     public static IInventory getItemProvider(ItemStack tablet){
-        ChunkPosition pos = getItemProvidingLocation(tablet);
+        BlockPos pos = getItemProvidingLocation(tablet);
         if(pos != null) {
             int dimension = getItemProvidingDimension(tablet);
             TileEntity te = PneumaticCraftUtils.getTileEntity(pos, dimension);
@@ -97,14 +98,14 @@ public class ItemAmadronTablet extends ItemPressurizable implements IAmadronInte
         return null;
     }
 
-    public static ChunkPosition getItemProvidingLocation(ItemStack tablet){
+    public static BlockPos getItemProvidingLocation(ItemStack tablet){
         NBTTagCompound compound = tablet.getTagCompound();
         if(compound != null) {
             int x = compound.getInteger("itemX");
             int y = compound.getInteger("itemY");
             int z = compound.getInteger("itemZ");
             if(x != 0 || y != 0 || z != 0) {
-                return new ChunkPosition(x, y, z);
+                return new BlockPos(x, y, z);
             } else {
                 return null;
             }
@@ -117,15 +118,15 @@ public class ItemAmadronTablet extends ItemPressurizable implements IAmadronInte
         return tablet.hasTagCompound() ? tablet.getTagCompound().getInteger("itemDim") : 0;
     }
 
-    public static void setItemProvidingLocation(ItemStack tablet, int x, int y, int z, int dimensionId){
-        NBTUtil.setInteger(tablet, "itemX", x);
-        NBTUtil.setInteger(tablet, "itemY", y);
-        NBTUtil.setInteger(tablet, "itemZ", z);
+    public static void setItemProvidingLocation(ItemStack tablet, BlockPos pos, int dimensionId){
+        NBTUtil.setInteger(tablet, "itemX", pos.getX());
+        NBTUtil.setInteger(tablet, "itemY", pos.getY());
+        NBTUtil.setInteger(tablet, "itemZ", pos.getZ());
         NBTUtil.setInteger(tablet, "itemDim", dimensionId);
     }
 
     public static IFluidHandler getLiquidProvider(ItemStack tablet){
-        ChunkPosition pos = getLiquidProvidingLocation(tablet);
+        BlockPos pos = getLiquidProvidingLocation(tablet);
         if(pos != null) {
             int dimension = getLiquidProvidingDimension(tablet);
             TileEntity te = PneumaticCraftUtils.getTileEntity(pos, dimension);
@@ -134,14 +135,14 @@ public class ItemAmadronTablet extends ItemPressurizable implements IAmadronInte
         return null;
     }
 
-    public static ChunkPosition getLiquidProvidingLocation(ItemStack tablet){
+    public static BlockPos getLiquidProvidingLocation(ItemStack tablet){
         NBTTagCompound compound = tablet.getTagCompound();
         if(compound != null) {
             int x = compound.getInteger("liquidX");
             int y = compound.getInteger("liquidY");
             int z = compound.getInteger("liquidZ");
             if(x != 0 || y != 0 || z != 0) {
-                return new ChunkPosition(x, y, z);
+                return new BlockPos(x, y, z);
             } else {
                 return null;
             }
@@ -154,10 +155,10 @@ public class ItemAmadronTablet extends ItemPressurizable implements IAmadronInte
         return tablet.hasTagCompound() ? tablet.getTagCompound().getInteger("liquidDim") : 0;
     }
 
-    public static void setLiquidProvidingLocation(ItemStack tablet, int x, int y, int z, int dimensionId){
-        NBTUtil.setInteger(tablet, "liquidX", x);
-        NBTUtil.setInteger(tablet, "liquidY", y);
-        NBTUtil.setInteger(tablet, "liquidZ", z);
+    public static void setLiquidProvidingLocation(ItemStack tablet, BlockPos pos, int dimensionId){
+        NBTUtil.setInteger(tablet, "liquidX", pos.getX());
+        NBTUtil.setInteger(tablet, "liquidY", pos.getY());
+        NBTUtil.setInteger(tablet, "liquidZ", pos.getZ());
         NBTUtil.setInteger(tablet, "liquidDim", dimensionId);
     }
 

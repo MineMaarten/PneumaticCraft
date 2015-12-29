@@ -1,6 +1,6 @@
 package pneumaticCraft.api.drone;
 
-import cpw.mods.fml.common.eventhandler.Event;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 /**
  * Event called on the MinecraftForge.EVENT_BUS just before a Drone executes a Suicide piece. Used internally by PneumaticCraft to handle Amadron requests.

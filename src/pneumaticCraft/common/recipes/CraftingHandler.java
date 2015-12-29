@@ -1,8 +1,8 @@
 package pneumaticCraft.common.recipes;
 
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import pneumaticCraft.common.AchievementHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent;
 
 public class CraftingHandler{
 

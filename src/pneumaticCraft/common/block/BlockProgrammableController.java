@@ -1,17 +1,18 @@
 package pneumaticCraft.common.block;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import pneumaticCraft.common.tileentity.TileEntityProgrammableController;
-import pneumaticCraft.lib.Textures;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
 public class BlockProgrammableController extends BlockPneumaticCraft{
 
     public BlockProgrammableController(Material par2Material){
         super(par2Material);
-        setBlockTextureName(Textures.BLOCK_PROGRAMMABLE_CONTROLLER);
     }
 
     @Override
@@ -30,7 +31,7 @@ public class BlockProgrammableController extends BlockPneumaticCraft{
      * reversed - eg it is 1 (up) when checking the bottom of the block.
      */
     @Override
-    public int isProvidingStrongPower(IBlockAccess par1IBlockAccess, int par2, int par3, int par4, int par5){
+    public int getStrongPower(IBlockAccess par1IBlockAccess, BlockPos pos, IBlockState state, EnumFacing side){
         return 0;
     }
 
@@ -42,10 +43,10 @@ public class BlockProgrammableController extends BlockPneumaticCraft{
      * when checking the bottom of the block.
      */
     @Override
-    public int isProvidingWeakPower(IBlockAccess par1IBlockAccess, int par2, int par3, int par4, int par5){
-        TileEntity te = par1IBlockAccess.getTileEntity(par2, par3, par4);
+    public int getWeakPower(IBlockAccess par1IBlockAccess, BlockPos pos, IBlockState state, EnumFacing side){
+        TileEntity te = par1IBlockAccess.getTileEntity(pos);
         if(te instanceof TileEntityProgrammableController) {
-            return ((TileEntityProgrammableController)te).getEmittingRedstone(par5 ^ 1);
+            return ((TileEntityProgrammableController)te).getEmittingRedstone(side.getOpposite());
         }
 
         return 0;
@@ -58,10 +59,10 @@ public class BlockProgrammableController extends BlockPneumaticCraft{
      * @param y The y position of this block instance
      * @param z The z position of this block instance
      * @param side The INPUT side of the block to be powered - ie the opposite of this block's output side
-     * @return Whether Block#isProvidingWeakPower should be called when determining indirect power
+     * @return Whether Block#getWeakPower should be called when determining indirect power
      */
     @Override
-    public boolean shouldCheckWeakPower(IBlockAccess world, int x, int y, int z, int side){
+    public boolean shouldCheckWeakPower(IBlockAccess world, BlockPos pos, EnumFacing side){
         return false;
     }
 }

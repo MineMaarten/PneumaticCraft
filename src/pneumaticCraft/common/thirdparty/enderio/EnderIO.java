@@ -3,13 +3,13 @@ package pneumaticCraft.common.thirdparty.enderio;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fml.common.event.FMLInterModComms;
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.common.PneumaticCraftAPIHandler;
 import pneumaticCraft.common.fluid.Fluids;
 import pneumaticCraft.common.thirdparty.IThirdParty;
 import pneumaticCraft.lib.Log;
 import pneumaticCraft.lib.ModIds;
-import cpw.mods.fml.common.event.FMLInterModComms;
 
 public class EnderIO implements IThirdParty{
 

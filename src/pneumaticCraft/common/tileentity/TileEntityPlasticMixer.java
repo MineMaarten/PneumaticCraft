@@ -1,11 +1,13 @@
 package pneumaticCraft.common.tileentity;
 
+import java.util.Arrays;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -13,6 +15,8 @@ import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.fluids.IFluidTank;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
 import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.PneumaticRegistry;
@@ -25,8 +29,6 @@ import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.thirdparty.computercraft.LuaMethod;
 import pneumaticCraft.lib.PneumaticValues;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityPlasticMixer extends TileEntityBase implements IFluidHandler, ISidedInventory, IHeatExchanger,
         IRedstoneControlled{
@@ -76,8 +78,8 @@ public class TileEntityPlasticMixer extends TileEntityBase implements IFluidHand
     }
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
         if(!worldObj.isRemote) {
             refillDyeBuffers();
             itemLogic.update();
@@ -92,11 +94,11 @@ public class TileEntityPlasticMixer extends TileEntityBase implements IFluidHand
 
                 if(itemLogic.getTemperature() >= PneumaticValues.PLASTIC_MIXER_MELTING_TEMP) {
                     FluidStack moltenPlastic = new FluidStack(Fluids.plastic, inventory[INV_INPUT].stackSize * 1000);
-                    int maxFill = fill(ForgeDirection.UNKNOWN, moltenPlastic, false) / 1000;
+                    int maxFill = fill(null, moltenPlastic, false) / 1000;
                     if(maxFill > 0) {
                         inventory[INV_INPUT].stackSize -= maxFill;
                         if(inventory[INV_INPUT].stackSize <= 0) inventory[INV_INPUT] = null;
-                        fill(ForgeDirection.UNKNOWN, new FluidStack(moltenPlastic, maxFill * 1000), true);
+                        fill(null, new FluidStack(moltenPlastic, maxFill * 1000), true);
                     }
                 }
 
@@ -139,7 +141,7 @@ public class TileEntityPlasticMixer extends TileEntityBase implements IFluidHand
     }
 
     private int useDye(int maxItems){
-        int desiredColor = ItemDye.field_150922_c[selectedPlastic];
+        int desiredColor = ItemDye.dyeColors[selectedPlastic];
         if(selectedPlastic == 15) return maxItems;//Converting to white plastic is free.
         for(int i = 0; i < 3; i++) {
             int colorComponent = desiredColor >> 8 * i & 0xFF;
@@ -206,7 +208,7 @@ public class TileEntityPlasticMixer extends TileEntityBase implements IFluidHand
     /******************* Tank methods *******************/
 
     @Override
-    public int fill(ForgeDirection from, FluidStack resource, boolean doFill){
+    public int fill(EnumFacing from, FluidStack resource, boolean doFill){
         if(resource == null || !Fluids.areFluidsEqual(resource.getFluid(), Fluids.plastic)) return 0;
         int fillingAmount = Math.min(tank.getCapacity() - tank.getFluidAmount(), resource.amount);
         if(doFill && fillingAmount > 0) {
@@ -217,30 +219,30 @@ public class TileEntityPlasticMixer extends TileEntityBase implements IFluidHand
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain){
+    public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain){
         if(resource == null || Fluids.areFluidsEqual(resource.getFluid(), Fluids.plastic)) return drain(from, PneumaticValues.MAX_DRAIN, doDrain);
         else return null;
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain){
+    public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain){
         FluidStack drained = tank.drain(Math.min(PneumaticValues.MAX_DRAIN, maxDrain), doDrain);
         if(doDrain && drained != null && drained.getFluid() != null) sendDescriptionPacket();
         return drained;
     }
 
     @Override
-    public boolean canFill(ForgeDirection from, Fluid fluid){
+    public boolean canFill(EnumFacing from, Fluid fluid){
         return Fluids.areFluidsEqual(fluid, Fluids.plastic);
     }
 
     @Override
-    public boolean canDrain(ForgeDirection from, Fluid fluid){
+    public boolean canDrain(EnumFacing from, Fluid fluid){
         return canFill(from, fluid);
     }
 
     @Override
-    public FluidTankInfo[] getTankInfo(ForgeDirection from){
+    public FluidTankInfo[] getTankInfo(EnumFacing from){
         return new FluidTankInfo[]{tank.getInfo()};
     }
 
@@ -249,10 +251,10 @@ public class TileEntityPlasticMixer extends TileEntityBase implements IFluidHand
     /****************** IInventory *********************/
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
 
     /**
      * Returns the number of slots in the inventory.
@@ -288,7 +290,7 @@ public class TileEntityPlasticMixer extends TileEntityBase implements IFluidHand
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
             setInventorySlotContents(slot, null);
@@ -305,7 +307,7 @@ public class TileEntityPlasticMixer extends TileEntityBase implements IFluidHand
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
         return Blockss.plasticMixer.getUnlocalizedName();
     }
 
@@ -334,7 +336,7 @@ public class TileEntityPlasticMixer extends TileEntityBase implements IFluidHand
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 
@@ -344,7 +346,7 @@ public class TileEntityPlasticMixer extends TileEntityBase implements IFluidHand
     }
 
     @Override
-    public IHeatExchangerLogic getHeatExchangerLogic(ForgeDirection side){
+    public IHeatExchangerLogic getHeatExchangerLogic(EnumFacing side){
         return hullLogic;
     }
 
@@ -360,18 +362,23 @@ public class TileEntityPlasticMixer extends TileEntityBase implements IFluidHand
     }
 
     @Override
-    public int[] getAccessibleSlotsFromSide(int side){
+    public int[] getSlotsForFace(EnumFacing side){
         return SLOTS;
     }
 
     @Override
-    public boolean canInsertItem(int slot, ItemStack stack, int side){
+    public boolean canInsertItem(int slot, ItemStack stack, EnumFacing side){
         return isItemValidForSlot(slot, stack);
     }
 
     @Override
-    public boolean canExtractItem(int slot, ItemStack stack, int side){
+    public boolean canExtractItem(int slot, ItemStack stack, EnumFacing side){
         return slot == INV_OUTPUT;
+    }
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
     }
 
     @Override

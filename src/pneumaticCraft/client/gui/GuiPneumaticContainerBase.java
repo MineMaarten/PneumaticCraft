@@ -2,6 +2,7 @@ package pneumaticCraft.client.gui;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,8 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -19,7 +22,9 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
 
@@ -42,18 +47,11 @@ import pneumaticCraft.common.tileentity.TileEntityPneumaticBase;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.ModIds;
 import pneumaticCraft.lib.Textures;
-import codechicken.nei.VisiblityData;
-import codechicken.nei.api.INEIGuiHandler;
-import codechicken.nei.api.TaggedInventoryArea;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-@Optional.Interface(iface = "codechicken.nei.api.INEIGuiHandler", modid = ModIds.NEI)
-public class GuiPneumaticContainerBase<Tile extends TileEntityBase> extends GuiContainer implements INEIGuiHandler,
-        IWidgetListener{
+//TODO NEI dep @Optional.Interface(iface = "codechicken.nei.api.INEIGuiHandler", modid = ModIds.NEI)
+public class GuiPneumaticContainerBase<Tile extends TileEntityBase> extends GuiContainer implements /*INEIGuiHandler,*/
+IWidgetListener{
 
     public final Tile te;
     private final ResourceLocation guiTexture;
@@ -144,7 +142,7 @@ public class GuiPneumaticContainerBase<Tile extends TileEntityBase> extends GuiC
         }
         if(te instanceof IInventory) {
             if(shouldAddInfoTab()) {
-                String info = "gui.tab.info." + ((IInventory)te).getInventoryName();
+                String info = "gui.tab.info." + ((IInventory)te).getName();
                 String translatedInfo = I18n.format(info);
                 if(!translatedInfo.equals(info)) {
                     addInfoTab(translatedInfo);
@@ -154,7 +152,7 @@ public class GuiPneumaticContainerBase<Tile extends TileEntityBase> extends GuiC
                 addAnimatedStat("gui.tab.info.heat.title", new ItemStack(Blocks.fire), 0xFFFF5500, false).setText("gui.tab.info.heat");
             }
             if(shouldAddUpgradeTab()) {
-                String upgrades = "gui.tab.upgrades." + ((IInventory)te).getInventoryName();
+                String upgrades = "gui.tab.upgrades." + ((IInventory)te).getName();
                 String translatedUpgrades = I18n.format(upgrades);
                 List<String> upgradeText = new ArrayList<String>();
                 if(te instanceof TileEntityPneumaticBase) {
@@ -218,7 +216,7 @@ public class GuiPneumaticContainerBase<Tile extends TileEntityBase> extends GuiC
         if(pressureStat != null) {
             TileEntityPneumaticBase pneu = (TileEntityPneumaticBase)te;
             Point gaugeLocation = getGaugeLocation();
-            if(gaugeLocation != null) GuiUtils.drawPressureGauge(fontRendererObj, -1, pneu.CRITICAL_PRESSURE, pneu.DANGER_PRESSURE, te instanceof IMinWorkingPressure ? ((IMinWorkingPressure)te).getMinWorkingPressure() : -1, pneu.getPressure(ForgeDirection.UNKNOWN), gaugeLocation.x, gaugeLocation.y, zLevel);
+            if(gaugeLocation != null) GuiUtils.drawPressureGauge(fontRendererObj, -1, pneu.CRITICAL_PRESSURE, pneu.DANGER_PRESSURE, te instanceof IMinWorkingPressure ? ((IMinWorkingPressure)te).getMinWorkingPressure() : -1, pneu.getPressure(), gaugeLocation.x, gaugeLocation.y, zLevel);
         }
     }
 
@@ -243,7 +241,7 @@ public class GuiPneumaticContainerBase<Tile extends TileEntityBase> extends GuiC
     protected void drawGuiContainerForegroundLayer(int x, int y){
         if(getInvNameOffset() != null && te instanceof IInventory) {
             IInventory inv = (IInventory)te;
-            String containerName = inv.hasCustomInventoryName() ? inv.getInventoryName() : StatCollector.translateToLocal(inv.getInventoryName() + ".name");
+            String containerName = inv.hasCustomName() ? inv.getName() : StatCollector.translateToLocal(inv.getName() + ".name");
             fontRendererObj.drawString(containerName, xSize / 2 - fontRendererObj.getStringWidth(containerName) / 2 + getInvNameOffset().x, 6 + getInvNameOffset().y, 4210752);
         }
         if(getInvTextOffset() != null) fontRendererObj.drawString(StatCollector.translateToLocal("container.inventory"), 8 + getInvTextOffset().x, ySize - 94 + getInvTextOffset().y, 4210752);
@@ -348,7 +346,7 @@ public class GuiPneumaticContainerBase<Tile extends TileEntityBase> extends GuiC
     protected void addPressureStatInfo(List<String> pressureStatText){
         TileEntityPneumaticBase pneumaticTile = (TileEntityPneumaticBase)te;
         pressureStatText.add("\u00a77Current Pressure:");
-        pressureStatText.add("\u00a70" + PneumaticCraftUtils.roundNumberTo(pneumaticTile.getPressure(ForgeDirection.UNKNOWN), 1) + " bar.");
+        pressureStatText.add("\u00a70" + PneumaticCraftUtils.roundNumberTo(pneumaticTile.getPressure(), 1) + " bar.");
         pressureStatText.add("\u00a77Current Air:");
         pressureStatText.add("\u00a70" + (double)Math.round(pneumaticTile.currentAir + pneumaticTile.volume) + " mL.");
         pressureStatText.add("\u00a77Volume:");
@@ -373,7 +371,7 @@ public class GuiPneumaticContainerBase<Tile extends TileEntityBase> extends GuiC
         }
         if(te instanceof IMinWorkingPressure) {
             IMinWorkingPressure minWork = (IMinWorkingPressure)te;
-            if(((TileEntityPneumaticBase)te).getPressure(ForgeDirection.UNKNOWN) < minWork.getMinWorkingPressure()) {
+            if(((TileEntityPneumaticBase)te).getPressure() < minWork.getMinWorkingPressure()) {
                 curInfo.add("gui.tab.problems.notEnoughPressure");
                 curInfo.add(I18n.format("gui.tab.problems.applyPressure", minWork.getMinWorkingPressure()));
             }
@@ -381,7 +379,7 @@ public class GuiPneumaticContainerBase<Tile extends TileEntityBase> extends GuiC
     }
 
     @Override
-    protected void mouseClicked(int par1, int par2, int par3){
+    protected void mouseClicked(int par1, int par2, int par3) throws IOException{
         super.mouseClicked(par1, par2, par3);
         for(IGuiWidget widget : widgets) {
             if(widget.getBounds().contains(par1, par2)) widget.onMouseClicked(par1, par2, par3);
@@ -410,7 +408,7 @@ public class GuiPneumaticContainerBase<Tile extends TileEntityBase> extends GuiC
     }
 
     @Override
-    public void handleMouseInput(){
+    public void handleMouseInput() throws IOException{
         super.handleMouseInput();
         for(IGuiWidget widget : widgets) {
             widget.handleMouseInput();
@@ -418,7 +416,7 @@ public class GuiPneumaticContainerBase<Tile extends TileEntityBase> extends GuiC
     }
 
     @Override
-    protected void keyTyped(char key, int keyCode){
+    protected void keyTyped(char key, int keyCode) throws IOException{
         for(IGuiWidget widget : widgets) {
             if(widget.onKey(key, keyCode)) return;
         }
@@ -437,13 +435,13 @@ public class GuiPneumaticContainerBase<Tile extends TileEntityBase> extends GuiC
 
     public static void drawTexture(String texture, int x, int y){
         Minecraft.getMinecraft().getTextureManager().bindTexture(GuiUtils.getResourceLocation(texture));
-        Tessellator tessellator = Tessellator.instance;
-        tessellator.startDrawingQuads();
-        tessellator.addVertexWithUV(x, y + 16, 0, 0.0, 1.0);
-        tessellator.addVertexWithUV(x + 16, y + 16, 0, 1.0, 1.0);
-        tessellator.addVertexWithUV(x + 16, y, 0, 1.0, 0.0);
-        tessellator.addVertexWithUV(x, y, 0, 0.0, 0.0);
-        tessellator.draw();
+        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+        wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+        wr.pos(x, y + 16, 0).tex(0.0, 1.0).endVertex();
+        wr.pos(x + 16, y + 16, 0).tex(1.0, 1.0).endVertex();
+        wr.pos(x + 16, y, 0).tex(1.0, 0.0).endVertex();
+        wr.pos(x, y, 0).tex(0.0, 0.0).endVertex();
+        Tessellator.getInstance().draw();
         // this.drawTexturedModalRect(x, y, 0, 0, 16, 16);
     }
 
@@ -469,7 +467,7 @@ public class GuiPneumaticContainerBase<Tile extends TileEntityBase> extends GuiC
 
     //-----------NEI support
 
-    @Override
+    /*@Override
     @Optional.Method(modid = ModIds.NEI)
     public VisiblityData modifyVisiblity(GuiContainer gui, VisiblityData currentVisibility){
         for(IGuiWidget w : widgets) {
@@ -498,53 +496,53 @@ public class GuiPneumaticContainerBase<Tile extends TileEntityBase> extends GuiC
     /**
      * @return A list of TaggedInventoryAreas that will be used with the savestates.
      */
-    @Override
-    @Optional.Method(modid = ModIds.NEI)
-    public List<TaggedInventoryArea> getInventoryAreas(GuiContainer gui){
-        return null;
-    }
+    /* @Override
+     @Optional.Method(modid = ModIds.NEI)
+     public List<TaggedInventoryArea> getInventoryAreas(GuiContainer gui){
+         return null;
+     }
 
-    /**
-     * Handles clicks while an itemstack has been dragged from the item panel. Use this to set configurable slots and the like. 
-     * Changes made to the stackSize of the dragged stack will be kept
-     * @param gui The current gui instance
-     * @param mousex The x position of the mouse
-     * @param mousey The y position of the mouse
-     * @param draggedStack The stack being dragged from the item panel
-     * @param button The button presed
-     * @return True if the drag n drop was handled. False to resume processing through other routes. The held stack will be deleted if draggedStack.stackSize == 0
-     */
-    @Override
-    public boolean handleDragNDrop(GuiContainer gui, int mousex, int mousey, ItemStack draggedStack, int button){
-        return false;
-    }
+     /**
+      * Handles clicks while an itemstack has been dragged from the item panel. Use this to set configurable slots and the like. 
+      * Changes made to the stackSize of the dragged stack will be kept
+      * @param gui The current gui instance
+      * @param mousex The x position of the mouse
+      * @param mousey The y position of the mouse
+      * @param draggedStack The stack being dragged from the item panel
+      * @param button The button presed
+      * @return True if the drag n drop was handled. False to resume processing through other routes. The held stack will be deleted if draggedStack.stackSize == 0
+      */
+    /* @Override
+     public boolean handleDragNDrop(GuiContainer gui, int mousex, int mousey, ItemStack draggedStack, int button){
+         return false;
+     }
 
-    /**
-     * Used to prevent the item panel from drawing on top of other gui elements.
-     * @param x The x coordinate of the rectangle bounding the slot
-     * @param y The y coordinate of the rectangle bounding the slot
-     * @param w The w coordinate of the rectangle bounding the slot
-     * @param h The h coordinate of the rectangle bounding the slot
-     * @return true if the item panel slot within the specified rectangle should not be rendered.
-     */
-    @Override
-    public boolean hideItemPanelSlot(GuiContainer gui, int x, int y, int w, int h){
-        for(IGuiWidget widget : widgets) {
-            if(widget instanceof IGuiAnimatedStat) {
-                IGuiAnimatedStat stat = (IGuiAnimatedStat)widget;
-                if(stat.getBounds().intersects(new Rectangle(x, y, w, h))) return true;
-            }
-        }
-        return false;
-    }
-
+     /**
+      * Used to prevent the item panel from drawing on top of other gui elements.
+      * @param x The x coordinate of the rectangle bounding the slot
+      * @param y The y coordinate of the rectangle bounding the slot
+      * @param w The w coordinate of the rectangle bounding the slot
+      * @param h The h coordinate of the rectangle bounding the slot
+      * @return true if the item panel slot within the specified rectangle should not be rendered.
+      */
+    /*  @Override
+      public boolean hideItemPanelSlot(GuiContainer gui, int x, int y, int w, int h){
+          for(IGuiWidget widget : widgets) {
+              if(widget instanceof IGuiAnimatedStat) {
+                  IGuiAnimatedStat stat = (IGuiAnimatedStat)widget;
+                  if(stat.getBounds().intersects(new Rectangle(x, y, w, h))) return true;
+              }
+          }
+          return false;
+      }
+    */
     @Override
     public void onKeyTyped(IGuiWidget widget){
 
     }
 
     protected void refreshScreen(){
-        ScaledResolution scaledresolution = new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
+        ScaledResolution scaledresolution = new ScaledResolution(Minecraft.getMinecraft());
         int i = scaledresolution.getScaledWidth();
         int j = scaledresolution.getScaledHeight();
         setWorldAndResolution(Minecraft.getMinecraft(), i, j);

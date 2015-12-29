@@ -5,18 +5,18 @@ import java.util.List;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.client.gui.programmer.GuiProgWidgetEmitRedstone;
 import pneumaticCraft.common.ai.IDroneBase;
-import pneumaticCraft.common.item.ItemPlasticPlants;
+import pneumaticCraft.common.item.ItemPlastic;
 import pneumaticCraft.lib.Textures;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProgWidgetEmitRedstone extends ProgWidget implements IRedstoneEmissionWidget, ISidedWidget{
     private boolean[] accessingSides = new boolean[]{true, true, true, true, true, true};
@@ -77,7 +77,7 @@ public class ProgWidgetEmitRedstone extends ProgWidget implements IRedstoneEmiss
             String tip = "";
             for(int i = 0; i < 6; i++) {
                 if(accessingSides[i]) {
-                    switch(ForgeDirection.getOrientation(i)){
+                    switch(EnumFacing.getFront(i)){
                         case UP:
                             tip += "top, ";
                             break;
@@ -107,7 +107,7 @@ public class ProgWidgetEmitRedstone extends ProgWidget implements IRedstoneEmiss
     public void writeToNBT(NBTTagCompound tag){
         super.writeToNBT(tag);
         for(int i = 0; i < 6; i++) {
-            tag.setBoolean(ForgeDirection.getOrientation(i).name(), accessingSides[i]);
+            tag.setBoolean(EnumFacing.getFront(i).name(), accessingSides[i]);
         }
     }
 
@@ -115,7 +115,7 @@ public class ProgWidgetEmitRedstone extends ProgWidget implements IRedstoneEmiss
     public void readFromNBT(NBTTagCompound tag){
         super.readFromNBT(tag);
         for(int i = 0; i < 6; i++) {
-            accessingSides[i] = tag.getBoolean(ForgeDirection.getOrientation(i).name());
+            accessingSides[i] = tag.getBoolean(EnumFacing.getFront(i).name());
         }
     }
 
@@ -146,7 +146,7 @@ public class ProgWidgetEmitRedstone extends ProgWidget implements IRedstoneEmiss
 
     @Override
     public int getCraftingColorIndex(){
-        return ItemPlasticPlants.FIRE_FLOWER_DAMAGE;
+        return ItemPlastic.FIRE_FLOWER_DAMAGE;
     }
 
     @Override
@@ -185,7 +185,7 @@ public class ProgWidgetEmitRedstone extends ProgWidget implements IRedstoneEmiss
             boolean[] sides = ((ISidedWidget)widget).getSides();
             for(int i = 0; i < 6; i++) {
                 if(sides[i]) {
-                    drone.setEmittingRedstone(ForgeDirection.getOrientation(i), ((IRedstoneEmissionWidget)widget).getEmittingRedstone());
+                    drone.setEmittingRedstone(EnumFacing.getFront(i), ((IRedstoneEmissionWidget)widget).getEmittingRedstone());
                 }
             }
             return false;

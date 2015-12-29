@@ -1,12 +1,14 @@
 package pneumaticCraft.common.tileentity;
 
+import java.util.Arrays;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import pneumaticCraft.api.tileentity.IPneumaticMachine;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.item.ItemMachineUpgrade;
@@ -77,13 +79,13 @@ public class TileEntityUVLightBox extends TileEntityPneumaticBase implements ISi
     }
 
     @Override
-    public void updateEntity(){
-        super.updateEntity();
+    public void update(){
+        super.update();
         if(!worldObj.isRemote) {
             ticksExisted++;
-            if(getPressure(ForgeDirection.UNKNOWN) >= PneumaticValues.MIN_PRESSURE_UV_LIGHTBOX && inventory[0] != null && inventory[0].getItem() == Itemss.emptyPCB && inventory[0].getItemDamage() > 0) {
+            if(getPressure(null) >= PneumaticValues.MIN_PRESSURE_UV_LIGHTBOX && inventory[0] != null && inventory[0].getItem() == Itemss.emptyPCB && inventory[0].getItemDamage() > 0) {
 
-                addAir((int)(-PneumaticValues.USAGE_UV_LIGHTBOX * getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots())), ForgeDirection.UNKNOWN);
+                addAir((int)(-PneumaticValues.USAGE_UV_LIGHTBOX * getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots())), null);
                 if(ticksExisted % Math.max(1, (int)(TileEntityConstants.LIGHT_BOX_0_100_TIME / (5 * getSpeedMultiplierFromUpgrades(getUpgradeSlots())))) == 0) {
                     if(!areLightsOn) {
                         areLightsOn = true;
@@ -119,15 +121,15 @@ public class TileEntityUVLightBox extends TileEntityPneumaticBase implements ISi
 
     // used in the air dispersion methods.
     @Override
-    public boolean isConnectedTo(ForgeDirection side){
-        return side != ForgeDirection.UP && side != ForgeDirection.getOrientation(getBlockMetadata()) && side != ForgeDirection.getOrientation(getBlockMetadata()).getOpposite();
+    public boolean isConnectedTo(EnumFacing side){
+        return side != EnumFacing.UP && side != getRotation() && side != getRotation().getOpposite();
     }
 
     public void updateConnections(){
-        for(ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS) {
+        for(EnumFacing direction : EnumFacing.VALUES) {
             if(isConnectedTo(direction)) {
-                boolean checkingLeft = ForgeDirection.getOrientation(getBlockMetadata()).getRotation(ForgeDirection.UP) == direction;
-                TileEntity te = worldObj.getTileEntity(xCoord + direction.offsetX, yCoord + direction.offsetY, zCoord + direction.offsetZ);
+                boolean checkingLeft = getRotation().rotateY() == direction;
+                TileEntity te = worldObj.getTileEntity(getPos().offset(direction));
                 if(te instanceof IPneumaticMachine) {
                     /*sidesConnected[direction.ordinal()]*/
                     boolean isConnected = ((IPneumaticMachine)te).isConnectedTo(direction.getOpposite());
@@ -179,7 +181,7 @@ public class TileEntityUVLightBox extends TileEntityPneumaticBase implements ISi
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot){
+    public ItemStack removeStackFromSlot(int slot){
         ItemStack itemStack = getStackInSlot(slot);
         if(itemStack != null) {
             setInventorySlotContents(slot, null);
@@ -196,7 +198,7 @@ public class TileEntityUVLightBox extends TileEntityPneumaticBase implements ISi
     }
 
     @Override
-    public String getInventoryName(){
+    public String getName(){
         return Blockss.uvLightBox.getUnlocalizedName();
     }
 
@@ -212,17 +214,17 @@ public class TileEntityUVLightBox extends TileEntityPneumaticBase implements ISi
 
     @Override
     // upgrades in bottom, fuel in the rest.
-    public int[] getAccessibleSlotsFromSide(int var1){
+    public int[] getSlotsForFace(EnumFacing var1){
         return new int[]{0};
     }
 
     @Override
-    public boolean canInsertItem(int i, ItemStack itemstack, int j){
+    public boolean canInsertItem(int i, ItemStack itemstack, EnumFacing j){
         return true;
     }
 
     @Override
-    public boolean canExtractItem(int i, ItemStack itemstack, int j){
+    public boolean canExtractItem(int i, ItemStack itemstack, EnumFacing j){
         return true;
     }
 
@@ -251,7 +253,7 @@ public class TileEntityUVLightBox extends TileEntityPneumaticBase implements ISi
     }
 
     @Override
-    public boolean hasCustomInventoryName(){
+    public boolean hasCustomName(){
         return false;
     }
 
@@ -261,10 +263,15 @@ public class TileEntityUVLightBox extends TileEntityPneumaticBase implements ISi
     }
 
     @Override
-    public void openInventory(){}
+    public void openInventory(EntityPlayer player){}
 
     @Override
-    public void closeInventory(){}
+    public void closeInventory(EntityPlayer player){}
+
+    @Override
+    public void clear(){
+        Arrays.fill(inventory, null);
+    }
 
     @Override
     public int getRedstoneMode(){
