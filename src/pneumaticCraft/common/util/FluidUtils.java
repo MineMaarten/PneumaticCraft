@@ -3,11 +3,13 @@ package pneumaticCraft.common.util;
 import java.util.List;
 
 import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.BlockFluidBase;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidContainerRegistry.FluidContainerData;
 import net.minecraftforge.fluids.FluidStack;
@@ -113,6 +115,13 @@ public class FluidUtils{
     }
 
     public static boolean isSourceBlock(World world, BlockPos pos){
-        return world.getBlockState(pos).getValue(BlockLiquid.LEVEL).intValue() == 0;
+        IBlockState state = world.getBlockState(pos);
+        if(state.getProperties().containsKey(BlockLiquid.LEVEL)) {
+            return world.getBlockState(pos).getValue(BlockLiquid.LEVEL).intValue() == 0;
+        } else if(state.getProperties().containsKey(BlockFluidBase.LEVEL)) {
+            return world.getBlockState(pos).getValue(BlockFluidBase.LEVEL).intValue() == 0;
+        } else {
+            return false;
+        }
     }
 }
