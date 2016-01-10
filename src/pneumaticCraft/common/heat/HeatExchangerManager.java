@@ -11,12 +11,14 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
-import pneumaticCraft.api.IHeatExchangerLogic;
-import pneumaticCraft.api.PneumaticRegistry;
+import pneumaticCraft.api.heat.HeatBehaviour;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
+import pneumaticCraft.api.tileentity.IHeatRegistry;
+import pneumaticCraft.common.heat.behaviour.HeatBehaviourManager;
 import pneumaticCraft.lib.Log;
 
-public class HeatExchangerManager{
+public class HeatExchangerManager implements IHeatRegistry{
     /**
      * Used for blocks like lava and ice.
      */
@@ -31,20 +33,20 @@ public class HeatExchangerManager{
     }
 
     public void init(){
-        PneumaticRegistry.getInstance().registerBlockExchanger(Blocks.ice, 263, 500);
-        PneumaticRegistry.getInstance().registerBlockExchanger(Blocks.packed_ice, 263, 500);
-        PneumaticRegistry.getInstance().registerBlockExchanger(Blocks.snow, 268, 1000);
-        PneumaticRegistry.getInstance().registerBlockExchanger(Blocks.torch, 1700, 100000);
-        PneumaticRegistry.getInstance().registerBlockExchanger(Blocks.fire, 1700, 1000);
+        registerBlockExchanger(Blocks.ice, 263, 500);
+        registerBlockExchanger(Blocks.packed_ice, 263, 500);
+        registerBlockExchanger(Blocks.snow, 268, 1000);
+        registerBlockExchanger(Blocks.torch, 1700, 100000);
+        registerBlockExchanger(Blocks.fire, 1700, 1000);
 
         Map<String, Fluid> fluids = FluidRegistry.getRegisteredFluids();
         for(Fluid fluid : fluids.values()) {
             if(fluid.getBlock() != null) {
-                PneumaticRegistry.getInstance().registerBlockExchanger(fluid.getBlock(), fluid.getTemperature(), FLUID_RESISTANCE);
+                registerBlockExchanger(fluid.getBlock(), fluid.getTemperature(), FLUID_RESISTANCE);
             }
         }
-        PneumaticRegistry.getInstance().registerBlockExchanger(Blocks.flowing_water, FluidRegistry.WATER.getTemperature(), 500);
-        PneumaticRegistry.getInstance().registerBlockExchanger(Blocks.flowing_lava, FluidRegistry.LAVA.getTemperature(), 500);
+        registerBlockExchanger(Blocks.flowing_water, FluidRegistry.WATER.getTemperature(), 500);
+        registerBlockExchanger(Blocks.flowing_lava, FluidRegistry.LAVA.getTemperature(), 500);
     }
 
     public IHeatExchangerLogic getLogic(World world, BlockPos pos, EnumFacing side){
@@ -75,6 +77,25 @@ public class HeatExchangerManager{
         } else {
             specialBlockExchangers.put(block, heatExchanger);
         }
+    }
+
+    public void registerBlockExchanger(Block block, IHeatExchangerLogic heatExchangerLogic){
+        registerBlockExchanger(block, new SimpleHeatExchanger(heatExchangerLogic));
+    }
+
+    @Override
+    public void registerBlockExchanger(Block block, double temperature, double thermalResistance){
+        registerBlockExchanger(block, new HeatExchangerLogicConstant(temperature, thermalResistance));
+    }
+
+    @Override
+    public void registerHeatBehaviour(Class<? extends HeatBehaviour> heatBehaviour){
+        HeatBehaviourManager.getInstance().registerBehaviour(heatBehaviour);
+    }
+
+    @Override
+    public IHeatExchangerLogic getHeatExchangerLogic(){
+        return new HeatExchangerLogic();
     }
 
 }

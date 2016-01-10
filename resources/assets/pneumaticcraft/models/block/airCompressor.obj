@@ -4,6 +4,7 @@
 #
 # object Group_001
 #
+mtllib airCompressor.mtl
 
 v  10.899 15.000 -1.000
 v  15.000 15.000 -5.101

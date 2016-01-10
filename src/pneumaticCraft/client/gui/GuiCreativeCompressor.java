@@ -31,7 +31,7 @@ public class GuiCreativeCompressor extends GuiPneumaticContainerBase<TileEntityC
     @Override
     public void drawScreen(int x, int y, float partialTicks){
         super.drawScreen(x, y, partialTicks);
-        drawCenteredString(fontRendererObj, PneumaticCraftUtils.roundNumberTo(te.getPressure(null), 1) + " bar", width / 2, height / 2, 0xFFFFFF);
+        drawCenteredString(fontRendererObj, PneumaticCraftUtils.roundNumberTo(te.getPressure(), 1) + " bar", width / 2, height / 2, 0xFFFFFF);
     }
 
     @Override

@@ -14,8 +14,8 @@ import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.PneumaticRegistry;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.api.recipe.IThermopneumaticProcessingPlantRecipe;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 import pneumaticCraft.common.block.Blockss;
@@ -36,7 +36,7 @@ public class TileEntityThermopneumaticProcessingPlant extends TileEntityPneumati
     @DescSynced
     private final FluidTank outputTank = new FluidTank(PneumaticValues.NORMAL_TANK_CAPACITY);
     @GuiSynced
-    private final IHeatExchangerLogic heatExchanger = PneumaticRegistry.getInstance().getHeatExchangerLogic();
+    private final IHeatExchangerLogic heatExchanger = PneumaticRegistry.getInstance().getHeatRegistry().getHeatExchangerLogic();
     @GuiSynced
     public int redstoneMode;
     @GuiSynced
@@ -70,12 +70,12 @@ public class TileEntityThermopneumaticProcessingPlant extends TileEntityPneumati
             if(hasRecipe) {
                 requiredPressure = recipe.getRequiredPressure(inputTank.getFluid(), inventory[4]);
                 requiredTemperature = recipe.getRequiredTemperature(inputTank.getFluid(), inventory[4]);
-                if(redstoneAllows() && heatExchanger.getTemperature() >= requiredTemperature && getPressure(null) >= getMinWorkingPressure()) {
+                if(redstoneAllows() && heatExchanger.getTemperature() >= requiredTemperature && getPressure() >= getMinWorkingPressure()) {
                     craftingProgress++;
                     if(craftingProgress >= CRAFTING_TIME) {
                         outputTank.fill(recipe.getRecipeOutput(inputTank.getFluid(), inventory[4]).copy(), true);
                         recipe.useRecipeItems(inputTank.getFluid(), inventory[4]);
-                        addAir(-recipe.airUsed(inputTank.getFluid(), inventory[4]), null);
+                        addAir(-recipe.airUsed(inputTank.getFluid(), inventory[4]));
                         heatExchanger.addHeat(-recipe.heatUsed(inputTank.getFluid(), inventory[4]));
                         if(inputTank.getFluid() != null && inputTank.getFluid().amount <= 0) inputTank.setFluid(null);
                         if(inventory[4] != null && inventory[4].stackSize <= 0) inventory[4] = null;

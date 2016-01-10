@@ -4,7 +4,9 @@ import java.util.List;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.world.World;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -16,33 +18,38 @@ import org.apache.commons.lang3.tuple.Pair;
 public interface IAirHandler extends IManoMeasurable{
 
     /**
-     * -----------Needs to be forwarded by the implementing TileEntity's updateEntity() method.
+     * -----------Needs to be forwarded by the implementing TileEntity's update() method.
      * Updates the pneumatic machine's logic like air dispersion and checking if it needs to explode.
      */
-    public void updateEntityI();
+    public void update();
 
     /**
      * -----------Needs to be forwarded by the implementing TileEntity.
-     * @param nbt
+     * @param tag
      */
-    public void readFromNBTI(NBTTagCompound nbt);
+    public void readFromNBT(NBTTagCompound tag);
 
     /**
      * -----------Needs to be forwarded by the implementing TileEntity.
-     * @param nbt
+     * @param tag
      */
-    public void writeToNBTI(NBTTagCompound nbt);
+    public void writeToNBT(NBTTagCompound tag);
 
     /**
      * -----------Needs to be forwarded by the implementing TileEntity with itself as parameter.
      * @param parent TileEntity that is referencing this air handler.
      */
-    public void validateI(TileEntity parent);
+    public void validate(TileEntity parent);
+
+    /**
+     * -----------Needs to be forwarded from the implementing _Block_! Forward the Block's "onNeighborChange" method to this handler.
+     */
+    public void onNeighborChange();
 
     /**
      * Method to release air in the air. It takes air from a specific side, plays a sound effect, and spawns smoke particles.
      * It automatically detects if it needs to release air (when under pressure), suck air (when in vacuum) or do nothing.
-     * @param side
+     * @param side this only affects the direction the steam is pointing.
      */
     public void airLeak(EnumFacing side);
 
@@ -52,27 +59,18 @@ public interface IAirHandler extends IManoMeasurable{
     public List<Pair<EnumFacing, IAirHandler>> getConnectedPneumatics();
 
     /**
-     * Adds air to the tank of the given side of this TE. It also updates clients where needed (when they have a GUI opened).
-     * Deprecated: use the version with the integer parameter now.
-     * @param amount
-     * @param side
+     * Adds air to the tank of the given side of this TE.
      */
-    @Deprecated
-    public void addAir(float amount, EnumFacing side);
-
-    public void addAir(int amount, EnumFacing side);
+    public void addAir(int amount);
 
     /**
      * Sets the volume of this TE's air tank. When the volume decreases the pressure will remain the same, meaning air will
      * be lost. When the volume increases, the air remains the same, meaning the pressure will drop.
      * Used in the Volume Upgrade calculations.
-     * Deprecated: use the version with the integer parameter now.
-     * @param newVolume
+     * By default volume we mean the base volume. Volume added due to Volume Upgrades are added to this.
+     * @param defaultVolume
      */
-    @Deprecated
-    public void setVolume(float newVolume);
-
-    public void setVolume(int newVolume);
+    public void setDefaultVolume(int defaultVolume);
 
     public int getVolume();
 
@@ -82,14 +80,13 @@ public interface IAirHandler extends IManoMeasurable{
      */
     public float getMaxPressure();
 
-    public float getPressure(EnumFacing sideRequested);
+    public float getPressure();
 
     /**
      * Returns the amount of air (that has a relation to the pressure: air = pressure * volume)
-     * @param sideRequested
      * @return
      */
-    public int getCurrentAir(EnumFacing sideRequested);
+    public int getAir();
 
     /**
      * When your TileEntity is implementing IInventory and has slots that accept PneumaticCraft upgrades, register these slots
@@ -100,16 +97,21 @@ public interface IAirHandler extends IManoMeasurable{
 
     public int[] getUpgradeSlots();
 
-    public int getXCoord();
-
-    public int getYCoord();
-
-    public int getZCoord();
+    public World getWorld();
 
     /**
-     * Needs to be forwarded from the implementing _Block_! Forward the Block's "onNeighborChange" method to this handler.
+     * Not necessary if you use validate().
+     * @param world
      */
-    public void onNeighborChange();
+    public void setWorld(World world);
+
+    public BlockPos getPos();
+
+    /**
+     * Not necessary if you use validate().
+     * @param pos
+     */
+    public void setPos(BlockPos pos);
 
     /**
      * Creates an air connection with another handler. Can be used to connect up pneumatic machines that aren't neighboring, like AE2's P2P tunnels.

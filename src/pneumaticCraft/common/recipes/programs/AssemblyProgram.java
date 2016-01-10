@@ -5,7 +5,7 @@ import java.util.List;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
-import pneumaticCraft.api.recipe.AssemblyRecipe;
+import pneumaticCraft.common.recipes.AssemblyRecipe;
 import pneumaticCraft.common.tileentity.TileEntityAssemblyController;
 import pneumaticCraft.common.tileentity.TileEntityAssemblyDrill;
 import pneumaticCraft.common.tileentity.TileEntityAssemblyIOUnit;

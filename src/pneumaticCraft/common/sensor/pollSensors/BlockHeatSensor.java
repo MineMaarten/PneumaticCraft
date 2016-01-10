@@ -17,7 +17,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.lwjgl.util.Rectangle;
 
-import pneumaticCraft.api.IHeatExchangerLogic;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 import pneumaticCraft.api.universalSensor.IBlockAndCoordinatePollSensor;
 import pneumaticCraft.common.tileentity.TileEntityCompressedIronBlock;

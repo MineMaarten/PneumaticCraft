@@ -8,7 +8,7 @@ import net.minecraft.util.MathHelper;
 
 import org.lwjgl.opengl.GL11;
 
-import pneumaticCraft.api.IHeatExchangerLogic;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.lib.Textures;
 
 public class WidgetTemperature extends WidgetBase{

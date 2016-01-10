@@ -72,10 +72,10 @@ public class TileEntityElectrostaticCompressor extends TileEntityPneumaticBase i
 
     public void onStruckByLightning(){
         struckByLightningCooldown = 10;
-        if(getPressure(null) > PneumaticValues.DANGER_PRESSURE_ELECTROSTATIC_COMPRESSOR) {
+        if(getPressure() > PneumaticValues.DANGER_PRESSURE_ELECTROSTATIC_COMPRESSOR) {
             int maxRedirection = PneumaticValues.MAX_REDIRECTION_PER_IRON_BAR * ironBarsBeneath;
-            int tooMuchAir = (int)((getPressure(null) - PneumaticValues.DANGER_PRESSURE_ELECTROSTATIC_COMPRESSOR) * volume);
-            addAir(-Math.min(maxRedirection, tooMuchAir), null);
+            int tooMuchAir = (int)((getPressure() - PneumaticValues.DANGER_PRESSURE_ELECTROSTATIC_COMPRESSOR) * getAirHandler(null).getVolume());
+            addAir(-Math.min(maxRedirection, tooMuchAir));
         }
     }
 

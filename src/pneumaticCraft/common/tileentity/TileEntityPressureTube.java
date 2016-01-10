@@ -1,11 +1,11 @@
 package pneumaticCraft.common.tileentity;
 
+import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
@@ -16,8 +16,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.tuple.Pair;
 
 import pneumaticCraft.api.tileentity.IAirHandler;
-import pneumaticCraft.api.tileentity.IPneumaticMachine;
-import pneumaticCraft.api.tileentity.ISidedPneumaticMachine;
+import pneumaticCraft.api.tileentity.IAirListener;
+import pneumaticCraft.api.tileentity.IManoMeasurable;
 import pneumaticCraft.common.block.tubes.IInfluenceDispersing;
 import pneumaticCraft.common.block.tubes.ModuleRegistrator;
 import pneumaticCraft.common.block.tubes.TubeModule;
@@ -26,7 +26,7 @@ import pneumaticCraft.common.thirdparty.ModInteractionUtils;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.PneumaticValues;
 
-public class TileEntityPressureTube extends TileEntityPneumaticBase{
+public class TileEntityPressureTube extends TileEntityPneumaticBase implements IAirListener, IManoMeasurable{
     @DescSynced
     public boolean[] sidesConnected = new boolean[6];
     public TubeModule[] modules = new TubeModule[6];
@@ -113,7 +113,7 @@ public class TileEntityPressureTube extends TileEntityPneumaticBase{
             }
         }
 
-        List<Pair<EnumFacing, IAirHandler>> teList = getConnectedPneumatics();
+        List<Pair<EnumFacing, IAirHandler>> teList = getAirHandler(null).getConnectedPneumatics();
 
         boolean hasModules = false;
         for(TubeModule module : modules) {
@@ -122,15 +122,15 @@ public class TileEntityPressureTube extends TileEntityPneumaticBase{
                 break;
             }
         }
-        if(!hasModules && teList.size() - specialConnectedHandlers.size() == 1 && !worldObj.isRemote) {
+        if(!hasModules && teList.size() == 1 && !worldObj.isRemote) {
             for(Pair<EnumFacing, IAirHandler> entry : teList) {
-                if(entry.getKey() != null && modules[entry.getKey().getOpposite().ordinal()] == null && isConnectedTo(entry.getKey().getOpposite())) airLeak(entry.getKey().getOpposite());
+                if(entry.getKey() != null && modules[entry.getKey().getOpposite().ordinal()] == null && isConnectedTo(entry.getKey().getOpposite())) getAirHandler(null).airLeak(entry.getKey().getOpposite());
             }
         }
     }
 
     @Override
-    protected void onAirDispersion(int amount, EnumFacing side){
+    public void onAirDispersion(IAirHandler handler, EnumFacing side, int amount){
         if(side != null) {
             int intSide = side/*.getOpposite()*/.ordinal();
             if(modules[intSide] instanceof IInfluenceDispersing) {
@@ -140,7 +140,7 @@ public class TileEntityPressureTube extends TileEntityPneumaticBase{
     }
 
     @Override
-    protected int getMaxDispersion(EnumFacing side){
+    public int getMaxDispersion(IAirHandler handler, EnumFacing side){
         if(side != null) {
             int intSide = side/*.getOpposite()*/.ordinal();
             if(modules[intSide] instanceof IInfluenceDispersing) {
@@ -149,6 +149,9 @@ public class TileEntityPressureTube extends TileEntityPneumaticBase{
         }
         return Integer.MAX_VALUE;
     }
+
+    @Override
+    public void addConnectedPneumatics(List<Pair<EnumFacing, IAirHandler>> pneumatics){}
 
     public void setModule(TubeModule module, EnumFacing side){
         if(module != null) {
@@ -187,19 +190,21 @@ public class TileEntityPressureTube extends TileEntityPneumaticBase{
 
     public void updateConnections(World world, int x, int y, int z){
         sidesConnected = new boolean[6];
+
+        List<Pair<EnumFacing, IAirHandler>> connections = getAirHandler(null).getConnectedPneumatics();
+        Arrays.fill(sidesConnected, false);
+        for(Pair<EnumFacing, IAirHandler> entry : connections) {
+            sidesConnected[entry.getKey().ordinal()] = true;
+        }
+
         boolean hasModule = false;
-        for(EnumFacing direction : EnumFacing.VALUES) {
-            TileEntity te = getTileCache()[direction.ordinal()].getTileEntity();
-            IPneumaticMachine machine = ModInteractionUtils.getInstance().getMachine(te);
-            if(machine != null) {
-                sidesConnected[direction.ordinal()] = isConnectedTo(direction) && machine.isConnectedTo(direction.getOpposite());
-            } else if(te instanceof ISidedPneumaticMachine) {
-                sidesConnected[direction.ordinal()] = ((ISidedPneumaticMachine)te).getAirHandler(direction.getOpposite()) != null;
-            }
-            if(modules[direction.ordinal()] != null) {
+        for(int i = 0; i < 6; i++) {
+            if(modules[i] != null) {
                 hasModule = true;
+                break;
             }
         }
+
         int sidesCount = 0;
         for(boolean bool : sidesConnected) {
             if(bool) sidesCount++;
@@ -225,7 +230,6 @@ public class TileEntityPressureTube extends TileEntityPneumaticBase{
 
     @Override
     public void printManometerMessage(EntityPlayer player, List<String> text){
-        super.printManometerMessage(player, text);
         MovingObjectPosition mop = PneumaticCraftUtils.getEntityLookedObject(player);
         if(mop != null && mop.hitInfo instanceof EnumFacing) {
             EnumFacing dir = (EnumFacing)mop.hitInfo;

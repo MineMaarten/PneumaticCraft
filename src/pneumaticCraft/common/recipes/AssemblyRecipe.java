@@ -1,4 +1,4 @@
-package pneumaticCraft.api.recipe;
+package pneumaticCraft.common.recipes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,10 +6,6 @@ import java.util.List;
 import net.minecraft.item.ItemStack;
 import pneumaticCraft.api.PneumaticRegistry;
 
-/**
- * @Deprecated Access via {@link pneumaticCraft.api.recipe.IPneumaticRecipeRegistry}
- */
-@Deprecated
 public class AssemblyRecipe{
 
     public static List<AssemblyRecipe> drillRecipes = new ArrayList<AssemblyRecipe>();

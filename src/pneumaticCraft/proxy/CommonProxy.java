@@ -134,10 +134,6 @@ public class CommonProxy implements IGuiHandler{
 
     private final HackTickHandler serverHackTickHandler = new HackTickHandler();
 
-    public void registerRenders(){
-
-    }
-
     public void initConfig(Configuration config){}
 
     public World getClientWorld(){
@@ -158,11 +154,6 @@ public class CommonProxy implements IGuiHandler{
 
     public Side getSide(){
         return FMLCommonHandler.instance().getEffectiveSide();
-    }
-
-    public void registerHandlers(){
-        FMLCommonHandler.instance().bus().register(serverHudHandler = new CommonHUDHandler());
-        FMLCommonHandler.instance().bus().register(getHackTickHandler());
     }
 
     public void postInit(){}
@@ -357,7 +348,14 @@ public class CommonProxy implements IGuiHandler{
         return false;
     }
 
-    public void init(){}
+    public void preInit(){
+
+    }
+
+    public void init(){
+        FMLCommonHandler.instance().bus().register(serverHudHandler = new CommonHUDHandler());
+        FMLCommonHandler.instance().bus().register(getHackTickHandler());
+    }
 
     public void registerSemiBlockRenderer(ItemSemiBlockBase semiBlock){
 

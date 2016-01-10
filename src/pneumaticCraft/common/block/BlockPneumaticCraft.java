@@ -7,6 +7,9 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityLivingBase;
@@ -39,6 +42,8 @@ import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
 //TODO Computercraft dep @Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheralProvider", modid = ModIds.COMPUTERCRAFT)
 public abstract class BlockPneumaticCraft extends BlockContainer implements IPneumaticWrenchable/*, IPeripheralProvider*/{
+
+    public static final PropertyEnum<EnumFacing> ROTATION = PropertyEnum.<EnumFacing> create("facing", EnumFacing.class);
 
     protected BlockPneumaticCraft(Material par2Material){
         super(par2Material);
@@ -96,8 +101,24 @@ public abstract class BlockPneumaticCraft extends BlockContainer implements IPne
     public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase entity, ItemStack stack){
         if(isRotatable()) {
             EnumFacing rotation = PneumaticCraftUtils.getDirectionFacing(entity, canRotateToTopOrBottom());
-            ((TileEntityBase)world.getTileEntity(pos)).setRotation(rotation);
+            setRotation(world, pos, rotation, state);
         }
+    }
+
+    private void setRotation(World world, BlockPos pos, EnumFacing rotation){
+        setRotation(world, pos, rotation, world.getBlockState(pos));
+    }
+
+    protected EnumFacing getRotation(IBlockAccess world, BlockPos pos){
+        return getRotation(world.getBlockState(pos));
+    }
+
+    protected EnumFacing getRotation(IBlockState state){
+        return state.getValue(ROTATION);
+    }
+
+    private void setRotation(World world, BlockPos pos, EnumFacing rotation, IBlockState state){
+        world.setBlockState(pos, state.withProperty(ROTATION, rotation));
     }
 
     public boolean isRotatable(){
@@ -108,8 +129,22 @@ public abstract class BlockPneumaticCraft extends BlockContainer implements IPne
         return false;
     }
 
-    protected EnumFacing getRotation(IBlockAccess world, BlockPos pos){
-        return ((TileEntityBase)world.getTileEntity(pos)).getRotation();
+    @Override
+    protected BlockState createBlockState(){
+        if(isRotatable()) {
+            return new BlockState(this, new IProperty[]{ROTATION});
+        } else {
+            return super.createBlockState();
+        }
+    }
+
+    @Override
+    public int getMetaFromState(IBlockState state){
+        if(isRotatable()) {
+            return state.getValue(ROTATION).ordinal();
+        } else {
+            return super.getMetaFromState(state);
+        }
     }
 
     @Override
@@ -172,11 +207,11 @@ public abstract class BlockPneumaticCraft extends BlockContainer implements IPne
                     TileEntityBase te = (TileEntityBase)world.getTileEntity(pos);
                     if(rotateForgeWay()) {
                         if(!canRotateToTopOrBottom()) side = EnumFacing.UP;
-                        if(te.getRotation().getAxis() != side.getAxis()) te.setRotation(te.getRotation().rotateAround(side.getAxis()));
+                        if(getRotation(world, pos).getAxis() != side.getAxis()) setRotation(world, pos, getRotation(world, pos).rotateAround(side.getAxis()));
                     } else {
                         do {
-                            te.setRotation(EnumFacing.getFront(te.getRotation().ordinal() + 1));
-                        } while(canRotateToTopOrBottom() || te.getRotation().getAxis() != Axis.Y);
+                            setRotation(world, pos, EnumFacing.getFront(getRotation(world, pos).ordinal() + 1));
+                        } while(canRotateToTopOrBottom() || getRotation(world, pos).getAxis() != Axis.Y);
                     }
                     te.onBlockRotated();
                 }
@@ -244,7 +279,7 @@ public abstract class BlockPneumaticCraft extends BlockContainer implements IPne
         if(PneumaticCraft.proxy.isSneakingInGui()) {
             TileEntity te = createNewTileEntity(player.worldObj, 0);
             if(te instanceof TileEntityPneumaticBase) {
-                float pressure = ((TileEntityPneumaticBase)te).DANGER_PRESSURE;
+                float pressure = ((TileEntityPneumaticBase)te).dangerPressure;
                 curInfo.add(EnumChatFormatting.YELLOW + I18n.format("gui.tooltip.maxPressure", pressure));
             }
         }

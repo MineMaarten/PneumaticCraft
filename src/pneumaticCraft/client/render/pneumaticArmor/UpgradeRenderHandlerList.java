@@ -5,7 +5,6 @@ import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
 import pneumaticCraft.api.client.pneumaticHelmet.IUpgradeRenderHandler;
-import pneumaticCraft.api.client.pneumaticHelmet.RenderHandlerRegistry;
 import pneumaticCraft.common.CommonHUDHandler;
 
 public class UpgradeRenderHandlerList{
@@ -22,7 +21,6 @@ public class UpgradeRenderHandlerList{
     }
 
     private UpgradeRenderHandlerList(){
-        RenderHandlerRegistry.renderHandlers = upgradeRenderers;
         upgradeRenderers.add(new MainHelmetHandler());
         upgradeRenderers.add(new BlockTrackUpgradeHandler());
         upgradeRenderers.add(new EntityTrackUpgradeHandler());

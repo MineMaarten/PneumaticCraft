@@ -4,7 +4,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import pneumaticCraft.api.IHeatExchangerLogic;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 
 /**
  * Used for block like lava/ice, which output a constant heat.

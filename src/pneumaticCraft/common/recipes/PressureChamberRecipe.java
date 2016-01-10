@@ -1,4 +1,4 @@
-package pneumaticCraft.api.recipe;
+package pneumaticCraft.common.recipes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,10 +7,8 @@ import net.minecraft.item.ItemStack;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-/**
- * @Deprecated Access via {@link pneumaticCraft.api.recipe.IPneumaticRecipeRegistry}
- */
-@Deprecated
+import pneumaticCraft.api.recipe.IPressureChamberRecipe;
+
 public class PressureChamberRecipe{
     public static List<PressureChamberRecipe> chamberRecipes = new ArrayList<PressureChamberRecipe>();
     public static List<IPressureChamberRecipe> specialRecipes = new ArrayList<IPressureChamberRecipe>();
@@ -19,7 +17,6 @@ public class PressureChamberRecipe{
     public final ItemStack[] output;
     public final float pressure;
 
-    @Deprecated
     public PressureChamberRecipe(ItemStack[] input, float pressureRequired, ItemStack[] output, boolean outputAsBlock){
         this.input = input;
         this.output = output;

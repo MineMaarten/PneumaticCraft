@@ -44,7 +44,8 @@ public class ModuleRegulatorTube extends TubeModuleRedstoneReceiving implements 
                 TileEntity neighbor = tile.getWorld().getTileEntity(tile.getPos().offset(dir));
                 inLine = neighbor instanceof IPneumaticMachine;
                 if(inLine) {
-                    inverted = ((IPneumaticMachine)neighbor).getAirHandler().getPressure(dir) > tile.getPressure(null);
+                    IAirHandler neighborHandler = ((IPneumaticMachine)neighbor).getAirHandler(dir);
+                    inverted = neighborHandler != null && neighborHandler.getPressure() > tile.getAirHandler(null).getPressure();
                     NetworkHandler.sendToServer(new PacketDescriptionPacketRequest(neighbor.getPos()));
                 }
                 hasTicked = true;
@@ -99,14 +100,14 @@ public class ModuleRegulatorTube extends TubeModuleRedstoneReceiving implements 
     @Override
     public int getMaxDispersion(){
         IAirHandler connectedHandler = null;
-        for(Pair<EnumFacing, IAirHandler> entry : pressureTube.getAirHandler().getConnectedPneumatics()) {
+        for(Pair<EnumFacing, IAirHandler> entry : pressureTube.getAirHandler(null).getConnectedPneumatics()) {
             if(entry.getKey().equals(dir)) {
                 connectedHandler = entry.getValue();
                 break;
             }
         }
         if(connectedHandler == null) return 0;
-        int maxDispersion = (int)((getThreshold() - connectedHandler.getPressure(null)) * connectedHandler.getVolume());
+        int maxDispersion = (int)((getThreshold() - connectedHandler.getPressure()) * connectedHandler.getVolume());
         if(maxDispersion < 0) return 0;
         return maxDispersion;
     }

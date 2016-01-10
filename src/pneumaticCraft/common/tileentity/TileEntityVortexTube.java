@@ -2,15 +2,15 @@ package pneumaticCraft.common.tileentity;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
-import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.PneumaticRegistry;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 import pneumaticCraft.common.network.DescSynced;
 
 public class TileEntityVortexTube extends TileEntityPneumaticBase implements IHeatExchanger{
-    private final IHeatExchangerLogic coldHeatExchanger = PneumaticRegistry.getInstance().getHeatExchangerLogic();
-    private final IHeatExchangerLogic hotHeatExchanger = PneumaticRegistry.getInstance().getHeatExchangerLogic();
-    private final IHeatExchangerLogic connectingExchanger = PneumaticRegistry.getInstance().getHeatExchangerLogic();
+    private final IHeatExchangerLogic coldHeatExchanger = PneumaticRegistry.getInstance().getHeatRegistry().getHeatExchangerLogic();
+    private final IHeatExchangerLogic hotHeatExchanger = PneumaticRegistry.getInstance().getHeatRegistry().getHeatExchangerLogic();
+    private final IHeatExchangerLogic connectingExchanger = PneumaticRegistry.getInstance().getHeatRegistry().getHeatExchangerLogic();
     private int visualizationTimer = 60;
 
     @DescSynced
@@ -128,9 +128,9 @@ public class TileEntityVortexTube extends TileEntityPneumaticBase implements IHe
         if(!worldObj.isRemote) {
             connectingExchanger.update();
             coldHeatExchanger.update();//Only update the cold and connecting side, the hot side is handled in TileEntityBase.
-            int usedAir = (int)(getPressure(null) * 10);
+            int usedAir = (int)(getPressure() * 10);
             if(usedAir > 0) {
-                addAir(-usedAir, null);
+                addAir(-usedAir);
                 double generatedHeat = usedAir / 10D;
                 coldHeatExchanger.addHeat(-generatedHeat);
                 hotHeatExchanger.addHeat(generatedHeat);

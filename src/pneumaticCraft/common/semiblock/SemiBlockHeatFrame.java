@@ -12,8 +12,8 @@ import net.minecraft.util.StatCollector;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.PneumaticRegistry;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.recipes.PneumaticRecipeRegistry;
@@ -21,7 +21,7 @@ import pneumaticCraft.common.tileentity.TileEntityCompressedIronBlock;
 import pneumaticCraft.common.util.IOHelper;
 
 public class SemiBlockHeatFrame extends SemiBlockBasic implements IHeatExchanger{
-    private final IHeatExchangerLogic logic = PneumaticRegistry.getInstance().getHeatExchangerLogic();
+    private final IHeatExchangerLogic logic = PneumaticRegistry.getInstance().getHeatRegistry().getHeatExchangerLogic();
     private int lastValidSlot;//Performance increaser
     private int cookingProgress;
     private int coolingProgress;

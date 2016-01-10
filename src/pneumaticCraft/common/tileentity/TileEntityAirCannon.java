@@ -198,6 +198,10 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
 
         super.update();
 
+        if(!worldObj.isRemote) {
+            List<Pair<EnumFacing, IAirHandler>> teList = getAirHandler(null).getConnectedPneumatics();
+            if(teList.size() == 0) getAirHandler(null).airLeak(getRotation());
+        }
     }
 
     private void updateTrackedItems(){
@@ -382,13 +386,6 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
     }
 
     // PNEUMATIC METHODS -----------------------------------------
-
-    @Override
-    protected void disperseAir(){
-        super.disperseAir();
-        List<Pair<EnumFacing, IAirHandler>> teList = getConnectedPneumatics();
-        if(teList.size() == 0) airLeak(getRotation());
-    }
 
     @Override
     public boolean isConnectedTo(EnumFacing side){
@@ -620,9 +617,9 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
 
     private synchronized boolean fire(){
         Entity itemShot = getCloseEntityIfUpgraded();
-        if(getPressure(null) >= PneumaticValues.MIN_PRESSURE_AIR_CANNON && (itemShot != null || inventory[0] != null)) {
+        if(getPressure() >= PneumaticValues.MIN_PRESSURE_AIR_CANNON && (itemShot != null || inventory[0] != null)) {
             double[] velocity = getVelocityVector(heightAngle, rotationAngle, getForce());
-            addAir((int)(-500 * getForce()), null);
+            addAir((int)(-500 * getForce()));
             boolean shootingInventory = false;
             if(itemShot == null) {
                 shootingInventory = true;

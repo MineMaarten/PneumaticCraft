@@ -1,4 +1,4 @@
-package pneumaticCraft.api;
+package pneumaticCraft.api.heat;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
@@ -6,7 +6,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 /**
- * DO NOT IMPLEMENT THIS CLASS YOURSELF! Use PneumaticRegistry.getInstance().getHeatExchangerLogic() !
+ * DO NOT IMPLEMENT THIS CLASS YOURSELF! Use PneumaticRegistry.getInstance().getHeatRegistry().getHeatExchangerLogic() !
  * @author MineMaarten
  * www.minemaarten.com
  */

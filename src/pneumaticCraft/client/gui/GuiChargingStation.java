@@ -112,10 +112,10 @@ public class GuiChargingStation extends GuiPneumaticContainerBase<TileEntityChar
         } else {
             ItemStack chargeStack = te.getStackInSlot(TileEntityChargingStation.CHARGE_INVENTORY_INDEX);
             IPressurizable chargeItem = (IPressurizable)chargeStack.getItem();
-            if(chargeItem.getPressure(chargeStack) > te.getPressure(null) + 0.01F && chargeItem.getPressure(chargeStack) <= 0) {
+            if(chargeItem.getPressure(chargeStack) > te.getPressure() + 0.01F && chargeItem.getPressure(chargeStack) <= 0) {
                 textList.addAll(PneumaticCraftUtils.convertStringIntoList("\u00a77The put in item can't be discharged", GuiConstants.maxCharPerLineLeft));
                 textList.add("\u00a70The item is empty.");
-            } else if(chargeItem.getPressure(chargeStack) < te.getPressure(null) - 0.01F && chargeItem.getPressure(chargeStack) >= chargeItem.maxPressure(chargeStack)) {
+            } else if(chargeItem.getPressure(chargeStack) < te.getPressure() - 0.01F && chargeItem.getPressure(chargeStack) >= chargeItem.maxPressure(chargeStack)) {
                 textList.addAll(PneumaticCraftUtils.convertStringIntoList("\u00a77The put in item can't be charged", GuiConstants.maxCharPerLineLeft));
                 textList.add("\u00a70The item is full.");
             } else if(!te.charging && !te.disCharging) {

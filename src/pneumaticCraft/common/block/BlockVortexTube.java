@@ -53,7 +53,7 @@ public class BlockVortexTube extends BlockPneumaticCraftModeled{
             te.rotateRoll(1);
             EnumFacing d = te.getTubeDirection();
             IPneumaticMachine pneumaticMachine = ModInteractionUtils.getInstance().getMachine(world.getTileEntity(pos.offset(d)));
-            if(pneumaticMachine != null && pneumaticMachine.isConnectedTo(d.getOpposite())) break;
+            if(pneumaticMachine != null && pneumaticMachine.getAirHandler(d.getOpposite()) != null) break;
         }
     }
 }

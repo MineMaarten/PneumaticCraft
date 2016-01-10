@@ -114,7 +114,7 @@ public class GuiAerialInterface extends GuiPneumaticContainerBase<TileEntityAeri
     @Override
     protected void addPressureStatInfo(List<String> pressureStatText){
         super.addPressureStatInfo(pressureStatText);
-        if(te.getPressure(null) > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE && te.isConnectedToPlayer) {
+        if(te.getPressure() > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE && te.isConnectedToPlayer) {
             pressureStatText.add(EnumChatFormatting.GRAY + "Usage:");
             pressureStatText.add(EnumChatFormatting.BLACK + PneumaticCraftUtils.roundNumberTo(PneumaticValues.USAGE_AERIAL_INTERFACE, 1) + " mL/tick.");
         }

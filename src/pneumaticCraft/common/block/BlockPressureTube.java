@@ -207,7 +207,7 @@ public class BlockPressureTube extends BlockPneumaticCraftModeled{
                 return true;
             }
             if(!player.capabilities.isCreativeMode) {
-                EntityItem entity = new EntityItem(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, new ItemStack(tube.maxPressure <= PneumaticValues.MAX_PRESSURE_PRESSURE_TUBE ? Blockss.pressureTube : Blockss.advancedPressureTube));
+                EntityItem entity = new EntityItem(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, new ItemStack(tube.criticalPressure <= PneumaticValues.MAX_PRESSURE_PRESSURE_TUBE ? Blockss.pressureTube : Blockss.advancedPressureTube));
                 world.spawnEntityInWorld(entity);
                 entity.onCollideWithPlayer(player);
             }

@@ -3,6 +3,7 @@ package pneumaticCraft.common.network;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import pneumaticCraft.common.pressure.AirHandler;
 import pneumaticCraft.common.thirdparty.ModInteractionUtils;
 import pneumaticCraft.common.tileentity.TileEntityPneumaticBase;
 import pneumaticCraft.common.tileentity.TileEntityPressureTube;
@@ -14,7 +15,7 @@ public class PacketUpdatePressureBlock extends LocationIntPacket<PacketUpdatePre
 
     public PacketUpdatePressureBlock(TileEntityPneumaticBase te){
         super(te.getPos());
-        currentAir = te.currentAir;
+        currentAir = te.getAirHandler(null).getAir();
     }
 
     @Override
@@ -33,10 +34,10 @@ public class PacketUpdatePressureBlock extends LocationIntPacket<PacketUpdatePre
     public void handleClientSide(PacketUpdatePressureBlock message, EntityPlayer player){
         TileEntity te = message.getTileEntity(player.worldObj);
         if(te instanceof TileEntityPneumaticBase) {
-            ((TileEntityPneumaticBase)te).currentAir = message.currentAir;
+            ((AirHandler)((TileEntityPneumaticBase)te).getAirHandler(null)).setAir(message.currentAir);
         } else {
             TileEntityPressureTube tube = ModInteractionUtils.getInstance().getTube(te);
-            if(tube != null) tube.currentAir = message.currentAir;
+            if(tube != null) ((AirHandler)tube.getAirHandler(null)).setAir(message.currentAir);
         }
     }
 

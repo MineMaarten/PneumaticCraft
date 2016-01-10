@@ -31,9 +31,11 @@ import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableBlock;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableEntity;
+import pneumaticCraft.api.client.pneumaticHelmet.IPneumaticHelmetRegistry;
 import pneumaticCraft.client.render.pneumaticArmor.BlockTrackUpgradeHandler;
 import pneumaticCraft.client.render.pneumaticArmor.EntityTrackUpgradeHandler;
 import pneumaticCraft.client.render.pneumaticArmor.HUDHandler;
+import pneumaticCraft.client.render.pneumaticArmor.PneumaticHelmetRegistry;
 import pneumaticCraft.client.render.pneumaticArmor.RenderBlockTarget;
 import pneumaticCraft.client.render.pneumaticArmor.RenderTarget;
 import pneumaticCraft.client.render.pneumaticArmor.hacking.block.HackableButton;
@@ -56,7 +58,6 @@ import pneumaticCraft.client.render.pneumaticArmor.hacking.entity.HackableGhast;
 import pneumaticCraft.client.render.pneumaticArmor.hacking.entity.HackableLivingDisarm;
 import pneumaticCraft.client.render.pneumaticArmor.hacking.entity.HackableTameable;
 import pneumaticCraft.client.render.pneumaticArmor.hacking.entity.HackableWitch;
-import pneumaticCraft.common.PneumaticCraftAPIHandler;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.util.WorldAndCoord;
 import pneumaticCraft.lib.Log;
@@ -77,35 +78,36 @@ public class HackableHandler{
     }
 
     public static void addDefaultEntries(){
-        PneumaticRegistry.getInstance().addHackable(Blocks.tnt, HackableTNT.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.mob_spawner, HackableMobSpawner.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.lever, HackableLever.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.stone_button, HackableButton.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.wooden_button, HackableButton.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.oak_door, HackableDoor.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.spruce_door, HackableDoor.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.birch_door, HackableDoor.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.jungle_door, HackableDoor.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.acacia_door, HackableDoor.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.dark_oak_door, HackableDoor.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.tripwire_hook, HackableTripwire.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.dispenser, HackableDispenser.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.dropper, HackableDispenser.class);
-        PneumaticRegistry.getInstance().addHackable(Blockss.securityStation, HackableSecurityStation.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.monster_egg, HackableTripwire.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.noteblock, HackableNoteblock.class);
-        PneumaticRegistry.getInstance().addHackable(Blocks.jukebox, HackableJukebox.class);
+        IPneumaticHelmetRegistry manager = PneumaticRegistry.getInstance().getHelmetRegistry();
+        manager.addHackable(Blocks.tnt, HackableTNT.class);
+        manager.addHackable(Blocks.mob_spawner, HackableMobSpawner.class);
+        manager.addHackable(Blocks.lever, HackableLever.class);
+        manager.addHackable(Blocks.stone_button, HackableButton.class);
+        manager.addHackable(Blocks.wooden_button, HackableButton.class);
+        manager.addHackable(Blocks.oak_door, HackableDoor.class);
+        manager.addHackable(Blocks.spruce_door, HackableDoor.class);
+        manager.addHackable(Blocks.birch_door, HackableDoor.class);
+        manager.addHackable(Blocks.jungle_door, HackableDoor.class);
+        manager.addHackable(Blocks.acacia_door, HackableDoor.class);
+        manager.addHackable(Blocks.dark_oak_door, HackableDoor.class);
+        manager.addHackable(Blocks.tripwire_hook, HackableTripwire.class);
+        manager.addHackable(Blocks.dispenser, HackableDispenser.class);
+        manager.addHackable(Blocks.dropper, HackableDispenser.class);
+        manager.addHackable(Blockss.securityStation, HackableSecurityStation.class);
+        manager.addHackable(Blocks.monster_egg, HackableTripwire.class);
+        manager.addHackable(Blocks.noteblock, HackableNoteblock.class);
+        manager.addHackable(Blocks.jukebox, HackableJukebox.class);
 
-        PneumaticRegistry.getInstance().addHackable(EntityCreeper.class, HackableCreeper.class);
-        PneumaticRegistry.getInstance().addHackable(EntityTameable.class, HackableTameable.class);
-        PneumaticRegistry.getInstance().addHackable(EntityCow.class, HackableCow.class);
-        PneumaticRegistry.getInstance().addHackable(EntityCaveSpider.class, HackableCaveSpider.class);
-        PneumaticRegistry.getInstance().addHackable(EntityBlaze.class, HackableBlaze.class);
-        PneumaticRegistry.getInstance().addHackable(EntityGhast.class, HackableGhast.class);
-        PneumaticRegistry.getInstance().addHackable(EntityWitch.class, HackableWitch.class);
-        PneumaticRegistry.getInstance().addHackable(EntityLiving.class, HackableLivingDisarm.class);
-        PneumaticRegistry.getInstance().addHackable(EntityEnderman.class, HackableEnderman.class);
-        PneumaticRegistry.getInstance().addHackable(EntityBat.class, HackableBat.class);
+        manager.addHackable(EntityCreeper.class, HackableCreeper.class);
+        manager.addHackable(EntityTameable.class, HackableTameable.class);
+        manager.addHackable(EntityCow.class, HackableCow.class);
+        manager.addHackable(EntityCaveSpider.class, HackableCaveSpider.class);
+        manager.addHackable(EntityBlaze.class, HackableBlaze.class);
+        manager.addHackable(EntityGhast.class, HackableGhast.class);
+        manager.addHackable(EntityWitch.class, HackableWitch.class);
+        manager.addHackable(EntityLiving.class, HackableLivingDisarm.class);
+        manager.addHackable(EntityEnderman.class, HackableEnderman.class);
+        manager.addHackable(EntityBat.class, HackableBat.class);
     }
 
     public static IHackableEntity getHackableForEntity(Entity entity, EntityPlayer player){
@@ -120,7 +122,7 @@ public class HackableHandler{
         if(entity instanceof IHackableEntity && ((IHackableEntity)entity).canHack(entity, player)) return (IHackableEntity)entity;
         IHackableEntity hackable = getInstance().trackedHackableEntities.get(entity);
         if(hackable == null) {
-            for(Map.Entry<Class<? extends Entity>, Class<? extends IHackableEntity>> entry : PneumaticCraftAPIHandler.getInstance().hackableEntities.entrySet()) {
+            for(Map.Entry<Class<? extends Entity>, Class<? extends IHackableEntity>> entry : PneumaticHelmetRegistry.getInstance().hackableEntities.entrySet()) {
                 if(entry.getKey().isAssignableFrom(entity.getClass())) {
                     try {
                         hackable = entry.getValue().newInstance();
@@ -149,7 +151,7 @@ public class HackableHandler{
         Iterator<Map.Entry<WorldAndCoord, IHackableBlock>> iterator = getInstance().trackedHackableBlocks.entrySet().iterator();
         while(iterator.hasNext()) {
             Map.Entry<WorldAndCoord, IHackableBlock> entry = iterator.next();
-            Class<? extends IHackableBlock> hackableBlockClazz = PneumaticCraftAPIHandler.getInstance().hackableBlocks.get(entry.getKey().getBlock());
+            Class<? extends IHackableBlock> hackableBlockClazz = PneumaticHelmetRegistry.getInstance().hackableBlocks.get(entry.getKey().getBlock());
             if(hackableBlockClazz != entry.getValue().getClass() || !entry.getValue().canHack(entry.getKey().world, entry.getKey().pos, player) && !isInDisplayCooldown(entry.getValue(), entry.getKey().world, entry.getKey().pos, player)) iterator.remove();
         }
 
@@ -157,9 +159,9 @@ public class HackableHandler{
         if(block instanceof IHackableBlock && ((IHackableBlock)block).canHack(world, pos, player)) return (IHackableBlock)block;
         IHackableBlock hackable = getInstance().trackedHackableBlocks.get(new WorldAndCoord(world, pos));
         if(hackable == null) {
-            if(!PneumaticCraftAPIHandler.getInstance().hackableBlocks.containsKey(block)) return null;
+            if(!PneumaticHelmetRegistry.getInstance().hackableBlocks.containsKey(block)) return null;
             try {
-                hackable = PneumaticCraftAPIHandler.getInstance().hackableBlocks.get(block).newInstance();
+                hackable = PneumaticHelmetRegistry.getInstance().hackableBlocks.get(block).newInstance();
                 if(hackable.canHack(world, pos, player)) {
                     getInstance().trackedHackableBlocks.put(new WorldAndCoord(world, pos), hackable);
                 } else {
@@ -221,7 +223,7 @@ public class HackableHandler{
             NBTTagList tagList = compound.getTagList("hackables", 10);
             for(int i = 0; i < tagList.tagCount(); i++) {
                 String hackableId = tagList.getCompoundTagAt(i).getString("id");
-                Class<? extends IHackableEntity> hackableClass = PneumaticCraftAPIHandler.getInstance().stringToEntityHackables.get(hackableId);
+                Class<? extends IHackableEntity> hackableClass = PneumaticHelmetRegistry.getInstance().stringToEntityHackables.get(hackableId);
                 if(hackableClass != null) {
                     try {
                         if(hackables == null) hackables = new ArrayList<IHackableEntity>();

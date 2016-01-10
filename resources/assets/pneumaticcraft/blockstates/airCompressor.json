@@ -1,0 +1,41 @@
+{
+    "forge_marker": 1,
+    "defaults": {
+        "textures": {"all": "pneumaticcraft:model/airCompressor.png"},
+        "model": "pneumaticcraft:airCompressor.obj"
+    },
+	"variants": {
+		"facing": {
+			"up": {"transform": {"rotation" : {"x" : 90}}},
+			"down": {"x" : -90},
+			"east": {
+				"transform": {
+					"scale": [ 0.0625, 0.0625, 0.0625 ],
+					"translation": [ -0.46875, -0.46875, 0.53125 ]
+				}
+			},
+			"north": {
+				"transform": {
+					"scale": [ 0.0625, 0.0625, 0.0625 ],
+					"translation": [ 0.53125, -0.46875, 0.46875 ],
+					"rotation": {"y" : 90}
+				}
+			},
+			"west": {
+				"transform": {
+					"scale": [ 0.0625, 0.0625, 0.0625 ],
+					"translation": [ 0.46875, -0.46875, -0.53125 ],
+					"rotation": {"y": 180}
+				}
+			},
+			"south": {
+				"transform": {
+					"scale": [ 0.0625, 0.0625, 0.0625 ],
+					"translation": [ -0.53125, -0.46875, -0.46875 ],
+					"rotation": {"y" : 270}
+				}
+			}
+		},
+		"inventory": [{}]
+	}
+}

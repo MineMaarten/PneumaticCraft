@@ -159,11 +159,11 @@ public class TileEntityPressureChamberInterface extends TileEntityPressureChambe
         ItemStack[] chamberStacks = core.getStacksInChamber();
         for(ItemStack chamberStack : chamberStacks) {
             if((inventory[0] == null || inventory[0].isItemEqual(chamberStack)) && isItemValidForSlot(0, chamberStack)) {
-                int maxAllowedItems = Math.abs(core.currentAir) / PneumaticValues.USAGE_CHAMBER_INTERFACE;
+                int maxAllowedItems = Math.abs(core.getAirHandler(null).getAir()) / PneumaticValues.USAGE_CHAMBER_INTERFACE;
                 if(maxAllowedItems > 0) {
                     if(inventory[0] != null) maxAllowedItems = Math.min(maxAllowedItems, chamberStack.getMaxStackSize() - inventory[0].stackSize);
                     int transferedItems = Math.min(chamberStack.stackSize, maxAllowedItems);
-                    core.addAir((core.currentAir > 0 ? -1 : 1) * transferedItems * PneumaticValues.USAGE_CHAMBER_INTERFACE, null);
+                    core.addAir((core.getAirHandler(null).getAir() > 0 ? -1 : 1) * transferedItems * PneumaticValues.USAGE_CHAMBER_INTERFACE);
                     ItemStack transferedStack = chamberStack.copy().splitStack(transferedItems);
                     ItemStack insertedStack = transferedStack.copy();
                     if(inventory[0] != null) insertedStack.stackSize += inventory[0].stackSize;
@@ -180,9 +180,9 @@ public class TileEntityPressureChamberInterface extends TileEntityPressureChambe
             for(EnumFacing d : EnumFacing.VALUES) {
                 BlockPos neighborPos = getPos().offset(d);
                 if(valve.isCoordWithinChamber(worldObj, neighborPos)) {
-                    enoughAir = Math.abs(valve.currentAir) > inventory[0].stackSize * PneumaticValues.USAGE_CHAMBER_INTERFACE;
+                    enoughAir = Math.abs(valve.getAirHandler(null).getAir()) > inventory[0].stackSize * PneumaticValues.USAGE_CHAMBER_INTERFACE;
                     if(enoughAir) {
-                        valve.addAir((valve.currentAir > 0 ? -1 : 1) * inventory[0].stackSize * PneumaticValues.USAGE_CHAMBER_INTERFACE, null);
+                        valve.addAir((valve.getAirHandler(null).getAir() > 0 ? -1 : 1) * inventory[0].stackSize * PneumaticValues.USAGE_CHAMBER_INTERFACE);
                         EntityItem item = new EntityItem(worldObj, neighborPos.getX() + 0.5, neighborPos.getY() + 0.5, neighborPos.getZ() + 0.5D, inventory[0].copy());
                         worldObj.spawnEntityInWorld(item);
                         setInventorySlotContents(0, null);

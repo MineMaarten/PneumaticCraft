@@ -71,7 +71,7 @@ public class GuiAirCompressor extends GuiPneumaticContainerBase<TileEntityAirCom
             textList.add("\u00a77No fuel!");
             textList.add("\u00a70Insert any burnable item.");
         }
-        List<Pair<EnumFacing, IAirHandler>> teSurrounding = te.getConnectedPneumatics();
+        List<Pair<EnumFacing, IAirHandler>> teSurrounding = te.getAirHandler(null).getConnectedPneumatics();
         if(teSurrounding.isEmpty()) {
             textList.add("\u00a77Air leaking!");
             textList.add("\u00a70Add pipes / machines");

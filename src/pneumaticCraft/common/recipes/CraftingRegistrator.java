@@ -24,9 +24,7 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import pneumaticCraft.api.PneumaticRegistry;
-import pneumaticCraft.api.recipe.AssemblyRecipe;
 import pneumaticCraft.api.recipe.IPneumaticRecipeRegistry;
-import pneumaticCraft.api.recipe.PressureChamberRecipe;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.block.tubes.ModuleRegistrator;
 import pneumaticCraft.common.config.Config;

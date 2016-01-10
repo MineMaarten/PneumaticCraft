@@ -12,11 +12,9 @@ import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import pneumaticCraft.api.recipe.AssemblyRecipe;
 import pneumaticCraft.api.recipe.IPneumaticRecipeRegistry;
 import pneumaticCraft.api.recipe.IPressureChamberRecipe;
 import pneumaticCraft.api.recipe.IThermopneumaticProcessingPlantRecipe;
-import pneumaticCraft.api.recipe.PressureChamberRecipe;
 import pneumaticCraft.common.util.OreDictionaryHelper;
 
 public class PneumaticRecipeRegistry implements IPneumaticRecipeRegistry{

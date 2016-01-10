@@ -68,8 +68,8 @@ import pneumaticCraft.api.drone.IPathNavigator;
 import pneumaticCraft.api.drone.IPathfindHandler;
 import pneumaticCraft.api.tileentity.IManoMeasurable;
 import pneumaticCraft.client.render.RenderProgressingLine;
+import pneumaticCraft.common.DroneRegistry;
 import pneumaticCraft.common.NBTUtil;
-import pneumaticCraft.common.PneumaticCraftAPIHandler;
 import pneumaticCraft.common.ai.DroneAIManager;
 import pneumaticCraft.common.ai.DroneAIManager.EntityAITaskEntry;
 import pneumaticCraft.common.ai.DroneGoToChargingStation;
@@ -901,8 +901,8 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
             return hasLiquidImmunity;
         }
         if(block.isPassable(worldObj, pos) && block != Blocks.ladder) return true;
-        if(PneumaticCraftAPIHandler.getInstance().pathfindableBlocks.containsKey(block)) {
-            IPathfindHandler pathfindHandler = PneumaticCraftAPIHandler.getInstance().pathfindableBlocks.get(block);
+        if(DroneRegistry.getInstance().pathfindableBlocks.containsKey(block)) {
+            IPathfindHandler pathfindHandler = DroneRegistry.getInstance().pathfindableBlocks.get(block);
             return pathfindHandler == null || pathfindHandler.canPathfindThrough(worldObj, pos);
         } else {
             return false;

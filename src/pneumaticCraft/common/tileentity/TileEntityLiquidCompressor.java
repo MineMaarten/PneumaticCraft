@@ -74,7 +74,7 @@ public class TileEntityLiquidCompressor extends TileEntityPneumaticBase implemen
                     isProducing = true;
                     internalFuelBuffer -= usageRate;
                     onFuelBurn(usageRate);
-                    addAir((int)(getBaseProduction() * this.getSpeedMultiplierFromUpgrades() * getEfficiency() / 100), null);
+                    addAir((int)(getBaseProduction() * this.getSpeedMultiplierFromUpgrades() * getEfficiency() / 100));
                 }
             }
         }

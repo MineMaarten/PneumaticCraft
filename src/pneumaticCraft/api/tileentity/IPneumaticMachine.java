@@ -2,11 +2,7 @@ package pneumaticCraft.api.tileentity;
 
 import net.minecraft.util.EnumFacing;
 
-/**
- * Deprecated: Use ISidedPneumaticMachine in favor of this one. In Minecraft 1.8+ that ISidedPneumaticMachine will be renamed to IPneumaticMachine, and therefore will be sided by default.
- * TODO 1.8 remove
- */
-@Deprecated
+
 public interface IPneumaticMachine{
 
     /**
@@ -22,14 +18,7 @@ public interface IPneumaticMachine{
      * to the IAirHandler.
      * Apart from that you'll need to forward {@link net.minecraft.block.Block#onNeighborChange(net.minecraft.world.IBlockAccess, int, int, int, int, int, int)}
      * from the implementing block to the IAirHandler.
-     * @return
+     * @return a valid IAirHandler when connectable on this side. If not, return null.
      */
-    public IAirHandler getAirHandler();
-
-    /**
-     * Returns true if the pneumatic logic is connected to the given side.
-     * @param side
-     * @return
-     */
-    public boolean isConnectedTo(EnumFacing side);
+    public IAirHandler getAirHandler(EnumFacing side);
 }

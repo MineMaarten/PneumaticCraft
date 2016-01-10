@@ -16,7 +16,10 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import pneumaticCraft.api.tileentity.IPneumaticMachine;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.item.ItemAssemblyProgram;
 import pneumaticCraft.common.item.Itemss;
@@ -70,7 +73,7 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
 
         if(!worldObj.isRemote) {
             displayedText = "Standby";
-            if(getPressure(null) >= PneumaticValues.MIN_PRESSURE_ASSEMBLY_CONTROLLER) {
+            if(getPressure() >= PneumaticValues.MIN_PRESSURE_ASSEMBLY_CONTROLLER) {
                 if(curProgram != null || goingToHomePosition) {
                     List<IAssemblyMachine> machineList = getMachines();
                     EnumMachine[] requiredMachines = curProgram != null ? curProgram.getRequiredMachines() : EnumMachine.values();
@@ -143,7 +146,7 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
                             goToHomePosition(platform, ioUnitImport, ioUnitExport, drill, laser);
                             displayedText = "Resetting...";
                         }
-                        if(useAir) addAir(-(int)(PneumaticValues.USAGE_ASSEMBLING * getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots())), null);
+                        if(useAir) addAir(-(int)(PneumaticValues.USAGE_ASSEMBLING * getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots())));
                         float speedMultiplier = getSpeedMultiplierFromUpgrades(getUpgradeSlots());
                         for(IAssemblyMachine machine : machineList) {
                             machine.setSpeed(speedMultiplier);
@@ -177,7 +180,7 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
     }
 
     public void addProblems(List<String> problemList){
-        if(getPressure(null) < PneumaticValues.MIN_PRESSURE_ASSEMBLY_CONTROLLER) {
+        if(getPressure() < PneumaticValues.MIN_PRESSURE_ASSEMBLY_CONTROLLER) {
             problemList.add(EnumChatFormatting.GRAY + "No sufficient pressure.");
             problemList.add(EnumChatFormatting.BLACK + "Add pressure.");
         }
@@ -203,7 +206,7 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
             textList = new ArrayList<String>();
             curProgram.addProgramProblem(textList);
         }
-        return !foundAllMachines || foundDuplicateMachine || getPressure(null) < PneumaticValues.MIN_PRESSURE_ASSEMBLY_CONTROLLER || curProgram == null || textList.size() > 0;
+        return !foundAllMachines || foundDuplicateMachine || getPressure() < PneumaticValues.MIN_PRESSURE_ASSEMBLY_CONTROLLER || curProgram == null || textList.size() > 0;
     }
 
     public List<IAssemblyMachine> getMachines(){
@@ -230,13 +233,10 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
     }
 
     public void updateConnections(){
-        for(EnumFacing direction : EnumFacing.VALUES) {
-            TileEntity te = worldObj.getTileEntity(getPos().offset(direction));
-            if(te instanceof IPneumaticMachine) {
-                sidesConnected[direction.ordinal()] = ((IPneumaticMachine)te).isConnectedTo(direction.getOpposite());
-            } else {
-                sidesConnected[direction.ordinal()] = false;
-            }
+        List<Pair<EnumFacing, IAirHandler>> connections = getAirHandler(null).getConnectedPneumatics();
+        Arrays.fill(sidesConnected, false);
+        for(Pair<EnumFacing, IAirHandler> entry : connections) {
+            sidesConnected[entry.getKey().ordinal()] = true;
         }
     }
 

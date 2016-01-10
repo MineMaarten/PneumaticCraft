@@ -64,7 +64,7 @@ public class CommandAmazonDelivery extends CommandBase{
                 if(inv.getStackInSlot(i) != null) deliveredStacks.add(inv.getStackInSlot(i));
             }
             if(deliveredStacks.size() > 0) {
-                PneumaticRegistry.getInstance().deliverItemsAmazonStyle(sender.getEntityWorld(), new BlockPos(x, y, z), deliveredStacks.toArray(new ItemStack[deliveredStacks.size()]));
+                PneumaticRegistry.getInstance().getDroneRegistry().deliverItemsAmazonStyle(sender.getEntityWorld(), new BlockPos(x, y, z), deliveredStacks.toArray(new ItemStack[deliveredStacks.size()]));
                 sender.addChatMessage(new ChatComponentTranslation("command.deliverAmazon.success"));
             } else {
                 sender.addChatMessage(new ChatComponentTranslation("command.deliverAmazon.noItems"));

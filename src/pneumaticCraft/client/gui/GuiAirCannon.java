@@ -102,7 +102,7 @@ public class GuiAirCannon extends GuiPneumaticContainerBase<TileEntityAirCannon>
 
     @Override
     protected void addProblems(List<String> textList){
-        List<Pair<EnumFacing, IAirHandler>> teSurrounding = te.getConnectedPneumatics();
+        List<Pair<EnumFacing, IAirHandler>> teSurrounding = te.getAirHandler(null).getConnectedPneumatics();
         super.addProblems(textList);
 
         if(teSurrounding.isEmpty()) {

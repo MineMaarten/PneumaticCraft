@@ -1,21 +1,19 @@
 package pneumaticCraft.common.block.tubes;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
 import net.minecraft.util.EnumFacing;
-import pneumaticCraft.api.tileentity.IPneumaticMachine;
+import pneumaticCraft.common.pressure.AirHandler;
 import pneumaticCraft.common.thirdparty.ModInteractionUtils;
-import pneumaticCraft.common.tileentity.TileEntityPneumaticBase;
 import pneumaticCraft.common.tileentity.TileEntityPressureTube;
 import pneumaticCraft.common.util.TileEntityCache;
 
 public class ModuleNetworkManager{
     private static ModuleNetworkManager INSTANCE = new ModuleNetworkManager();
-    private final List<Set<TubeModule>> connectedModules = new ArrayList<Set<TubeModule>>();
+
+    // private final List<Set<TubeModule>> connectedModules = new ArrayList<Set<TubeModule>>(); Not cached due to the performance being ok
 
     public static ModuleNetworkManager getInstance(){
         return INSTANCE;
@@ -35,7 +33,7 @@ public class ModuleNetworkManager{
             for(TubeModule m : tube.modules) {
                 if(m != null) modules.add(m);
             }
-            TileEntityCache[] cache = ((TileEntityPneumaticBase)((IPneumaticMachine)tube).getAirHandler()).getTileCache();
+            TileEntityCache[] cache = ((AirHandler)tube.getAirHandler(null)).getTileCache();
             for(EnumFacing d : EnumFacing.VALUES) {
                 if(tube.sidesConnected[d.ordinal()]) {
                     TileEntityPressureTube newTube = ModInteractionUtils.getInstance().getTube(cache[d.ordinal()].getTileEntity());

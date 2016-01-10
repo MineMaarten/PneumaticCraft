@@ -30,6 +30,7 @@ import org.lwjgl.opengl.GL11;
 
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.api.client.IGuiAnimatedStat;
+import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 import pneumaticCraft.client.gui.widget.GuiAnimatedStat;
 import pneumaticCraft.client.gui.widget.IGuiWidget;
@@ -216,7 +217,7 @@ IWidgetListener{
         if(pressureStat != null) {
             TileEntityPneumaticBase pneu = (TileEntityPneumaticBase)te;
             Point gaugeLocation = getGaugeLocation();
-            if(gaugeLocation != null) GuiUtils.drawPressureGauge(fontRendererObj, -1, pneu.CRITICAL_PRESSURE, pneu.DANGER_PRESSURE, te instanceof IMinWorkingPressure ? ((IMinWorkingPressure)te).getMinWorkingPressure() : -1, pneu.getPressure(), gaugeLocation.x, gaugeLocation.y, zLevel);
+            if(gaugeLocation != null) GuiUtils.drawPressureGauge(fontRendererObj, -1, pneu.criticalPressure, pneu.dangerPressure, te instanceof IMinWorkingPressure ? ((IMinWorkingPressure)te).getMinWorkingPressure() : -1, pneu.getPressure(), gaugeLocation.x, gaugeLocation.y, zLevel);
         }
     }
 
@@ -345,17 +346,18 @@ IWidgetListener{
 
     protected void addPressureStatInfo(List<String> pressureStatText){
         TileEntityPneumaticBase pneumaticTile = (TileEntityPneumaticBase)te;
+        IAirHandler airHandler = pneumaticTile.getAirHandler(null);
         pressureStatText.add("\u00a77Current Pressure:");
         pressureStatText.add("\u00a70" + PneumaticCraftUtils.roundNumberTo(pneumaticTile.getPressure(), 1) + " bar.");
         pressureStatText.add("\u00a77Current Air:");
-        pressureStatText.add("\u00a70" + (double)Math.round(pneumaticTile.currentAir + pneumaticTile.volume) + " mL.");
+        pressureStatText.add("\u00a70" + (airHandler.getAir() + airHandler.getVolume()) + " mL.");
         pressureStatText.add("\u00a77Volume:");
-        pressureStatText.add("\u00a70" + (double)Math.round(pneumaticTile.DEFAULT_VOLUME) + " mL.");
-        float volumeLeft = pneumaticTile.volume - pneumaticTile.DEFAULT_VOLUME;
+        pressureStatText.add("\u00a70" + pneumaticTile.defaultVolume + " mL.");
+        int volumeLeft = airHandler.getVolume() - pneumaticTile.defaultVolume;
         if(volumeLeft > 0) {
-            pressureStatText.add("\u00a70" + (double)Math.round(volumeLeft) + " mL. (Volume Upgrades)");
+            pressureStatText.add("\u00a70" + volumeLeft + " mL. (Volume Upgrades)");
             pressureStatText.add("\u00a70--------+");
-            pressureStatText.add("\u00a70" + (double)Math.round(pneumaticTile.volume) + " mL.");
+            pressureStatText.add("\u00a70" + airHandler.getVolume() + " mL.");
         }
     }
 

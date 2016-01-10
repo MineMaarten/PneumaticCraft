@@ -14,8 +14,8 @@ import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.PneumaticRegistry;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 import pneumaticCraft.common.fluid.Fluids;
 import pneumaticCraft.common.network.DescSynced;
@@ -37,7 +37,7 @@ public class TileEntityRefinery extends TileEntityBase implements IFluidHandler,
     @LazySynced
     private final FluidTank outputTank = new FluidTank(PneumaticValues.NORMAL_TANK_CAPACITY);
     @GuiSynced
-    private final IHeatExchangerLogic heatExchanger = PneumaticRegistry.getInstance().getHeatExchangerLogic();
+    private final IHeatExchangerLogic heatExchanger = PneumaticRegistry.getInstance().getHeatRegistry().getHeatExchangerLogic();
     @DescSynced
     private int oilTankAmount, outputTankAmount;//amount divided by 100 to decrease network load.
     @GuiSynced

@@ -1,21 +1,24 @@
 package pneumaticCraft.common.tileentity;
 
+import java.util.List;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
-import pneumaticCraft.common.network.DescSynced;
 
-public class TileEntityCreativeCompressor extends TileEntityPneumaticBase{
+import org.apache.commons.lang3.tuple.Pair;
+
+import pneumaticCraft.api.tileentity.IAirHandler;
+import pneumaticCraft.api.tileentity.IAirListener;
+import pneumaticCraft.common.network.DescSynced;
+import pneumaticCraft.common.pressure.AirHandler;
+
+public class TileEntityCreativeCompressor extends TileEntityPneumaticBase implements IAirListener{
     @DescSynced
     public float pressureSetpoint;
 
     public TileEntityCreativeCompressor(){
         super(30, 30, 50000);
-    }
-
-    @Override
-    public float getPressure(EnumFacing sideRequested){
-        return pressureSetpoint;
     }
 
     @Override
@@ -28,14 +31,6 @@ public class TileEntityCreativeCompressor extends TileEntityPneumaticBase{
     public void writeToNBT(NBTTagCompound nbt){
         super.writeToNBT(nbt);
         nbt.setFloat("setpoint", pressureSetpoint);
-    }
-
-    @Override
-    public void update(){
-        if(!worldObj.isRemote) {
-            currentAir = (int)(getVolume() * pressureSetpoint);
-        }
-        super.update();
     }
 
     @Override
@@ -56,5 +51,19 @@ public class TileEntityCreativeCompressor extends TileEntityPneumaticBase{
         }
         if(pressureSetpoint > 30) pressureSetpoint = 30;
         if(pressureSetpoint < -1) pressureSetpoint = -1;
+        ((AirHandler)getAirHandler(null)).setPressure(pressureSetpoint);
     }
+
+    @Override
+    public void onAirDispersion(IAirHandler handler, EnumFacing dir, int airAdded){
+        addAir(-airAdded); //Keep the pressure equal.
+    }
+
+    @Override
+    public int getMaxDispersion(IAirHandler handler, EnumFacing dir){
+        return Integer.MAX_VALUE;
+    }
+
+    @Override
+    public void addConnectedPneumatics(List<Pair<EnumFacing, IAirHandler>> pneumatics){}
 }

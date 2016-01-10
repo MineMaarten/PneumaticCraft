@@ -40,7 +40,7 @@ public class BlockElevatorCaller extends BlockPneumaticCraft{
                 return te.camoStack != null && te.camoStack.getItem() instanceof ItemBlock;
             }
         }
-        return te.getRotation().getOpposite() == side;
+        return getRotation(state).getOpposite() == side;
     }
 
     @Override

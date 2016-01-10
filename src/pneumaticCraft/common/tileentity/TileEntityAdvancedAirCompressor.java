@@ -2,8 +2,8 @@ package pneumaticCraft.common.tileentity;
 
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
-import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.PneumaticRegistry;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.network.GuiSynced;
@@ -11,7 +11,7 @@ import pneumaticCraft.lib.PneumaticValues;
 
 public class TileEntityAdvancedAirCompressor extends TileEntityAirCompressor implements IHeatExchanger{
     @GuiSynced
-    private final IHeatExchangerLogic heatExchanger = PneumaticRegistry.getInstance().getHeatExchangerLogic();
+    private final IHeatExchangerLogic heatExchanger = PneumaticRegistry.getInstance().getHeatRegistry().getHeatExchangerLogic();
 
     public TileEntityAdvancedAirCompressor(){
         super(20, 25, 10000);

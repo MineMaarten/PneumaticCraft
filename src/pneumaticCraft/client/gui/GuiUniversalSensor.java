@@ -71,7 +71,7 @@ public class GuiUniversalSensor extends GuiPneumaticContainerBase<TileEntityUniv
 
         String[] folders = te.getSensorSetting().split("/");
         if(folders.length == 1) {
-            ItemStack[] requiredStacks = SensorHandler.instance().getRequiredStacksFromText(folders[0]);
+            ItemStack[] requiredStacks = SensorHandler.getInstance().getRequiredStacksFromText(folders[0]);
             for(int i = 0; i < requiredStacks.length; i++) {
                 GuiUtils.drawItemStack(requiredStacks[i], 102 + i * 18, 20);
             }
@@ -92,7 +92,7 @@ public class GuiUniversalSensor extends GuiPneumaticContainerBase<TileEntityUniv
 
         nameFilterField.drawTextBox();
 
-        ISensorSetting sensor = SensorHandler.instance().getSensorFromPath(te.getSensorSetting());
+        ISensorSetting sensor = SensorHandler.getInstance().getSensorFromPath(te.getSensorSetting());
         if(sensor != null) {
             sensor.drawAdditionalInfo(fontRendererObj);
         }
@@ -141,7 +141,7 @@ public class GuiUniversalSensor extends GuiPneumaticContainerBase<TileEntityUniv
         } else {
             buttonList.add(new GuiButton(-1, guiLeft + 70, guiTop + 125, 98, 20, I18n.format("gui.universalSensor.button.showRange")));
         }
-        String[] directories = SensorHandler.instance().getDirectoriesAtLocation(te.getSensorSetting());
+        String[] directories = SensorHandler.getInstance().getDirectoriesAtLocation(te.getSensorSetting());
         maxPage = (directories.length - 1) / MAX_SENSORS_PER_PAGE + 1;
         if(page > maxPage) page = maxPage;
         if(page < 1) page = 1;
@@ -156,7 +156,7 @@ public class GuiUniversalSensor extends GuiPneumaticContainerBase<TileEntityUniv
         }
         for(int i = 0; i < buttonsOnPage; i++) {
             String buttonText = directories[i + (page - 1) * MAX_SENSORS_PER_PAGE];
-            if(SensorHandler.instance().getSensorFromPath(te.getSensorSetting() + "/" + buttonText) != null) {
+            if(SensorHandler.getInstance().getSensorFromPath(te.getSensorSetting() + "/" + buttonText) != null) {
                 buttonText = EnumChatFormatting.YELLOW + buttonText;
             }
             int buttonID = i * 10 + 10 + (page - 1) * MAX_SENSORS_PER_PAGE * 10;
@@ -165,7 +165,7 @@ public class GuiUniversalSensor extends GuiPneumaticContainerBase<TileEntityUniv
             int buttonWidth = 98;
             int buttonHeight = 20;
             if(te.getSensorSetting().equals("")) {
-                ItemStack[] requiredStacks = SensorHandler.instance().getRequiredStacksFromText(buttonText);
+                ItemStack[] requiredStacks = SensorHandler.getInstance().getRequiredStacksFromText(buttonText);
                 GuiButtonSpecial button = new GuiButtonSpecial(buttonID, buttonX, buttonY, buttonWidth, buttonHeight, "");
                 button.setRenderStacks(requiredStacks);
                 button.enabled = te.areGivenUpgradesInserted(requiredStacks);
@@ -175,7 +175,7 @@ public class GuiUniversalSensor extends GuiPneumaticContainerBase<TileEntityUniv
             }
         }
         sensorInfoStat.setText(getSensorInfo());
-        ISensorSetting sensor = SensorHandler.instance().getSensorFromPath(te.getSensorSetting());
+        ISensorSetting sensor = SensorHandler.getInstance().getSensorFromPath(te.getSensorSetting());
         boolean textboxEnabled = sensor != null && sensor.needsTextBox();
         nameFilterField.setVisible(textboxEnabled);
         if(!textboxEnabled) nameFilterField.setFocused(false);
@@ -198,13 +198,13 @@ public class GuiUniversalSensor extends GuiPneumaticContainerBase<TileEntityUniv
         List<String> upgradeInfo = new ArrayList<String>();
         upgradeInfo.add("gui.tab.upgrades.volume");
         upgradeInfo.add("gui.tab.upgrades.security");
-        upgradeInfo.addAll(SensorHandler.instance().getUpgradeInfo());
+        upgradeInfo.addAll(SensorHandler.getInstance().getUpgradeInfo());
         return upgradeInfo;
     }
 
     private List<String> getSensorInfo(){
         List<String> text = new ArrayList<String>();
-        ISensorSetting sensor = SensorHandler.instance().getSensorFromPath(te.getSensorSetting());
+        ISensorSetting sensor = SensorHandler.getInstance().getSensorFromPath(te.getSensorSetting());
         if(sensor != null) {
             String[] folders = te.getSensorSetting().split("/");
             text.add(EnumChatFormatting.GRAY + folders[folders.length - 1]);
@@ -227,7 +227,7 @@ public class GuiUniversalSensor extends GuiPneumaticContainerBase<TileEntityUniv
     @Override
     protected void addProblems(List<String> textList){
         super.addProblems(textList);
-        if(SensorHandler.instance().getSensorFromPath(te.getSensorSetting()) == null) {
+        if(SensorHandler.getInstance().getSensorFromPath(te.getSensorSetting()) == null) {
             textList.add(EnumChatFormatting.GRAY + "No sensor selected!");
             textList.add(EnumChatFormatting.BLACK + "Insert upgrades and select the desired sensor.");
         }

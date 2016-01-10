@@ -38,15 +38,12 @@ public class ModuleAirGrate extends TubeModule{
     private final Set<TileEntityHeatSink> heatSinks = new HashSet<TileEntityHeatSink>();
     private final RenderRangeLines rangeLineRenderer = new RenderRangeLines(0x55FF0000);
 
-    private final int plantCheckX = Integer.MIN_VALUE;
-    private final int plantCheckZ = Integer.MIN_VALUE;
-
     public ModuleAirGrate(){
         rangeLineRenderer.resetRendering(1);
     }
 
     private int getRange(){
-        float range = pressureTube.getAirHandler().getPressure(null) * 4;
+        float range = pressureTube.getAirHandler(null).getPressure() * 4;
         vacuum = range < 0;
         if(vacuum) range = -range * 4;
         return (int)range;
@@ -66,7 +63,7 @@ public class ModuleAirGrate extends TubeModule{
         if(!worldObj.isRemote) {
             int oldGrateRange = grateRange;
             grateRange = getRange();
-            pressureTube.getAirHandler().addAir((vacuum ? 1 : -1) * grateRange * PneumaticValues.USAGE_AIR_GRATE, null);
+            pressureTube.getAirHandler(null).addAir((vacuum ? 1 : -1) * grateRange * PneumaticValues.USAGE_AIR_GRATE);
             if(oldGrateRange != grateRange) sendDescriptionPacket();
 
             coolHeatSinks(worldObj, pos, grateRange);

@@ -11,8 +11,8 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import pneumaticCraft.api.IHeatExchangerLogic;
-import pneumaticCraft.api.tileentity.HeatBehaviour;
+import pneumaticCraft.api.heat.HeatBehaviour;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.common.heat.behaviour.HeatBehaviourManager;
 import pneumaticCraft.common.network.GuiSynced;
 

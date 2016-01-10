@@ -20,8 +20,8 @@ import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
-import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.api.item.IPressurizable;
+import pneumaticCraft.common.DroneRegistry;
 import pneumaticCraft.common.config.AmadronOfferSettings;
 import pneumaticCraft.common.config.AmadronOfferStaticConfig;
 import pneumaticCraft.common.entity.living.EntityDrone;
@@ -238,12 +238,12 @@ public class ContainerAmadron extends ContainerPneumaticBase{
                 stacks.add(stack);
                 amount -= stack.stackSize;
             }
-            return (EntityDrone)PneumaticRegistry.getInstance().retrieveItemsAmazonStyle(itemWorld, itemPos, stacks.toArray(new ItemStack[stacks.size()]));
+            return (EntityDrone)DroneRegistry.getInstance().retrieveItemsAmazonStyle(itemWorld, itemPos, stacks.toArray(new ItemStack[stacks.size()]));
         } else {
             if(liquidWorld == null || liquidPos == null) return null;
             FluidStack queryingFluid = ((FluidStack)offer.getInput()).copy();
             queryingFluid.amount *= times;
-            return (EntityDrone)PneumaticRegistry.getInstance().retrieveFluidAmazonStyle(liquidWorld, liquidPos, queryingFluid);
+            return (EntityDrone)DroneRegistry.getInstance().retrieveFluidAmazonStyle(liquidWorld, liquidPos, queryingFluid);
         }
     }
 

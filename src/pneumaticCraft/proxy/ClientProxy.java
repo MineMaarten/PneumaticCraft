@@ -17,6 +17,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.client.FMLClientHandler;
@@ -59,6 +60,7 @@ import pneumaticCraft.common.thirdparty.igwmod.IGWSupportNotifier;
 import pneumaticCraft.common.tileentity.TileEntityPlasticMixer;
 import pneumaticCraft.lib.Log;
 import pneumaticCraft.lib.ModIds;
+import pneumaticCraft.lib.Names;
 import pneumaticCraft.lib.Textures;
 
 public class ClientProxy extends CommonProxy{
@@ -67,7 +69,50 @@ public class ClientProxy extends CommonProxy{
     public final Map<String, Integer> keybindToKeyCodes = new HashMap<String, Integer>();
 
     @Override
-    public void registerRenders(){
+    public void preInit(){
+        OBJLoader.instance.addDomain(Names.MOD_ID);
+
+        MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
+        FMLCommonHandler.instance().bus().register(new ClientEventHandler());
+
+        MinecraftForge.EVENT_BUS.register(HUDHandler.instance());
+        FMLCommonHandler.instance().bus().register(HUDHandler.instance());
+        FMLCommonHandler.instance().bus().register(ClientTickHandler.instance());
+        FMLCommonHandler.instance().bus().register(getHackTickHandler());
+        FMLCommonHandler.instance().bus().register(clientHudHandler = new CommonHUDHandler());
+        MinecraftForge.EVENT_BUS.register(new ClientSemiBlockManager());
+
+        MinecraftForge.EVENT_BUS.register(HUDHandler.instance().getSpecificRenderer(CoordTrackUpgradeHandler.class));
+        MinecraftForge.EVENT_BUS.register(AreaShowManager.getInstance());
+        FMLCommonHandler.instance().bus().register(AreaShowManager.getInstance());
+
+        if(!Loader.isModLoaded(ModIds.NOT_ENOUGH_KEYS) || !Config.config.get("Third_Party_Enabling", ModIds.NOT_ENOUGH_KEYS, true).getBoolean()) {
+            FMLCommonHandler.instance().bus().register(KeyHandler.getInstance());
+        } else KeyHandler.getInstance();
+        ThirdPartyManager.instance().clientSide();
+
+        /*  if(Config.enableUpdateChecker) {
+              UpdateChecker.instance().start();
+              FMLCommonHandler.instance().bus().register(UpdateChecker.instance());
+          }*/
+        EntityTrackHandler.registerDefaultEntries();
+        getAllKeybindsFromOptionsFile();
+        new IGWSupportNotifier();
+    }
+
+    @Override
+    public void init(){
+        for(int i = 0; i < 16; i++) { //Only register these recipes client side, so NEI compatibility works, but drones don't lose their program when dyed.
+            ItemStack drone = new ItemStack(Itemss.drone);
+            NBTTagCompound tag = new NBTTagCompound();
+            tag.setInteger("color", ItemDye.dyeColors[i]);
+            drone.setTagCompound(tag);
+            GameRegistry.addRecipe(new ShapelessOreRecipe(drone, Itemss.drone, TileEntityPlasticMixer.DYES[i]));
+        }
+        CraftingRegistrator.addShapelessRecipe(new ItemStack(Itemss.drone), new ItemStack(Itemss.logisticsDrone), Itemss.printedCircuitBoard);
+
+        ThirdPartyManager.instance().clientInit();
+
         // RenderingRegistry.registerBlockHandler(new RendererSpecialBlock());
         /* registerBaseModelRenderer(Blockss.airCompressor, TileEntityAirCompressor.class, new ModelAirCompressor("airCompressor"));
          registerBaseModelRenderer(Blockss.advancedAirCompressor, TileEntityAdvancedAirCompressor.class, new ModelAirCompressor("advancedAirCompressor"));
@@ -119,7 +164,7 @@ public class ClientProxy extends CommonProxy{
         EntityRegistry.registerModEntity(EntityRing.class, "Ring", 100, PneumaticCraft.instance, 80, 1, true);
 
         registerModuleRenderers();
-        super.registerRenders();
+        super.init();
     }
 
     public static void registerBaseModelRenderer(Block block, Class<? extends TileEntity> tileEntityClass, IBaseModel model){
@@ -138,37 +183,6 @@ public class ClientProxy extends CommonProxy{
     public boolean isSneakingInGui(){
 
         return GameSettings.isKeyDown(Minecraft.getMinecraft().gameSettings.keyBindSneak);
-    }
-
-    @Override
-    public void registerHandlers(){
-        super.registerHandlers();
-        MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
-        FMLCommonHandler.instance().bus().register(new ClientEventHandler());
-
-        MinecraftForge.EVENT_BUS.register(HUDHandler.instance());
-        FMLCommonHandler.instance().bus().register(HUDHandler.instance());
-        FMLCommonHandler.instance().bus().register(ClientTickHandler.instance());
-        FMLCommonHandler.instance().bus().register(getHackTickHandler());
-        FMLCommonHandler.instance().bus().register(clientHudHandler = new CommonHUDHandler());
-        MinecraftForge.EVENT_BUS.register(new ClientSemiBlockManager());
-
-        MinecraftForge.EVENT_BUS.register(HUDHandler.instance().getSpecificRenderer(CoordTrackUpgradeHandler.class));
-        MinecraftForge.EVENT_BUS.register(AreaShowManager.getInstance());
-        FMLCommonHandler.instance().bus().register(AreaShowManager.getInstance());
-
-        if(!Loader.isModLoaded(ModIds.NOT_ENOUGH_KEYS) || !Config.config.get("Third_Party_Enabling", ModIds.NOT_ENOUGH_KEYS, true).getBoolean()) {
-            FMLCommonHandler.instance().bus().register(KeyHandler.getInstance());
-        } else KeyHandler.getInstance();
-        ThirdPartyManager.instance().clientSide();
-
-        /*  if(Config.enableUpdateChecker) {
-              UpdateChecker.instance().start();
-              FMLCommonHandler.instance().bus().register(UpdateChecker.instance());
-          }*/
-        EntityTrackHandler.registerDefaultEntries();
-        getAllKeybindsFromOptionsFile();
-        new IGWSupportNotifier();
     }
 
     private void getAllKeybindsFromOptionsFile(){
@@ -197,20 +211,6 @@ public class ClientProxy extends CommonProxy{
                 exception1.printStackTrace();
             }
         }
-    }
-
-    @Override
-    public void init(){
-        for(int i = 0; i < 16; i++) { //Only register these recipes client side, so NEI compatibility works, but drones don't lose their program when dyed.
-            ItemStack drone = new ItemStack(Itemss.drone);
-            NBTTagCompound tag = new NBTTagCompound();
-            tag.setInteger("color", ItemDye.dyeColors[i]);
-            drone.setTagCompound(tag);
-            GameRegistry.addRecipe(new ShapelessOreRecipe(drone, Itemss.drone, TileEntityPlasticMixer.DYES[i]));
-        }
-        CraftingRegistrator.addShapelessRecipe(new ItemStack(Itemss.drone), new ItemStack(Itemss.logisticsDrone), Itemss.printedCircuitBoard);
-
-        ThirdPartyManager.instance().clientInit();
     }
 
     @Override

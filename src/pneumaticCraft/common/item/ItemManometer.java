@@ -13,7 +13,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
-import pneumaticCraft.api.IHeatExchangerLogic;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.api.item.IPressurizable;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 import pneumaticCraft.api.tileentity.IManoMeasurable;
@@ -39,10 +39,11 @@ public class ItemManometer extends ItemPressurizable{
             IPneumaticMachine machine = ModInteractionUtils.getInstance().getMachine(te);
             List<IChatComponent> curInfo = new ArrayList<IChatComponent>();
             List<String> info = new ArrayList<String>();
+            if(machine != null) {
+                machine.getAirHandler(side).printManometerMessage(player, info);
+            }
             if(te instanceof IManoMeasurable) {
                 ((IManoMeasurable)te).printManometerMessage(player, info);
-            } else if(machine != null) {
-                machine.getAirHandler().printManometerMessage(player, info);
             }
             for(String s : info)
                 curInfo.add(new ChatComponentTranslation(s));

@@ -13,9 +13,9 @@ import igwmod.gui.LocatedTexture;
 import java.util.List;
 
 import net.minecraft.item.ItemStack;
-import pneumaticCraft.api.recipe.AssemblyRecipe;
 import pneumaticCraft.common.item.ItemAssemblyProgram;
 import pneumaticCraft.common.item.Itemss;
+import pneumaticCraft.common.recipes.AssemblyRecipe;
 import pneumaticCraft.lib.Textures;
 
 public class IntegratorAssembly implements IRecipeIntegrator{

@@ -20,9 +20,8 @@ import pneumaticCraft.api.universalSensor.IBlockAndCoordinateEventSensor;
 import pneumaticCraft.api.universalSensor.IBlockAndCoordinatePollSensor;
 import pneumaticCraft.api.universalSensor.IEventSensorSetting;
 import pneumaticCraft.api.universalSensor.IPollSensorSetting;
+import pneumaticCraft.api.universalSensor.ISensorRegistry;
 import pneumaticCraft.api.universalSensor.ISensorSetting;
-import pneumaticCraft.api.universalSensor.SensorRegistrator;
-import pneumaticCraft.api.universalSensor.SensorRegistrator.ISensorRegistrator;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.Itemss;
@@ -49,34 +48,34 @@ import pneumaticCraft.common.sensor.pollSensors.entity.EntityInRangeSensor;
 import pneumaticCraft.common.tileentity.TileEntityUniversalSensor;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 
-public class SensorHandler implements ISensorRegistrator{
+public class SensorHandler implements ISensorRegistry{
+    private static final SensorHandler INSTANCE = new SensorHandler();
 
-    public static SensorHandler instance(){
-        return (SensorHandler)SensorRegistrator.sensorRegistrator;
+    public static SensorHandler getInstance(){
+        return INSTANCE;
     }
 
-    public static void init(){
-        SensorRegistrator.sensorRegistrator = new SensorHandler();
-        SensorRegistrator.sensorRegistrator.registerSensor(new EntityInRangeSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new PlayerAttackSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new PlayerItemPickupSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new BlockInteractSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new WorldDayLightSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new WorldRainingSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new WorldTimeSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new WorldWeatherForecaster());
-        SensorRegistrator.sensorRegistrator.registerSensor(new WorldPlayersInServerSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new WorldTicktimeSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new WorldGlobalVariableSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new BlockPresenceSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new BlockMetadataSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new BlockComparatorSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new BlockRedstoneSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new BlockLightLevelSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new BlockHeatSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new UserSetSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new TwitchStreamerSensor());
-        SensorRegistrator.sensorRegistrator.registerSensor(new PlayerHealthSensor());
+    public void init(){
+        registerSensor(new EntityInRangeSensor());
+        registerSensor(new PlayerAttackSensor());
+        registerSensor(new PlayerItemPickupSensor());
+        registerSensor(new BlockInteractSensor());
+        registerSensor(new WorldDayLightSensor());
+        registerSensor(new WorldRainingSensor());
+        registerSensor(new WorldTimeSensor());
+        registerSensor(new WorldWeatherForecaster());
+        registerSensor(new WorldPlayersInServerSensor());
+        registerSensor(new WorldTicktimeSensor());
+        registerSensor(new WorldGlobalVariableSensor());
+        registerSensor(new BlockPresenceSensor());
+        registerSensor(new BlockMetadataSensor());
+        registerSensor(new BlockComparatorSensor());
+        registerSensor(new BlockRedstoneSensor());
+        registerSensor(new BlockLightLevelSensor());
+        registerSensor(new BlockHeatSensor());
+        registerSensor(new UserSetSensor());
+        registerSensor(new TwitchStreamerSensor());
+        registerSensor(new PlayerHealthSensor());
     }
 
     private final List<ISensorSetting> sensors = new ArrayList<ISensorSetting>();

@@ -81,15 +81,15 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
             updateNeighbours();
         }
         if(!worldObj.isRemote) {
-            if(getPressure(null) > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE && isConnectedToPlayer) {
+            if(getPressure() > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE && isConnectedToPlayer) {
                 if(energyRF != null) tickRF();
-                addAir(-PneumaticValues.USAGE_AERIAL_INTERFACE, null);
+                addAir(-PneumaticValues.USAGE_AERIAL_INTERFACE);
                 if(worldObj.getTotalWorldTime() % 40 == 0) dispenserUpgradeInserted = getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0;
                 if(worldObj.getTotalWorldTime() % 20 == 0) {
                     EntityPlayer player = getPlayer();
                     if(player != null && player.getAir() <= 280) {
                         player.setAir(player.getAir() + 20);
-                        addAir(-4000, null);
+                        addAir(-4000);
                     }
                 }
             }
@@ -337,7 +337,7 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
         if(i < 4) return true;
         EntityPlayer player = getPlayer();
         if(player == null) return false;
-        if(getPressure(null) > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE) {
+        if(getPressure() > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE) {
             if(!dispenserUpgradeInserted || i >= 40 && i <= 43) {
                 return i < 40 || itemstack != null && itemstack.getItem() instanceof ItemArmor && ((ItemArmor)itemstack.getItem()).armorType == 43 - i;
             } else {
@@ -364,7 +364,7 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
 
     @Override
     public boolean canExtractItem(int i, ItemStack itemstack, EnumFacing j){
-        return i < 4 || getPressure(null) > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE;
+        return i < 4 || getPressure() > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE;
     }
 
     @Override
@@ -440,12 +440,12 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
 
     @Override
     public boolean canFill(EnumFacing from, Fluid fluid){
-        return fluid != null && PneumaticCraftAPIHandler.getInstance().liquidXPs.containsKey(fluid) && getPlayer() != null && getPressure(null) > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE && dispenserUpgradeInserted;
+        return fluid != null && PneumaticCraftAPIHandler.getInstance().liquidXPs.containsKey(fluid) && getPlayer() != null && getPressure() > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE && dispenserUpgradeInserted;
     }
 
     @Override
     public boolean canDrain(EnumFacing from, Fluid fluid){
-        return (fluid == null || PneumaticCraftAPIHandler.getInstance().liquidXPs.containsKey(fluid)) && getPlayer() != null && getPressure(null) > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE && dispenserUpgradeInserted;
+        return (fluid == null || PneumaticCraftAPIHandler.getInstance().liquidXPs.containsKey(fluid)) && getPlayer() != null && getPressure() > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE && dispenserUpgradeInserted;
     }
 
     @Override

@@ -57,7 +57,7 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
         super.update();
         oldProgress = progress;
         if(!worldObj.isRemote) {
-            if(getPressure(null) >= PneumaticValues.MIN_PRESSURE_PNEUMATIC_DOOR) {
+            if(getPressure() >= PneumaticValues.MIN_PRESSURE_PNEUMATIC_DOOR) {
                 if(worldObj.getTotalWorldTime() % 60 == 0) {
                     TileEntity te = worldObj.getTileEntity(getPos().offset(orientation, 3));
                     if(te instanceof TileEntityPneumaticDoorBase) {
@@ -90,7 +90,7 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
             }
             if(progress < targetProgress) progress = targetProgress;
         }
-        if(!worldObj.isRemote) addAir((int)(-Math.abs(oldProgress - progress) * PneumaticValues.USAGE_PNEUMATIC_DOOR * (getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots()) / speedMultiplier)), null);
+        if(!worldObj.isRemote) addAir((int)(-Math.abs(oldProgress - progress) * PneumaticValues.USAGE_PNEUMATIC_DOOR * (getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots()) / speedMultiplier)));
 
         // if(worldObj.isRemote) System.out.println("progress: " + progress);
         door = getDoor();
@@ -154,7 +154,7 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
     }
 
     public void setNeighborOpening(boolean opening){
-        if(doubleDoor != null && doubleDoor.getPressure(null) >= PneumaticValues.MIN_PRESSURE_PNEUMATIC_DOOR) {
+        if(doubleDoor != null && doubleDoor.getPressure() >= PneumaticValues.MIN_PRESSURE_PNEUMATIC_DOOR) {
             doubleDoor.setOpening(opening);
         }
     }

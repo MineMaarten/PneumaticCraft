@@ -24,7 +24,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.tuple.Pair;
 
 import pneumaticCraft.api.tileentity.IAirHandler;
-import pneumaticCraft.api.tileentity.IPneumaticMachine;
+import pneumaticCraft.api.tileentity.IAirListener;
 import pneumaticCraft.common.block.BlockElevatorBase;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.config.Config;
@@ -42,7 +42,7 @@ import pneumaticCraft.lib.Sounds;
 import pneumaticCraft.lib.TileEntityConstants;
 
 public class TileEntityElevatorBase extends TileEntityPneumaticBase implements IInventory, IGUITextFieldSensitive,
-        IRedstoneControlled, IMinWorkingPressure{
+        IRedstoneControlled, IMinWorkingPressure, IAirListener{
     @DescSynced
     public boolean[] sidesConnected = new boolean[6];
     public float oldExtension;
@@ -92,7 +92,7 @@ public class TileEntityElevatorBase extends TileEntityPneumaticBase implements I
                 }
 
                 targetExtension = redstoneInput * maxExtension / 15;
-                if(targetExtension > oldExtension && getPressure(null) < PneumaticValues.MIN_PRESSURE_ELEVATOR) targetExtension = oldExtension; // only ascent when there's enough pressure
+                if(targetExtension > oldExtension && getPressure() < PneumaticValues.MIN_PRESSURE_ELEVATOR) targetExtension = oldExtension; // only ascent when there's enough pressure
                 if(oldTargetExtension != targetExtension) sendDescPacketFromAllElevators();
             }
             float speedMultiplier = getSpeedMultiplierFromUpgrades(getUpgradeSlots());
@@ -102,7 +102,7 @@ public class TileEntityElevatorBase extends TileEntityPneumaticBase implements I
 
             String soundName = null;
             if(extension < targetExtension) {
-                if(!worldObj.isRemote && getPressure(null) < PneumaticValues.MIN_PRESSURE_ELEVATOR) {
+                if(!worldObj.isRemote && getPressure() < PneumaticValues.MIN_PRESSURE_ELEVATOR) {
                     targetExtension = extension;
                     sendDescPacket(256D);
                 }
@@ -134,7 +134,7 @@ public class TileEntityElevatorBase extends TileEntityPneumaticBase implements I
                     */
                     // moveEntities(TileEntityConstants.ELEVATOR_SPEED_SLOW);
                 }
-                addAir((int)((oldExtension - extension) * PneumaticValues.USAGE_ELEVATOR * (getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots()) / speedMultiplier)), null);// substract the ascended distance from the air reservoir.
+                addAir((int)((oldExtension - extension) * PneumaticValues.USAGE_ELEVATOR * (getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots()) / speedMultiplier)));// substract the ascended distance from the air reservoir.
             }
             if(extension > targetExtension) {
                 soundName = Sounds.ELEVATOR_MOVING;
@@ -394,14 +394,12 @@ public class TileEntityElevatorBase extends TileEntityPneumaticBase implements I
     }
 
     public void updateConnections(){
-        for(EnumFacing direction : EnumFacing.VALUES) {
-            TileEntity te = worldObj.getTileEntity(getPos().offset(direction));
-            if(te instanceof IPneumaticMachine) {
-                sidesConnected[direction.ordinal()] = ((IPneumaticMachine)te).isConnectedTo(direction.getOpposite());
-            } else {
-                sidesConnected[direction.ordinal()] = false;
-            }
+        List<Pair<EnumFacing, IAirHandler>> connections = getAirHandler(null).getConnectedPneumatics();
+        Arrays.fill(sidesConnected, false);
+        for(Pair<EnumFacing, IAirHandler> entry : connections) {
+            sidesConnected[entry.getKey().ordinal()] = true;
         }
+
         if(worldObj.getBlockState(getPos().offset(EnumFacing.UP)) != Blockss.elevatorBase) {
             coreElevator = this;
             int i = -1;
@@ -665,40 +663,28 @@ public class TileEntityElevatorBase extends TileEntityPneumaticBase implements I
     }
 
     @Override
-    public void addAir(int amount, EnumFacing side){
+    public IAirHandler getAirHandler(EnumFacing sideRequested){
         if(isCoreElevator()) {
-            super.addAir(amount, side);
+            return super.getAirHandler(sideRequested);
         } else {
-            getCoreElevator().addAir(amount, side);
+            return getCoreElevator().getAirHandler(sideRequested);
         }
     }
 
     @Override
-    public float getPressure(EnumFacing sideRequested){
-        if(isCoreElevator()) {
-            return super.getPressure(sideRequested);
-        } else {
-            return getCoreElevator().getPressure(sideRequested);
-        }
-    }
-
-    @Override
-    public int getCurrentAir(EnumFacing sideRequested){
-        if(isCoreElevator()) {
-            return super.getCurrentAir(sideRequested);
-        } else {
-            return getCoreElevator().getCurrentAir(sideRequested);
-        }
-    }
-
-    @Override
-    public List<Pair<EnumFacing, IAirHandler>> getConnectedPneumatics(){
-        List<Pair<EnumFacing, IAirHandler>> connectedMachines = super.getConnectedPneumatics();
+    public void addConnectedPneumatics(List<Pair<EnumFacing, IAirHandler>> connectedMachines){
         TileEntity te = getTileCache()[EnumFacing.DOWN.ordinal()].getTileEntity();
         if(te instanceof TileEntityElevatorBase) {
-            connectedMachines.addAll(((TileEntityElevatorBase)te).getConnectedPneumatics());
+            connectedMachines.addAll(((TileEntityElevatorBase)te).airHandler.getConnectedPneumatics());
         }
-        return connectedMachines;
+    }
+
+    @Override
+    public void onAirDispersion(IAirHandler handler, EnumFacing dir, int airAdded){}
+
+    @Override
+    public int getMaxDispersion(IAirHandler handler, EnumFacing dir){
+        return Integer.MAX_VALUE;
     }
 
     @Override

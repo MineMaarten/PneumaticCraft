@@ -58,7 +58,7 @@ public class ItemMachineUpgrade extends ItemPneumatic{
         infoList.add("Used in:");
 
         List<String> unlocalized = new ArrayList<String>();
-        SensorHandler.instance().addMachineUpgradeInfo(unlocalized, stack.getItemDamage());
+        SensorHandler.getInstance().addMachineUpgradeInfo(unlocalized, stack.getItemDamage());
         switch(stack.getItemDamage()){
             case 0:
                 infoList.add("Any machine driven by");

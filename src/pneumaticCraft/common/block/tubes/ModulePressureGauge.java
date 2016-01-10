@@ -24,7 +24,7 @@ public class ModulePressureGauge extends TubeModuleRedstoneEmitting{
         super.update();
         if(!pressureTube.world().isRemote) {
             if(pressureTube.world().getTotalWorldTime() % 20 == 0) NetworkHandler.sendToAllAround(new PacketUpdatePressureBlock((TileEntityPneumaticBase)getTube()), getTube().world());
-            setRedstone(getRedstone(pressureTube.getAirHandler().getPressure(null)));
+            setRedstone(getRedstone(pressureTube.getAirHandler(null).getPressure()));
         }
     }
 

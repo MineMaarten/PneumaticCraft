@@ -2,7 +2,7 @@ package pneumaticCraft.common.heat.behaviour;
 
 import net.minecraft.block.BlockFurnace;
 import net.minecraft.tileentity.TileEntityFurnace;
-import pneumaticCraft.api.tileentity.HeatBehaviour;
+import pneumaticCraft.api.heat.HeatBehaviour;
 import pneumaticCraft.lib.Names;
 
 public class HeatBehaviourFurnace extends HeatBehaviour<TileEntityFurnace>{

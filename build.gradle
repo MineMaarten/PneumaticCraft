@@ -47,8 +47,8 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 project.ext {
 	massive = "1"
     major = "13"
-    minor = "0"
-    mcVersion = "1.8.8"
+    minor = "1"
+    mcVersion = "1.8.9"
 }
 
 version = "${project.ext.massive}.${project.ext.major}.${project.minor}"
@@ -57,8 +57,6 @@ archivesBaseName = "PneumaticCraft"
 
 if (System.getenv().BUILD_NUMBER != null) {
     version += "-${System.getenv().BUILD_NUMBER}"
-} else {
-    version += " - err"
 }
 
 //delete 'Version.txt'
@@ -89,7 +87,7 @@ dependencies {
 }
 
 minecraft {
-    version = "11.15.0.1625-${project.ext.mcVersion}"
+    version = "11.15.0.1675"
     runDir = "minecraft/assets"
 
 	// the mappings can be changed at any time, and must be in the following format.
@@ -97,7 +95,7 @@ minecraft {
     // stable_#            stables are built at the discretion of the MCP team.
     // Use non-default mappings at your own risk. they may not allways work.
     // simply re-run your setup task after changing the mappings to update your workspace.
-    mappings = "snapshot_20151129"
+    mappings = "snapshot_20151230"
 	
     // replacing stuff in the source
 	replace '@MASSIVE@', project.massive

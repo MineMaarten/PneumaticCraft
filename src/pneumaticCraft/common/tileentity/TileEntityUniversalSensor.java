@@ -13,7 +13,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -22,7 +21,10 @@ import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import pneumaticCraft.api.tileentity.IPneumaticMachine;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.api.universalSensor.IEventSensorSetting;
 import pneumaticCraft.api.universalSensor.IPollSensorSetting;
 import pneumaticCraft.api.universalSensor.ISensorSetting;
@@ -103,10 +105,10 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
 
         if(!worldObj.isRemote) {
             ticksExisted++;
-            ISensorSetting sensor = SensorHandler.instance().getSensorFromPath(sensorSetting);
-            if(sensor != null && getPressure(null) > PneumaticValues.MIN_PRESSURE_UNIVERSAL_SENSOR) {
+            ISensorSetting sensor = SensorHandler.getInstance().getSensorFromPath(sensorSetting);
+            if(sensor != null && getPressure() > PneumaticValues.MIN_PRESSURE_UNIVERSAL_SENSOR) {
                 isSensorActive = true;
-                addAir(-PneumaticValues.USAGE_UNIVERSAL_SENSOR, null);
+                addAir(-PneumaticValues.USAGE_UNIVERSAL_SENSOR);
                 if(sensor instanceof IPollSensorSetting) {
 
                     if(ticksExisted % ((IPollSensorSetting)sensor).getPollFrequency(this) == 0) {
@@ -166,8 +168,8 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
     }
 
     public void onEvent(Event event){
-        ISensorSetting sensor = SensorHandler.instance().getSensorFromPath(sensorSetting);
-        if(sensor != null && sensor instanceof IEventSensorSetting && getPressure(null) > PneumaticValues.MIN_PRESSURE_UNIVERSAL_SENSOR) {
+        ISensorSetting sensor = SensorHandler.getInstance().getSensorFromPath(sensorSetting);
+        if(sensor != null && sensor instanceof IEventSensorSetting && getPressure() > PneumaticValues.MIN_PRESSURE_UNIVERSAL_SENSOR) {
             int newRedstoneStrength = ((IEventSensorSetting)sensor).emitRedstoneOnEvent(event, this, getRange(), sensorGuiText);
             if(newRedstoneStrength != 0) eventTimer = ((IEventSensorSetting)sensor).getRedstonePulseLength();
             if(invertedRedstone) newRedstoneStrength = 15 - newRedstoneStrength;
@@ -201,7 +203,7 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
     }
 
     private boolean setSensorSetting(ISensorSetting sensor){
-        if(areGivenUpgradesInserted(SensorHandler.instance().getRequiredStacksFromText(sensor.getSensorPath()))) {
+        if(areGivenUpgradesInserted(SensorHandler.getInstance().getRequiredStacksFromText(sensor.getSensorPath()))) {
             setSensorSetting(sensor.getSensorPath());
             return true;
         } else {
@@ -261,7 +263,7 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
     @Override
     public void handleGUIButtonPress(int buttonID, EntityPlayer player){
         if(buttonID >= 10 && buttonID % 10 == 0) {
-            String[] directories = SensorHandler.instance().getDirectoriesAtLocation(getSensorSetting());
+            String[] directories = SensorHandler.getInstance().getDirectoriesAtLocation(getSensorSetting());
             if(buttonID / 10 <= directories.length) {// <= because of the redstone button being 0.
                 if(getSensorSetting().equals("")) {
                     setSensorSetting(directories[buttonID / 10 - 1]);
@@ -302,13 +304,10 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
     @Override
     public void onNeighborTileUpdate(){
         super.onNeighborTileUpdate();
-        for(EnumFacing direction : EnumFacing.VALUES) {
-            TileEntity te = worldObj.getTileEntity(getPos().offset(direction));
-            if(te instanceof IPneumaticMachine) {
-                sidesConnected[direction.ordinal()] = ((IPneumaticMachine)te).isConnectedTo(direction.getOpposite());
-            } else {
-                sidesConnected[direction.ordinal()] = false;
-            }
+        List<Pair<EnumFacing, IAirHandler>> connections = getAirHandler(null).getConnectedPneumatics();
+        Arrays.fill(sidesConnected, false);
+        for(Pair<EnumFacing, IAirHandler> entry : connections) {
+            sidesConnected[entry.getKey().ordinal()] = true;
         }
     }
 
@@ -389,7 +388,7 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
         if(itemStack != null && itemStack.stackSize > getInventoryStackLimit()) {
             itemStack.stackSize = getInventoryStackLimit();
         }
-        if(!worldObj.isRemote && !getSensorSetting().equals("") && !areGivenUpgradesInserted(SensorHandler.instance().getRequiredStacksFromText(getSensorSetting()))) {
+        if(!worldObj.isRemote && !getSensorSetting().equals("") && !areGivenUpgradesInserted(SensorHandler.getInstance().getRequiredStacksFromText(getSensorSetting()))) {
             setSensorSetting("");
         }
         positions = getGPSPositionsStatic(this, getRange());
@@ -479,7 +478,7 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
             @Override
             public Object[] call(Object[] args) throws Exception{
                 if(args.length == 0) {
-                    return SensorHandler.instance().getSensorNames();
+                    return SensorHandler.getInstance().getSensorNames();
                 } else {
                     throw new IllegalArgumentException("getSensorNames doesn't accept any arguments!");
                 }
@@ -492,9 +491,9 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
                 if(args.length == 1) {
                     ISensorSetting sensor = null;
                     if(args[0] instanceof String) {
-                        sensor = SensorHandler.instance().getSensorForName((String)args[0]);
+                        sensor = SensorHandler.getInstance().getSensorForName((String)args[0]);
                     } else {
-                        sensor = SensorHandler.instance().getSensorByIndex(((Double)args[0]).intValue() - 1);
+                        sensor = SensorHandler.getInstance().getSensorByIndex(((Double)args[0]).intValue() - 1);
                     }
                     if(sensor != null) return new Object[]{setSensorSetting(sensor)};
                     throw new IllegalArgumentException("Invalid sensor name/index: " + args[0]);
@@ -511,7 +510,7 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
             @Override
             public Object[] call(Object[] args) throws Exception{
                 if(args.length == 0) {
-                    ISensorSetting curSensor = SensorHandler.instance().getSensorFromPath(getSensorSetting());
+                    ISensorSetting curSensor = SensorHandler.getInstance().getSensorFromPath(getSensorSetting());
                     return curSensor == null ? null : new Object[]{getSensorSetting().substring(getSensorSetting().lastIndexOf('/') + 1)};
                 } else {
                     throw new IllegalArgumentException("getSensor doesn't take any arguments!");
@@ -546,7 +545,7 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
             @Override
             public Object[] call(Object[] args) throws Exception{
                 if(args.length == 0) {
-                    return new Object[]{SensorHandler.instance().getSensorFromPath(getSensorSetting()) instanceof IEventSensorSetting};
+                    return new Object[]{SensorHandler.getInstance().getSensorFromPath(getSensorSetting()) instanceof IEventSensorSetting};
                 } else {
                     throw new IllegalArgumentException("isSensorEventBased takes no arguments");
                 }
@@ -557,7 +556,7 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
             @Override
             public Object[] call(Object[] args) throws Exception{
                 if(args.length == 0) {
-                    ISensorSetting s = SensorHandler.instance().getSensorFromPath(getSensorSetting());
+                    ISensorSetting s = SensorHandler.getInstance().getSensorFromPath(getSensorSetting());
                     if(s instanceof IPollSensorSetting) {
                         requestPollPullEvent = true;
                         return new Object[]{redstoneStrength};

@@ -81,7 +81,7 @@ public class PneumaticCraft{
 
         PneumaticRegistry.init(PneumaticCraftAPIHandler.getInstance());
         UpgradeRenderHandlerList.init();
-        SensorHandler.init();
+        SensorHandler.getInstance().init();
         Config.init(event.getSuggestedConfigurationFile());
         ThirdPartyManager.instance().index();
 
@@ -103,7 +103,7 @@ public class PneumaticCraft{
         AchievementHandler.init();
         HeatBehaviourManager.getInstance().init();
 
-        proxy.registerHandlers();
+        proxy.preInit();
         tickHandler = new TickHandlerPneumaticCraft();
         FMLCommonHandler.instance().bus().register(tickHandler);
         MinecraftForge.EVENT_BUS.register(new EventHandlerPneumaticCraft());
@@ -139,7 +139,6 @@ public class PneumaticCraft{
         }
 
         proxy.init();
-        proxy.registerRenders();
         ThirdPartyManager.instance().init();
     }
 

@@ -1,7 +1,7 @@
 package pneumaticCraft.api.tileentity;
 
 import net.minecraft.util.EnumFacing;
-import pneumaticCraft.api.IHeatExchangerLogic;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 
 /**
  * Implemented by TileEntities or Blocks which transport heat. Keep in mind that when a Block is implementing it you only can give off a constant
@@ -12,7 +12,7 @@ import pneumaticCraft.api.IHeatExchangerLogic;
 public interface IHeatExchanger{
 
     /**
-     * Get an instance of IHeatExchangerLogic from PneumaticRegistry.getInstance().getHeatExchangerLogic() and keep a global reference.
+     * Get an instance of IHeatExchangerLogic from PneumaticRegistry.getInstance().getHeatRegistry().getHeatExchangerLogic() and keep a global reference.
      * Then return it in this method. You can return different exchanger logics for different sides. Keep in mind that when you change
      * a returned logic, you need to create a neighbor block change to notify the differences. You can return null to indicate no heat can
      * be exchanged on that side.

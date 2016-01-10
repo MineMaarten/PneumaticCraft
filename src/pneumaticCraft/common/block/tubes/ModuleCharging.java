@@ -4,7 +4,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import pneumaticCraft.api.item.IPressurizable;
 import pneumaticCraft.api.tileentity.IAirHandler;
-import pneumaticCraft.api.tileentity.IPneumaticMachine;
 import pneumaticCraft.client.model.IBaseModel;
 import pneumaticCraft.common.util.IOHelper;
 import pneumaticCraft.common.util.TileEntityCache;
@@ -43,15 +42,15 @@ public class ModuleCharging extends TubeModule{
                     ItemStack chargedItem = inv.getStackInSlot(slot);
                     if(chargedItem != null && chargedItem.getItem() instanceof IPressurizable) {
                         IPressurizable chargingItem = (IPressurizable)chargedItem.getItem();
-                        IAirHandler airHandler = ((IPneumaticMachine)pressureTube).getAirHandler();
+                        IAirHandler airHandler = pressureTube.getAirHandler(null);
 
-                        if(chargingItem.getPressure(chargedItem) > airHandler.getPressure(null) + 0.01F && chargingItem.getPressure(chargedItem) > 0F) {
+                        if(chargingItem.getPressure(chargedItem) > airHandler.getPressure() + 0.01F && chargingItem.getPressure(chargedItem) > 0F) {
                             chargingItem.addAir(chargedItem, -1);
-                            airHandler.addAir(1, null);
+                            airHandler.addAir(1);
                             charged = true;
-                        } else if(chargingItem.getPressure(chargedItem) < airHandler.getPressure(null) - 0.01F && chargingItem.getPressure(chargedItem) < chargingItem.maxPressure(chargedItem)) {// if there is pressure, and the item isn't fully charged yet..
+                        } else if(chargingItem.getPressure(chargedItem) < airHandler.getPressure() - 0.01F && chargingItem.getPressure(chargedItem) < chargingItem.maxPressure(chargedItem)) {// if there is pressure, and the item isn't fully charged yet..
                             chargingItem.addAir(chargedItem, 1);
-                            airHandler.addAir(-1, null);
+                            airHandler.addAir(-1);
                             charged = true;
                         }
                     }

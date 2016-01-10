@@ -15,7 +15,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
-import pneumaticCraft.api.PneumaticRegistry;
+import pneumaticCraft.common.DroneRegistry;
 import pneumaticCraft.common.config.AmadronOfferSettings;
 import pneumaticCraft.common.inventory.ContainerAmadron;
 import pneumaticCraft.common.network.NetworkHandler;
@@ -129,11 +129,11 @@ public class AmadronOfferCustom extends AmadronOffer{
                         stacks.add(stack);
                         amount -= stack.stackSize;
                     }
-                    PneumaticRegistry.getInstance().deliverItemsAmazonStyle(returning.getWorld(), returning.getPos(), stacks.toArray(new ItemStack[stacks.size()]));
+                    DroneRegistry.getInstance().deliverItemsAmazonStyle(returning.getWorld(), returning.getPos(), stacks.toArray(new ItemStack[stacks.size()]));
                 } else {
                     FluidStack deliveringFluid = ((FluidStack)getInput()).copy();
                     deliveringFluid.amount *= paying;
-                    PneumaticRegistry.getInstance().deliverFluidAmazonStyle(returning.getWorld(), returning.getPos(), deliveringFluid);
+                    DroneRegistry.getInstance().deliverFluidAmazonStyle(returning.getWorld(), returning.getPos(), deliveringFluid);
                 }
             }
         }
@@ -158,11 +158,11 @@ public class AmadronOfferCustom extends AmadronOffer{
                         stacks.add(stack);
                         amount -= stack.stackSize;
                     }
-                    PneumaticRegistry.getInstance().deliverItemsAmazonStyle(provider.getWorld(), provider.getPos(), stacks.toArray(new ItemStack[stacks.size()]));
+                    DroneRegistry.getInstance().deliverItemsAmazonStyle(provider.getWorld(), provider.getPos(), stacks.toArray(new ItemStack[stacks.size()]));
                 } else {
                     FluidStack deliveringFluid = ((FluidStack)getInput()).copy();
                     deliveringFluid.amount *= stock;
-                    PneumaticRegistry.getInstance().deliverFluidAmazonStyle(provider.getWorld(), provider.getPos(), deliveringFluid);
+                    DroneRegistry.getInstance().deliverFluidAmazonStyle(provider.getWorld(), provider.getPos(), deliveringFluid);
                 }
             } else {
                 break;

@@ -3,7 +3,7 @@ package pneumaticCraft.common.heat.behaviour;
 import net.minecraft.init.Blocks;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
-import pneumaticCraft.api.tileentity.HeatBehaviour;
+import pneumaticCraft.api.heat.HeatBehaviour;
 
 public abstract class HeatBehaviourLiquid extends HeatBehaviour{
     public Fluid getFluid(){

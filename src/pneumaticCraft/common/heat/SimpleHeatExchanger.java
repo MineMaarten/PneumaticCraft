@@ -1,7 +1,7 @@
 package pneumaticCraft.common.heat;
 
 import net.minecraft.util.EnumFacing;
-import pneumaticCraft.api.IHeatExchangerLogic;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 
 public class SimpleHeatExchanger implements IHeatExchanger{

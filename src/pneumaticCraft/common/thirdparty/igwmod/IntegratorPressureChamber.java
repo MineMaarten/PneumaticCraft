@@ -22,9 +22,9 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import pneumaticCraft.api.recipe.PressureChamberRecipe;
 import pneumaticCraft.common.config.Config;
 import pneumaticCraft.common.recipes.PneumaticRecipeRegistry;
+import pneumaticCraft.common.recipes.PressureChamberRecipe;
 import pneumaticCraft.lib.Textures;
 
 public class IntegratorPressureChamber implements IRecipeIntegrator{

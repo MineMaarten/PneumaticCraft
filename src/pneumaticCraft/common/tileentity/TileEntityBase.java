@@ -3,6 +3,7 @@ package pneumaticCraft.common.tileentity;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -22,9 +23,9 @@ import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidContainerItem;
 import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
-import pneumaticCraft.api.IHeatExchangerLogic;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
-import pneumaticCraft.api.tileentity.IPneumaticMachine;
+import pneumaticCraft.common.block.BlockPneumaticCraft;
 import pneumaticCraft.common.inventory.SyncedField;
 import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.Itemss;
@@ -52,8 +53,7 @@ public class TileEntityBase extends TileEntity implements IGUIButtonSensitive, I
     protected int poweredRedstone; //The redstone strength currently applied to the block.
     private TileEntityCache[] tileCache;
     protected List<ILuaMethod> luaMethods = new ArrayList<ILuaMethod>();
-    @DescSynced
-    private EnumFacing rotation = EnumFacing.NORTH;
+    private IBlockState cachedBlockState;
 
     public TileEntityBase(){
         addLuaMethods();
@@ -166,7 +166,6 @@ public class TileEntityBase extends TileEntity implements IGUIButtonSensitive, I
     public void writeToNBT(NBTTagCompound tag){
         super.writeToNBT(tag);
         writeToPacket(tag);
-        tag.setByte("rotation", (byte)rotation.ordinal());
         if(this instanceof IHeatExchanger) {
             ((IHeatExchanger)this).getHeatExchangerLogic(null).writeToNBT(tag);
         }
@@ -176,7 +175,6 @@ public class TileEntityBase extends TileEntity implements IGUIButtonSensitive, I
     public void readFromNBT(NBTTagCompound tag){
         super.readFromNBT(tag);
         readFromPacket(tag);
-        rotation = EnumFacing.getFront(tag.getByte("rotation"));
         if(this instanceof IHeatExchanger) {
             ((IHeatExchanger)this).getHeatExchangerLogic(null).readFromNBT(tag);
         }
@@ -199,28 +197,31 @@ public class TileEntityBase extends TileEntity implements IGUIButtonSensitive, I
     public void onGuiUpdate(){}
 
     public EnumFacing getRotation(){
-        return rotation;
+        if(cachedBlockState == null) {
+            cachedBlockState = worldObj.getBlockState(getPos());
+        }
+        return cachedBlockState.getValue(BlockPneumaticCraft.ROTATION);
     }
 
-    public void setRotation(EnumFacing rotation){
-        this.rotation = rotation;
-        sendDescriptionPacket();
+    @Override
+    public void updateContainingBlockInfo(){
+        cachedBlockState = null;
+        super.updateContainingBlockInfo();
     }
 
     public int getUpgrades(int upgradeDamage){
-        return getUpgrades(upgradeDamage, this instanceof IPneumaticMachine ? ((IPneumaticMachine)this).getAirHandler().getUpgradeSlots() : getUpgradeSlots());
+        return getUpgrades(upgradeDamage, getUpgradeSlots());
     }
 
     protected int getUpgrades(int upgradeDamage, int... upgradeSlots){
+        return getUpgrades((IInventory)this, upgradeDamage, upgradeSlots);
+    }
+
+    public static int getUpgrades(IInventory inv, int upgradeDamage, int... upgradeSlots){
         int upgrades = 0;
-        IInventory inv = null;
-        if(this instanceof IInventory) inv = (IInventory)this;
-        if(inv == null && this instanceof TileEntityPneumaticBase && ((TileEntityPneumaticBase)this).parentTile instanceof IInventory) inv = (IInventory)((TileEntityPneumaticBase)this).parentTile;
-        if(inv != null) {
-            for(int i : upgradeSlots) {
-                if(inv.getStackInSlot(i) != null && inv.getStackInSlot(i).getItem() == Itemss.machineUpgrade && inv.getStackInSlot(i).getItemDamage() == upgradeDamage) {
-                    upgrades += inv.getStackInSlot(i).stackSize;
-                }
+        for(int i : upgradeSlots) {
+            if(inv.getStackInSlot(i) != null && inv.getStackInSlot(i).getItem() == Itemss.machineUpgrade && inv.getStackInSlot(i).getItemDamage() == upgradeDamage) {
+                upgrades += inv.getStackInSlot(i).stackSize;
             }
         }
         return upgrades;

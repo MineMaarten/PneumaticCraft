@@ -1,15 +1,18 @@
 package pneumaticCraft.common.tileentity;
 
 import java.util.Arrays;
+import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import pneumaticCraft.api.tileentity.IPneumaticMachine;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.Itemss;
@@ -83,9 +86,9 @@ public class TileEntityUVLightBox extends TileEntityPneumaticBase implements ISi
         super.update();
         if(!worldObj.isRemote) {
             ticksExisted++;
-            if(getPressure(null) >= PneumaticValues.MIN_PRESSURE_UV_LIGHTBOX && inventory[0] != null && inventory[0].getItem() == Itemss.emptyPCB && inventory[0].getItemDamage() > 0) {
+            if(getPressure() >= PneumaticValues.MIN_PRESSURE_UV_LIGHTBOX && inventory[0] != null && inventory[0].getItem() == Itemss.emptyPCB && inventory[0].getItemDamage() > 0) {
 
-                addAir((int)(-PneumaticValues.USAGE_UV_LIGHTBOX * getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots())), null);
+                addAir((int)(-PneumaticValues.USAGE_UV_LIGHTBOX * getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots())));
                 if(ticksExisted % Math.max(1, (int)(TileEntityConstants.LIGHT_BOX_0_100_TIME / (5 * getSpeedMultiplierFromUpgrades(getUpgradeSlots())))) == 0) {
                     if(!areLightsOn) {
                         areLightsOn = true;
@@ -126,20 +129,15 @@ public class TileEntityUVLightBox extends TileEntityPneumaticBase implements ISi
     }
 
     public void updateConnections(){
-        for(EnumFacing direction : EnumFacing.VALUES) {
-            if(isConnectedTo(direction)) {
-                boolean checkingLeft = getRotation().rotateY() == direction;
-                TileEntity te = worldObj.getTileEntity(getPos().offset(direction));
-                if(te instanceof IPneumaticMachine) {
-                    /*sidesConnected[direction.ordinal()]*/
-                    boolean isConnected = ((IPneumaticMachine)te).isConnectedTo(direction.getOpposite());
-                    if(checkingLeft) leftConnected = isConnected;
-                    else rightConnected = isConnected;
-                } else {
-                    /*sidesConnected[direction.ordinal()]*/
-                    if(checkingLeft) leftConnected = false;
-                    else rightConnected = false;
-                }
+        leftConnected = false;
+        rightConnected = false;
+
+        List<Pair<EnumFacing, IAirHandler>> connections = getAirHandler(null).getConnectedPneumatics();
+        for(Pair<EnumFacing, IAirHandler> entry : connections) {
+            if(entry.getKey() == getRotation().rotateY()) { //TODO 1.8 test
+                leftConnected = true;
+            } else if(entry.getKey() == getRotation().rotateYCCW()) {
+                rightConnected = true;
             }
         }
     }

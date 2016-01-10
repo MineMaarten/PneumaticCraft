@@ -472,7 +472,7 @@ public class PneumaticCraftUtils{
     }
 
     public static boolean isRenderIDCamo(int renderID){
-        return PneumaticCraftAPIHandler.getInstance().concealableRenderIds.contains(renderID);
+        return false;//TODO 1.8 remove PneumaticCraftAPIHandler.getInstance().concealableRenderIds.contains(renderID);
     }
 
     public static int getProtectingSecurityStations(World world, BlockPos pos, EntityPlayer player, boolean showRangeLines, boolean placementRange){

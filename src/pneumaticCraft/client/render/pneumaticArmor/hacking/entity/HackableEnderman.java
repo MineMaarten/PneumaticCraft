@@ -47,7 +47,7 @@ public class HackableEnderman implements IHackableEntity{
      * @return false if enderman should be disallowed from teleporting
      */
     public static boolean onEndermanTeleport(Entity entity){
-        List<IHackableEntity> hacks = PneumaticRegistry.instance.getCurrentEntityHacks(entity);
+        List<IHackableEntity> hacks = PneumaticRegistry.getInstance().getHelmetRegistry().getCurrentEntityHacks(entity);
         for(IHackableEntity hack : hacks) {
             if(hack instanceof HackableEnderman) {
                 return false;

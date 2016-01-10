@@ -2,8 +2,8 @@ package pneumaticCraft.common.heat.behaviour;
 
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
-import pneumaticCraft.api.IHeatExchangerLogic;
-import pneumaticCraft.api.tileentity.HeatBehaviour;
+import pneumaticCraft.api.heat.HeatBehaviour;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.common.heat.HeatExchangerLogic;
 import pneumaticCraft.common.semiblock.ISemiBlock;
 import pneumaticCraft.common.semiblock.SemiBlockHeatFrame;

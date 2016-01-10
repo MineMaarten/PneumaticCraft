@@ -123,10 +123,10 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
             for(int j = 0; j < chargingItems.size(); j++) {
                 IPressurizable chargingItem = chargingItems.get(j);
                 ItemStack chargedItem = chargedStacks.get(j);
-                if(chargingItem.getPressure(chargedItem) > getPressure(null) + 0.01F && chargingItem.getPressure(chargedItem) > 0F) {
+                if(chargingItem.getPressure(chargedItem) > getPressure() + 0.01F && chargingItem.getPressure(chargedItem) > 0F) {
                     if(!worldObj.isRemote) {
                         chargingItem.addAir(chargedItem, -1);
-                        addAir(1, null);
+                        addAir(1);
                     }
                     disCharging = true;
                     renderAirProgress -= ANIMATION_AIR_SPEED;
@@ -134,10 +134,10 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
                         renderAirProgress += 1F;
                     }
                     charged = true;
-                } else if(chargingItem.getPressure(chargedItem) < getPressure(null) - 0.01F && chargingItem.getPressure(chargedItem) < chargingItem.maxPressure(chargedItem)) {// if there is pressure, and the item isn't fully charged yet..
+                } else if(chargingItem.getPressure(chargedItem) < getPressure() - 0.01F && chargingItem.getPressure(chargedItem) < chargingItem.maxPressure(chargedItem)) {// if there is pressure, and the item isn't fully charged yet..
                     if(!worldObj.isRemote) {
                         chargingItem.addAir(chargedItem, 1);
-                        addAir(-1, null);
+                        addAir(-1);
                     }
                     charging = true;
                     renderAirProgress += ANIMATION_AIR_SPEED;
@@ -157,13 +157,10 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
 
         super.update();
 
-    }
-
-    @Override
-    protected void disperseAir(){
-        super.disperseAir();
-        List<Pair<EnumFacing, IAirHandler>> teList = getConnectedPneumatics();
-        if(teList.size() == 0) airLeak(getRotation());
+        if(!worldObj.isRemote) {
+            List<Pair<EnumFacing, IAirHandler>> teList = getAirHandler(null).getConnectedPneumatics();
+            if(teList.size() == 0) getAirHandler(null).airLeak(getRotation());
+        }
     }
 
     @Override

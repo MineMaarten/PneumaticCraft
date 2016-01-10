@@ -65,9 +65,8 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
     @Override
     public void onNeighborTileUpdate(){
         super.onNeighborTileUpdate();
-        List<Pair<EnumFacing, IAirHandler>> connections = getConnectedPneumatics();
-        for(int i = 0; i < sidesConnected.length; i++)
-            sidesConnected[i] = false;
+        List<Pair<EnumFacing, IAirHandler>> connections = getAirHandler(null).getConnectedPneumatics();
+        Arrays.fill(sidesConnected, false);
         for(Pair<EnumFacing, IAirHandler> entry : connections) {
             sidesConnected[entry.getKey().ordinal()] = true;
         }
@@ -84,7 +83,7 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
             }
             if(ticker % 400 == 0) pumpingLake = null;
 
-            if(redstoneAllows() && getPressure(null) >= getMinWorkingPressure()) {
+            if(redstoneAllows() && getPressure() >= getMinWorkingPressure()) {
                 workTimer += this.getSpeedMultiplierFromUpgrades();
                 while(workTimer > 20) {
                     workTimer -= 20;
@@ -95,7 +94,7 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
                             if(isPipe(getPos().add(0, -currentDepth, 0))) {
                                 if(IOHelper.insert((IInventory)this, new ItemStack(Blockss.pressureTube), null, false) == null) {
                                     worldObj.destroyBlock(getPos().add(0, -currentDepth, 0), false);
-                                    addAir(-100, null);
+                                    addAir(-100);
                                     currentDepth--;
                                 } else {
                                     status = 0;
@@ -114,7 +113,7 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
                                         decrStackSize(4, 1);
                                         worldObj.destroyBlock(getPos().add(0, -currentDepth, 0), false);
                                         worldObj.setBlockState(getPos().add(0, -currentDepth, 0), Blockss.pressureTube.getDefaultState());
-                                        addAir(-100, null);
+                                        addAir(-100);
                                     } else {
                                         status = 0;
                                         currentDepth--;
@@ -184,7 +183,7 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
                 } else if(foundSource) {
                     worldObj.setBlockToAir(curPos);
                     fill(null, new FluidStack(fluid, 1000), true);
-                    addAir(-100, null);
+                    addAir(-100);
                     status = 1;
                 }
             }

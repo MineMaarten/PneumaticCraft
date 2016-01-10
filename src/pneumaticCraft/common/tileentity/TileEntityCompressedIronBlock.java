@@ -1,14 +1,14 @@
 package pneumaticCraft.common.tileentity;
 
 import net.minecraft.util.EnumFacing;
-import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.PneumaticRegistry;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 import pneumaticCraft.common.network.DescSynced;
 
 public class TileEntityCompressedIronBlock extends TileEntityBase implements IHeatExchanger, IComparatorSupport{
 
-    protected final IHeatExchangerLogic heatExchanger = PneumaticRegistry.getInstance().getHeatExchangerLogic();
+    protected final IHeatExchangerLogic heatExchanger = PneumaticRegistry.getInstance().getHeatRegistry().getHeatExchangerLogic();
     @DescSynced
     private int heatLevel = 10;
     private int oldComparatorOutput = 0;

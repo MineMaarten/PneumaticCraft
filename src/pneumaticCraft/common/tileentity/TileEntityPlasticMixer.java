@@ -18,8 +18,8 @@ import net.minecraftforge.fluids.IFluidTank;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
-import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.PneumaticRegistry;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 import pneumaticCraft.common.AchievementHandler;
 import pneumaticCraft.common.block.Blockss;
@@ -37,9 +37,9 @@ public class TileEntityPlasticMixer extends TileEntityBase implements IFluidHand
     private int lastTickInventoryStacksize;
     private static int BASE_TEMPERATURE = FluidRegistry.WATER.getTemperature();
     @GuiSynced
-    private final IHeatExchangerLogic hullLogic = PneumaticRegistry.getInstance().getHeatExchangerLogic();
+    private final IHeatExchangerLogic hullLogic = PneumaticRegistry.getInstance().getHeatRegistry().getHeatExchangerLogic();
     @GuiSynced
-    private final IHeatExchangerLogic itemLogic = PneumaticRegistry.getInstance().getHeatExchangerLogic();
+    private final IHeatExchangerLogic itemLogic = PneumaticRegistry.getInstance().getHeatRegistry().getHeatExchangerLogic();
     @GuiSynced
     public int selectedPlastic = -1;
     @GuiSynced

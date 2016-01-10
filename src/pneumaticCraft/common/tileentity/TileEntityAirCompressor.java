@@ -76,7 +76,7 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
             if(burnTime >= curFuelUsage) {
                 burnTime -= curFuelUsage;
                 if(!worldObj.isRemote) {
-                    addAir((int)(getBaseProduction() * getSpeedMultiplierFromUpgrades(getUpgradeSlots()) * getEfficiency() / 100D), null);
+                    addAir((int)(getBaseProduction() * getSpeedMultiplierFromUpgrades(getUpgradeSlots()) * getEfficiency() / 100D));
                     onFuelBurn(curFuelUsage);
                 }
             }
@@ -85,6 +85,10 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
 
         super.update();
 
+        if(!worldObj.isRemote) {
+            List<Pair<EnumFacing, IAirHandler>> teList = getAirHandler(null).getConnectedPneumatics();
+            if(teList.size() == 0) getAirHandler(null).airLeak(getRotation());
+        }
     }
 
     protected void onFuelBurn(int burnedFuel){}
@@ -123,13 +127,6 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
                 worldObj.spawnParticle(EnumParticleTypes.FLAME, f + f4, f1, f2 + f3, 0.0D, 0.0D, 0.0D);
                 break;
         }
-    }
-
-    @Override
-    protected void disperseAir(){
-        super.disperseAir();
-        List<Pair<EnumFacing, IAirHandler>> teList = getConnectedPneumatics();
-        if(teList.size() == 0) airLeak(getRotation());
     }
 
     @Override

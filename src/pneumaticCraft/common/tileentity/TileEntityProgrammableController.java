@@ -156,7 +156,7 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
                 getFakePlayer().theItemInWorldManager.updateBlockRemoving();
             }
             if(getPressure() >= getMinWorkingPressure()) {
-                if(!aiManager.isIdling()) addAir(-10, null);
+                if(!aiManager.isIdling()) addAir(-10);
                 aiManager.onUpdateTasks();
             }
         } else {
@@ -485,7 +485,7 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
 
     @Override
     public void addAir(ItemStack iStack, int amount){
-        addAir(amount, null);
+        addAir(amount);
     }
 
     @Override

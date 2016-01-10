@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableBlock;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableEntity;
+import pneumaticCraft.client.render.pneumaticArmor.PneumaticHelmetRegistry;
 import pneumaticCraft.client.render.pneumaticArmor.hacking.HackableHandler.HackingEntityProperties;
 import pneumaticCraft.common.util.WorldAndCoord;
 import pneumaticCraft.lib.Log;
@@ -28,7 +29,7 @@ public class HackTickHandler{
                 WorldAndCoord hackedBlock = entry.getKey();
 
                 boolean found = false;
-                for(Map.Entry<Block, Class<? extends IHackableBlock>> registeredEntry : PneumaticCraftAPIHandler.getInstance().hackableBlocks.entrySet()) {
+                for(Map.Entry<Block, Class<? extends IHackableBlock>> registeredEntry : PneumaticHelmetRegistry.getInstance().hackableBlocks.entrySet()) {
                     if(hackableBlock.getClass() == registeredEntry.getValue()) {
                         if(hackedBlock.getBlock() == registeredEntry.getKey()) {
                             if(!hackableBlock.afterHackTick((World)hackedBlock.world, hackedBlock.pos)) {

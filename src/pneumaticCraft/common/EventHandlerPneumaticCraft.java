@@ -43,7 +43,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.api.block.IPneumaticWrenchable;
 import pneumaticCraft.api.client.pneumaticHelmet.EntityTrackEvent;
 import pneumaticCraft.api.client.pneumaticHelmet.InventoryTrackEvent;
@@ -312,7 +311,7 @@ public class EventHandlerPneumaticCraft{
                 BlockPos pos = ItemAmadronTablet.getItemProvidingLocation(usedTablet);
                 if(pos != null) {
                     World world = PneumaticCraftUtils.getWorldForDimension(ItemAmadronTablet.getItemProvidingDimension(usedTablet));
-                    PneumaticRegistry.getInstance().deliverItemsAmazonStyle(world, pos, stacks.toArray(new ItemStack[stacks.size()]));
+                    DroneRegistry.getInstance().deliverItemsAmazonStyle(world, pos, stacks.toArray(new ItemStack[stacks.size()]));
                 }
             } else {
                 FluidStack offeringFluid = ((FluidStack)offer.getOutput()).copy();
@@ -320,7 +319,7 @@ public class EventHandlerPneumaticCraft{
                 BlockPos pos = ItemAmadronTablet.getLiquidProvidingLocation(usedTablet);
                 if(pos != null) {
                     World world = PneumaticCraftUtils.getWorldForDimension(ItemAmadronTablet.getLiquidProvidingDimension(usedTablet));
-                    PneumaticRegistry.getInstance().deliverFluidAmazonStyle(world, pos, offeringFluid);
+                    DroneRegistry.getInstance().deliverFluidAmazonStyle(world, pos, offeringFluid);
                 }
             }
         }

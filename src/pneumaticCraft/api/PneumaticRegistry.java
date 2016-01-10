@@ -1,131 +1,49 @@
 package pneumaticCraft.api;
 
-import java.util.List;
-
-import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidStack;
-import pneumaticCraft.api.client.pneumaticHelmet.IBlockTrackEntry;
-import pneumaticCraft.api.client.pneumaticHelmet.IEntityTrackEntry;
-import pneumaticCraft.api.client.pneumaticHelmet.IHackableBlock;
-import pneumaticCraft.api.client.pneumaticHelmet.IHackableEntity;
-import pneumaticCraft.api.drone.ICustomBlockInteract;
-import pneumaticCraft.api.drone.IPathfindHandler;
+import net.minecraftforge.fml.common.Loader;
+import pneumaticCraft.api.client.IClientRegistry;
+import pneumaticCraft.api.client.pneumaticHelmet.IPneumaticHelmetRegistry;
+import pneumaticCraft.api.drone.IDroneRegistry;
 import pneumaticCraft.api.item.IInventoryItem;
 import pneumaticCraft.api.recipe.IPneumaticRecipeRegistry;
-import pneumaticCraft.api.tileentity.HeatBehaviour;
+import pneumaticCraft.api.tileentity.IAirHandlerSupplier;
+import pneumaticCraft.api.tileentity.IHeatRegistry;
+import pneumaticCraft.api.universalSensor.ISensorRegistry;
 
 /**
- * TODO 1.8 change API structure
  * This class can be used to register and access various things to and from the mod.
  */
 public class PneumaticRegistry{
-    /**
-     * This field, which is initialized in PneumaticCraft's preInit, will give you access to various registration and access options.
-     * @deprecated This field isn't going to be removed, but it'll be marked private. use getInstance().
-     */
-    @Deprecated
-    public static IPneumaticCraftInterface instance;
+    private static IPneumaticCraftInterface instance;
 
     public static IPneumaticCraftInterface getInstance(){
         return instance;
     }
 
     public static void init(IPneumaticCraftInterface inter){
-        if(instance == null) instance = inter;//only allow initialization once; by PneumaticCraft
+        if(instance == null && Loader.instance().activeModContainer().getModId().equals("PneumaticCraft")) instance = inter;//only allow initialization once; by PneumaticCraft
+        else throw new IllegalStateException("Only PneumaticCraft is allowed to call this method!");
     }
 
     public static interface IPneumaticCraftInterface{
 
         public IPneumaticRecipeRegistry getRecipeRegistry();
 
-        /*
-         * ------------- Pneumatic Helmet --------------
-         */
+        public IAirHandlerSupplier getAirHandlerSupplier();
 
-        public void registerEntityTrackEntry(Class<? extends IEntityTrackEntry> entry);
+        public IPneumaticHelmetRegistry getHelmetRegistry();
 
-        public void registerBlockTrackEntry(IBlockTrackEntry entry);
+        public IDroneRegistry getDroneRegistry();
 
-        public void addHackable(Class<? extends Entity> entityClazz, Class<? extends IHackableEntity> iHackable);
+        public IHeatRegistry getHeatRegistry();
 
-        public void addHackable(Block block, Class<? extends IHackableBlock> iHackable);
+        public IClientRegistry getGuiRegistry();
 
-        /**
-         * Returns a list of all current successful hacks of a given entity. This is used for example in Enderman hacking, so the user
-         * can only hack an enderman once (more times wouldn't have any effect). This is mostly used for display purposes.
-         * @param entity
-         * @return empty list if no hacks.
-         */
-        public List<IHackableEntity> getCurrentEntityHacks(Entity entity);
-
-        /*
-         * ------------- Drones --------------
-         */
-
-        /**
-         * Normally drones will pathfind through any block that doesn't have any collisions (Block#getBlocksMovement returns true).
-         * With this method you can register custom blocks to allow the drone to pathfind through them. If the block requires any special
-         * handling, like allow pathfinding on certain conditions, you can pass a IPathFindHandler with the registry.
-         * @param block
-         * @param handler can be null, to always allow pathfinding through this block.
-         */
-        public void addPathfindableBlock(Block block, IPathfindHandler handler);
-
-        /**
-         * This will add a puzzle piece that has only a Area white- and blacklist parameter (similar to a GoTo piece).
-         * It will do the specified behaviour. This can be used to create energy import/export widgets.
-         * @param interactor
-         */
-        public void registerCustomBlockInteractor(ICustomBlockInteract interactor);
-
-        /**
-         * Will spawn in a Drone a distance away from the given coordinate. When there is an inventory at the given x,y,z the drone will export the items in there. If there isn't or items don't fit, the drone will travel to 5 blocks above the specified
-         * y level, and drop the deliveredStacks. When there isn't a clear path for the items to fall these 5 blocks the Drone will deliver at a
-         * y level above the specified y that _is_ clear. If no clear blocks can be found (when there are only solid blocks), the Drone will
-         * drop the items very high up in the air instead, and drop them there.
-         * 
-         * When the Drone is tried to be caught by a player (by wrenching it), the drone will only the drop the items that it was delivering (or
-         * none if it dropped those items already). The Drone itself never will be dropped.
-         * @param pos
-         * @param deliveredStacks stacks that are delivered by the drone. When no stacks, or more than 65 stacks are given, this will generate an IllegalArgumentException.
-         * 
-         * @return the drone. You can use this to set a custom name for example (defaults to "Amadron Delivery Drone").
-         */
-        public EntityCreature deliverItemsAmazonStyle(World world, BlockPos pos, ItemStack... deliveredStacks);
-
-        /**
-         * The opposite of deliverItemsAmazonStyle. Will retrieve the queried items from an inventory at the specified location.
-         * @param world
-         * @param pos
-         * @param queriedStacks
-         * @return
-         */
-        public EntityCreature retrieveItemsAmazonStyle(World world, BlockPos pos, ItemStack... queriedStacks);
-
-        /**
-         * Similar to deliverItemsAmazonStyle, but with Fluids. Will spawn in a Drone that will fill an IFluidHandler at the given x,y,z. If the fluid doesn't fit or there isn't a IFluidHandler, the fluid is lost.
-         * @param world
-         * @param pos
-         * @param deliveredFluid
-         * @return
-         */
-        public EntityCreature deliverFluidAmazonStyle(World world, BlockPos pos, FluidStack deliveredFluid);
-
-        /**
-         * The opposite of deliverFluidAmazonStyle. Will retrieve the queried fluid from an IFluidHandler at the specified location.
-         * @param world
-         * @param pos
-         * @param queriedStacks
-         * @return
-         */
-        public EntityCreature retrieveFluidAmazonStyle(World world, BlockPos pos, FluidStack queriedFluid);
+        public ISensorRegistry getSensorRegistry();
 
         /*
          * --------------- Items -------------------
@@ -135,15 +53,6 @@ public class PneumaticRegistry{
          * @param handler
          */
         public void registerInventoryItem(IInventoryItem handler);
-
-        /*
-         * ----------------- Heat System --------------
-         */
-        public IHeatExchangerLogic getHeatExchangerLogic();
-
-        public void registerBlockExchanger(Block block, double temperature, double thermalResistance);
-
-        public void registerHeatBehaviour(Class<? extends HeatBehaviour> heatBehaviour);
 
         /*
          * ---------------- Power Generation -----------
@@ -171,12 +80,6 @@ public class PneumaticRegistry{
          * This method throws an IllegalArgumentException when tried to be called from the client side!
          */
         public int getProtectingSecurityStations(World world, BlockPos pos, EntityPlayer player, boolean showRangeLines);
-
-        /**
-         * Use this to register ISimpleBlockRenderHandler render id's of full blocks, those of which should be able to be used for the Pneumatic Door Base camouflage.
-         * @param id
-         */
-        public void registerConcealableRenderId(int id);
 
         /**
          * Used to register a liquid that represents liquid XP (like MFR mob essence, OpenBlocks liquid XP).

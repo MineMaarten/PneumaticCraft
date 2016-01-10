@@ -21,17 +21,18 @@ import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.api.client.pneumaticHelmet.IEntityTrackEntry;
 import pneumaticCraft.api.client.pneumaticHelmet.IEntityTrackEntry.EntityTrackEntry;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableEntity;
+import pneumaticCraft.api.client.pneumaticHelmet.IPneumaticHelmetRegistry;
 import pneumaticCraft.api.item.IPressurizable;
 import pneumaticCraft.client.KeyHandler;
 import pneumaticCraft.client.render.pneumaticArmor.DroneDebugUpgradeHandler;
 import pneumaticCraft.client.render.pneumaticArmor.EntityTrackUpgradeHandler;
 import pneumaticCraft.client.render.pneumaticArmor.HUDHandler;
 import pneumaticCraft.client.render.pneumaticArmor.HackUpgradeRenderHandler;
+import pneumaticCraft.client.render.pneumaticArmor.PneumaticHelmetRegistry;
 import pneumaticCraft.client.render.pneumaticArmor.RenderDroneAI;
 import pneumaticCraft.client.render.pneumaticArmor.RenderTarget;
 import pneumaticCraft.client.render.pneumaticArmor.hacking.HackableHandler;
 import pneumaticCraft.common.NBTUtil;
-import pneumaticCraft.common.PneumaticCraftAPIHandler;
 import pneumaticCraft.common.entity.living.EntityDrone;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.Log;
@@ -41,20 +42,21 @@ public class EntityTrackHandler{
     private static List<IEntityTrackEntry> trackEntries = new ArrayList<IEntityTrackEntry>();
 
     public static void registerDefaultEntries(){
-        PneumaticRegistry.getInstance().registerEntityTrackEntry(EntityTrackEntryLivingBase.class);
-        PneumaticRegistry.getInstance().registerEntityTrackEntry(EntityTrackEntryHackable.class);
-        PneumaticRegistry.getInstance().registerEntityTrackEntry(EntityTrackEntryDrone.class);
-        PneumaticRegistry.getInstance().registerEntityTrackEntry(EntityTrackEntryPressurizable.class);
-        PneumaticRegistry.getInstance().registerEntityTrackEntry(EntityTrackEntryAgeable.class);
-        PneumaticRegistry.getInstance().registerEntityTrackEntry(EntityTrackEntryTameable.class);
-        PneumaticRegistry.getInstance().registerEntityTrackEntry(EntityTrackEntryCreeper.class);
-        PneumaticRegistry.getInstance().registerEntityTrackEntry(EntityTrackEntrySlime.class);
-        PneumaticRegistry.getInstance().registerEntityTrackEntry(EntityTrackEntryPlayer.class);
-        PneumaticRegistry.getInstance().registerEntityTrackEntry(EntityTrackEntryMob.class);
+        IPneumaticHelmetRegistry manager = PneumaticRegistry.getInstance().getHelmetRegistry();
+        manager.registerEntityTrackEntry(EntityTrackEntryLivingBase.class);
+        manager.registerEntityTrackEntry(EntityTrackEntryHackable.class);
+        manager.registerEntityTrackEntry(EntityTrackEntryDrone.class);
+        manager.registerEntityTrackEntry(EntityTrackEntryPressurizable.class);
+        manager.registerEntityTrackEntry(EntityTrackEntryAgeable.class);
+        manager.registerEntityTrackEntry(EntityTrackEntryTameable.class);
+        manager.registerEntityTrackEntry(EntityTrackEntryCreeper.class);
+        manager.registerEntityTrackEntry(EntityTrackEntrySlime.class);
+        manager.registerEntityTrackEntry(EntityTrackEntryPlayer.class);
+        manager.registerEntityTrackEntry(EntityTrackEntryMob.class);
     }
 
     public static void init(){
-        for(Class<? extends IEntityTrackEntry> clazz : PneumaticCraftAPIHandler.getInstance().entityTrackEntries) {
+        for(Class<? extends IEntityTrackEntry> clazz : PneumaticHelmetRegistry.getInstance().entityTrackEntries) {
             try {
                 trackEntries.add(clazz.newInstance());
             } catch(InstantiationException e) {

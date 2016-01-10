@@ -146,7 +146,7 @@ public class ModuleLogistics extends TubeModule{
         super.update();
         if(cachedFrame != null && cachedFrame.isInvalid()) cachedFrame = null;
         if(!getTube().world().isRemote) {
-            if(powered != getTube().getAirHandler().getPressure(null) >= MIN_PRESSURE) {
+            if(powered != getTube().getAirHandler(null).getPressure() >= MIN_PRESSURE) {
                 powered = !powered;
                 NetworkHandler.sendToAllAround(new PacketUpdateLogisticModule(this, 0), getTube().world());
             }
@@ -178,10 +178,10 @@ public class ModuleLogistics extends TubeModule{
                                     ModuleLogistics provider = frameToModuleMap.get(task.provider);
                                     ModuleLogistics requester = frameToModuleMap.get(task.requester);
                                     int airUsed = (int)(ITEM_TRANSPORT_COST * extractedStack.stackSize * Math.pow(PneumaticCraftUtils.distBetweenSq(provider.getTube().pos(), requester.getTube().pos()), 0.25));
-                                    if(requester.getTube().getAirHandler().getCurrentAir(null) > airUsed) {
+                                    if(requester.getTube().getAirHandler(null).getAir() > airUsed) {
                                         sendModuleUpdate(provider, true);
                                         sendModuleUpdate(requester, true);
-                                        requester.getTube().getAirHandler().addAir(-airUsed, null);
+                                        requester.getTube().getAirHandler(null).addAir(-airUsed);
                                         IOHelper.extract(task.provider.getTileEntity(), extractedStack, false);
                                         IOHelper.insert(task.requester.getTileEntity(), extractedStack, false);
                                         ticksUntilNextCycle = 20;
@@ -211,7 +211,7 @@ public class ModuleLogistics extends TubeModule{
                                             extractedFluid = provider.drain(d, drainingFluid, false);
                                             if(extractedFluid != null) {
                                                 airUsed = (int)(FLUID_TRANSPORT_COST * extractedFluid.amount * PneumaticCraftUtils.distBetweenSq(p.getTube().pos(), r.getTube().pos()));
-                                                if(r.getTube().getAirHandler().getCurrentAir(null) > airUsed) {
+                                                if(r.getTube().getAirHandler(null).getAir() > airUsed) {
                                                     extractedFluid = provider.drain(d, drainingFluid, true);
                                                     break;
                                                 } else {
@@ -225,7 +225,7 @@ public class ModuleLogistics extends TubeModule{
                                         if(extractedFluid != null) {
                                             sendModuleUpdate(p, true);
                                             sendModuleUpdate(r, true);
-                                            r.getTube().getAirHandler().addAir(-airUsed, null);
+                                            r.getTube().getAirHandler(null).addAir(-airUsed);
                                             requester.fill(di, extractedFluid, true);
                                             ticksUntilNextCycle = 20;
                                         }

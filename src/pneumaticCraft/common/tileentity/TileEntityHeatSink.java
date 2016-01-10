@@ -4,13 +4,13 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import pneumaticCraft.api.IHeatExchangerLogic;
 import pneumaticCraft.api.PneumaticRegistry;
+import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 
 public class TileEntityHeatSink extends TileEntityCompressedIronBlock implements IHeatExchanger{
 
-    private final IHeatExchangerLogic airExchanger = PneumaticRegistry.getInstance().getHeatExchangerLogic();
+    private final IHeatExchangerLogic airExchanger = PneumaticRegistry.getInstance().getHeatRegistry().getHeatExchangerLogic();
 
     public TileEntityHeatSink(){
         airExchanger.addConnectedExchanger(heatExchanger);

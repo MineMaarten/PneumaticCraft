@@ -44,7 +44,7 @@ public class ThirdPartyManager implements IGuiHandler{
             //thirdPartyClasses.put(ModIds.WAILA, Waila.class);
             // thirdPartyClasses.put(ModIds.THAUMCRAFT, Thaumcraft.class);
             thirdPartyClasses.put(ModIds.AE2, AE2.class);
-            thirdPartyClasses.put(ModIds.CHISEL, Chisel.class);
+            // thirdPartyClasses.put(ModIds.CHISEL, Chisel.class);
             thirdPartyClasses.put(ModIds.FORESTRY, Forestry.class);
             thirdPartyClasses.put(ModIds.MFR, MFR.class);
             thirdPartyClasses.put(ModIds.OPEN_BLOCKS, OpenBlocks.class);
