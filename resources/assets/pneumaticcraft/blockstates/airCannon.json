@@ -1,0 +1,38 @@
+{
+    "forge_marker": 1,
+    "defaults": {
+        "textures": {},
+        "custom": { "flip-v" : true},
+        "model": "pneumaticcraft:airCannon.obj"
+    },
+	"variants": {
+		"facing": {
+			"up": {"transform": {"rotation" : {"x" : 90}}},
+			"down": {"x" : -90},
+			"east": {
+				"transform": {
+					"translation": [ -0.46875, -0.46875, 0.53125 ]
+				}
+			},
+			"north": {
+				"transform": {
+					"translation": [ 0.53125, -0.46875, 0.46875 ],
+					"rotation": {"y" : 90}
+				}
+			},
+			"west": {
+				"transform": {
+					"translation": [ 0.46875, -0.46875, -0.53125 ],
+					"rotation": {"y": 180}
+				}
+			},
+			"south": {
+				"transform": {
+					"translation": [ -0.53125, -0.46875, -0.46875 ],
+					"rotation": {"y" : 270}
+				}
+			}
+		},
+		"inventory": [{}]
+	}
+}

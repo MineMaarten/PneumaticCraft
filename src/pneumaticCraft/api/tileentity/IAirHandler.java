@@ -2,6 +2,7 @@ package pneumaticCraft.api.tileentity;
 
 import java.util.List;
 
+import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
@@ -99,19 +100,37 @@ public interface IAirHandler extends IManoMeasurable{
 
     public World getWorld();
 
+    public BlockPos getPos();
+
     /**
      * Not necessary if you use validate().
      * @param world
      */
     public void setWorld(World world);
 
-    public BlockPos getPos();
-
     /**
      * Not necessary if you use validate().
      * @param pos
      */
     public void setPos(BlockPos pos);
+
+    /**
+     * Not necessary if you use validate()
+     * @param pos
+     */
+    public void setPneumaticMachine(IPneumaticMachine machine);
+
+    /**
+     * Not necessary if you use validate(), or when the parent's inventory isn't used to handle like volume upgrades.
+     * @param pos
+     */
+    public void setParentInventory(IInventory inv);
+
+    /**
+     * Not necessary if you use validate(), or when the parent doesn't implement IAirListener.
+     * @param pos
+     */
+    public void setAirListener(IAirListener airListener);
 
     /**
      * Creates an air connection with another handler. Can be used to connect up pneumatic machines that aren't neighboring, like AE2's P2P tunnels.

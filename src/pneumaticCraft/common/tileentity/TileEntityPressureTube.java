@@ -10,6 +10,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -23,7 +24,9 @@ import pneumaticCraft.common.block.tubes.ModuleRegistrator;
 import pneumaticCraft.common.block.tubes.TubeModule;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.thirdparty.ModInteractionUtils;
+import pneumaticCraft.common.thirdparty.mcmultipart.PartPressureTube;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
+import pneumaticCraft.lib.ModIds;
 import pneumaticCraft.lib.PneumaticValues;
 
 public class TileEntityPressureTube extends TileEntityPneumaticBase implements IAirListener, IManoMeasurable{
@@ -160,7 +163,7 @@ public class TileEntityPressureTube extends TileEntityPneumaticBase implements I
         }
         modules[side.ordinal()] = module;
         if(worldObj != null && !worldObj.isRemote) {
-            //TODO FMP depif(part != null) updatePart();
+            if(part != null) updatePart();
             sendDescriptionPacket();
         }
     }
@@ -212,7 +215,8 @@ public class TileEntityPressureTube extends TileEntityPneumaticBase implements I
         if(sidesCount == 1 && !hasModule) {
             for(int i = 0; i < 6; i++) {
                 if(sidesConnected[i]) {
-                    if(isConnectedTo(EnumFacing.getFront(i).getOpposite())) sidesConnected[i ^ 1] = true;
+                    EnumFacing opposite = EnumFacing.getFront(i).getOpposite();
+                    if(isConnectedTo(opposite)) sidesConnected[opposite.ordinal()] = true;
                     break;
                 }
             }
@@ -239,17 +243,17 @@ public class TileEntityPressureTube extends TileEntityPneumaticBase implements I
         }
     }
 
-    /*TODO FMP dep  @Override
-      @Optional.Method(modid = ModIds.FMP)
-      public void sendDescriptionPacket(){
-          if(part != null && !worldObj.isRemote) {
-              ((PartPressureTube)part).sendDescUpdate();
-          }
-          super.sendDescriptionPacket();
-      }
+    @Override
+    @Optional.Method(modid = ModIds.MCMP)
+    public void sendDescriptionPacket(){
+        if(part != null && !worldObj.isRemote) {
+            ((PartPressureTube)part).sendUpdatePacket();
+        }
+        super.sendDescriptionPacket();
+    }
 
-      @Optional.Method(modid = ModIds.FMP)
-      public void updatePart(){
-          ((PartPressureTube)part).onNeighborChanged();
-      }*/
+    @Optional.Method(modid = ModIds.FMP)
+    public void updatePart(){
+        ((PartPressureTube)part).onNeighborTileChange(null);
+    }
 }

@@ -17,6 +17,7 @@ import pneumaticCraft.common.thirdparty.buildcraft.BuildCraft;
 import pneumaticCraft.common.thirdparty.enderio.EnderIO;
 import pneumaticCraft.common.thirdparty.forestry.Forestry;
 import pneumaticCraft.common.thirdparty.igwmod.IGWMod;
+import pneumaticCraft.common.thirdparty.mcmultipart.MCMultipart;
 import pneumaticCraft.common.thirdparty.mfr.MFR;
 import pneumaticCraft.common.thirdparty.openblocks.OpenBlocks;
 import pneumaticCraft.lib.Log;
@@ -52,6 +53,7 @@ public class ThirdPartyManager implements IGuiHandler{
             thirdPartyClasses.put(ModIds.NOT_ENOUGH_KEYS, NotEnoughKeys.class);
             //  thirdPartyClasses.put(ModIds.EE3, EE3.class);
             thirdPartyClasses.put(ModIds.EIO, EnderIO.class);
+            thirdPartyClasses.put(ModIds.MCMP, MCMultipart.class);
             DramaSplash.newDrama();
         } catch(Throwable e) {
             Log.error("A class loader loaded a class where MineMaarten didn't expect it to do so! Please report, as third party content is broken.");

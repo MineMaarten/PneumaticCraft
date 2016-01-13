@@ -8,18 +8,23 @@ import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -46,12 +51,14 @@ import pneumaticCraft.client.render.pneumaticArmor.entitytracker.EntityTrackHand
 import pneumaticCraft.client.semiblock.ClientSemiBlockManager;
 import pneumaticCraft.common.CommonHUDHandler;
 import pneumaticCraft.common.HackTickHandler;
+import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.config.Config;
 import pneumaticCraft.common.entity.EntityProgrammableController;
 import pneumaticCraft.common.entity.EntityRing;
 import pneumaticCraft.common.entity.living.EntityDrone;
 import pneumaticCraft.common.entity.living.EntityLogisticsDrone;
 import pneumaticCraft.common.entity.projectile.EntityVortex;
+import pneumaticCraft.common.fluid.Fluids;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.recipes.CraftingRegistrator;
 import pneumaticCraft.common.semiblock.ItemSemiBlockBase;
@@ -71,6 +78,10 @@ public class ClientProxy extends CommonProxy{
     @Override
     public void preInit(){
         OBJLoader.instance.addDomain(Names.MOD_ID);
+
+        for(Fluid fluid : Fluids.fluids) {
+            ModelLoader.setBucketModelDefinition(Fluids.getBucket(fluid));
+        }
 
         MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
         FMLCommonHandler.instance().bus().register(new ClientEventHandler());
@@ -102,6 +113,19 @@ public class ClientProxy extends CommonProxy{
 
     @Override
     public void init(){
+        for(Block block : Blockss.blocks) {
+            Item item = Item.getItemFromBlock(block);
+            ResourceLocation resLoc = new ResourceLocation(Names.MOD_ID, item.getUnlocalizedName().substring(5));
+            ModelBakery.registerItemVariants(item, resLoc);
+            Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(item, 0, new ModelResourceLocation(resLoc, "inventory"));
+        }
+        for(Item item : Itemss.items) {
+            if(item instanceof ItemBucket) continue;
+            ResourceLocation resLoc = new ResourceLocation(Names.MOD_ID, item.getUnlocalizedName().substring(5));
+            ModelBakery.registerItemVariants(item, resLoc);
+            Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(item, 0, new ModelResourceLocation(resLoc, "inventory"));
+        }
+
         for(int i = 0; i < 16; i++) { //Only register these recipes client side, so NEI compatibility works, but drones don't lose their program when dyed.
             ItemStack drone = new ItemStack(Itemss.drone);
             NBTTagCompound tag = new NBTTagCompound();

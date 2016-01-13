@@ -17,7 +17,7 @@ import pneumaticCraft.api.universalSensor.ISensorRegistry;
 /**
  * This class can be used to register and access various things to and from the mod.
  */
-public class PneumaticRegistry{
+public final class PneumaticRegistry{
     private static IPneumaticCraftInterface instance;
 
     public static IPneumaticCraftInterface getInstance(){
@@ -29,7 +29,7 @@ public class PneumaticRegistry{
         else throw new IllegalStateException("Only PneumaticCraft is allowed to call this method!");
     }
 
-    public static interface IPneumaticCraftInterface{
+    public interface IPneumaticCraftInterface{
 
         public IPneumaticRecipeRegistry getRecipeRegistry();
 

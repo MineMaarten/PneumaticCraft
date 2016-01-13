@@ -1,5 +1,8 @@
 package pneumaticCraft.common.item;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -55,6 +58,7 @@ public class Itemss{
     public static Item gunAmmo;
     public static Item amadronTablet;
     public static Item minigun;
+    public static List<Item> items = new ArrayList<Item>();
 
     public static void init(){
         GPSTool = new ItemGPSTool().setUnlocalizedName("gpsTool");
@@ -158,5 +162,6 @@ public class Itemss{
         GameRegistry.registerItem(item, registerName, Names.MOD_ID);
         ThirdPartyManager.instance().onItemRegistry(item);
         //GameData.newItemAdded(item);
+        items.add(item);
     }
 }

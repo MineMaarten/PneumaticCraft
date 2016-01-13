@@ -17,7 +17,8 @@ public class TileEntityCache{
     }
 
     public void update(){
-        te = world.getTileEntity(pos);
+        te = world.isBlockLoaded(pos) ? world.getTileEntity(pos) : null;
+        if(te != null && te.getWorld() == null) te = null;
     }
 
     public TileEntity getTileEntity(){

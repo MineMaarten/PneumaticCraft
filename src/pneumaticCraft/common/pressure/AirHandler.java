@@ -49,7 +49,7 @@ public class AirHandler implements IAirHandler{
     private TileEntityCache[] tileCache;
     private int[] upgradeSlots;
 
-    private TileEntity parent;
+    private IInventory parentInventory;
     private IAirListener airListener;
     private IPneumaticMachine parentPneumatic;
     private World worldObj;
@@ -143,11 +143,11 @@ public class AirHandler implements IAirHandler{
     }
 
     private int getUpgrades(int upgradeDamage){
-        return TileEntityBase.getUpgrades((IInventory)parent, upgradeDamage, getUpgradeSlots());
+        return TileEntityBase.getUpgrades(parentInventory, upgradeDamage, getUpgradeSlots());
     }
 
     protected int getVolumeFromUpgrades(int[] upgradeSlots){
-        return TileEntityBase.getUpgrades((IInventory)parent, ItemMachineUpgrade.UPGRADE_VOLUME_DAMAGE, upgradeSlots) * PneumaticValues.VOLUME_VOLUME_UPGRADE;
+        return TileEntityBase.getUpgrades(parentInventory, ItemMachineUpgrade.UPGRADE_VOLUME_DAMAGE, upgradeSlots) * PneumaticValues.VOLUME_VOLUME_UPGRADE;
     }
 
     /**
@@ -269,11 +269,26 @@ public class AirHandler implements IAirHandler{
 
     @Override
     public void validate(TileEntity parent){
-        this.parent = parent;
+        parentInventory = parent instanceof IInventory ? (IInventory)parent : null;
         airListener = parent instanceof IAirListener ? (IAirListener)parent : null;
         parentPneumatic = (IPneumaticMachine)parent;
         setWorld(parent.getWorld());
         setPos(parent.getPos());
+    }
+
+    @Override
+    public void setPneumaticMachine(IPneumaticMachine machine){
+        parentPneumatic = machine;
+    }
+
+    @Override
+    public void setParentInventory(IInventory inv){
+        parentInventory = inv;
+    }
+
+    @Override
+    public void setAirListener(IAirListener airListener){
+        this.airListener = airListener;
     }
 
     /**

@@ -5,6 +5,9 @@
 # object Gen
 #
 
+mtllib liquidCompressor.mtl
+usemtl defaultMaterial
+
 v  16.000 5.929 -13.000
 v  16.000 10.071 -13.000
 v  16.000 13.000 -10.071

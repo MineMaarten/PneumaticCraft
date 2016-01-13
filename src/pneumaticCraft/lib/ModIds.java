@@ -22,4 +22,5 @@ public class ModIds{
     public static final String OPEN_COMPUTERS = "OpenComputers|Core";
     public static final String EE3 = "EE3";
     public static final String EIO = "EnderIO";
+    public static final String MCMP = "mcmultipart";
 }

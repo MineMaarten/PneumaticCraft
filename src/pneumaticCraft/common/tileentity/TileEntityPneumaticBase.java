@@ -56,6 +56,12 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IPneumati
     }
 
     @Override
+    public void onNeighborTileUpdate(){
+        super.onNeighborTileUpdate();
+        airHandler.onNeighborChange();
+    }
+
+    @Override
     protected void addLuaMethods(){
         super.addLuaMethods();
         luaMethods.add(new LuaMethod("getPressure"){

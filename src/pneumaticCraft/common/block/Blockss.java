@@ -1,5 +1,8 @@
 package pneumaticCraft.common.block;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -58,6 +61,7 @@ public class Blockss{
     public static Block keroseneLamp;
     public static Block keroseneLampLight;
     public static Block sentryTurret;
+    public static List<Block> blocks = new ArrayList<Block>();
 
     public static void init(){
         pressureTube = new BlockPressureTube(Material.iron, PneumaticValues.DANGER_PRESSURE_PRESSURE_TUBE, PneumaticValues.MAX_PRESSURE_PRESSURE_TUBE, PneumaticValues.VOLUME_PRESSURE_TUBE).setUnlocalizedName("pressureTube");
@@ -166,5 +170,6 @@ public class Blockss{
     private static void registerBlock(Block block, Class<? extends ItemBlockPneumaticCraft> itemBlockClass){
         GameRegistry.registerBlock(block, itemBlockClass, block.getUnlocalizedName().substring("tile.".length()));
         ThirdPartyManager.instance().onBlockRegistry(block);
+        blocks.add(block);
     }
 }

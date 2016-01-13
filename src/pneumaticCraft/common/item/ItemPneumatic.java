@@ -40,7 +40,7 @@ public class ItemPneumatic extends Item{
             if(PneumaticCraft.proxy.isSneakingInGui()) {
                 translatedInfo = EnumChatFormatting.AQUA + translatedInfo;
                 if(!Loader.isModLoaded(ModIds.IGWMOD)) translatedInfo += " \\n \\n" + I18n.format("gui.tab.info.assistIGW");
-                curInfo.addAll(PneumaticCraftUtils.convertStringIntoList(translatedInfo, 60));
+                curInfo.addAll(PneumaticCraftUtils.convertStringIntoList(translatedInfo, 40));
             } else {
                 curInfo.add(EnumChatFormatting.AQUA + I18n.format("gui.tooltip.sneakForInfo"));
             }

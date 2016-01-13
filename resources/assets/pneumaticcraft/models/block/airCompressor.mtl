@@ -1,3 +1,2 @@
-newmtl airCompressor:Default
-Kd 1.00 1.00 1.00
+newmtl defaultMaterial
 map_Kd pneumaticcraft:model/airCompressor
