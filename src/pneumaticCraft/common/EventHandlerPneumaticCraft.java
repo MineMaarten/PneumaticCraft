@@ -49,6 +49,7 @@ import pneumaticCraft.api.client.pneumaticHelmet.InventoryTrackEvent;
 import pneumaticCraft.api.drone.AmadronRetrievalEvent;
 import pneumaticCraft.api.drone.DroneConstructingEvent;
 import pneumaticCraft.api.drone.DroneSuicideEvent;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.item.IPressurizable;
 import pneumaticCraft.client.gui.widget.GuiKeybindCheckBox;
 import pneumaticCraft.client.render.pneumaticArmor.EntityTrackUpgradeHandler;
@@ -62,7 +63,6 @@ import pneumaticCraft.common.entity.EntityProgrammableController;
 import pneumaticCraft.common.entity.living.EntityDrone;
 import pneumaticCraft.common.fluid.Fluids;
 import pneumaticCraft.common.item.ItemAmadronTablet;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.ItemPneumaticArmor;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.NetworkHandler;
@@ -209,7 +209,7 @@ public class EventHandlerPneumaticCraft{
         EntityPlayer player = FMLClientHandler.instance().getClient().thePlayer;
         if(event.target == player && (event.entityLiving instanceof EntityGolem || event.entityLiving instanceof EntityMob)) {
             ItemStack helmetStack = player.getCurrentArmor(3);
-            if(helmetStack != null && helmetStack.getItem() == Itemss.pneumaticHelmet && ((IPressurizable)helmetStack.getItem()).getPressure(helmetStack) > 0 && ItemPneumaticArmor.getUpgrades(ItemMachineUpgrade.UPGRADE_ENTITY_TRACKER, helmetStack) > 0 && GuiKeybindCheckBox.trackedCheckboxes.get("pneumaticHelmet.upgrade.coreComponents").checked && GuiKeybindCheckBox.trackedCheckboxes.get("pneumaticHelmet.upgrade." + EntityTrackUpgradeHandler.UPGRADE_NAME).checked) {
+            if(helmetStack != null && helmetStack.getItem() == Itemss.pneumaticHelmet && ((IPressurizable)helmetStack.getItem()).getPressure(helmetStack) > 0 && ItemPneumaticArmor.getUpgrades(EnumUpgrade.ENTITY_TRACKER, helmetStack) > 0 && GuiKeybindCheckBox.trackedCheckboxes.get("pneumaticHelmet.upgrade.coreComponents").checked && GuiKeybindCheckBox.trackedCheckboxes.get("pneumaticHelmet.upgrade." + EntityTrackUpgradeHandler.UPGRADE_NAME).checked) {
                 HUDHandler.instance().getSpecificRenderer(EntityTrackUpgradeHandler.class).warnIfNecessary(event.entityLiving);
             }
         } else {

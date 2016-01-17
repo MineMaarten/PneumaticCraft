@@ -96,7 +96,7 @@ public class GuiChargingStation extends GuiPneumaticContainerBase<TileEntityChar
         super.addPressureStatInfo(pressureStatText);
         if(te.charging || te.disCharging) {
             pressureStatText.add("\u00a77" + (te.charging ? "C" : "Disc") + "harging at");
-            pressureStatText.add("\u00a70" + (double)Math.round(PneumaticValues.CHARGING_STATION_CHARGE_RATE * te.getSpeedMultiplierFromUpgrades(te.getUpgradeSlots())) + "mL/tick");
+            pressureStatText.add("\u00a70" + (double)Math.round(PneumaticValues.CHARGING_STATION_CHARGE_RATE * te.getSpeedMultiplierFromUpgrades()) + "mL/tick");
         }
     }
 

@@ -1,6 +1,7 @@
 package pneumaticCraft.client.render.pneumaticArmor;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.pathfinding.PathEntity;
@@ -17,13 +18,13 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.api.client.pneumaticHelmet.IOptionPage;
 import pneumaticCraft.api.client.pneumaticHelmet.IUpgradeRenderHandler;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.client.gui.pneumaticHelmet.GuiCoordinateTrackerOptions;
 import pneumaticCraft.client.gui.widget.GuiAnimatedStat;
 import pneumaticCraft.common.NBTUtil;
 import pneumaticCraft.common.ai.EntityPathNavigateDrone;
 import pneumaticCraft.common.config.Config;
 import pneumaticCraft.common.entity.living.EntityDrone;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.ItemPneumaticArmor;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.NetworkHandler;
@@ -108,11 +109,8 @@ public class CoordTrackUpgradeHandler implements IUpgradeRenderHandler{
     public void render2D(float partialTicks, boolean upgradeEnabled){}
 
     @Override
-    public boolean isEnabled(ItemStack[] upgradeStacks){
-        for(ItemStack stack : upgradeStacks) {
-            if(stack != null && stack.getItem() == Itemss.machineUpgrade && stack.getItemDamage() == ItemMachineUpgrade.UPGRADE_COORDINATE_TRACKER_DAMAGE) return true;
-        }
-        return false;
+    public Item[] getRequiredUpgrades(){
+        return new Item[]{Itemss.upgrades.get(EnumUpgrade.COORDINATE_TRACKER)};
     }
 
     @Override

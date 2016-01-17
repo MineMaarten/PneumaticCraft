@@ -1,0 +1,39 @@
+{
+    "forge_marker": 1,
+    "defaults": {
+        "textures": {},
+		"custom": { "flip-v": true },
+        "model": "pneumaticcraft:creativeCompressor.obj"
+    },
+	"variants": {
+		"normal": [{
+			"transform": {
+				"scale": [ 0.0625, 0.0625, 0.0625 ],
+				"translation": [ -0.46875, -0.46875, 0.53125 ]
+			}
+		}],
+		"inventory": [{
+          "transform": {
+            "translation": [ -0.45, -0.1, 0.45 ],
+            "scale": [ 0.0625, 0.0625, 0.0625 ],
+            "firstperson": {
+              "translation": [ 0, 0, 0 ],
+              "scale": [ 1, 1, 1 ]
+            },
+            "thirdperson": {
+              "translation": [ 0, 0.09375, -0.171875 ],
+              "rotation": [{ "x": 10 }, { "y": -45 }, { "z": 170 }],
+              "scale": [ 0.375, 0.375, 0.375 ]
+            },
+            "fixed": {
+              "scale": [ 1, 1, 1 ]
+            },
+            "gui": {
+              "translation": [ 0, -0.15, -0.05 ],
+              "rotation": [{ "x": 0 }, { "y": -90 }, { "z": 0 }],
+              "scale": [ 1.00, 1.00, 1.00 ]
+            }
+          }
+        }]
+	}
+}

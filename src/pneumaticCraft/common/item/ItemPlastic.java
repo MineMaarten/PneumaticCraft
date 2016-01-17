@@ -3,8 +3,8 @@ package pneumaticCraft.common.item;
 import java.util.List;
 
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -46,6 +46,11 @@ public class ItemPlastic extends ItemPneumatic{
     @Override
     public int getMetadata(int meta){
         return meta;
+    }
+
+    @Override
+    protected String getModelLocation(ItemStack stack){
+        return getUnlocalizedName().substring(5);
     }
 
     @Override
@@ -98,6 +103,6 @@ public class ItemPlastic extends ItemPneumatic{
 
     @Override
     public String getUnlocalizedName(ItemStack stack){
-        return super.getUnlocalizedName(stack) + "." + ItemDye.dyeColors[MathHelper.clamp_int(stack.getItemDamage(), 0, 15)];
+        return super.getUnlocalizedName(stack) + "." + EnumDyeColor.byDyeDamage(MathHelper.clamp_int(stack.getItemDamage(), 0, 15));
     }
 }

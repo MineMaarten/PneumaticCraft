@@ -17,10 +17,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.text.WordUtils;
 
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.client.gui.widget.GuiAnimatedStat;
 import pneumaticCraft.common.PneumaticCraftAPIHandler;
 import pneumaticCraft.common.inventory.Container4UpgradeSlots;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.tileentity.TileEntityAerialInterface;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.ModIds;
@@ -44,7 +44,7 @@ public class GuiAerialInterface extends GuiPneumaticContainerBase<TileEntityAeri
             addAnimatedStat("gui.tab.info.aerialInterface.interfacingRF.info.title", new ItemStack(Items.glowstone_dust), 0xFFFF2222, false).setText("gui.tab.info.aerialInterface.interfacingRF.info");
         }
 
-        if(te.getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0) {
+        if(te.getUpgrades(EnumUpgrade.DISPENSER) > 0) {
             GuiAnimatedStat optionStat = addAnimatedStat("gui.tab.aerialInterface.feedMode", new ItemStack(Items.beef), 0xFFFFCC00, false);
             List<String> text = new ArrayList<String>();
             for(int i = 0; i < 4; i++)
@@ -77,7 +77,7 @@ public class GuiAerialInterface extends GuiPneumaticContainerBase<TileEntityAeri
     @Override
     public void updateScreen(){
         super.updateScreen();
-        if(te.getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0) {
+        if(te.getUpgrades(EnumUpgrade.DISPENSER) > 0) {
             if(modeButtons[0] != null) {
                 for(int i = 0; i < modeButtons.length; i++) {
                     modeButtons[i].enabled = te.feedMode != i;

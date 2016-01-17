@@ -68,7 +68,7 @@ public class GuiVacuumPump extends GuiPneumaticContainerBase<TileEntityVacuumPum
 
         if(te.turning) {
             pressureStatText.add("\u00a77Currently sucking at:");
-            pressureStatText.add("\u00a70" + (double)Math.round(PneumaticValues.PRODUCTION_VACUUM_PUMP * te.getSpeedMultiplierFromUpgrades(te.getUpgradeSlots())) + " mL/tick.");
+            pressureStatText.add("\u00a70" + (double)Math.round(PneumaticValues.PRODUCTION_VACUUM_PUMP * te.getSpeedMultiplierFromUpgrades()) + " mL/tick.");
         }
     }
 

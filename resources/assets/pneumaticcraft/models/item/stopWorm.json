@@ -1,7 +1,7 @@
 {
     "parent": "builtin/generated",
     "textures": {
-        "layer0": "pneumaticcraft:items/stopWorm"
+        "layer0": "pneumaticcraft:items/networkComponents/stopWorm"
     },
     "display": {
         "thirdperson": {

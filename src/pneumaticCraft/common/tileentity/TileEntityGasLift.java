@@ -24,11 +24,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.common.ai.ChunkPositionSorter;
 import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
-import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.util.FluidUtils;
@@ -53,8 +52,8 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
     private static final int MAX_PUMP_RANGE = 15;
 
     public TileEntityGasLift(){
-        super(5, 7, 3000);
-        setUpgradeSlots(0, 1, 2, 3);
+        super(5, 7, 3000, 0, 1, 2, 3);
+        addApplicableUpgrade(EnumUpgrade.SPEED);
     }
 
     @Override
@@ -129,7 +128,7 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
             } else {
                 status = 0;
             }
-            if(getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0) {
+            if(getUpgrades(EnumUpgrade.DISPENSER) > 0) {
                 autoExportLiquid();
             }
         }
@@ -331,7 +330,7 @@ public class TileEntityGasLift extends TileEntityPneumaticBase implements IMinWo
 
     @Override
     public boolean isItemValidForSlot(int par1, ItemStack stack){
-        return stack != null && (par1 < 4 && stack.getItem() == Itemss.machineUpgrade || par1 == 4 && stack.isItemEqual(new ItemStack(Blockss.pressureTube)));
+        return stack != null && (canInsertUpgrade(par1, stack) || par1 == 4 && stack.isItemEqual(new ItemStack(Blockss.pressureTube)));
     }
 
     @Override

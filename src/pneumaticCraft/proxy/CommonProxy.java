@@ -4,6 +4,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.IGuiHandler;
@@ -353,8 +354,8 @@ public class CommonProxy implements IGuiHandler{
     }
 
     public void init(){
-        FMLCommonHandler.instance().bus().register(serverHudHandler = new CommonHUDHandler());
-        FMLCommonHandler.instance().bus().register(getHackTickHandler());
+        MinecraftForge.EVENT_BUS.register(serverHudHandler = new CommonHUDHandler());
+        MinecraftForge.EVENT_BUS.register(getHackTickHandler());
     }
 
     public void registerSemiBlockRenderer(ItemSemiBlockBase semiBlock){

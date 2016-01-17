@@ -3,13 +3,17 @@ package pneumaticCraft.common.item;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -17,6 +21,7 @@ import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.common.NBTUtil;
 import pneumaticCraft.common.progwidgets.IProgWidget;
 import pneumaticCraft.common.progwidgets.WidgetRegistrator;
+import pneumaticCraft.lib.Names;
 
 public class ItemProgrammingPuzzle extends ItemPneumatic{
 
@@ -36,7 +41,7 @@ public class ItemProgrammingPuzzle extends ItemPneumatic{
 
     @Override
     public String getUnlocalizedName(ItemStack stack){
-        return super.getUnlocalizedName(stack) + "." + ItemDye.dyeColors[MathHelper.clamp_int(stack.getItemDamage(), 0, 15)];
+        return super.getUnlocalizedName(stack) + "." + EnumDyeColor.byDyeDamage(MathHelper.clamp_int(stack.getItemDamage(), 0, 15));
     }
 
     @Override
@@ -53,6 +58,14 @@ public class ItemProgrammingPuzzle extends ItemPneumatic{
                 }
             }
         }
+    }
+
+    @Override
+    public void registerItemVariants(){
+        ResourceLocation resLoc = new ResourceLocation(Names.MOD_ID, getUnlocalizedName().substring(5));
+        ModelBakery.registerItemVariants(this, resLoc);
+        for(int i = 0; i < 16; i++)
+            Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(this, i, new ModelResourceLocation(resLoc, "inventory"));
     }
 
     public static IProgWidget getWidgetForPiece(ItemStack stack){

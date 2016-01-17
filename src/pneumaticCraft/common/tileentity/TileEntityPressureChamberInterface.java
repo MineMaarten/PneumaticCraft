@@ -15,6 +15,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.FilteredSynced;
@@ -69,7 +70,8 @@ public class TileEntityPressureChamberInterface extends TileEntityPressureChambe
     }
 
     public TileEntityPressureChamberInterface(){
-        setUpgradeSlots(new int[]{UPGRADE_SLOT_START, 2, 3, UPGRADE_SLOT_END});
+        super(UPGRADE_SLOT_START, 2, 3, UPGRADE_SLOT_END);
+        addApplicableUpgrade(EnumUpgrade.SPEED);
     }
 
     @Override
@@ -120,7 +122,7 @@ public class TileEntityPressureChamberInterface extends TileEntityPressureChambe
             }
         }
 
-        int speed = (int)getSpeedMultiplierFromUpgrades(getUpgradeSlots());
+        int speed = (int)getSpeedMultiplierFromUpgrades();
 
         if(shouldOpenInput) {
             inputProgress = Math.min(inputProgress + speed, MAX_PROGRESS);

@@ -23,14 +23,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.tuple.Pair;
 
 import pneumaticCraft.PneumaticCraft;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.item.IPressurizable;
 import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.inventory.ContainerChargingStationItemInventory;
 import pneumaticCraft.common.inventory.InventoryPneumaticInventoryItem;
 import pneumaticCraft.common.item.IChargingStationGUIHolderItem;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
-import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
@@ -61,9 +60,9 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
     private ItemStack camoStack;
 
     public TileEntityChargingStation(){
-        super(PneumaticValues.DANGER_PRESSURE_CHARGING_STATION, PneumaticValues.MAX_PRESSURE_CHARGING_STATION, PneumaticValues.VOLUME_CHARGING_STATION);
+        super(PneumaticValues.DANGER_PRESSURE_CHARGING_STATION, PneumaticValues.MAX_PRESSURE_CHARGING_STATION, PneumaticValues.VOLUME_CHARGING_STATION, UPGRADE_SLOT_START, 2, 3, UPGRADE_SLOT_END);
         inventory = new ItemStack[INVENTORY_SIZE];
-        setUpgradeSlots(new int[]{UPGRADE_SLOT_START, 2, 3, UPGRADE_SLOT_END});
+        addApplicableUpgrade(EnumUpgrade.SPEED, EnumUpgrade.DISPENSER);
     }
 
     public ItemStack getCamoStack(){
@@ -92,7 +91,7 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
             chargingItems.add((IPressurizable)inventory[CHARGE_INVENTORY_INDEX].getItem());
             chargedStacks.add(inventory[CHARGE_INVENTORY_INDEX]);
         }
-        if(this.getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0) {
+        if(this.getUpgrades(EnumUpgrade.DISPENSER) > 0) {
             //creating a new word, 'entities padding'.
             List<Entity> entitiesPadding = worldObj.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(getPos().getX(), getPos().getY(), getPos().getZ(), getPos().getX() + 1, getPos().getY() + 2, getPos().getZ() + 1));
             for(Entity entity : entitiesPadding) {
@@ -117,7 +116,7 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
                 }
             }
         }
-        int speedMultiplier = (int)getSpeedMultiplierFromUpgrades(getUpgradeSlots());
+        int speedMultiplier = (int)getSpeedMultiplierFromUpgrades();
         for(int i = 0; i < PneumaticValues.CHARGING_STATION_CHARGE_RATE * speedMultiplier; i++) {
             boolean charged = false;
             for(int j = 0; j < chargingItems.size(); j++) {
@@ -376,7 +375,7 @@ public class TileEntityChargingStation extends TileEntityPneumaticBase implement
             if(slot == 0) {
                 return itemstack.getItem() instanceof IPressurizable;
             } else {
-                return itemstack.getItem() == Itemss.machineUpgrade;
+                return canInsertUpgrade(slot, itemstack);
             }
         } else {
             return chargeableInventory.isItemValidForSlot(slot - inventory.length, itemstack);

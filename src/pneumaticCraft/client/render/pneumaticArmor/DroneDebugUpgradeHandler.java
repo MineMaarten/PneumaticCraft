@@ -4,14 +4,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.common.config.Configuration;
 import pneumaticCraft.api.client.IGuiAnimatedStat;
 import pneumaticCraft.api.client.pneumaticHelmet.IOptionPage;
 import pneumaticCraft.api.client.pneumaticHelmet.IUpgradeRenderHandler;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.client.gui.pneumaticHelmet.GuiDroneDebuggerOptions;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.ItemPneumaticArmor;
 import pneumaticCraft.common.item.Itemss;
 
@@ -57,19 +58,23 @@ public class DroneDebugUpgradeHandler implements IUpgradeRenderHandler{
         return null;
     }
 
+    /* @Override
+     public boolean isEnabled(ItemStack[] upgradeStacks){
+         if(enabledForStacks(upgradeStacks)) {
+             return true;
+         } else {
+             shownPositions.clear(); //TODO 1.8 test
+             return false;
+         }
+     }*/
     @Override
-    public boolean isEnabled(ItemStack[] upgradeStacks){
-        if(enabledForStacks(upgradeStacks)) {
-            return true;
-        } else {
-            shownPositions.clear();
-            return false;
-        }
+    public Item[] getRequiredUpgrades(){
+        return new Item[]{Itemss.upgrades.get(EnumUpgrade.DISPENSER)};
     }
 
     private static boolean enabledForStacks(ItemStack[] upgradeStacks){
         for(ItemStack stack : upgradeStacks) {
-            if(stack != null && stack.getItem() == Itemss.machineUpgrade && stack.getItemDamage() == ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) return true;
+            if(stack != null && stack.getItem() == Itemss.upgrades.get(EnumUpgrade.DISPENSER)) return true;
         }
         return false;
     }

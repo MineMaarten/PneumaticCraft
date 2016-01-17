@@ -12,10 +12,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.common.block.BlockPneumaticDoor;
 import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
-import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.network.LazySynced;
@@ -40,16 +39,14 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
     private ItemStack[] inventory = new ItemStack[5];
     @GuiSynced
     public int redstoneMode;
-    @DescSynced
-    public EnumFacing orientation = EnumFacing.UP;
     public static final int UPGRADE_SLOT_1 = 0;
     public static final int UPGRADE_SLOT_4 = 3;
     public static final int CAMO_SLOT = 4;
     private ItemStack oldCamo;
 
     public TileEntityPneumaticDoorBase(){
-        super(PneumaticValues.DANGER_PRESSURE_PNEUMATIC_DOOR, PneumaticValues.MAX_PRESSURE_PNEUMATIC_DOOR, PneumaticValues.VOLUME_PNEUMATIC_DOOR);
-        setUpgradeSlots(new int[]{UPGRADE_SLOT_1, 1, 2, UPGRADE_SLOT_4});
+        super(PneumaticValues.DANGER_PRESSURE_PNEUMATIC_DOOR, PneumaticValues.MAX_PRESSURE_PNEUMATIC_DOOR, PneumaticValues.VOLUME_PNEUMATIC_DOOR, UPGRADE_SLOT_1, 1, 2, UPGRADE_SLOT_4);
+        addApplicableUpgrade(EnumUpgrade.SPEED, EnumUpgrade.RANGE);
     }
 
     @Override
@@ -59,7 +56,7 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
         if(!worldObj.isRemote) {
             if(getPressure() >= PneumaticValues.MIN_PRESSURE_PNEUMATIC_DOOR) {
                 if(worldObj.getTotalWorldTime() % 60 == 0) {
-                    TileEntity te = worldObj.getTileEntity(getPos().offset(orientation, 3));
+                    TileEntity te = worldObj.getTileEntity(getPos().offset(getRotation(), 3));
                     if(te instanceof TileEntityPneumaticDoorBase) {
                         doubleDoor = (TileEntityPneumaticDoorBase)te;
                     } else {
@@ -73,7 +70,7 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
             }
         }
         float targetProgress = opening ? 1F : 0F;
-        float speedMultiplier = getSpeedMultiplierFromUpgrades(getUpgradeSlots());
+        float speedMultiplier = getSpeedMultiplierFromUpgrades();
         if(progress < targetProgress) {
             if(progress < targetProgress - TileEntityConstants.PNEUMATIC_DOOR_EXTENSION) {
                 progress += TileEntityConstants.PNEUMATIC_DOOR_SPEED_FAST * speedMultiplier;
@@ -90,7 +87,7 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
             }
             if(progress < targetProgress) progress = targetProgress;
         }
-        if(!worldObj.isRemote) addAir((int)(-Math.abs(oldProgress - progress) * PneumaticValues.USAGE_PNEUMATIC_DOOR * (getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots()) / speedMultiplier)));
+        if(!worldObj.isRemote) addAir((int)(-Math.abs(oldProgress - progress) * PneumaticValues.USAGE_PNEUMATIC_DOOR * (getSpeedUsageMultiplierFromUpgrades() / speedMultiplier)));
 
         // if(worldObj.isRemote) System.out.println("progress: " + progress);
         door = getDoor();
@@ -110,7 +107,7 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
         switch(redstoneMode){
             case 0:
             case 1:
-                int range = TileEntityConstants.RANGE_PNEUMATIC_DOOR_BASE + this.getUpgrades(ItemMachineUpgrade.UPGRADE_RANGE);
+                int range = TileEntityConstants.RANGE_PNEUMATIC_DOOR_BASE + this.getUpgrades(EnumUpgrade.RANGE);
                 AxisAlignedBB aabb = new AxisAlignedBB(getPos().getX() - range, getPos().getY() - range, getPos().getZ() - range, getPos().getX() + range + 1, getPos().getY() + range + 1, getPos().getZ() + range + 1);
                 List<EntityPlayer> players = worldObj.getEntitiesWithinAABB(EntityPlayer.class, aabb);
                 for(EntityPlayer player : players) {
@@ -165,11 +162,11 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
     }
 
     private TileEntityPneumaticDoor getDoor(){
-        TileEntity te = worldObj.getTileEntity(getPos().offset(orientation).add(0, -1, 0));
+        TileEntity te = worldObj.getTileEntity(getPos().offset(getRotation()).add(0, -1, 0));
         if(te instanceof TileEntityPneumaticDoor) {
-            if(orientation.rotateY() == EnumFacing.getFront(te.getBlockMetadata()) && !((TileEntityPneumaticDoor)te).rightGoing) {
+            if(getRotation().rotateY() == EnumFacing.getFront(te.getBlockMetadata()) && !((TileEntityPneumaticDoor)te).rightGoing) {
                 return (TileEntityPneumaticDoor)te;
-            } else if(orientation.rotateYCCW() == EnumFacing.getFront(te.getBlockMetadata()) && ((TileEntityPneumaticDoor)te).rightGoing) {
+            } else if(getRotation().rotateYCCW() == EnumFacing.getFront(te.getBlockMetadata()) && ((TileEntityPneumaticDoor)te).rightGoing) {
                 return (TileEntityPneumaticDoor)te;
             }
         }
@@ -183,7 +180,6 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
         progress = tag.getFloat("extension");
         opening = tag.getBoolean("opening");
         redstoneMode = tag.getInteger("redstoneMode");
-        orientation = EnumFacing.getFront(tag.getInteger("orientation"));
         rightGoing = tag.getBoolean("rightGoing");
         // Read in the ItemStacks in the inventory from NBT
         NBTTagList tagList = tag.getTagList("Items", 10);
@@ -202,7 +198,6 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
         super.writeToNBT(tag);
         tag.setFloat("extension", progress);
         tag.setBoolean("opening", opening);
-        tag.setInteger("orientation", orientation.ordinal());
         tag.setInteger("redstoneMode", redstoneMode);
         tag.setBoolean("rightGoing", rightGoing);
         // Write the ItemStacks in the inventory to NBT
@@ -308,7 +303,7 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
 
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack){
-        return i == CAMO_SLOT || itemstack.getItem() == Itemss.machineUpgrade;
+        return i == CAMO_SLOT || canInsertUpgrade(i, itemstack);
     }
 
     @Override

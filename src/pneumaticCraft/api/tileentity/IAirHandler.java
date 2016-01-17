@@ -11,12 +11,14 @@ import net.minecraft.world.World;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import pneumaticCraft.api.item.IUpgradeAcceptor;
+
 /**
  * A way for you to access about everything you need from a pneumatic machine.
  * DO NOT IMPLEMENT THIS YOURSELF! Use AirHandlerSupplier to get an instance for your TileEntity, and implement IPneumaticMachine instead.
  */
 
-public interface IAirHandler extends IManoMeasurable{
+public interface IAirHandler extends IManoMeasurable, IUpgradeAcceptor{
 
     /**
      * -----------Needs to be forwarded by the implementing TileEntity's update() method.

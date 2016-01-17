@@ -4,7 +4,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -45,9 +44,9 @@ public class BlockPneumaticDoorBase extends BlockPneumaticCraftModeled{
      * Called when the block is placed in the world.
      */
     @Override
-    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase par5EntityLiving, ItemStack par6ItemStack){
+    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase entity, ItemStack stack){
+        super.onBlockPlacedBy(world, pos, state, entity, stack);
         TileEntityPneumaticDoorBase doorBase = (TileEntityPneumaticDoorBase)world.getTileEntity(pos);
-        doorBase.orientation = PneumaticCraftUtils.getDirectionFacing(par5EntityLiving, false);
         updateDoorSide(doorBase);
     }
 
@@ -56,7 +55,7 @@ public class BlockPneumaticDoorBase extends BlockPneumaticCraftModeled{
         TileEntity te = world.getTileEntity(pos);
         if(te instanceof TileEntityPneumaticDoorBase) {
             updateDoorSide((TileEntityPneumaticDoorBase)te);
-            EnumFacing dir = ((TileEntityPneumaticDoorBase)te).orientation;
+            EnumFacing dir = ((TileEntityPneumaticDoorBase)te).getRotation();
             if(world.getBlockState(pos.offset(dir)).getBlock() == Blockss.pneumaticDoor) {
                 Blockss.pneumaticDoor.onNeighborBlockChange(world, pos.offset(dir), world.getBlockState(pos.offset(dir)), block);
             }
@@ -64,10 +63,10 @@ public class BlockPneumaticDoorBase extends BlockPneumaticCraftModeled{
     }
 
     private void updateDoorSide(TileEntityPneumaticDoorBase doorBase){
-        TileEntity teDoor = doorBase.getWorld().getTileEntity(doorBase.getPos().offset(doorBase.orientation));
+        TileEntity teDoor = doorBase.getWorld().getTileEntity(doorBase.getPos().offset(doorBase.getRotation()));
         if(teDoor instanceof TileEntityPneumaticDoor) {
             TileEntityPneumaticDoor door = (TileEntityPneumaticDoor)teDoor;
-            if(doorBase.orientation.rotateY() == door.getRotation() && door.rightGoing || doorBase.orientation.rotateYCCW() == EnumFacing.getFront(door.getBlockMetadata() % 6) && !door.rightGoing) {
+            if(doorBase.getRotation().rotateY() == door.getRotation() && door.rightGoing || doorBase.getRotation().rotateYCCW() == EnumFacing.getFront(door.getBlockMetadata() % 6) && !door.rightGoing) {
                 door.rightGoing = !door.rightGoing;
                 door.setRotation(0);
             }
@@ -81,22 +80,7 @@ public class BlockPneumaticDoorBase extends BlockPneumaticCraftModeled{
 
     @Override
     protected boolean canRotateToTopOrBottom(){
-        return true;
-    }
-
-    @Override
-    public boolean rotateBlock(World world, EntityPlayer player, BlockPos pos, EnumFacing side){
-        if(player.isSneaking()) {
-            return super.rotateBlock(world, player, pos, side);
-        } else {
-            TileEntity te = world.getTileEntity(pos);
-            if(te instanceof TileEntityPneumaticDoorBase) {
-                TileEntityPneumaticDoorBase teDb = (TileEntityPneumaticDoorBase)te;
-                teDb.orientation = teDb.orientation.rotateY();
-                return true;
-            }
-            return false;
-        }
+        return false;
     }
 
     @Override

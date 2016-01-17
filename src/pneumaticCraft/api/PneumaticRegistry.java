@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.Loader;
 import pneumaticCraft.api.client.IClientRegistry;
 import pneumaticCraft.api.client.pneumaticHelmet.IPneumaticHelmetRegistry;
 import pneumaticCraft.api.drone.IDroneRegistry;
-import pneumaticCraft.api.item.IInventoryItem;
+import pneumaticCraft.api.item.IItemRegistry;
 import pneumaticCraft.api.recipe.IPneumaticRecipeRegistry;
 import pneumaticCraft.api.tileentity.IAirHandlerSupplier;
 import pneumaticCraft.api.tileentity.IHeatRegistry;
@@ -45,14 +45,7 @@ public final class PneumaticRegistry{
 
         public ISensorRegistry getSensorRegistry();
 
-        /*
-         * --------------- Items -------------------
-         */
-        /**
-         * See {@link pneumaticCraft.api.item.IInventoryItem}
-         * @param handler
-         */
-        public void registerInventoryItem(IInventoryItem handler);
+        public IItemRegistry getItemRegistry();
 
         /*
          * ---------------- Power Generation -----------

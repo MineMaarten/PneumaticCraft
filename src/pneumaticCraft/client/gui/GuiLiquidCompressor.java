@@ -44,7 +44,7 @@ public class GuiLiquidCompressor extends GuiPneumaticContainerBase<TileEntityLiq
         super.addPressureStatInfo(pressureStatText);
         if(te.isProducing) {
             pressureStatText.add("\u00a77Currently producing:");
-            pressureStatText.add("\u00a70" + (double)Math.round(te.getBaseProduction() * te.getEfficiency() * te.getSpeedMultiplierFromUpgrades(te.getUpgradeSlots()) / 100) + " mL/tick.");
+            pressureStatText.add("\u00a70" + (double)Math.round(te.getBaseProduction() * te.getEfficiency() * te.getSpeedMultiplierFromUpgrades() / 100) + " mL/tick.");
         }
     }
 

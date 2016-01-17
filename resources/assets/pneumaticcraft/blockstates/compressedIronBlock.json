@@ -1,0 +1,9 @@
+{
+	"variants":{
+		"normal": { "model": "pneumaticcraft:compressedIronBlock" },
+		"inventory": [{
+          "model": "pneumaticcraft:compressedIronBlock"
+        }]
+	}
+	
+}

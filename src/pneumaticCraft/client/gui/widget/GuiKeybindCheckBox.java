@@ -9,9 +9,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 
@@ -45,7 +45,7 @@ public class GuiKeybindCheckBox extends GuiCheckBox{
         if(!trackedCheckboxes.containsKey(keyBindingName)) {
             checked = Config.config.get("pneumatic_helmet_widgetDefaults", keyBindingName, true).getBoolean();
             trackedCheckboxes.put(keyBindingName, this);
-            FMLCommonHandler.instance().bus().register(this);
+            MinecraftForge.EVENT_BUS.register(this);
         } else {
             checked = trackedCheckboxes.get(keyBindingName).checked;
         }

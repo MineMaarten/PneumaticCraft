@@ -3,6 +3,7 @@ package pneumaticCraft.common.thirdparty.igwmod;
 import igwmod.lib.Constants;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
@@ -17,7 +18,7 @@ public class IGWMod implements IThirdParty{
     public void preInit(){
         try {
             int minorVersion = Integer.parseInt((String)ReflectionHelper.getPrivateValue(Constants.class, null, "MINOR"));
-            if(minorVersion < 7) FMLCommonHandler.instance().bus().register(this);
+            if(minorVersion < 7) MinecraftForge.EVENT_BUS.register(this);
         } catch(Throwable e) {
             e.printStackTrace();
         }

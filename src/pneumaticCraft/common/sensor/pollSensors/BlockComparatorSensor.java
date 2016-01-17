@@ -1,11 +1,13 @@
 package pneumaticCraft.common.sensor.pollSensors;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.item.Item;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
@@ -14,13 +16,23 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.util.Rectangle;
 
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.universalSensor.IBlockAndCoordinatePollSensor;
+import pneumaticCraft.common.item.Itemss;
 
 public class BlockComparatorSensor implements IBlockAndCoordinatePollSensor{
 
     @Override
     public String getSensorPath(){
-        return "blockTracker_gpsTool/Block/Comparator";
+        return "Block/Comparator";
+    }
+
+    @Override
+    public Set<Item> getRequiredUpgrades(){
+        Set<Item> upgrades = new HashSet<Item>();
+        upgrades.add(Itemss.upgrades.get(EnumUpgrade.BLOCK_TRACKER));
+        upgrades.add(Itemss.GPSTool);
+        return upgrades;
     }
 
     @Override

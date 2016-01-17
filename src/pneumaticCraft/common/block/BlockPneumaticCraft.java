@@ -3,6 +3,7 @@ package pneumaticCraft.common.block;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
@@ -16,6 +17,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -30,6 +32,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.api.block.IPneumaticWrenchable;
+import pneumaticCraft.api.item.IUpgradeAcceptor;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.thirdparty.ModInteractionUtils;
 import pneumaticCraft.common.tileentity.IComparatorSupport;
@@ -41,7 +44,7 @@ import pneumaticCraft.lib.ModIds;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
 //TODO Computercraft dep @Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheralProvider", modid = ModIds.COMPUTERCRAFT)
-public abstract class BlockPneumaticCraft extends BlockContainer implements IPneumaticWrenchable/*, IPeripheralProvider*/{
+public abstract class BlockPneumaticCraft extends BlockContainer implements IPneumaticWrenchable, IUpgradeAcceptor/*, IPeripheralProvider*/{
 
     public static final PropertyEnum<EnumFacing> ROTATION = PropertyEnum.<EnumFacing> create("facing", EnumFacing.class);
 
@@ -55,7 +58,9 @@ public abstract class BlockPneumaticCraft extends BlockContainer implements IPne
     @Override
     public TileEntity createNewTileEntity(World world, int metadata){
         try {
-            return getTileEntityClass().newInstance();
+            TileEntity te = getTileEntityClass().newInstance();
+            te.setWorldObj(world);
+            return te;
         } catch(Exception e) {
             e.printStackTrace();
             return null;
@@ -144,6 +149,15 @@ public abstract class BlockPneumaticCraft extends BlockContainer implements IPne
             return state.getValue(ROTATION).ordinal();
         } else {
             return super.getMetaFromState(state);
+        }
+    }
+
+    @Override
+    public IBlockState getStateFromMeta(int meta){
+        if(isRotatable()) {
+            return super.getStateFromMeta(meta).withProperty(ROTATION, EnumFacing.getFront(meta));
+        } else {
+            return super.getStateFromMeta(meta);
         }
     }
 
@@ -252,7 +266,7 @@ public abstract class BlockPneumaticCraft extends BlockContainer implements IPne
 
     @Override
     public void onNeighborBlockChange(World world, BlockPos pos, IBlockState state, Block block){
-        if(world instanceof World && !world.isRemote) {
+        if(!world.isRemote) {
             TileEntity te = world.getTileEntity(pos);
             if(te instanceof TileEntityBase) {
                 ((TileEntityBase)te).onNeighborBlockUpdate();
@@ -313,5 +327,20 @@ public abstract class BlockPneumaticCraft extends BlockContainer implements IPne
     @Override
     public int getComparatorInputOverride(World world, BlockPos pos){
         return ((IComparatorSupport)world.getTileEntity(pos)).getComparatorValue();
+    }
+
+    @Override
+    public Set<Item> getApplicableUpgrades(){
+        return ((IUpgradeAcceptor)createNewTileEntity(null, 0)).getApplicableUpgrades();
+    }
+
+    @Override
+    public String getName(){
+        return getUnlocalizedName() + ".name";
+    }
+
+    @Override
+    public int getRenderType(){
+        return 3;
     }
 }

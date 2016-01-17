@@ -8,9 +8,9 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.item.IPressurizable;
 import pneumaticCraft.common.inventory.ContainerChargingStationItemInventory;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.ItemPneumaticArmor;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketGuiButton;
@@ -43,7 +43,7 @@ public abstract class GuiPneumaticInventoryItem extends GuiPneumaticContainerBas
     protected void addPressureStatInfo(List<String> pressureStatText){
         pressureStatText.add("\u00a77Current Pressure:");
         float curPressure = ((IPressurizable)itemStack.getItem()).getPressure(te.getStackInSlot(TileEntityChargingStation.CHARGE_INVENTORY_INDEX));
-        int volume = ItemPneumaticArmor.getUpgrades(ItemMachineUpgrade.UPGRADE_VOLUME_DAMAGE, te.getStackInSlot(TileEntityChargingStation.CHARGE_INVENTORY_INDEX)) * PneumaticValues.VOLUME_VOLUME_UPGRADE + getDefaultVolume();
+        int volume = ItemPneumaticArmor.getUpgrades(EnumUpgrade.VOLUME, te.getStackInSlot(TileEntityChargingStation.CHARGE_INVENTORY_INDEX)) * PneumaticValues.VOLUME_VOLUME_UPGRADE + getDefaultVolume();
         pressureStatText.add("\u00a70" + (double)Math.round(curPressure * 10) / 10 + " bar.");
         pressureStatText.add("\u00a77Current Air:");
         pressureStatText.add("\u00a70" + (double)Math.round(curPressure * volume) + " mL.");

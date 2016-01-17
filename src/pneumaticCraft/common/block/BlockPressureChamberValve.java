@@ -1,6 +1,8 @@
 package pneumaticCraft.common.block;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -13,7 +15,9 @@ import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.common.tileentity.TileEntityPressureChamberValve;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
-public class BlockPressureChamberValve extends BlockPneumaticCraft{
+public class BlockPressureChamberValve extends BlockPneumaticCraft implements IBlockPressureChamber{
+
+    public static final PropertyBool FORMED = PropertyBool.create("formed");
 
     public BlockPressureChamberValve(Material par2Material){
         super(par2Material);
@@ -41,6 +45,21 @@ public class BlockPressureChamberValve extends BlockPneumaticCraft{
     @Override
     protected boolean canRotateToTopOrBottom(){
         return true;
+    }
+
+    @Override
+    protected BlockState createBlockState(){
+        return new BlockState(this, ROTATION, FORMED);
+    }
+
+    @Override
+    public IBlockState getStateFromMeta(int meta){
+        return super.getStateFromMeta(meta).withProperty(FORMED, meta >= 6);
+    }
+
+    @Override
+    public int getMetaFromState(IBlockState state){
+        return super.getMetaFromState(state) + (state.getValue(FORMED) ? 6 : 0);
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.util.Set;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
@@ -20,10 +21,11 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.api.tileentity.IAirListener;
 import pneumaticCraft.api.tileentity.IPneumaticMachine;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
+import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketPlaySound;
@@ -95,7 +97,7 @@ public class AirHandler implements IAirHandler{
         if(!worldObj.isRemote && getUpgradeSlots() != null) {
             updateVolume();
 
-            if(getUpgrades(ItemMachineUpgrade.UPGRADE_SECURITY) > 0) {
+            if(getUpgrades(EnumUpgrade.SECURITY) > 0) {
                 if(getPressure() >= dangerPressure - 0.1) {
                     airLeak(EnumFacing.DOWN);
                 }
@@ -118,7 +120,7 @@ public class AirHandler implements IAirHandler{
     }
 
     private void updateVolume(){
-        int upgradeVolume = getVolumeFromUpgrades(getUpgradeSlots());
+        int upgradeVolume = getVolumeFromUpgrades();
         setVolume(defaultVolume + upgradeVolume);
     }
 
@@ -142,12 +144,12 @@ public class AirHandler implements IAirHandler{
         return airListener != null ? airListener.getMaxDispersion(this, dir) : Integer.MAX_VALUE;
     }
 
-    private int getUpgrades(int upgradeDamage){
-        return TileEntityBase.getUpgrades(parentInventory, upgradeDamage, getUpgradeSlots());
+    private int getUpgrades(EnumUpgrade upgrade){
+        return TileEntityBase.getUpgrades(parentInventory, upgrade, getUpgradeSlots());
     }
 
-    protected int getVolumeFromUpgrades(int[] upgradeSlots){
-        return TileEntityBase.getUpgrades(parentInventory, ItemMachineUpgrade.UPGRADE_VOLUME_DAMAGE, upgradeSlots) * PneumaticValues.VOLUME_VOLUME_UPGRADE;
+    protected int getVolumeFromUpgrades(){
+        return getUpgrades(EnumUpgrade.VOLUME) * PneumaticValues.VOLUME_VOLUME_UPGRADE;
     }
 
     /**
@@ -412,5 +414,18 @@ public class AirHandler implements IAirHandler{
     @Override
     public void setPos(BlockPos pos){
         this.pos = pos;
+    }
+
+    @Override
+    public Set<Item> getApplicableUpgrades(){
+        Set<Item> upgrades = new HashSet<Item>(2);
+        upgrades.add(Itemss.upgrades.get(EnumUpgrade.VOLUME));
+        upgrades.add(Itemss.upgrades.get(EnumUpgrade.SECURITY));
+        return upgrades;
+    }
+
+    @Override
+    public String getName(){
+        throw new UnsupportedOperationException();
     }
 }

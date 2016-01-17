@@ -17,6 +17,7 @@ import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.fluids.IFluidTank;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.common.PneumaticCraftAPIHandler;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.network.GuiSynced;
@@ -39,8 +40,8 @@ public class TileEntityLiquidCompressor extends TileEntityPneumaticBase implemen
     }
 
     public TileEntityLiquidCompressor(float dangerPressure, float criticalPressure, int volume){
-        super(dangerPressure, criticalPressure, volume);
-        setUpgradeSlots(0, 1, 2, 3);
+        super(dangerPressure, criticalPressure, volume, 0, 1, 2, 3);
+        addApplicableUpgrade(EnumUpgrade.SPEED);
     }
 
     private int getFuelValue(FluidStack fluid){

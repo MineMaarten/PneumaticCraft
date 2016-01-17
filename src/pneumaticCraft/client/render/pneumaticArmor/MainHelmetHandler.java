@@ -3,7 +3,7 @@ package pneumaticCraft.client.render.pneumaticArmor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.Item;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.relauncher.Side;
@@ -97,8 +97,8 @@ public class MainHelmetHandler implements IUpgradeRenderHandler{
     }
 
     @Override
-    public boolean isEnabled(ItemStack[] upgradeStacks){
-        return true;
+    public Item[] getRequiredUpgrades(){
+        return new Item[]{};
     }
 
     @Override

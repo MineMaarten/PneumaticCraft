@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
@@ -25,18 +26,18 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.recipe.IPressureChamberRecipe;
 import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.api.tileentity.IAirListener;
 import pneumaticCraft.common.AchievementHandler;
 import pneumaticCraft.common.DamageSourcePneumaticCraft;
 import pneumaticCraft.common.NBTUtil;
+import pneumaticCraft.common.block.BlockPressureChamberValve;
 import pneumaticCraft.common.block.Blockss;
+import pneumaticCraft.common.block.IBlockPressureChamber;
 import pneumaticCraft.common.config.Config;
 import pneumaticCraft.common.fluid.Fluids;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
-import pneumaticCraft.common.item.Itemss;
-import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.recipes.PneumaticRecipeRegistry;
 import pneumaticCraft.common.recipes.PressureChamberRecipe;
@@ -44,13 +45,10 @@ import pneumaticCraft.lib.PneumaticValues;
 
 public class TileEntityPressureChamberValve extends TileEntityPneumaticBase implements IInventory, IMinWorkingPressure,
         IAirListener{
-    @DescSynced
     public int multiBlockX;
-    @DescSynced
     public int multiBlockY;
-    @DescSynced
     public int multiBlockZ;
-    @DescSynced
+    @GuiSynced
     public int multiBlockSize;
     public List<TileEntityPressureChamberValve> accessoryValves;
     private final List<BlockPos> nbtValveList;
@@ -74,10 +72,10 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
     // private int pressureUpdateTimer = 60;
 
     public TileEntityPressureChamberValve(){
-        super(PneumaticValues.DANGER_PRESSURE_PRESSURE_CHAMBER, PneumaticValues.MAX_PRESSURE_PRESSURE_CHAMBER, PneumaticValues.VOLUME_PRESSURE_CHAMBER);
+        super(PneumaticValues.DANGER_PRESSURE_PRESSURE_CHAMBER, PneumaticValues.MAX_PRESSURE_PRESSURE_CHAMBER, PneumaticValues.VOLUME_PRESSURE_CHAMBER, UPGRADE_SLOT_1, 1, 2, UPGRADE_SLOT_4);
         accessoryValves = new ArrayList<TileEntityPressureChamberValve>();
         nbtValveList = new ArrayList<BlockPos>();
-        setUpgradeSlots(new int[]{UPGRADE_SLOT_1, 1, 2, UPGRADE_SLOT_4});
+        addApplicableUpgrade(EnumUpgrade.ITEM_LIFE);
     }
 
     @Override
@@ -140,7 +138,6 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
             }
             if(worldObj.isRemote) worldObj.markBlockRangeForRenderUpdate(getPos().getX(), getPos().getY(), getPos().getZ(), getPos().getX(), getPos().getY(), getPos().getZ());
         }
-
         if(!worldObj.isRemote) {
             //code to check if we need to leak air.
             boolean[] connected = new boolean[]{true, true, true, true, true, true};//assume we are not leaking at any side
@@ -291,7 +288,7 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
             }
         }
 
-        boolean lifeUpgrade = getUpgrades(ItemMachineUpgrade.UPGRADE_ITEM_LIFE, getUpgradeSlots()) > 0;
+        boolean lifeUpgrade = getUpgrades(EnumUpgrade.ITEM_LIFE) > 0;
         if(lifeUpgrade && !worldObj.isRemote) {
             for(EntityItem entity : entities) {
                 entity.age--;
@@ -536,6 +533,11 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
         multiBlockY = baseY;
         multiBlockZ = baseZ;
         getAirHandler(null).setDefaultVolume(PneumaticValues.VOLUME_PRESSURE_CHAMBER + (multiBlockSize > 0 ? (int)Math.pow(multiBlockSize - 2, 3) * PneumaticValues.VOLUME_PRESSURE_CHAMBER_PER_EMPTY : 0));
+        if(worldObj != null) {
+            IBlockState state = worldObj.getBlockState(getPos());
+            if(state.getBlock() == Blockss.pressureChamberValve) worldObj.setBlockState(getPos(), state.withProperty(BlockPressureChamberValve.FORMED, multiBlockSize > 0), 2);
+        }
+
     }
 
     public static boolean checkIfProperlyFormed(World world, BlockPos pos){
@@ -580,7 +582,7 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
                     if(x != 0 && x != size - 1 && y != 0 && y != size - 1 && z != 0 && z != size - 1) continue;
                     BlockPos pos = new BlockPos(x + baseX, y + baseY, z + baseZ);
                     Block block = world.getBlockState(pos).getBlock();
-                    if(block != Blockss.pressureChamberWall && block != Blockss.pressureChamberValve && block != Blockss.pressureChamberInterface) {
+                    if(!(block instanceof IBlockPressureChamber)) {
                         return false;
                     } else if(block == Blockss.pressureChamberValve) {
                         boolean xMid = x != 0 && x != size - 1;
@@ -636,6 +638,9 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
             valve.sendDescriptionPacket();
         }
 
+        // set the multi-block coords in the valve TE
+        teValve.setMultiBlockCoords(size, baseX, baseY, baseZ);
+
         // set the redirections of right clicking and breaking a wall block to
         // the valve.
         for(int x = 0; x < size; x++) {
@@ -651,8 +656,6 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
             }
         }
 
-        // set the multi-block coords in the valve TE
-        teValve.setMultiBlockCoords(size, baseX, baseY, baseZ);
         teValve.sendDescriptionPacket();
         return true;
     }
@@ -739,7 +742,7 @@ public class TileEntityPressureChamberValve extends TileEntityPneumaticBase impl
 
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack){
-        return itemstack.getItem() == Itemss.machineUpgrade;
+        return canInsertUpgrade(i, itemstack);
     }
 
     @Override

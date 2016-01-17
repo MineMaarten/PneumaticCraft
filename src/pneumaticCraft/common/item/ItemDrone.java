@@ -1,6 +1,8 @@
 package pneumaticCraft.common.item;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -14,8 +16,10 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.item.IPressurizable;
 import pneumaticCraft.api.item.IProgrammable;
+import pneumaticCraft.api.item.IUpgradeAcceptor;
 import pneumaticCraft.common.NBTUtil;
 import pneumaticCraft.common.entity.living.EntityDrone;
 import pneumaticCraft.common.progwidgets.IProgWidget;
@@ -25,7 +29,8 @@ import pneumaticCraft.lib.Log;
 import pneumaticCraft.lib.PneumaticValues;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
-public class ItemDrone extends ItemPneumatic implements IPressurizable, IChargingStationGUIHolderItem, IProgrammable{
+public class ItemDrone extends ItemPneumatic implements IPressurizable, IChargingStationGUIHolderItem, IProgrammable,
+        IUpgradeAcceptor{
 
     public ItemDrone(){
         setMaxStackSize(1);
@@ -87,7 +92,7 @@ public class ItemDrone extends ItemPneumatic implements IPressurizable, IChargin
 
     @Override
     public float getPressure(ItemStack iStack){
-        float volume = ItemPneumaticArmor.getUpgrades(ItemMachineUpgrade.UPGRADE_VOLUME_DAMAGE, iStack) * PneumaticValues.VOLUME_VOLUME_UPGRADE + PneumaticValues.DRONE_VOLUME;
+        float volume = ItemPneumaticArmor.getUpgrades(EnumUpgrade.VOLUME, iStack) * PneumaticValues.VOLUME_VOLUME_UPGRADE + PneumaticValues.DRONE_VOLUME;
         float oldVolume = NBTUtil.getFloat(iStack, "volume");
         if(volume < oldVolume) {
             float currentAir = NBTUtil.getFloat(iStack, "currentAir");
@@ -139,6 +144,23 @@ public class ItemDrone extends ItemPneumatic implements IPressurizable, IChargin
             iStack.getTagCompound().setTag("UpgradeInventory", iStack.getTagCompound().getTag("Inventory"));
             iStack.getTagCompound().removeTag("Inventory");
         }
+    }
+
+    @Override
+    public Set<Item> getApplicableUpgrades(){
+        Set<Item> set = new HashSet<Item>();
+        set.add(Itemss.upgrades.get(EnumUpgrade.VOLUME));
+        set.add(Itemss.upgrades.get(EnumUpgrade.DISPENSER));
+        set.add(Itemss.upgrades.get(EnumUpgrade.ITEM_LIFE));
+        set.add(Itemss.upgrades.get(EnumUpgrade.SECURITY));
+        set.add(Itemss.upgrades.get(EnumUpgrade.SPEED));
+        set.add(Itemss.upgrades.get(EnumUpgrade.ENTITY_TRACKER));
+        return set;
+    }
+
+    @Override
+    public String getName(){
+        return getUnlocalizedName() + ".name";
     }
 
 }

@@ -17,7 +17,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import pneumaticCraft.PneumaticCraft;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.common.item.ItemPneumaticArmor;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.tileentity.TileEntitySecurityStation;
@@ -91,7 +91,7 @@ public class BlockSecurityStation extends BlockPneumaticCraftModeled{
     private int getPlayerHackLevel(EntityPlayer player){
         ItemStack armorStack = player.inventory.armorItemInSlot(3);
         if(armorStack != null && armorStack.getItem() == Itemss.pneumaticHelmet) {
-            return ItemPneumaticArmor.getUpgrades(ItemMachineUpgrade.UPGRADE_SECURITY, armorStack);
+            return ItemPneumaticArmor.getUpgrades(EnumUpgrade.SECURITY, armorStack);
         }
         return 0;//No hacking ability.
     }

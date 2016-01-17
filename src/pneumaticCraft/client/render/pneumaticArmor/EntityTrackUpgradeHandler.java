@@ -13,6 +13,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumChatFormatting;
@@ -25,13 +26,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.api.client.pneumaticHelmet.EntityTrackEvent;
 import pneumaticCraft.api.client.pneumaticHelmet.IOptionPage;
 import pneumaticCraft.api.client.pneumaticHelmet.IUpgradeRenderHandler;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.client.gui.pneumaticHelmet.GuiEntityTrackOptions;
 import pneumaticCraft.client.gui.widget.GuiAnimatedStat;
 import pneumaticCraft.common.CommonHUDHandler;
 import pneumaticCraft.common.NBTUtil;
 import pneumaticCraft.common.config.Config;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.Itemss;
+import pneumaticCraft.common.recipes.CraftingRegistrator;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.PneumaticValues;
 
@@ -179,11 +181,8 @@ public class EntityTrackUpgradeHandler implements IUpgradeRenderHandler{
     public void render2D(float partialTicks, boolean upgradeEnabled){}
 
     @Override
-    public boolean isEnabled(ItemStack[] upgradeStacks){
-        for(ItemStack stack : upgradeStacks) {
-            if(stack != null && stack.getItem() == Itemss.machineUpgrade && stack.getItemDamage() == ItemMachineUpgrade.UPGRADE_ENTITY_TRACKER) return true;
-        }
-        return false;
+    public Item[] getRequiredUpgrades(){
+        return new Item[]{Itemss.upgrades.get(EnumUpgrade.ENTITY_TRACKER)};
     }
 
     @Override
@@ -229,7 +228,7 @@ public class EntityTrackUpgradeHandler implements IUpgradeRenderHandler{
         if(entityTrackInfo == null) {
             Minecraft minecraft = Minecraft.getMinecraft();
             ScaledResolution sr = new ScaledResolution(minecraft);
-            entityTrackInfo = new GuiAnimatedStat(null, "Current tracked entities:", new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_ENTITY_TRACKER), statX != -1 ? statX : sr.getScaledWidth() - 2, statY, 0x3000AA00, null, statLeftSided);
+            entityTrackInfo = new GuiAnimatedStat(null, "Current tracked entities:", CraftingRegistrator.getUpgrade(EnumUpgrade.ENTITY_TRACKER), statX != -1 ? statX : sr.getScaledWidth() - 2, statY, 0x3000AA00, null, statLeftSided);
             entityTrackInfo.setMinDimensionsAndReset(0, 0);
         }
         return entityTrackInfo;

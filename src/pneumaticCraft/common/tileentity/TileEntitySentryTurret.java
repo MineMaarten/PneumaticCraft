@@ -19,9 +19,9 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.FakePlayerFactory;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.common.ai.StringFilterEntitySelector;
 import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.minigun.Minigun;
 import pneumaticCraft.common.network.DescSynced;
@@ -52,14 +52,15 @@ public class TileEntitySentryTurret extends TileEntityBase implements IRedstoneC
     private final SentryTurretEntitySelector entitySelector = new SentryTurretEntitySelector();
 
     public TileEntitySentryTurret(){
-        setUpgradeSlots(0, 1, 2, 3);
+        super(0, 1, 2, 3);
+        addApplicableUpgrade(EnumUpgrade.RANGE);
     }
 
     @Override
     public void update(){
         super.update();
         if(!worldObj.isRemote) {
-            range = 16 + Math.min(16, getUpgrades(ItemMachineUpgrade.UPGRADE_RANGE));
+            range = 16 + Math.min(16, getUpgrades(EnumUpgrade.RANGE));
             if(getMinigun().getAttackTarget() == null && redstoneAllows()) {
                 getMinigun().setSweeping(true);
                 if(worldObj.getTotalWorldTime() % 20 == 0) {
@@ -253,7 +254,7 @@ public class TileEntitySentryTurret extends TileEntityBase implements IRedstoneC
     @Override
     public boolean isItemValidForSlot(int slot, ItemStack stack){
         if(slot < 4) {
-            return stack != null && stack.getItem() == Itemss.machineUpgrade;
+            return canInsertUpgrade(slot, stack);
         } else {
             return stack != null && stack.getItem() == Itemss.gunAmmo;
         }

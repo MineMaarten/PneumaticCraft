@@ -1,6 +1,8 @@
 package pneumaticCraft;
 
+import net.minecraft.block.Block;
 import net.minecraft.command.ServerCommandManager;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.WeightedRandomChestContent;
@@ -8,7 +10,6 @@ import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.IFuelHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
@@ -25,6 +26,7 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import pneumaticCraft.api.PneumaticRegistry;
+import pneumaticCraft.api.item.IUpgradeAcceptor;
 import pneumaticCraft.client.CreativeTabPneumaticCraft;
 import pneumaticCraft.client.render.pneumaticArmor.UpgradeRenderHandlerList;
 import pneumaticCraft.client.render.pneumaticArmor.hacking.HackableHandler;
@@ -105,13 +107,13 @@ public class PneumaticCraft{
 
         proxy.preInit();
         tickHandler = new TickHandlerPneumaticCraft();
-        FMLCommonHandler.instance().bus().register(tickHandler);
+        MinecraftForge.EVENT_BUS.register(tickHandler);
         MinecraftForge.EVENT_BUS.register(new EventHandlerPneumaticCraft());
         MinecraftForge.EVENT_BUS.register(new EventHandlerUniversalSensor());
         MinecraftForge.EVENT_BUS.register(new DroneSpecialVariableHandler());
 
-        FMLCommonHandler.instance().bus().register(new CraftingHandler());
-        FMLCommonHandler.instance().bus().register(new Config());
+        MinecraftForge.EVENT_BUS.register(new CraftingHandler());
+        MinecraftForge.EVENT_BUS.register(new Config());
     }
 
     @EventHandler
@@ -163,6 +165,17 @@ public class PneumaticCraft{
         AmadronOfferManager.getInstance().shufflePeriodicOffers();
         AmadronOfferManager.getInstance().recompileOffers();
         CraftingRegistrator.addProgrammingPuzzleRecipes();
+
+        for(Block block : Blockss.blocks) {
+            if(block instanceof IUpgradeAcceptor) {
+                PneumaticRegistry.getInstance().getItemRegistry().registerUpgradeAcceptor((IUpgradeAcceptor)block);
+            }
+        }
+        for(Item item : Itemss.items) {
+            if(item instanceof IUpgradeAcceptor) {
+                PneumaticRegistry.getInstance().getItemRegistry().registerUpgradeAcceptor((IUpgradeAcceptor)item);
+            }
+        }
     }
 
     @EventHandler

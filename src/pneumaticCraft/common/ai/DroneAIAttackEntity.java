@@ -2,8 +2,9 @@ package pneumaticCraft.common.ai;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIAttackOnCollide;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.common.entity.living.EntityDrone;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
+import pneumaticCraft.common.item.Itemss;
 
 public class DroneAIAttackEntity extends EntityAIAttackOnCollide{
     private final EntityDrone attacker;
@@ -14,7 +15,7 @@ public class DroneAIAttackEntity extends EntityAIAttackOnCollide{
         super(attacker, speed, p_i1636_4_);
         this.attacker = attacker;
         isRanged = attacker.hasMinigun();
-        rangedAttackRange = 16 + Math.min(16, ((IDroneBase)attacker).getUpgrades(ItemMachineUpgrade.UPGRADE_RANGE));
+        rangedAttackRange = 16 + Math.min(16, ((IDroneBase)attacker).getUpgrades(Itemss.upgrades.get(EnumUpgrade.RANGE)));
     }
 
     @Override

@@ -1,11 +1,12 @@
 package pneumaticCraft.common.sensor;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
@@ -22,8 +23,6 @@ import pneumaticCraft.api.universalSensor.IEventSensorSetting;
 import pneumaticCraft.api.universalSensor.IPollSensorSetting;
 import pneumaticCraft.api.universalSensor.ISensorRegistry;
 import pneumaticCraft.api.universalSensor.ISensorSetting;
-import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.sensor.eventSensors.BlockInteractSensor;
 import pneumaticCraft.common.sensor.eventSensors.PlayerAttackSensor;
@@ -117,10 +116,10 @@ public class SensorHandler implements ISensorRegistry{
         List<String> text = new ArrayList<String>();
         text.add(EnumChatFormatting.GRAY + "The following combinations of upgrades are used in sensors to work:");
         for(String sensorPath : sensorPaths) {
-            ItemStack[] requiredStacks = getRequiredStacksFromText(sensorPath.split("/")[0]);
+            Set<Item> requiredStacks = getRequiredStacksFromText(sensorPath.split("/")[0]);
             String upgradeTitle = "";
-            for(ItemStack stack : requiredStacks) {
-                upgradeTitle = upgradeTitle + stack.getDisplayName() + " + ";
+            for(Item stack : requiredStacks) {
+                upgradeTitle = upgradeTitle + stack.getUnlocalizedName() + " + "; //TODO 1.8 localize
             }
             upgradeTitle = EnumChatFormatting.BLACK + "-" + upgradeTitle.substring(0, upgradeTitle.length() - 3).replace("Machine Upgrade: ", "");
             if(!text.contains(upgradeTitle)) text.add(upgradeTitle);
@@ -128,16 +127,12 @@ public class SensorHandler implements ISensorRegistry{
         return text;
     }
 
-    public void addMachineUpgradeInfo(List tooltip, int upgradeMeta){
-        for(String sensorPath : sensorPaths) {
-            ItemStack[] requiredStacks = getRequiredStacksFromText(sensorPath);
-            for(ItemStack stack : requiredStacks) {
-                if(stack.getItem() == Itemss.machineUpgrade && stack.getItemDamage() == upgradeMeta) {
-                    tooltip.add(Blockss.universalSensor.getUnlocalizedName());
-                    return;
-                }
-            }
+    public Set<Item> getUniversalSensorUpgrades(){
+        Set<Item> items = new HashSet<Item>();
+        for(ISensorSetting sensor : sensors) {
+            items.addAll(sensor.getRequiredUpgrades());
         }
+        return items;
     }
 
     private String sortRequiredUpgrades(String path){
@@ -170,35 +165,8 @@ public class SensorHandler implements ISensorRegistry{
         return directoryArray;
     }
 
-    public ItemStack[] getRequiredStacksFromText(String buttonText){
-        String[] stacks = buttonText.split("/")[0].split("_");
-        List<ItemStack> itemStacks = new ArrayList<ItemStack>();
-        for(String stack : stacks) {
-            if(stack.equals("entityTracker")) {
-                itemStacks.add(new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_ENTITY_TRACKER));
-            } else if(stack.equals("blockTracker")) {
-                itemStacks.add(new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_BLOCK_TRACKER));
-            } else if(stack.equals("volume")) {
-                itemStacks.add(new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_VOLUME_DAMAGE));
-            } else if(stack.equals("dispenser")) {
-                itemStacks.add(new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE));
-            } else if(stack.equals("speed")) {
-                itemStacks.add(new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_SPEED_DAMAGE));
-            } else if(stack.equals("itemLife")) {
-                itemStacks.add(new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_ITEM_LIFE));
-            } else if(stack.equals("itemSearch")) {
-                itemStacks.add(new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_SEARCH_DAMAGE));
-            } else if(stack.equals("coordinateTracker")) {
-                itemStacks.add(new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_COORDINATE_TRACKER_DAMAGE));
-            } else if(stack.equals("range")) {
-                itemStacks.add(new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_RANGE));
-            } else if(stack.equals("security")) {
-                itemStacks.add(new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_SECURITY));
-            } else if(stack.equals("gpsTool")) {
-                itemStacks.add(new ItemStack(Itemss.GPSTool));
-            }
-        }
-        return itemStacks.toArray(new ItemStack[itemStacks.size()]);
+    public Set<Item> getRequiredStacksFromText(String text){
+        return new HashSet<Item>(); //TODO 1.8
     }
 
     @Override
@@ -261,6 +229,13 @@ public class SensorHandler implements ISensorRegistry{
         public Rectangle needsSlot(){
             return coordinateSensor.needsSlot();
         }
+
+        @Override
+        public Set<Item> getRequiredUpgrades(){
+            Set<Item> upgrades = new HashSet<Item>(coordinateSensor.getRequiredUpgrades());
+            upgrades.add(Itemss.GPSTool);
+            return upgrades;
+        }
     }
 
     private class BlockAndCoordinatePollSensor implements IPollSensorSetting{
@@ -313,6 +288,13 @@ public class SensorHandler implements ISensorRegistry{
         @Override
         public Rectangle needsSlot(){
             return coordinateSensor.needsSlot();
+        }
+
+        @Override
+        public Set<Item> getRequiredUpgrades(){
+            Set<Item> upgrades = new HashSet<Item>(coordinateSensor.getRequiredUpgrades());
+            upgrades.add(Itemss.GPSTool);
+            return upgrades;
         }
     }
 

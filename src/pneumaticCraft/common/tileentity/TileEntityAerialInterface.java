@@ -20,10 +20,9 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.fml.common.Loader;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.common.PneumaticCraftAPIHandler;
 import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
-import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.ModIds;
@@ -58,9 +57,10 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
     private boolean dispenserUpgradeInserted;
 
     public TileEntityAerialInterface(){
-        super(PneumaticValues.DANGER_PRESSURE_AERIAL_INTERFACE, PneumaticValues.MAX_PRESSURE_AERIAL_INTERFACE, PneumaticValues.VOLUME_AERIAL_INTERFACE);
+        super(PneumaticValues.DANGER_PRESSURE_AERIAL_INTERFACE, PneumaticValues.MAX_PRESSURE_AERIAL_INTERFACE, PneumaticValues.VOLUME_AERIAL_INTERFACE, UPGRADE_SLOT_START, 1, 2, UPGRADE_SLOT_END);
         inventory = new ItemStack[INVENTORY_SIZE];
-        setUpgradeSlots(new int[]{UPGRADE_SLOT_START, 1, 2, UPGRADE_SLOT_END});
+        addApplicableUpgrade(EnumUpgrade.DISPENSER);
+
         if(isRFAvailable()) initRF();
     }
 
@@ -84,7 +84,7 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
             if(getPressure() > PneumaticValues.MIN_PRESSURE_AERIAL_INTERFACE && isConnectedToPlayer) {
                 if(energyRF != null) tickRF();
                 addAir(-PneumaticValues.USAGE_AERIAL_INTERFACE);
-                if(worldObj.getTotalWorldTime() % 40 == 0) dispenserUpgradeInserted = getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0;
+                if(worldObj.getTotalWorldTime() % 40 == 0) dispenserUpgradeInserted = getUpgrades(EnumUpgrade.DISPENSER) > 0;
                 if(worldObj.getTotalWorldTime() % 20 == 0) {
                     EntityPlayer player = getPlayer();
                     if(player != null && player.getAir() <= 280) {
@@ -278,7 +278,7 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
                 inventory[slot] = ItemStack.loadItemStackFromNBT(tagCompound);
             }
         }
-        dispenserUpgradeInserted = getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0;
+        dispenserUpgradeInserted = getUpgrades(EnumUpgrade.DISPENSER) > 0;
     }
 
     @Override
@@ -308,7 +308,7 @@ public class TileEntityAerialInterface extends TileEntityPneumaticBase implement
 
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack){
-        return i >= 4 || itemstack != null && itemstack.getItem() == Itemss.machineUpgrade;
+        return i >= 4 || canInsertUpgrade(i, itemstack);
     }
 
     @Override

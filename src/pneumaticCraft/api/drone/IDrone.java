@@ -5,6 +5,7 @@ import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -17,10 +18,9 @@ import pneumaticCraft.api.item.IPressurizable;
 public interface IDrone extends IPressurizable{
     /**
      * 
-     * @param upgradeIndex metadata value of the upgrade item
      * @return amount of inserted upgrades in the drone
      */
-    public int getUpgrades(int upgradeIndex);
+    public int getUpgrades(Item upgrade);
 
     public World getWorld();
 

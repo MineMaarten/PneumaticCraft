@@ -43,6 +43,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.api.drone.DroneConstructingEvent;
 import pneumaticCraft.api.drone.IPathNavigator;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.item.IProgrammable;
 import pneumaticCraft.common.ai.DroneAIManager;
 import pneumaticCraft.common.ai.FakePlayerItemInWorldManager;
@@ -50,7 +51,6 @@ import pneumaticCraft.common.ai.IDroneBase;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.entity.EntityProgrammableController;
 import pneumaticCraft.common.entity.living.EntityDrone.DroneFakePlayer;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.LazySynced;
 import pneumaticCraft.common.network.NetworkHandler;
@@ -107,10 +107,9 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
     }
 
     public TileEntityProgrammableController(){
-        super(5, 7, 5000);
+        super(5, 7, 5000, 1, 2, 3, 4);
         inventory = new ItemStack[INVENTORY_SIZE];
-        //    setUpgradeSlots(new int[]{UPGRADE_SLOT_START, 1, 2, UPGRADE_SLOT_END});
-        setUpgradeSlots(new int[]{1, 2, 3, 4});
+        addApplicableUpgrade(EnumUpgrade.SPEED, EnumUpgrade.DISPENSER);
         MinecraftForge.EVENT_BUS.post(new DroneConstructingEvent(this));
     }
 
@@ -136,8 +135,8 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
         if(!worldObj.isRemote) {
             getAIManager();
             if(worldObj.getTotalWorldTime() % 40 == 0) {
-                dispenserUpgrades = getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE);
-                speedUpgrades = getUpgrades(ItemMachineUpgrade.UPGRADE_SPEED_DAMAGE);
+                dispenserUpgrades = getUpgrades(EnumUpgrade.DISPENSER);
+                speedUpgrades = getUpgrades(EnumUpgrade.SPEED);
 
                 for(int i = getDroneSlots(); i < 36; i++) {
                     ItemStack stack = getFakePlayer().inventory.getStackInSlot(i);

@@ -12,7 +12,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.client.gui.widget.GuiAnimatedStat;
 import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.inventory.Container4UpgradeSlots;
+import pneumaticCraft.common.inventory.ContainerPressureChamber;
 import pneumaticCraft.common.tileentity.TileEntityPressureChamberValve;
 import pneumaticCraft.lib.Textures;
 
@@ -23,7 +23,7 @@ public class GuiPressureChamber extends GuiPneumaticContainerBase<TileEntityPres
 
     public GuiPressureChamber(InventoryPlayer player, TileEntityPressureChamberValve te){
 
-        super(new Container4UpgradeSlots(player, te), te, Textures.GUI_4UPGRADE_SLOTS);
+        super(new ContainerPressureChamber(player, te), te, Textures.GUI_4UPGRADE_SLOTS);
     }
 
     @Override

@@ -1,7 +1,8 @@
 {
     "parent": "builtin/generated",
     "textures": {
-        "layer0": "pneumaticcraft:items/gunAmmo"
+        "layer0": "pneumaticcraft:items/gunAmmo",
+        "layer1": "pneumaticcraft:items/gunAmmoOverlay"
     },
     "display": {
         "thirdperson": {

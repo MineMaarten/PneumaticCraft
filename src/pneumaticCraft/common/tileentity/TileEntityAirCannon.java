@@ -47,9 +47,9 @@ import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
@@ -106,15 +106,15 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
     private final int INVENTORY_SIZE = 6;
     public final int CANNON_SLOT = 0;
     public final int GPS_SLOT = 1;
-    public final int UPGRADE_SLOT_1 = 2;
-    public final int UPGRADE_SLOT_2 = 3;
-    public final int UPGRADE_SLOT_3 = 4;
-    public final int UPGRADE_SLOT_4 = 5;
+    public static final int UPGRADE_SLOT_1 = 2;
+    public static final int UPGRADE_SLOT_2 = 3;
+    public static final int UPGRADE_SLOT_3 = 4;
+    public static final int UPGRADE_SLOT_4 = 5;
 
     public TileEntityAirCannon(){
-        super(PneumaticValues.DANGER_PRESSURE_AIR_CANNON, PneumaticValues.MAX_PRESSURE_AIR_CANNON, PneumaticValues.VOLUME_AIR_CANNON);
+        super(PneumaticValues.DANGER_PRESSURE_AIR_CANNON, PneumaticValues.MAX_PRESSURE_AIR_CANNON, PneumaticValues.VOLUME_AIR_CANNON, UPGRADE_SLOT_1, UPGRADE_SLOT_2, UPGRADE_SLOT_3, UPGRADE_SLOT_4);
         inventory = new ItemStack[INVENTORY_SIZE];
-        setUpgradeSlots(new int[]{UPGRADE_SLOT_1, UPGRADE_SLOT_2, UPGRADE_SLOT_3, UPGRADE_SLOT_4});
+        addApplicableUpgrade(EnumUpgrade.RANGE, EnumUpgrade.SPEED, EnumUpgrade.DISPENSER, EnumUpgrade.ENTITY_TRACKER, EnumUpgrade.BLOCK_TRACKER, EnumUpgrade.ITEM_LIFE);
     }
 
     @Override
@@ -138,15 +138,15 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
             }
         }
 
-        int curRangeUpgrades = Math.min(8, getUpgrades(ItemMachineUpgrade.UPGRADE_RANGE, getUpgradeSlots()));
+        int curRangeUpgrades = Math.min(8, getUpgrades(EnumUpgrade.RANGE));
         if(curRangeUpgrades != oldRangeUpgrades) {
             oldRangeUpgrades = curRangeUpgrades;
             if(!externalControl) updateDestination();
         }
 
         if(worldObj.getTotalWorldTime() % 40 == 0) {
-            boolean isDispenserUpgradeInserted = getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0;
-            boolean isEntityTrackerUpgradeInserted = getUpgrades(ItemMachineUpgrade.UPGRADE_ENTITY_TRACKER) > 0;
+            boolean isDispenserUpgradeInserted = getUpgrades(EnumUpgrade.DISPENSER) > 0;
+            boolean isEntityTrackerUpgradeInserted = getUpgrades(EnumUpgrade.ENTITY_TRACKER) > 0;
             if(dispenserUpgradeInserted != isDispenserUpgradeInserted || entityUpgradeInserted != isEntityTrackerUpgradeInserted) {
                 dispenserUpgradeInserted = isDispenserUpgradeInserted;
                 entityUpgradeInserted = isEntityTrackerUpgradeInserted;
@@ -156,7 +156,7 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
 
         // update angles
         doneTurning = true;
-        float speedMultiplier = getSpeedMultiplierFromUpgrades(getUpgradeSlots());
+        float speedMultiplier = getSpeedMultiplierFromUpgrades();
         if(rotationAngle < targetRotationAngle) {
             if(rotationAngle < targetRotationAngle - TileEntityConstants.CANNON_SLOW_ANGLE) {
                 rotationAngle += TileEntityConstants.CANNON_TURN_HIGH_SPEED * speedMultiplier;
@@ -256,11 +256,11 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
                                         // dispenser upgrade is inserted.
         double payloadFrictionX = 0.98D;
         double payloadGravity = 0.04D;
-        if(getUpgrades(ItemMachineUpgrade.UPGRADE_ENTITY_TRACKER) > 0) {
+        if(getUpgrades(EnumUpgrade.ENTITY_TRACKER) > 0) {
             payloadFrictionY = 0.98D;
             payloadFrictionX = 0.91D;
             payloadGravity = 0.08D;
-        } else if(getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE, getUpgradeSlots()) > 0 && inventory[0] != null) {// if
+        } else if(getUpgrades(EnumUpgrade.DISPENSER) > 0 && inventory[0] != null) {// if
             // there
             // is
             // a
@@ -552,9 +552,9 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
 
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack){
+        if(canInsertUpgrade(i, itemstack)) return true;
         if(i == GPS_SLOT && itemstack != null && itemstack.getItem() != Itemss.GPSTool) return false;
-        if(i > GPS_SLOT && i <= UPGRADE_SLOT_4 && itemstack != null && itemstack.getItem() != Itemss.machineUpgrade) return false;
-        return true;
+        return i == CANNON_SLOT;
     }
 
     @Override
@@ -584,7 +584,7 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
     public void handleGUIButtonPress(int buttonID, EntityPlayer player){
         if(buttonID == 0) {
             if(++redstoneMode > 2) redstoneMode = 0;
-            if(redstoneMode == 2 && getUpgrades(ItemMachineUpgrade.UPGRADE_BLOCK_TRACKER) == 0) redstoneMode = 0;
+            if(redstoneMode == 2 && getUpgrades(EnumUpgrade.BLOCK_TRACKER) == 0) redstoneMode = 0;
         }
     }
 
@@ -627,7 +627,7 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
 
                 if(itemShot instanceof EntityItem) {
                     inventory[0] = null;
-                    if(getUpgrades(ItemMachineUpgrade.UPGRADE_BLOCK_TRACKER) > 0) {
+                    if(getUpgrades(EnumUpgrade.BLOCK_TRACKER) > 0) {
                         trackedItems.add((EntityItem)itemShot);
                     }
                 } else {
@@ -682,7 +682,7 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
     // warning: no null-check for inventory slot 0
     private Entity getPayloadEntity(){
 
-        if(getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE, getUpgradeSlots()) > 0) {
+        if(getUpgrades(EnumUpgrade.DISPENSER) > 0) {
             Item item = inventory[0].getItem();
             if(item == Item.getItemFromBlock(Blocks.tnt)) {
                 EntityTNTPrimed tnt = new EntityTNTPrimed(worldObj);
@@ -710,7 +710,7 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
         EntityItem item = new EntityItem(worldObj);
         item.setEntityItemStack(inventory[0].copy());
         item.setAgeToCreativeDespawnTime(); // 1200 ticks left to live, = 60s.
-        item.lifespan += Math.min(getUpgrades(ItemMachineUpgrade.UPGRADE_ITEM_LIFE, getUpgradeSlots()) * 600, 4800); // add
+        item.lifespan += Math.min(getUpgrades(EnumUpgrade.ITEM_LIFE) * 600, 4800); // add
         // 30s
         // for
         // each
@@ -727,7 +727,7 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
     }
 
     private Entity getCloseEntityIfUpgraded(){
-        int entityUpgrades = getUpgrades(ItemMachineUpgrade.UPGRADE_ENTITY_TRACKER);
+        int entityUpgrades = getUpgrades(EnumUpgrade.ENTITY_TRACKER);
         if(entityUpgrades > 0) {
             entityUpgrades = Math.min(entityUpgrades, 5);
             List<EntityLivingBase> entities = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, new AxisAlignedBB(getPos().add(-entityUpgrades, -entityUpgrades, -entityUpgrades), getPos().add(1 + entityUpgrades, 1 + entityUpgrades, 1 + entityUpgrades)));

@@ -1,21 +1,26 @@
 package pneumaticCraft.common.tileentity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.Packet;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ITickable;
+import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidContainerRegistry.FluidContainerData;
 import net.minecraftforge.fluids.FluidStack;
@@ -24,10 +29,11 @@ import net.minecraftforge.fluids.IFluidContainerItem;
 import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import pneumaticCraft.api.heat.IHeatExchangerLogic;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
+import pneumaticCraft.api.item.IUpgradeAcceptor;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 import pneumaticCraft.common.block.BlockPneumaticCraft;
 import pneumaticCraft.common.inventory.SyncedField;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.DescPacketHandler;
 import pneumaticCraft.common.network.DescSynced;
@@ -42,26 +48,32 @@ import pneumaticCraft.common.util.TileEntityCache;
 import pneumaticCraft.lib.PneumaticValues;
 
 //TODO Computercraft dep @Optional.InterfaceList({@Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = ModIds.COMPUTERCRAFT)})
-public class TileEntityBase extends TileEntity implements IGUIButtonSensitive, IDescSynced, ITickable/*, IPeripheral*/{
+public class TileEntityBase extends TileEntity implements IGUIButtonSensitive, IDescSynced, ITickable, IUpgradeAcceptor/*, IPeripheral*/{
     /**
      * True only the first time updateEntity invokes in a session.
      */
     protected boolean firstRun = true;
-    private int[] upgradeSlots;
+    private final int[] upgradeSlots;
     private boolean descriptionPacketScheduled;
     private List<SyncedField> descriptionFields;
     protected int poweredRedstone; //The redstone strength currently applied to the block.
     private TileEntityCache[] tileCache;
     protected List<ILuaMethod> luaMethods = new ArrayList<ILuaMethod>();
     private IBlockState cachedBlockState;
-
-    public TileEntityBase(){
-        addLuaMethods();
-    }
+    private final Set<Item> applicableUpgrades = new HashSet<Item>();
 
     public TileEntityBase(int... upgradeSlots){
-        this();
+        addLuaMethods();
         this.upgradeSlots = upgradeSlots;
+    }
+
+    protected void addApplicableUpgrade(EnumUpgrade... upgrades){
+        for(EnumUpgrade upgrade : upgrades)
+            addApplicableUpgrade(Itemss.upgrades.get(upgrade));
+    }
+
+    protected void addApplicableUpgrade(Item upgrade){
+        applicableUpgrades.add(upgrade);
     }
 
     @Override
@@ -209,38 +221,46 @@ public class TileEntityBase extends TileEntity implements IGUIButtonSensitive, I
         super.updateContainingBlockInfo();
     }
 
-    public int getUpgrades(int upgradeDamage){
-        return getUpgrades(upgradeDamage, getUpgradeSlots());
+    public int getUpgrades(EnumUpgrade upgrade){
+        return getUpgrades(upgrade, upgradeSlots);
     }
 
-    protected int getUpgrades(int upgradeDamage, int... upgradeSlots){
-        return getUpgrades((IInventory)this, upgradeDamage, upgradeSlots);
+    protected int getUpgrades(EnumUpgrade upgrade, int... upgradeSlots){
+        return getUpgrades((IInventory)this, upgrade, upgradeSlots);
     }
 
-    public static int getUpgrades(IInventory inv, int upgradeDamage, int... upgradeSlots){
+    public int getUpgrades(Item upgrade){
+        return getUpgrades((IInventory)this, upgrade, upgradeSlots);
+    }
+
+    public static int getUpgrades(IInventory inv, EnumUpgrade upgrade, int... upgradeSlots){
+        return getUpgrades(inv, Itemss.upgrades.get(upgrade), upgradeSlots);
+    }
+
+    public static int getUpgrades(IInventory inv, Item upgrade, int... upgradeSlots){
         int upgrades = 0;
         for(int i : upgradeSlots) {
-            if(inv.getStackInSlot(i) != null && inv.getStackInSlot(i).getItem() == Itemss.machineUpgrade && inv.getStackInSlot(i).getItemDamage() == upgradeDamage) {
+            if(inv.getStackInSlot(i) != null && inv.getStackInSlot(i).getItem() == upgrade) {
                 upgrades += inv.getStackInSlot(i).stackSize;
             }
         }
         return upgrades;
     }
 
-    protected float getSpeedMultiplierFromUpgrades(){
-        return getSpeedMultiplierFromUpgrades(getUpgradeSlots());
+    public float getSpeedMultiplierFromUpgrades(){
+        return getSpeedMultiplierFromUpgrades(upgradeSlots);
     }
 
-    protected float getSpeedUsageMultiplierFromUpgrades(){
-        return getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots());
+    public float getSpeedUsageMultiplierFromUpgrades(){
+        return getSpeedUsageMultiplierFromUpgrades(upgradeSlots);
     }
 
     public float getSpeedMultiplierFromUpgrades(int[] upgradeSlots){
-        return (float)Math.pow(PneumaticValues.SPEED_UPGRADE_MULTIPLIER, Math.min(10, getUpgrades(ItemMachineUpgrade.UPGRADE_SPEED_DAMAGE, upgradeSlots)));
+        return (float)Math.pow(PneumaticValues.SPEED_UPGRADE_MULTIPLIER, Math.min(10, getUpgrades(EnumUpgrade.SPEED, upgradeSlots)));
     }
 
     protected float getSpeedUsageMultiplierFromUpgrades(int[] upgradeSlots){
-        return (float)Math.pow(PneumaticValues.SPEED_UPGRADE_USAGE_MULTIPLIER, Math.min(10, getUpgrades(ItemMachineUpgrade.UPGRADE_SPEED_DAMAGE, upgradeSlots)));
+        return (float)Math.pow(PneumaticValues.SPEED_UPGRADE_USAGE_MULTIPLIER, Math.min(10, getUpgrades(EnumUpgrade.SPEED, upgradeSlots)));
     }
 
     /* TODO IC2 dep @Optional.Method(modid = ModIds.INDUSTRIALCRAFT)
@@ -264,14 +284,6 @@ public class TileEntityBase extends TileEntity implements IGUIButtonSensitive, I
 
     public boolean isGuiUseableByPlayer(EntityPlayer par1EntityPlayer){
         return worldObj.getTileEntity(getPos()) != this ? false : par1EntityPlayer.getDistanceSq(getPos().getX() + 0.5D, getPos().getY() + 0.5D, getPos().getZ() + 0.5D) <= 64.0D;
-    }
-
-    public void setUpgradeSlots(int... upgradeSlots){
-        this.upgradeSlots = upgradeSlots;
-    }
-
-    public int[] getUpgradeSlots(){
-        return upgradeSlots;
     }
 
     public static void writeInventoryToNBT(NBTTagCompound tag, ItemStack[] stacks){
@@ -489,6 +501,33 @@ public class TileEntityBase extends TileEntity implements IGUIButtonSensitive, I
 
     public int getFieldCount(){
         return 0;
+    }
+
+    @Override
+    public Set<Item> getApplicableUpgrades(){
+        return applicableUpgrades;
+    }
+
+    @Override
+    public String getName(){
+        return null; //Is called directly from the block instead.
+    }
+
+    protected boolean canInsertUpgrade(int slot, ItemStack item){
+        return item != null ? canInsertUpgrade(slot, item.getItem()) : false;
+    }
+
+    protected boolean canInsertUpgrade(int slot, Item item){
+        if(!applicableUpgrades.contains(item)) return false;
+        for(int upgradeSlot : upgradeSlots) {
+            if(upgradeSlot == slot) return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate){
+        return oldState.getBlock() != newSate.getBlock();
     }
 
     /*

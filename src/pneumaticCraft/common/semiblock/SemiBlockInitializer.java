@@ -2,7 +2,6 @@ package pneumaticCraft.common.semiblock;
 
 import net.minecraft.item.Item;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.common.item.Itemss;
@@ -11,7 +10,6 @@ import pneumaticCraft.lib.ModIds;
 public class SemiBlockInitializer{
     public static void init(){
         MinecraftForge.EVENT_BUS.register(SemiBlockManager.getServerInstance());
-        FMLCommonHandler.instance().bus().register(SemiBlockManager.getServerInstance());
         Class requesterClass = Loader.isModLoaded(ModIds.AE2) ? SemiBlockRequesterAE.class : SemiBlockRequester.class;
 
         registerSemiBlock(SemiBlockActiveProvider.ID, SemiBlockActiveProvider.class, false);

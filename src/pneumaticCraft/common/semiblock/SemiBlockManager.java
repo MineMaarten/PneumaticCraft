@@ -24,9 +24,9 @@ import net.minecraftforge.event.world.ChunkDataEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.common.NBTUtil;
+import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketDescription;
 import pneumaticCraft.common.network.PacketSetSemiBlock;
@@ -64,7 +64,7 @@ public class SemiBlockManager{
 
         if(addItem) {
             ItemSemiBlockBase item = new ItemSemiBlockBase(key);
-            GameRegistry.registerItem(item, key);
+            Itemss.registerItem(item, key);
             PneumaticCraft.proxy.registerSemiBlockRenderer(item);
             registerSemiBlockToItemMapping(semiBlock, item);
             return item;

@@ -10,7 +10,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.lib.PneumaticValues;
 
@@ -27,9 +26,8 @@ public class TileEntityElectrostaticCompressor extends TileEntityPneumaticBase i
     private int struckByLightningCooldown; //used by the redstone.
 
     public TileEntityElectrostaticCompressor(){
-        super(PneumaticValues.DANGER_PRESSURE_ELECTROSTATIC_COMPRESSOR, PneumaticValues.MAX_PRESSURE_ELECTROSTATIC_COMPRESSOR, PneumaticValues.VOLUME_ELECTROSTATIC_COMPRESSOR);
+        super(PneumaticValues.DANGER_PRESSURE_ELECTROSTATIC_COMPRESSOR, PneumaticValues.MAX_PRESSURE_ELECTROSTATIC_COMPRESSOR, PneumaticValues.VOLUME_ELECTROSTATIC_COMPRESSOR, 0, 1, 2, 3);
         inventory = new ItemStack[INVENTORY_SIZE];
-        setUpgradeSlots(0, 1, 2, 3);
     }
 
     @Override
@@ -198,7 +196,7 @@ public class TileEntityElectrostaticCompressor extends TileEntityPneumaticBase i
 
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack){
-        return itemstack != null && itemstack.getItem() == Itemss.machineUpgrade;
+        return canInsertUpgrade(i, itemstack);
     }
 
     @Override

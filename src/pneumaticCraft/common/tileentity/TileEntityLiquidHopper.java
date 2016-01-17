@@ -18,8 +18,8 @@ import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.util.FluidUtils;
 import pneumaticCraft.common.util.IOHelper;
@@ -31,7 +31,8 @@ public class TileEntityLiquidHopper extends TileEntityOmnidirectionalHopper impl
     private final FluidTank tank = new FluidTank(PneumaticValues.NORMAL_TANK_CAPACITY);
 
     public TileEntityLiquidHopper(){
-        setUpgradeSlots(0, 1, 2, 3);
+        super(0, 1, 2, 3);
+        addApplicableUpgrade(EnumUpgrade.DISPENSER);
     }
 
     @Override
@@ -87,7 +88,7 @@ public class TileEntityLiquidHopper extends TileEntityOmnidirectionalHopper impl
             }
         }
 
-        if(getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0) {
+        if(getUpgrades(EnumUpgrade.DISPENSER) > 0) {
             if(worldObj.isAirBlock(getPos().offset(dir))) {
                 FluidStack extractedFluid = drain(null, 1000, false);
                 if(extractedFluid != null && extractedFluid.amount == 1000) {
@@ -138,7 +139,7 @@ public class TileEntityLiquidHopper extends TileEntityOmnidirectionalHopper impl
             }
         }
 
-        if(getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0) {
+        if(getUpgrades(EnumUpgrade.DISPENSER) > 0) {
             BlockPos neighborPos = getPos().offset(inputDir);
             Fluid fluid = FluidRegistry.lookupFluidForBlock(worldObj.getBlockState(neighborPos).getBlock());
             if(fluid != null && FluidUtils.isSourceBlock(worldObj, neighborPos)) {

@@ -1,8 +1,6 @@
 package pneumaticCraft.common;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -14,7 +12,7 @@ import pneumaticCraft.api.PneumaticRegistry.IPneumaticCraftInterface;
 import pneumaticCraft.api.client.IClientRegistry;
 import pneumaticCraft.api.client.pneumaticHelmet.IPneumaticHelmetRegistry;
 import pneumaticCraft.api.drone.IDroneRegistry;
-import pneumaticCraft.api.item.IInventoryItem;
+import pneumaticCraft.api.item.IItemRegistry;
 import pneumaticCraft.api.recipe.IPneumaticRecipeRegistry;
 import pneumaticCraft.api.tileentity.IAirHandlerSupplier;
 import pneumaticCraft.api.tileentity.IHeatRegistry;
@@ -22,6 +20,7 @@ import pneumaticCraft.api.universalSensor.ISensorRegistry;
 import pneumaticCraft.client.GuiRegistry;
 import pneumaticCraft.client.render.pneumaticArmor.PneumaticHelmetRegistry;
 import pneumaticCraft.common.heat.HeatExchangerManager;
+import pneumaticCraft.common.item.ItemRegistry;
 import pneumaticCraft.common.pressure.AirHandlerSupplier;
 import pneumaticCraft.common.recipes.PneumaticRecipeRegistry;
 import pneumaticCraft.common.sensor.SensorHandler;
@@ -33,7 +32,6 @@ import pneumaticCraft.lib.Log;
  */
 public class PneumaticCraftAPIHandler implements IPneumaticCraftInterface{
     private final static PneumaticCraftAPIHandler INSTANCE = new PneumaticCraftAPIHandler();
-    public final List<IInventoryItem> inventoryItems = new ArrayList<IInventoryItem>();
     public final Map<Fluid, Integer> liquidXPs = new HashMap<Fluid, Integer>();
     public final Map<String, Integer> liquidFuels = new HashMap<String, Integer>();
 
@@ -73,11 +71,6 @@ public class PneumaticCraftAPIHandler implements IPneumaticCraftInterface{
     }
 
     @Override
-    public void registerInventoryItem(IInventoryItem handler){
-        inventoryItems.add(handler);
-    }
-
-    @Override
     public void registerXPLiquid(Fluid fluid, int liquidToPointRatio){
         if(fluid == null) throw new NullPointerException("Fluid can't be null!");
         if(liquidToPointRatio <= 0) throw new IllegalArgumentException("liquidToPointRatio can't be <= 0");
@@ -103,5 +96,10 @@ public class PneumaticCraftAPIHandler implements IPneumaticCraftInterface{
     @Override
     public ISensorRegistry getSensorRegistry(){
         return SensorHandler.getInstance();
+    }
+
+    @Override
+    public IItemRegistry getItemRegistry(){
+        return ItemRegistry.getInstance();
     }
 }

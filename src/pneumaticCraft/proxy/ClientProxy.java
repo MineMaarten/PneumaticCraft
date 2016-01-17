@@ -3,7 +3,9 @@ package pneumaticCraft.proxy;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.minecraft.block.Block;
@@ -27,7 +29,6 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -59,7 +60,9 @@ import pneumaticCraft.common.entity.living.EntityDrone;
 import pneumaticCraft.common.entity.living.EntityLogisticsDrone;
 import pneumaticCraft.common.entity.projectile.EntityVortex;
 import pneumaticCraft.common.fluid.Fluids;
+import pneumaticCraft.common.item.ItemPneumatic;
 import pneumaticCraft.common.item.Itemss;
+import pneumaticCraft.common.itemBlock.ItemBlockPneumaticCraft;
 import pneumaticCraft.common.recipes.CraftingRegistrator;
 import pneumaticCraft.common.semiblock.ItemSemiBlockBase;
 import pneumaticCraft.common.thirdparty.ThirdPartyManager;
@@ -84,27 +87,24 @@ public class ClientProxy extends CommonProxy{
         }
 
         MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
-        FMLCommonHandler.instance().bus().register(new ClientEventHandler());
 
         MinecraftForge.EVENT_BUS.register(HUDHandler.instance());
-        FMLCommonHandler.instance().bus().register(HUDHandler.instance());
-        FMLCommonHandler.instance().bus().register(ClientTickHandler.instance());
-        FMLCommonHandler.instance().bus().register(getHackTickHandler());
-        FMLCommonHandler.instance().bus().register(clientHudHandler = new CommonHUDHandler());
+        MinecraftForge.EVENT_BUS.register(ClientTickHandler.instance());
+        MinecraftForge.EVENT_BUS.register(getHackTickHandler());
+        MinecraftForge.EVENT_BUS.register(clientHudHandler = new CommonHUDHandler());
         MinecraftForge.EVENT_BUS.register(new ClientSemiBlockManager());
 
         MinecraftForge.EVENT_BUS.register(HUDHandler.instance().getSpecificRenderer(CoordTrackUpgradeHandler.class));
         MinecraftForge.EVENT_BUS.register(AreaShowManager.getInstance());
-        FMLCommonHandler.instance().bus().register(AreaShowManager.getInstance());
 
         if(!Loader.isModLoaded(ModIds.NOT_ENOUGH_KEYS) || !Config.config.get("Third_Party_Enabling", ModIds.NOT_ENOUGH_KEYS, true).getBoolean()) {
-            FMLCommonHandler.instance().bus().register(KeyHandler.getInstance());
+            MinecraftForge.EVENT_BUS.register(KeyHandler.getInstance());
         } else KeyHandler.getInstance();
         ThirdPartyManager.instance().clientSide();
 
         /*  if(Config.enableUpdateChecker) {
               UpdateChecker.instance().start();
-              FMLCommonHandler.instance().bus().register(UpdateChecker.instance());
+              MinecraftForge.EVENT_BUS.register(UpdateChecker.instance());
           }*/
         EntityTrackHandler.registerDefaultEntries();
         getAllKeybindsFromOptionsFile();
@@ -115,15 +115,19 @@ public class ClientProxy extends CommonProxy{
     public void init(){
         for(Block block : Blockss.blocks) {
             Item item = Item.getItemFromBlock(block);
-            ResourceLocation resLoc = new ResourceLocation(Names.MOD_ID, item.getUnlocalizedName().substring(5));
-            ModelBakery.registerItemVariants(item, resLoc);
-            Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(item, 0, new ModelResourceLocation(resLoc, "inventory"));
+            if(item instanceof ItemBlockPneumaticCraft) ((ItemBlockPneumaticCraft)item).registerItemVariants();
         }
         for(Item item : Itemss.items) {
-            if(item instanceof ItemBucket) continue;
-            ResourceLocation resLoc = new ResourceLocation(Names.MOD_ID, item.getUnlocalizedName().substring(5));
-            ModelBakery.registerItemVariants(item, resLoc);
-            Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(item, 0, new ModelResourceLocation(resLoc, "inventory"));
+            if(item instanceof ItemPneumatic) ((ItemPneumatic)item).registerItemVariants();
+            else if(!(item instanceof ItemBucket)) {
+                List<ItemStack> stacks = new ArrayList<ItemStack>();
+                item.getSubItems(item, null, stacks);
+                for(ItemStack stack : stacks) {
+                    ResourceLocation resLoc = new ResourceLocation(Names.MOD_ID, stack.getUnlocalizedName().substring(5));
+                    ModelBakery.registerItemVariants(item, resLoc);
+                    Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(item, stack.getItemDamage(), new ModelResourceLocation(resLoc, "inventory"));
+                }
+            }
         }
 
         for(int i = 0; i < 16; i++) { //Only register these recipes client side, so NEI compatibility works, but drones don't lose their program when dyed.

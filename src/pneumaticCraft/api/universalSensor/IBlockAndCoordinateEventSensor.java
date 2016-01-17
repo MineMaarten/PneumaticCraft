@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -16,6 +17,12 @@ public interface IBlockAndCoordinateEventSensor{
      * @return
      */
     public String getSensorPath();
+
+    /**
+     * See {@link ISensorSetting#getRequiredUpgrades()}
+     * @return
+     */
+    public Set<Item> getRequiredUpgrades();
 
     /**
      * Extended version of the normal emitRedstoneOnEvent. This method will only invoke with a valid GPS tool, and when all the coordinates are within range.

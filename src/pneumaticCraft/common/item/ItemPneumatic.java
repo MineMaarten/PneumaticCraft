@@ -1,18 +1,24 @@
 package pneumaticCraft.common.item;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.ModIds;
+import pneumaticCraft.lib.Names;
 
 public class ItemPneumatic extends Item{
     public ItemPneumatic(){
@@ -27,10 +33,25 @@ public class ItemPneumatic extends Item{
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void addInformation(ItemStack stack, EntityPlayer player, List curInfo, boolean extraInfo){
+    public void addInformation(ItemStack stack, EntityPlayer player, List<String> curInfo, boolean extraInfo){
         super.addInformation(stack, player, curInfo, extraInfo);
+        curInfo.add("Unlocalized: " + stack.getUnlocalizedName());
         curInfo.addAll(PneumaticCraftUtils.convertStringIntoList(EnumChatFormatting.RED + "PneumaticCraft is highly unstable at this point! The item/block you're looking at probably does not have a texture. It is recommended only to use the mod for worldgen purposes while it is being stabilized for MC1.8.8.", 40));
         addTooltip(stack, player, curInfo);
+    }
+
+    public void registerItemVariants(){
+        List<ItemStack> stacks = new ArrayList<ItemStack>();
+        getSubItems(this, null, stacks);
+        for(ItemStack stack : stacks) {
+            ResourceLocation resLoc = new ResourceLocation(Names.MOD_ID, getModelLocation(stack));
+            ModelBakery.registerItemVariants(this, resLoc);
+            Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(this, stack.getItemDamage(), new ModelResourceLocation(resLoc, "inventory"));
+        }
+    }
+
+    protected String getModelLocation(ItemStack stack){
+        return stack.getUnlocalizedName().substring(5);
     }
 
     public static void addTooltip(ItemStack stack, EntityPlayer player, List curInfo){

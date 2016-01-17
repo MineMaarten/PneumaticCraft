@@ -12,6 +12,7 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.util.ChatComponentTranslation;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -207,7 +208,7 @@ public class UpdateChecker extends Thread{
                         //if(Config.enableUpdateChecker) FMLCommonHandler.instance().bus().unregister(instance()); causes NPE for some reason...
                         INSTANCE = new UpdateChecker();//reset variables, prevent thread from running twice.
                         instance().displayDelay = 0;
-                        FMLCommonHandler.instance().bus().register(instance());
+                        MinecraftForge.EVENT_BUS.register(instance());
                         instance().start();
                         Config.enableUpdateChecker = true;
                     } else if(astring[1].equalsIgnoreCase("false")) {

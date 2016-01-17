@@ -60,7 +60,7 @@ public class GuiAirCompressor extends GuiPneumaticContainerBase<TileEntityAirCom
         super.addPressureStatInfo(pressureStatText);
         if(te.getBurnTimeRemainingScaled(12) > 0 || TileEntityFurnace.isItemFuel(te.getStackInSlot(0)) && te.redstoneAllows()) {
             pressureStatText.add("\u00a77Currently producing:");
-            pressureStatText.add("\u00a70" + (double)Math.round(te.getBaseProduction() * te.getEfficiency() * te.getSpeedMultiplierFromUpgrades(te.getUpgradeSlots()) / 100) + " mL/tick.");
+            pressureStatText.add("\u00a70" + (double)Math.round(te.getBaseProduction() * te.getEfficiency() * te.getSpeedMultiplierFromUpgrades() / 100) + " mL/tick.");
         }
     }
 

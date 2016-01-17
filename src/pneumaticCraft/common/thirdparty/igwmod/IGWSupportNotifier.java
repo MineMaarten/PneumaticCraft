@@ -17,6 +17,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -60,7 +61,7 @@ public class IGWSupportNotifier{
                 for(ModContainer container : loadedMods) {
                     if(container.getModId().equals(modid)) {
                         supportingMod = container.getName();
-                        FMLCommonHandler.instance().bus().register(this);
+                        MinecraftForge.EVENT_BUS.register(this);
                         ClientCommandHandler.instance.registerCommand(new CommandDownloadIGW());
                         break;
                     }

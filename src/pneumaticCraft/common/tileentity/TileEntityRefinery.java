@@ -58,7 +58,7 @@ public class TileEntityRefinery extends TileEntityBase implements IFluidHandler,
     private final Fluid[] refiningFluids = getRefiningFluids();
 
     public TileEntityRefinery(){
-        //  setUpgradeSlots(0, 1, 2, 3);
+
     }
 
     public static Fluid[] getRefiningFluids(){

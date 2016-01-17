@@ -8,7 +8,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
@@ -24,15 +24,16 @@ import pneumaticCraft.api.client.pneumaticHelmet.BlockTrackEvent;
 import pneumaticCraft.api.client.pneumaticHelmet.IBlockTrackEntry;
 import pneumaticCraft.api.client.pneumaticHelmet.IOptionPage;
 import pneumaticCraft.api.client.pneumaticHelmet.IUpgradeRenderHandler;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.client.gui.pneumaticHelmet.GuiBlockTrackOptions;
 import pneumaticCraft.client.gui.widget.GuiAnimatedStat;
 import pneumaticCraft.client.render.pneumaticArmor.blockTracker.BlockTrackEntryList;
 import pneumaticCraft.common.CommonHUDHandler;
 import pneumaticCraft.common.config.Config;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketDescriptionPacketRequest;
+import pneumaticCraft.common.recipes.CraftingRegistrator;
 import pneumaticCraft.lib.PneumaticValues;
 
 public class BlockTrackUpgradeHandler implements IUpgradeRenderHandler{
@@ -224,11 +225,8 @@ public class BlockTrackUpgradeHandler implements IUpgradeRenderHandler{
     public void render2D(float partialTicks, boolean helmetEnabled){}
 
     @Override
-    public boolean isEnabled(ItemStack[] upgradeStacks){
-        for(ItemStack stack : upgradeStacks) {
-            if(stack != null && stack.getItem() == Itemss.machineUpgrade && stack.getItemDamage() == ItemMachineUpgrade.UPGRADE_BLOCK_TRACKER) return true;
-        }
-        return false;
+    public Item[] getRequiredUpgrades(){
+        return new Item[]{Itemss.upgrades.get(EnumUpgrade.BLOCK_TRACKER)};
     }
 
     @Override
@@ -253,7 +251,7 @@ public class BlockTrackUpgradeHandler implements IUpgradeRenderHandler{
         if(blockTrackInfo == null) {
             Minecraft minecraft = Minecraft.getMinecraft();
             ScaledResolution sr = new ScaledResolution(minecraft);
-            blockTrackInfo = new GuiAnimatedStat(null, "Current tracked blocks:", new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_BLOCK_TRACKER), statX != -1 ? statX : sr.getScaledWidth() - 2, statY, 0x3000AA00, null, statLeftSided);
+            blockTrackInfo = new GuiAnimatedStat(null, "Current tracked blocks:", CraftingRegistrator.getUpgrade(EnumUpgrade.BLOCK_TRACKER), statX != -1 ? statX : sr.getScaledWidth() - 2, statY, 0x3000AA00, null, statLeftSided);
             blockTrackInfo.setMinDimensionsAndReset(0, 0);
         }
         return blockTrackInfo;

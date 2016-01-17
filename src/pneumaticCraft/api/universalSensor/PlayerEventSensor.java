@@ -1,15 +1,28 @@
 package pneumaticCraft.api.universalSensor;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
+import pneumaticCraft.common.item.Itemss;
 
 public abstract class PlayerEventSensor implements IEventSensorSetting{
 
     @Override
     public String getSensorPath(){
-        return "entityTracker/Player";
+        return "Player";
+    }
+
+    @Override
+    public Set<Item> getRequiredUpgrades(){
+        Set<Item> upgrades = new HashSet<Item>();
+        upgrades.add(Itemss.upgrades.get(EnumUpgrade.ENTITY_TRACKER));
+        return upgrades;
     }
 
     @Override

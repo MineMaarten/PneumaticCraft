@@ -28,6 +28,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -66,6 +67,7 @@ import pneumaticCraft.api.block.IPneumaticWrenchable;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableEntity;
 import pneumaticCraft.api.drone.IPathNavigator;
 import pneumaticCraft.api.drone.IPathfindHandler;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.tileentity.IManoMeasurable;
 import pneumaticCraft.client.render.RenderProgressingLine;
 import pneumaticCraft.common.DroneRegistry;
@@ -81,7 +83,6 @@ import pneumaticCraft.common.ai.IDroneBase;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.config.Config;
 import pneumaticCraft.common.item.ItemGPSTool;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.ItemProgrammingPuzzle;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.minigun.Minigun;
@@ -242,14 +243,14 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
     public void onUpdate(){
         if(firstTick) {
             firstTick = false;
-            volume = PneumaticValues.DRONE_VOLUME + getUpgrades(ItemMachineUpgrade.UPGRADE_VOLUME_DAMAGE) * PneumaticValues.VOLUME_VOLUME_UPGRADE;
-            hasLiquidImmunity = getUpgrades(ItemMachineUpgrade.UPGRADE_SECURITY) > 0;
+            volume = PneumaticValues.DRONE_VOLUME + getUpgrades(EnumUpgrade.VOLUME) * PneumaticValues.VOLUME_VOLUME_UPGRADE;
+            hasLiquidImmunity = getUpgrades(EnumUpgrade.SECURITY) > 0;
             if(hasLiquidImmunity) {
                 ((EntityPathNavigateDrone)getPathNavigator()).pathThroughLiquid = true;
             }
-            speed = 0.1 + Math.min(10, getUpgrades(ItemMachineUpgrade.UPGRADE_SPEED_DAMAGE)) * 0.01;
-            lifeUpgrades = getUpgrades(ItemMachineUpgrade.UPGRADE_ITEM_LIFE);
-            if(!worldObj.isRemote) setHasMinigun(getUpgrades(ItemMachineUpgrade.UPGRADE_ENTITY_TRACKER) > 0);
+            speed = 0.1 + Math.min(10, getUpgrades(EnumUpgrade.SPEED)) * 0.01;
+            lifeUpgrades = getUpgrades(EnumUpgrade.ITEM_LIFE);
+            if(!worldObj.isRemote) setHasMinigun(getUpgrades(EnumUpgrade.ENTITY_TRACKER) > 0);
             aiManager.setWidgets(progWidgets);
         }
         boolean enabled = !disabledByHacking && getPressure(null) > 0.01F;
@@ -773,7 +774,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
                 }
             }
 
-            inventory = new InventoryDrone("Drone Inventory", true, 1 + getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE));
+            inventory = new InventoryDrone("Drone Inventory", true, 1 + getUpgrades(EnumUpgrade.DISPENSER));
             for(int i = 0; i < tagList.tagCount(); ++i) {
                 NBTTagCompound tagCompound = tagList.getCompoundTagAt(i);
                 byte slot = tagCompound.getByte("Slot");
@@ -783,7 +784,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
             }
         }
 
-        tank.setCapacity(PneumaticValues.DRONE_TANK_SIZE * (1 + getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE)));
+        tank.setCapacity(PneumaticValues.DRONE_TANK_SIZE * (1 + getUpgrades(EnumUpgrade.DISPENSER)));
         tank.readFromNBT(tag);
 
         if(tag.hasKey("amadronOffer")) {
@@ -828,11 +829,15 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
         }
     }
 
+    private int getUpgrades(EnumUpgrade upgrade){
+        return getUpgrades(Itemss.upgrades.get(upgrade));
+    }
+
     @Override
-    public int getUpgrades(int upgradeDamage){
+    public int getUpgrades(Item upgrade){
         int upgrades = 0;
         for(ItemStack stack : upgradeInventory) {
-            if(stack != null && stack.getItem() == Itemss.machineUpgrade && stack.getItemDamage() == upgradeDamage) {
+            if(stack != null && stack.getItem() == upgrade) {
                 upgrades += stack.stackSize;
             }
         }

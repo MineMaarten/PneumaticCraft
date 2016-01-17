@@ -13,8 +13,8 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.util.IOHelper;
@@ -30,7 +30,12 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
     protected boolean leaveMaterial;//leave items/liquids (used as filter)
 
     public TileEntityOmnidirectionalHopper(){
-        setUpgradeSlots(5, 6, 7, 8);
+        this(5, 6, 7, 8);
+    }
+
+    public TileEntityOmnidirectionalHopper(int... upgradeSlots){
+        super(upgradeSlots);
+        addApplicableUpgrade(EnumUpgrade.SPEED);
     }
 
     protected int getInvSize(){
@@ -142,7 +147,7 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
     }
 
     public int getMaxItems(){
-        int upgrades = getUpgrades(ItemMachineUpgrade.UPGRADE_SPEED_DAMAGE, getUpgradeSlots());
+        int upgrades = getUpgrades(EnumUpgrade.SPEED);
         if(upgrades > 3) {
             return Math.min((int)Math.pow(2, upgrades - 3), 256);
         } else {
@@ -151,7 +156,7 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
     }
 
     public int getItemTransferInterval(){
-        return 8 / (int)Math.pow(2, getUpgrades(ItemMachineUpgrade.UPGRADE_SPEED_DAMAGE, getUpgradeSlots()));
+        return 8 / (int)Math.pow(2, getUpgrades(EnumUpgrade.SPEED));
     }
 
     public void setDirection(EnumFacing dir){

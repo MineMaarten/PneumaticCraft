@@ -8,14 +8,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import pneumaticCraft.api.client.pneumaticHelmet.IUpgradeRenderHandler;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.item.IPressurizable;
 import pneumaticCraft.client.gui.widget.GuiAnimatedStat;
 import pneumaticCraft.client.render.pneumaticArmor.UpgradeRenderHandlerList;
 import pneumaticCraft.common.CommonHUDHandler;
 import pneumaticCraft.common.inventory.ContainerChargingStationItemInventory;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.ItemPneumaticArmor;
 import pneumaticCraft.common.item.Itemss;
+import pneumaticCraft.common.recipes.CraftingRegistrator;
 import pneumaticCraft.common.tileentity.TileEntityChargingStation;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.PneumaticValues;
@@ -35,13 +36,13 @@ public class GuiPneumaticHelmet extends GuiPneumaticInventoryItem{
         addAnimatedStat("gui.tab.info", Textures.GUI_INFO_LOCATION, 0xFF8888FF, true).setText("gui.tab.info.item.pneumaticHelmet");
         statusStat = addAnimatedStat("Helmet Status", new ItemStack(Itemss.pneumaticHelmet), 0xFFFFAA00, false);
 
-        ItemStack searchUpgradeStat = new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_SEARCH_DAMAGE);
+        ItemStack searchUpgradeStat = CraftingRegistrator.getUpgrade(EnumUpgrade.SEARCH);
         addAnimatedStat(searchUpgradeStat.getDisplayName(), searchUpgradeStat, 0xFF0000FF, false).setText("gui.tab.info.item.pneumaticHelmet.searchUpgrade");
-        ItemStack coordinateTracker = new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_COORDINATE_TRACKER_DAMAGE);
+        ItemStack coordinateTracker = CraftingRegistrator.getUpgrade(EnumUpgrade.COORDINATE_TRACKER);
         addAnimatedStat(coordinateTracker.getDisplayName(), coordinateTracker, 0xFF0000FF, false).setText("gui.tab.info.item.pneumaticHelmet.coordinateTracker");
-        ItemStack entityTracker = new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_ENTITY_TRACKER);
+        ItemStack entityTracker = CraftingRegistrator.getUpgrade(EnumUpgrade.ENTITY_TRACKER);
         addAnimatedStat(entityTracker.getDisplayName(), entityTracker, 0xFF0000FF, true).setText("gui.tab.info.item.pneumaticHelmet.entityTracker");
-        ItemStack blockTracker = new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_BLOCK_TRACKER);
+        ItemStack blockTracker = CraftingRegistrator.getUpgrade(EnumUpgrade.BLOCK_TRACKER);
         addAnimatedStat(blockTracker.getDisplayName(), blockTracker, 0xFF0000FF, true).setText("gui.tab.info.item.pneumaticHelmet.blockTracker");
     }
 
@@ -74,7 +75,7 @@ public class GuiPneumaticHelmet extends GuiPneumaticInventoryItem{
             text.add(EnumChatFormatting.BLACK + "0.0 mL/tick");
         }
         text.add("\u00a77Estimated time remaining:");
-        int volume = ItemPneumaticArmor.getUpgrades(ItemMachineUpgrade.UPGRADE_VOLUME_DAMAGE, te.getStackInSlot(TileEntityChargingStation.CHARGE_INVENTORY_INDEX)) * PneumaticValues.VOLUME_VOLUME_UPGRADE + getDefaultVolume();
+        int volume = ItemPneumaticArmor.getUpgrades(EnumUpgrade.VOLUME, te.getStackInSlot(TileEntityChargingStation.CHARGE_INVENTORY_INDEX)) * PneumaticValues.VOLUME_VOLUME_UPGRADE + getDefaultVolume();
         int airLeft = (int)(((IPressurizable)itemStack.getItem()).getPressure(itemStack) * volume);
         if(totalUsage == 0) {
             if(airLeft > 0) text.add("\u00a70infinite");

@@ -2,24 +2,29 @@ package pneumaticCraft.common.tileentity;
 
 import java.util.List;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import pneumaticCraft.api.tileentity.IManoMeasurable;
-import pneumaticCraft.common.network.DescSynced;
+import pneumaticCraft.common.block.BlockPressureChamberWall;
+import pneumaticCraft.common.block.Blockss;
 
 public class TileEntityPressureChamberWall extends TileEntityBase implements IManoMeasurable{
 
     protected TileEntityPressureChamberValve teValve;
-    @DescSynced
     private int valveX;
-    @DescSynced
     private int valveY;
-    @DescSynced
     private int valveZ;
 
-    public TileEntityPressureChamberWall(){}
+    public TileEntityPressureChamberWall(){
+        super();
+    }
+
+    public TileEntityPressureChamberWall(int... upgradeSlots){
+        super(upgradeSlots);
+    }
 
     public TileEntityPressureChamberValve getCore(){
         if(teValve == null && (valveX != 0 || valveY != 0 || valveZ != 0)) {// when the saved TE equals null, check if we can
@@ -51,7 +56,15 @@ public class TileEntityPressureChamberWall extends TileEntityBase implements IMa
                 valveZ = 0;
             }
         }
+        boolean hasChanged = teValve != te;
         teValve = te;
+        if(hasChanged && !worldObj.isRemote) {
+            IBlockState curState = worldObj.getBlockState(getPos());
+            if(curState.getBlock() == Blockss.pressureChamberWall) {
+                IBlockState newState = ((BlockPressureChamberWall)Blockss.pressureChamberWall).updateState(curState, worldObj, getPos());
+                worldObj.setBlockState(getPos(), newState, 2);
+            }
+        }
     }
 
     @Override

@@ -14,7 +14,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.common.tileentity.TileEntityChargingStation;
 import pneumaticCraft.lib.BBConstants;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
@@ -28,7 +28,7 @@ public class BlockChargingStation extends BlockPneumaticCraftModeled{
 
     @Override
     public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos){
-        if(((TileEntityChargingStation)world.getTileEntity(pos)).getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0) {
+        if(((TileEntityChargingStation)world.getTileEntity(pos)).getUpgrades(EnumUpgrade.DISPENSER) > 0) {
             setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
         } else {
             setBlockBounds(BBConstants.CHARGING_STATION_MIN_POS, 0F, BBConstants.CHARGING_STATION_MIN_POS, BBConstants.CHARGING_STATION_MAX_POS, BBConstants.CHARGING_STATION_MAX_POS_TOP, BBConstants.CHARGING_STATION_MAX_POS);

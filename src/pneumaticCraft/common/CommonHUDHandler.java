@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -14,10 +15,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableBlock;
 import pneumaticCraft.api.client.pneumaticHelmet.IHackableEntity;
+import pneumaticCraft.api.client.pneumaticHelmet.IUpgradeRenderHandler;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.item.IPressurizable;
 import pneumaticCraft.client.render.pneumaticArmor.UpgradeRenderHandlerList;
 import pneumaticCraft.client.render.pneumaticArmor.hacking.HackableHandler;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.ItemPneumaticArmor;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.NetworkHandler;
@@ -108,12 +110,26 @@ public class CommonHUDHandler{
 
     public void checkHelmetInventory(ItemStack helmetStack){
         ItemStack[] helmetStacks = ItemPneumaticArmor.getUpgradeStacks(helmetStack);
-        rangeUpgradesInstalled = ItemPneumaticArmor.getUpgrades(ItemMachineUpgrade.UPGRADE_RANGE, helmetStack);
-        speedUpgradesInstalled = ItemPneumaticArmor.getUpgrades(ItemMachineUpgrade.UPGRADE_SPEED_DAMAGE, helmetStack);
+        rangeUpgradesInstalled = ItemPneumaticArmor.getUpgrades(EnumUpgrade.RANGE, helmetStack);
+        speedUpgradesInstalled = ItemPneumaticArmor.getUpgrades(EnumUpgrade.SPEED, helmetStack);
         upgradeRenderersInserted = new boolean[UpgradeRenderHandlerList.instance().upgradeRenderers.size()];
         for(int i = 0; i < UpgradeRenderHandlerList.instance().upgradeRenderers.size(); i++) {
-            upgradeRenderersInserted[i] = UpgradeRenderHandlerList.instance().upgradeRenderers.get(i).isEnabled(helmetStacks);
+            upgradeRenderersInserted[i] = isModuleEnabled(helmetStacks, UpgradeRenderHandlerList.instance().upgradeRenderers.get(i));
         }
+    }
+
+    private boolean isModuleEnabled(ItemStack[] helmetStacks, IUpgradeRenderHandler handler){
+        for(Item requiredUpgrade : handler.getRequiredUpgrades()) {
+            boolean found = false;
+            for(ItemStack stack : helmetStacks) {
+                if(stack != null && stack.getItem() == requiredUpgrade) {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) return false;
+        }
+        return true;
     }
 
     public int getSpeedFromUpgrades(){

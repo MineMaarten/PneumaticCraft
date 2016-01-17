@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
@@ -16,6 +17,12 @@ public interface IBlockAndCoordinatePollSensor{
      * @return
      */
     public String getSensorPath();
+
+    /**
+     * See {@link ISensorSetting#getRequiredUpgrades()}
+     * @return
+     */
+    public Set<Item> getRequiredUpgrades();
 
     /**
      * See {@link ISensorSetting#needsTextBox()}

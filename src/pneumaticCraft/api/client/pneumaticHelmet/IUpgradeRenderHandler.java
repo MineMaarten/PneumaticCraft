@@ -1,7 +1,7 @@
 package pneumaticCraft.api.client.pneumaticHelmet;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.Item;
 import net.minecraftforge.common.config.Configuration;
 import pneumaticCraft.api.client.IGuiAnimatedStat;
 
@@ -62,11 +62,10 @@ public interface IUpgradeRenderHandler{
     public IGuiAnimatedStat getAnimatedStat();
 
     /**
-     * Should return true if this upgrade handler is enabled for the given stacks placed in the helmet.
-     * @param upgradeStacks
+     * Should return the upgrades that are required to be in the helmet to enable this module.
      * @return
      */
-    public boolean isEnabled(ItemStack[] upgradeStacks);
+    public Item[] getRequiredUpgrades();
 
     /**
      * Returns the usage in mL/tick when this upgrade handler is enabled.

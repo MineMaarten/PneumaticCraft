@@ -53,8 +53,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 import pneumaticCraft.api.item.IInventoryItem;
-import pneumaticCraft.common.PneumaticCraftAPIHandler;
 import pneumaticCraft.common.entity.living.EntityDrone;
+import pneumaticCraft.common.item.ItemRegistry;
 import pneumaticCraft.common.thirdparty.ModInteractionUtils;
 import pneumaticCraft.common.tileentity.TileEntitySecurityStation;
 import pneumaticCraft.lib.Log;
@@ -378,7 +378,7 @@ public class PneumaticCraftUtils{
                 inventoryItemBlacklist.add(item.getItem());
             }
         } else {
-            Iterator<IInventoryItem> iterator = PneumaticCraftAPIHandler.getInstance().inventoryItems.iterator();
+            Iterator<IInventoryItem> iterator = ItemRegistry.getInstance().inventoryItems.iterator();
             while(iterator.hasNext()) {
                 try {
                     iterator.next().getStacksInItem(item, items);

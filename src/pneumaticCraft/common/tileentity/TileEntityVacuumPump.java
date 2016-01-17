@@ -17,10 +17,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.tuple.Pair;
 
 import pneumaticCraft.api.PneumaticRegistry;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.api.tileentity.IManoMeasurable;
 import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
@@ -46,21 +46,9 @@ public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IIn
     public static final int INVENTORY_SIZE = 4;
 
     public TileEntityVacuumPump(){
-        super(PneumaticValues.DANGER_PRESSURE_VACUUM_PUMP, PneumaticValues.MAX_PRESSURE_VACUUM_PUMP, PneumaticValues.VOLUME_VACUUM_PUMP);
-        setUpgradeSlots(new int[]{UPGRADE_SLOT_1, 1, 2, UPGRADE_SLOT_4});
-    }
-
-    @Override
-    public boolean isConnectedTo(EnumFacing side){
-        switch(getRotation()){
-            case NORTH:
-            case SOUTH:
-                return side == EnumFacing.NORTH || side == EnumFacing.SOUTH;
-            case EAST:
-            case WEST:
-                return side == EnumFacing.EAST || side == EnumFacing.WEST;
-        }
-        return false;
+        super(PneumaticValues.DANGER_PRESSURE_VACUUM_PUMP, PneumaticValues.MAX_PRESSURE_VACUUM_PUMP, PneumaticValues.VOLUME_VACUUM_PUMP, UPGRADE_SLOT_1, 1, 2, UPGRADE_SLOT_4);
+        vacuumHandler.setUpgradeSlots(PneumaticValues.VOLUME_VACUUM_PUMP, UPGRADE_SLOT_1, 1, 2, UPGRADE_SLOT_4);
+        addApplicableUpgrade(EnumUpgrade.SPEED);
     }
 
     @Override
@@ -101,8 +89,8 @@ public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IIn
             if(!worldObj.isRemote && turnTimer == -1) {
                 turning = true;
             }
-            getAirHandler(getVacuumSide()).addAir((int)(-PneumaticValues.PRODUCTION_VACUUM_PUMP * getSpeedMultiplierFromUpgrades(getUpgradeSlots()))); // negative because it's pulling a vacuum.
-            getAirHandler(getInputSide()).addAir((int)(-PneumaticValues.USAGE_VACUUM_PUMP * getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots())));
+            getAirHandler(getVacuumSide()).addAir((int)(-PneumaticValues.PRODUCTION_VACUUM_PUMP * getSpeedMultiplierFromUpgrades())); // negative because it's pulling a vacuum.
+            getAirHandler(getInputSide()).addAir((int)(-PneumaticValues.USAGE_VACUUM_PUMP * getSpeedUsageMultiplierFromUpgrades()));
             turnTimer = 40;
         }
         if(turnTimer == 0) {
@@ -259,7 +247,7 @@ public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IIn
 
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack){
-        return itemstack.getItem() == Itemss.machineUpgrade;
+        return canInsertUpgrade(i, itemstack);
     }
 
     @Override

@@ -10,6 +10,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
@@ -24,13 +25,14 @@ import org.lwjgl.opengl.GL12;
 
 import pneumaticCraft.api.client.pneumaticHelmet.IOptionPage;
 import pneumaticCraft.api.client.pneumaticHelmet.IUpgradeRenderHandler;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.client.KeyHandler;
 import pneumaticCraft.client.gui.pneumaticHelmet.GuiSearchUpgradeOptions;
 import pneumaticCraft.client.gui.widget.GuiAnimatedStat;
 import pneumaticCraft.common.config.Config;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.ItemPneumaticArmor;
 import pneumaticCraft.common.item.Itemss;
+import pneumaticCraft.common.recipes.CraftingRegistrator;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.PneumaticValues;
 import pneumaticCraft.lib.Textures;
@@ -156,11 +158,8 @@ public class SearchUpgradeHandler implements IUpgradeRenderHandler{
     }
 
     @Override
-    public boolean isEnabled(ItemStack[] upgradeStacks){
-        for(ItemStack stack : upgradeStacks) {
-            if(stack != null && stack.getItem() == Itemss.machineUpgrade && stack.getItemDamage() == ItemMachineUpgrade.UPGRADE_SEARCH_DAMAGE) return true;
-        }
-        return false;
+    public Item[] getRequiredUpgrades(){
+        return new Item[]{Itemss.upgrades.get(EnumUpgrade.SEARCH)};
     }
 
     /**
@@ -225,7 +224,7 @@ public class SearchUpgradeHandler implements IUpgradeRenderHandler{
         if(searchInfo == null) {
             Minecraft minecraft = Minecraft.getMinecraft();
             ScaledResolution sr = new ScaledResolution(minecraft);
-            searchInfo = new GuiAnimatedStat(null, "Currently searching for:", new ItemStack(Itemss.machineUpgrade, 1, ItemMachineUpgrade.UPGRADE_SEARCH_DAMAGE), statX != -1 ? statX : sr.getScaledWidth() - 2, statY, 0x3000AA00, null, statLeftSided);
+            searchInfo = new GuiAnimatedStat(null, "Currently searching for:", CraftingRegistrator.getUpgrade(EnumUpgrade.SEARCH), statX != -1 ? statX : sr.getScaledWidth() - 2, statY, 0x3000AA00, null, statLeftSided);
             searchInfo.setMinDimensionsAndReset(0, 0);
         }
         return searchInfo;

@@ -1,100 +1,95 @@
 package pneumaticCraft.common.block;
 
-import java.util.List;
-
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.IStringSerializable;
 import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.common.tileentity.TileEntityPressureChamberValve;
 import pneumaticCraft.common.tileentity.TileEntityPressureChamberWall;
 
-public class BlockPressureChamberWall extends BlockPneumaticCraft{
-    private static final PropertyBool GLASS = PropertyBool.create("glass");
+public class BlockPressureChamberWall extends BlockPressureChamberWallBase{
+
+    public enum EnumWallState implements IStringSerializable{
+        NONE, CENTER, XEDGE, ZEDGE, YEDGE, XMIN_YMIN_ZMIN, XMIN_YMIN_ZMAX, XMIN_YMAX_ZMIN, XMIN_YMAX_ZMAX;
+
+        @Override
+        public String getName(){
+            return toString().toLowerCase();
+        }
+    }
+
+    public static final PropertyEnum<EnumWallState> WALL_STATE = PropertyEnum.<EnumWallState> create("wallState", EnumWallState.class);
 
     public BlockPressureChamberWall(Material par2Material){
         super(par2Material);
     }
 
-    private boolean isGlass(IBlockAccess world, BlockPos pos){
-        return world.getBlockState(pos).getBlock() == this && world.getBlockState(pos).getValue(GLASS);
+    @Override
+    protected BlockState createBlockState(){
+        return new BlockState(this, WALL_STATE);
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(IBlockAccess world, BlockPos pos, EnumFacing side){
-        EnumFacing d = side.getOpposite();
-        return !isGlass(world, pos.offset(d)) || !isGlass(world, pos);
+    public int getMetaFromState(IBlockState state){
+        return state.getValue(WALL_STATE).ordinal();
     }
 
     @Override
-    public boolean isOpaqueCube(){
-        return false;
+    public IBlockState getStateFromMeta(int meta){
+        return super.getStateFromMeta(meta).withProperty(WALL_STATE, EnumWallState.values()[meta]);
     }
 
-    @Override
-    protected Class<? extends TileEntity> getTileEntityClass(){
-        return TileEntityPressureChamberWall.class;
-    }
+    public IBlockState updateState(IBlockState state, IBlockAccess world, BlockPos pos){
+        state = super.getExtendedState(state, world, pos);
+        TileEntityPressureChamberWall wall = (TileEntityPressureChamberWall)world.getTileEntity(pos);
+        EnumWallState wallState;
+        if(wall != null) {
+            TileEntityPressureChamberValve core = wall.getCore();
+            if(core != null) {
+                int x = pos.getX();
+                int y = pos.getY();
+                int z = pos.getZ();
+                boolean xMin = x == core.multiBlockX;
+                boolean yMin = y == core.multiBlockY;
+                boolean zMin = z == core.multiBlockZ;
+                boolean xMax = x == core.multiBlockX + core.multiBlockSize - 1;
+                boolean yMax = y == core.multiBlockY + core.multiBlockSize - 1;
+                boolean zMax = z == core.multiBlockZ + core.multiBlockSize - 1;
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void getSubBlocks(Item par1, CreativeTabs par2CreativeTabs, List par3List){
-        for(int var4 = 0; var4 < 2; ++var4) {
-            par3List.add(new ItemStack(this, 1, var4 * 6));
-        }
-    }
-
-    /**
-     * Called when the block is placed in the world.
-     */
-    @Override
-    public void onBlockPlacedBy(World par1World, BlockPos pos, IBlockState state, EntityLivingBase par5EntityLiving, ItemStack iStack){
-        super.onBlockPlacedBy(par1World, pos, state, par5EntityLiving, iStack);
-        TileEntityPressureChamberValve.checkIfProperlyFormed(par1World, pos);
-    }
-
-    @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float par7, float par8, float par9){
-        if(world.isRemote) return true;
-        TileEntity te = world.getTileEntity(pos);
-        if(te instanceof TileEntityPressureChamberWall) {
-            TileEntityPressureChamberValve valve = ((TileEntityPressureChamberWall)te).getCore();
-            if(valve != null) {
-                return valve.getBlockType().onBlockActivated(world, pos, state, player, side, par7, par8, par9);
+                //Corners
+                if(xMin && yMin && zMin || xMax && yMax && zMax) {
+                    wallState = EnumWallState.XMIN_YMIN_ZMIN;
+                } else if(xMin && yMin && zMax || xMax && yMax && zMin) {
+                    wallState = EnumWallState.XMIN_YMIN_ZMAX;
+                } else if(xMin && yMax && zMax || xMax && yMin && zMin) {
+                    wallState = EnumWallState.XMIN_YMAX_ZMAX;
+                } else if(xMin && yMax && zMin || xMax && yMin && zMax) {
+                    wallState = EnumWallState.XMIN_YMAX_ZMIN;
+                }
+                //Edges
+                else if(yMin && xMin || yMax && xMax || yMin && xMax || yMax && xMin) {
+                    wallState = EnumWallState.XEDGE;
+                } else if(yMin && zMin || yMax && zMax || yMin && zMax || yMax && zMin) {
+                    wallState = EnumWallState.ZEDGE;
+                } else if(!yMin && !yMax) {
+                    if(xMin && zMin || xMax && zMax || xMin && zMax || xMax && zMin) {
+                        wallState = EnumWallState.YEDGE;
+                    } else {
+                        wallState = EnumWallState.CENTER;
+                    }
+                } else {
+                    wallState = EnumWallState.CENTER;
+                }
+            } else {
+                wallState = EnumWallState.NONE;
             }
+        } else {
+            wallState = EnumWallState.NONE;
         }
-        return false;
+        state = state.withProperty(WALL_STATE, wallState);
+        return state;
     }
-
-    @Override
-    public void breakBlock(World world, BlockPos pos, IBlockState state){
-        TileEntity te = world.getTileEntity(pos);
-        if(te instanceof TileEntityPressureChamberWall && !world.isRemote) {
-            ((TileEntityPressureChamberWall)te).onBlockBreak();
-        }
-        super.breakBlock(world, pos, state);
-
-    }
-
-    /**
-     * Determines the damage on the item the block drops. Used in cloth and
-     * wood.
-     */
-    @Override
-    public int damageDropped(IBlockState state){
-        return state.getValue(GLASS) ? 6 : 0; //TODO convert to 1 : 0.
-    }
-
 }

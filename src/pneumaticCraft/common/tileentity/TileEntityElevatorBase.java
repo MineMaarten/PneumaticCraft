@@ -23,12 +23,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.api.tileentity.IAirListener;
 import pneumaticCraft.common.block.BlockElevatorBase;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.config.Config;
-import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.network.LazySynced;
@@ -70,8 +70,8 @@ public class TileEntityElevatorBase extends TileEntityPneumaticBase implements I
     public static final int UPGRADE_SLOT_4 = 3;
 
     public TileEntityElevatorBase(){
-        super(PneumaticValues.DANGER_PRESSURE_ELEVATOR, PneumaticValues.MAX_PRESSURE_ELEVATOR, PneumaticValues.VOLUME_ELEVATOR);
-        setUpgradeSlots(new int[]{UPGRADE_SLOT_1, 1, 2, UPGRADE_SLOT_4});
+        super(PneumaticValues.DANGER_PRESSURE_ELEVATOR, PneumaticValues.MAX_PRESSURE_ELEVATOR, PneumaticValues.VOLUME_ELEVATOR, UPGRADE_SLOT_1, 1, 2, UPGRADE_SLOT_4);
+        addApplicableUpgrade(EnumUpgrade.SPEED);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class TileEntityElevatorBase extends TileEntityPneumaticBase implements I
                 if(targetExtension > oldExtension && getPressure() < PneumaticValues.MIN_PRESSURE_ELEVATOR) targetExtension = oldExtension; // only ascent when there's enough pressure
                 if(oldTargetExtension != targetExtension) sendDescPacketFromAllElevators();
             }
-            float speedMultiplier = getSpeedMultiplierFromUpgrades(getUpgradeSlots());
+            float speedMultiplier = getSpeedMultiplierFromUpgrades();
             if(worldObj.isRemote) {
                 speedMultiplier = (float)(speedMultiplier * PacketServerTickTime.tickTimeMultiplier);
             }
@@ -134,7 +134,7 @@ public class TileEntityElevatorBase extends TileEntityPneumaticBase implements I
                     */
                     // moveEntities(TileEntityConstants.ELEVATOR_SPEED_SLOW);
                 }
-                addAir((int)((oldExtension - extension) * PneumaticValues.USAGE_ELEVATOR * (getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots()) / speedMultiplier)));// substract the ascended distance from the air reservoir.
+                addAir((int)((oldExtension - extension) * PneumaticValues.USAGE_ELEVATOR * (getSpeedUsageMultiplierFromUpgrades() / speedMultiplier)));// substract the ascended distance from the air reservoir.
             }
             if(extension > targetExtension) {
                 soundName = Sounds.ELEVATOR_MOVING;
@@ -617,7 +617,7 @@ public class TileEntityElevatorBase extends TileEntityPneumaticBase implements I
 
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack){
-        return itemstack.getItem() == Itemss.machineUpgrade && i < 4 || itemstack.getItem() instanceof ItemBlock && i >= 4;
+        return canInsertUpgrade(i, itemstack) || itemstack.getItem() instanceof ItemBlock && i >= 4;
     }
 
     @Override

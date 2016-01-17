@@ -1,11 +1,13 @@
 package pneumaticCraft.common.sensor.pollSensors;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
@@ -18,15 +20,25 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.lwjgl.util.Rectangle;
 
 import pneumaticCraft.api.heat.IHeatExchangerLogic;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 import pneumaticCraft.api.universalSensor.IBlockAndCoordinatePollSensor;
+import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.tileentity.TileEntityCompressedIronBlock;
 
 public class BlockHeatSensor implements IBlockAndCoordinatePollSensor{
 
     @Override
     public String getSensorPath(){
-        return "blockTracker_gpsTool/Block/Heat";
+        return "Block/Heat";
+    }
+
+    @Override
+    public Set<Item> getRequiredUpgrades(){
+        Set<Item> upgrades = new HashSet<Item>();
+        upgrades.add(Itemss.upgrades.get(EnumUpgrade.BLOCK_TRACKER));
+        upgrades.add(Itemss.GPSTool);
+        return upgrades;
     }
 
     @Override

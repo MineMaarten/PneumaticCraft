@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -24,6 +25,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.api.universalSensor.IEventSensorSetting;
 import pneumaticCraft.api.universalSensor.IPollSensorSetting;
@@ -32,7 +34,6 @@ import pneumaticCraft.client.gui.GuiUniversalSensor;
 import pneumaticCraft.client.render.RenderRangeLines;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.item.ItemGPSTool;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
@@ -79,8 +80,10 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
     //  private final List<IComputerAccess> attachedComputers = new ArrayList<IComputerAccess>(); //keep track of the computers so we can raise a os.pullevent.
 
     public TileEntityUniversalSensor(){
-        super(PneumaticValues.DANGER_PRESSURE_UNIVERSAL_SENSOR, PneumaticValues.MAX_PRESSURE_UNIVERSAL_SENSOR, PneumaticValues.VOLUME_UNIVERSAL_SENSOR);
-        setUpgradeSlots(new int[]{UPGRADE_SLOT_1, 1, 2, UPGRADE_SLOT_4});
+        super(PneumaticValues.DANGER_PRESSURE_UNIVERSAL_SENSOR, PneumaticValues.MAX_PRESSURE_UNIVERSAL_SENSOR, PneumaticValues.VOLUME_UNIVERSAL_SENSOR, UPGRADE_SLOT_1, 1, 2, UPGRADE_SLOT_4);
+        for(Item upgrade : SensorHandler.getInstance().getUniversalSensorUpgrades()) {
+            addApplicableUpgrade(upgrade);
+        }
     }
 
     @Override
@@ -189,7 +192,7 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
     }
 
     public int getRange(){
-        return getUpgrades(ItemMachineUpgrade.UPGRADE_RANGE, getUpgradeSlots()) + 2;
+        return getUpgrades(EnumUpgrade.RANGE) + 2;
     }
 
     public void setSensorSetting(String sensorPath){
@@ -203,7 +206,7 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
     }
 
     private boolean setSensorSetting(ISensorSetting sensor){
-        if(areGivenUpgradesInserted(SensorHandler.getInstance().getRequiredStacksFromText(sensor.getSensorPath()))) {
+        if(areGivenUpgradesInserted(sensor.getRequiredUpgrades())) {
             setSensorSetting(sensor.getSensorPath());
             return true;
         } else {
@@ -286,16 +289,10 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
         }
     }
 
-    public boolean areGivenUpgradesInserted(ItemStack[] requiredStacks){
-        for(ItemStack requiredStack : requiredStacks) {
-            if(requiredStack.getItem() != Itemss.GPSTool) {
-                if(getUpgrades(requiredStack.getItemDamage(), getUpgradeSlots()) <= 0) {
-                    return false;
-                }
-            } else {
-                if(getUpgrades(-1, getUpgradeSlots()) <= 0) {
-                    return false;
-                }
+    public boolean areGivenUpgradesInserted(Set<Item> requiredItems){
+        for(Item requiredItem : requiredItems) {
+            if(getUpgrades(requiredItem) == 0) {
+                return false;
             }
         }
         return true;
@@ -313,27 +310,6 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
 
     // INVENTORY METHODS- && NBT
     // ------------------------------------------------------------
-
-    /**
-     * We need to override this, as we need to add the GPS Tool to the mapping.
-     */
-    @Override
-    protected int getUpgrades(int upgradeDamage, int... upgradeSlots){
-        int upgrades = 0;
-        if(this instanceof IInventory) {// this always should be true.
-            IInventory inv = this;
-            for(int i : upgradeSlots) {
-                if(inv.getStackInSlot(i) != null) {
-                    if(inv.getStackInSlot(i).getItem() == Itemss.machineUpgrade && inv.getStackInSlot(i).getItemDamage() == upgradeDamage) {
-                        upgrades += inv.getStackInSlot(i).stackSize;
-                    } else if(upgradeDamage == -1 && inv.getStackInSlot(i).getItem() == Itemss.GPSTool) {
-                        upgrades += inv.getStackInSlot(i).stackSize;
-                    }
-                }
-            }
-        }
-        return upgrades;
-    }
 
     /**
      * Returns the number of slots in the inventory.
@@ -443,7 +419,7 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
 
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack){
-        return itemstack.getItem() == Itemss.machineUpgrade;
+        return canInsertUpgrade(i, itemstack);
     }
 
     @Override
@@ -660,4 +636,5 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
     public float getMinWorkingPressure(){
         return PneumaticValues.MIN_PRESSURE_UNIVERSAL_SENSOR;
     }
+
 }

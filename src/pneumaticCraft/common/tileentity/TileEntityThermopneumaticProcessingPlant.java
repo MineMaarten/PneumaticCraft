@@ -16,11 +16,10 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.api.heat.IHeatExchangerLogic;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.recipe.IThermopneumaticProcessingPlantRecipe;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
-import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.recipes.PneumaticRecipeRegistry;
@@ -51,9 +50,9 @@ public class TileEntityThermopneumaticProcessingPlant extends TileEntityPneumati
     private static final int CRAFTING_TIME = 60;
 
     public TileEntityThermopneumaticProcessingPlant(){
-        super(5, 7, 3000);
+        super(5, 7, 3000, 0, 1, 2, 3);
         heatExchanger.setThermalResistance(10);
-        setUpgradeSlots(0, 1, 2, 3);
+
     }
 
     @Override
@@ -87,7 +86,7 @@ public class TileEntityThermopneumaticProcessingPlant extends TileEntityPneumati
                 requiredTemperature = 273;
                 requiredPressure = 0;
             }
-            if(getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) > 0) {
+            if(getUpgrades(EnumUpgrade.DISPENSER) > 0) {
                 autoExportLiquid();
             }
         }
@@ -262,7 +261,7 @@ public class TileEntityThermopneumaticProcessingPlant extends TileEntityPneumati
 
     @Override
     public boolean isItemValidForSlot(int par1, ItemStack stack){
-        return par1 == 4 || stack != null && stack.getItem() == Itemss.machineUpgrade;
+        return par1 == 4 || canInsertUpgrade(par1, stack);
     }
 
     @Override

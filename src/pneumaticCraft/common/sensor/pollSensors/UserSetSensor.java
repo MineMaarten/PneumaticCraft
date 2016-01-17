@@ -1,9 +1,12 @@
 package pneumaticCraft.common.sensor.pollSensors;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
@@ -12,13 +15,22 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.util.Rectangle;
 
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.universalSensor.IPollSensorSetting;
+import pneumaticCraft.common.item.Itemss;
 
 public class UserSetSensor implements IPollSensorSetting{
 
     @Override
     public String getSensorPath(){
-        return "dispenser/Constant";
+        return "Constant";
+    }
+
+    @Override
+    public Set<Item> getRequiredUpgrades(){
+        Set<Item> upgrades = new HashSet<Item>();
+        upgrades.add(Itemss.upgrades.get(EnumUpgrade.DISPENSER));
+        return upgrades;
     }
 
     @Override

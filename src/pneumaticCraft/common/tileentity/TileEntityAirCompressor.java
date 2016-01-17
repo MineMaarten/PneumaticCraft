@@ -18,9 +18,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.lib.PneumaticValues;
@@ -53,9 +53,9 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
     }
 
     public TileEntityAirCompressor(float dangerPressure, float criticalPressure, int volume){
-        super(dangerPressure, criticalPressure, volume);
+        super(dangerPressure, criticalPressure, volume, UPGRADE_SLOT_START, 2, 3, UPGRADE_SLOT_END);
         inventory = new ItemStack[INVENTORY_SIZE];
-        setUpgradeSlots(new int[]{UPGRADE_SLOT_START, 2, 3, UPGRADE_SLOT_END});
+        addApplicableUpgrade(EnumUpgrade.SPEED);
     }
 
     @Override
@@ -72,11 +72,11 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
 
             }
 
-            curFuelUsage = (int)(getBaseProduction() * getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots()) / 10);
+            curFuelUsage = (int)(getBaseProduction() * getSpeedUsageMultiplierFromUpgrades() / 10);
             if(burnTime >= curFuelUsage) {
                 burnTime -= curFuelUsage;
                 if(!worldObj.isRemote) {
-                    addAir((int)(getBaseProduction() * getSpeedMultiplierFromUpgrades(getUpgradeSlots()) * getEfficiency() / 100D));
+                    addAir((int)(getBaseProduction() * getSpeedMultiplierFromUpgrades() * getEfficiency() / 100D));
                     onFuelBurn(curFuelUsage);
                 }
             }
@@ -278,7 +278,7 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
 
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack){
-        return i == 0 || itemstack != null && itemstack.getItem() == Itemss.machineUpgrade;
+        return i == 0 && TileEntityFurnace.isItemFuel(itemstack) || canInsertUpgrade(i, itemstack);
     }
 
     @Override

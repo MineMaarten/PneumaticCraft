@@ -23,6 +23,7 @@ public class ContainerPneumaticBase<Tile extends TileEntityBase> extends Contain
     public Tile te;
     private final List<SyncedField> syncedFields = new ArrayList<SyncedField>();
     private boolean firstTick = true;
+    private int playerSlotsStart;
 
     public ContainerPneumaticBase(Tile te){
         this.te = te;
@@ -62,11 +63,73 @@ public class ContainerPneumaticBase<Tile extends TileEntityBase> extends Contain
     }
 
     protected void sendToCrafters(IMessage message){
-        for(ICrafting crafter : (List<ICrafting>)crafters) {
+        for(ICrafting crafter : crafters) {
             if(crafter instanceof EntityPlayerMP) {
                 NetworkHandler.sendTo(message, (EntityPlayerMP)crafter);
             }
         }
+    }
+
+    protected void addPlayerSlots(InventoryPlayer inventoryPlayer, int yOffset){
+        playerSlotsStart = inventorySlots.size();
+
+        // Add the player's inventory slots to the container
+        for(int inventoryRowIndex = 0; inventoryRowIndex < 3; ++inventoryRowIndex) {
+            for(int inventoryColumnIndex = 0; inventoryColumnIndex < 9; ++inventoryColumnIndex) {
+                addSlotToContainer(new Slot(inventoryPlayer, inventoryColumnIndex + inventoryRowIndex * 9 + 9, 8 + inventoryColumnIndex * 18, yOffset + inventoryRowIndex * 18));
+            }
+        }
+
+        // Add the player's action bar slots to the container
+        for(int actionBarSlotIndex = 0; actionBarSlotIndex < 9; ++actionBarSlotIndex) {
+            addSlotToContainer(new Slot(inventoryPlayer, actionBarSlotIndex, 8 + actionBarSlotIndex * 18, yOffset + 58));
+        }
+    }
+
+    @Override
+    public ItemStack transferStackInSlot(EntityPlayer par1EntityPlayer, int par2){
+
+        ItemStack var3 = null;
+        Slot var4 = inventorySlots.get(par2);
+
+        if(var4 != null && var4.getHasStack()) {
+            ItemStack var5 = var4.getStack();
+            var3 = var5.copy();
+
+            if(par2 < playerSlotsStart) {
+                if(!mergeItemStack(var5, playerSlotsStart, playerSlotsStart + 36, false)) return null;
+
+                var4.onSlotChange(var5, var3);
+            } else {
+                /* int validStartSlot = -1; Unncessary, as Forge now adds respect to slot.isItemValid to mergeItemStack
+                 for(int i = 0; i < playerSlotsStart; i++) {
+                     boolean slotValid = inventorySlots.get(i).isItemValid(var5);
+                     if(slotValid && validStartSlot == -1) {
+                         validStartSlot = i;
+                     } else if(!slotValid && validStartSlot >= 0) {
+                         if(!mergeItemStack(var5, validStartSlot, i, false)) return null;
+                         validStartSlot = -1;
+                     }
+                 }
+                 if(validStartSlot >= 0) {
+                     if(!mergeItemStack(var5, validStartSlot, playerSlotsStart, false)) return null;
+                 }*/
+                if(!mergeItemStack(var5, 0, playerSlotsStart, false)) return null;
+                var4.onSlotChange(var5, var3);
+            }
+
+            if(var5.stackSize == 0) {
+                var4.putStack((ItemStack)null);
+            } else {
+                var4.onSlotChanged();
+            }
+
+            if(var5.stackSize == var3.stackSize) return null;
+
+            var4.onPickupFromSlot(par1EntityPlayer, var5);
+        }
+
+        return var3;
     }
 
     /**

@@ -331,7 +331,7 @@ public class TileEntityPlasticMixer extends TileEntityBase implements IFluidHand
             case INV_DYE_BLUE:
                 return getDyeIndex(itemstack) == 4;
             default:
-                return itemstack.getItem() == Itemss.machineUpgrade;
+                return canInsertUpgrade(i, itemstack);
         }
     }
 

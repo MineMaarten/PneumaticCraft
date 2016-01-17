@@ -8,11 +8,6 @@ public abstract class BlockPneumaticCraftModeled extends BlockPneumaticCraft{
         super(par2Material);
     }
 
-    @Override
-    public int getRenderType(){
-        return 3;//TODO 1.8 PneumaticCraft.proxy.SPECIAL_RENDER_TYPE_VALUE;
-    }
-
     /* @Override
      public boolean renderAsNormalBlock(){
          return false;

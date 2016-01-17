@@ -12,9 +12,9 @@ import net.minecraft.util.EnumFacing;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
@@ -41,8 +41,8 @@ public class TileEntityUVLightBox extends TileEntityPneumaticBase implements ISi
     private boolean oldRedstoneStatus;
 
     public TileEntityUVLightBox(){
-        super(PneumaticValues.DANGER_PRESSURE_UV_LIGHTBOX, PneumaticValues.MAX_PRESSURE_UV_LIGHTBOX, PneumaticValues.VOLUME_UV_LIGHTBOX);
-        setUpgradeSlots(new int[]{UPGRADE_SLOT_START, 2, 3, UPGRADE_SLOT_END});
+        super(PneumaticValues.DANGER_PRESSURE_UV_LIGHTBOX, PneumaticValues.MAX_PRESSURE_UV_LIGHTBOX, PneumaticValues.VOLUME_UV_LIGHTBOX, UPGRADE_SLOT_START, 2, 3, UPGRADE_SLOT_END);
+        addApplicableUpgrade(EnumUpgrade.SPEED);
     }
 
     @Override
@@ -88,8 +88,8 @@ public class TileEntityUVLightBox extends TileEntityPneumaticBase implements ISi
             ticksExisted++;
             if(getPressure() >= PneumaticValues.MIN_PRESSURE_UV_LIGHTBOX && inventory[0] != null && inventory[0].getItem() == Itemss.emptyPCB && inventory[0].getItemDamage() > 0) {
 
-                addAir((int)(-PneumaticValues.USAGE_UV_LIGHTBOX * getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots())));
-                if(ticksExisted % Math.max(1, (int)(TileEntityConstants.LIGHT_BOX_0_100_TIME / (5 * getSpeedMultiplierFromUpgrades(getUpgradeSlots())))) == 0) {
+                addAir((int)(-PneumaticValues.USAGE_UV_LIGHTBOX * getSpeedUsageMultiplierFromUpgrades()));
+                if(ticksExisted % Math.max(1, (int)(TileEntityConstants.LIGHT_BOX_0_100_TIME / (5 * getSpeedMultiplierFromUpgrades()))) == 0) {
                     if(!areLightsOn) {
                         areLightsOn = true;
                         updateNeighbours();
@@ -119,7 +119,7 @@ public class TileEntityUVLightBox extends TileEntityPneumaticBase implements ISi
     }
 
     public int getLightLevel(){
-        return areLightsOn ? Math.min(5, getUpgrades(ItemMachineUpgrade.UPGRADE_SPEED_DAMAGE) * 2) + 10 : 0;
+        return areLightsOn ? Math.min(5, getUpgrades(EnumUpgrade.SPEED) * 2) + 10 : 0;
     }
 
     // used in the air dispersion methods.
@@ -207,7 +207,7 @@ public class TileEntityUVLightBox extends TileEntityPneumaticBase implements ISi
 
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack){
-        return i == 0 || itemstack != null && itemstack.getItem() == Itemss.machineUpgrade;
+        return i == 0 || canInsertUpgrade(i, itemstack);
     }
 
     @Override

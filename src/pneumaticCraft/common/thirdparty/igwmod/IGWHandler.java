@@ -5,6 +5,7 @@ import igwmod.api.WikiRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.entity.living.EntityLogisticsDrone;
@@ -51,7 +52,9 @@ public class IGWHandler{
         WikiRegistry.registerBlockAndItemPageEntry(Blockss.assemblyPlatform, "pneumaticcraft:menu/assemblyMachines");
         WikiRegistry.registerBlockAndItemPageEntry(Itemss.assemblyProgram, "pneumaticcraft:menu/assemblyMachines");
 
-        WikiRegistry.registerBlockAndItemPageEntry(Itemss.machineUpgrade, "pneumaticcraft:menu/machineUpgrades");
+        for(Item upgrade : Itemss.upgrades.values()) {
+            WikiRegistry.registerBlockAndItemPageEntry(upgrade, "pneumaticcraft:menu/machineUpgrades");
+        }
 
         WikiRegistry.registerBlockAndItemPageEntry(Itemss.PCBBlueprint, "pneumaticcraft:menu/printedCircuitBoards");
         WikiRegistry.registerBlockAndItemPageEntry(Itemss.emptyPCB, "pneumaticcraft:menu/printedCircuitBoards");

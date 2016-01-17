@@ -1,12 +1,13 @@
 package pneumaticCraft.client.render.pneumaticArmor;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Configuration;
 import pneumaticCraft.api.client.IGuiAnimatedStat;
 import pneumaticCraft.api.client.pneumaticHelmet.IOptionPage;
 import pneumaticCraft.api.client.pneumaticHelmet.IUpgradeRenderHandler;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.common.item.ItemPneumaticArmor;
 import pneumaticCraft.common.item.Itemss;
 
@@ -19,48 +20,42 @@ public class HackUpgradeRenderHandler implements IUpgradeRenderHandler{
 
     @Override
     public void initConfig(Configuration config){
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void saveToConfig(){
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void update(EntityPlayer player, int rangeUpgrades){
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void render3D(float partialTicks){
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void render2D(float partialTicks, boolean helmetEnabled){
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public IGuiAnimatedStat getAnimatedStat(){
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public boolean isEnabled(ItemStack[] upgradeStacks){
-        return enabledForStacks(upgradeStacks);
+    public Item[] getRequiredUpgrades(){
+        return new Item[]{Itemss.upgrades.get(EnumUpgrade.SECURITY)};
     }
 
     private static boolean enabledForStacks(ItemStack[] upgradeStacks){
         for(ItemStack stack : upgradeStacks) {
-            if(stack != null && stack.getItem() == Itemss.machineUpgrade && stack.getItemDamage() == ItemMachineUpgrade.UPGRADE_SECURITY) return true;
+            if(stack != null && stack.getItem() == Itemss.upgrades.get(EnumUpgrade.SECURITY)) return true;
         }
         return false;
     }
@@ -76,19 +71,16 @@ public class HackUpgradeRenderHandler implements IUpgradeRenderHandler{
 
     @Override
     public float getEnergyUsage(int rangeUpgrades, EntityPlayer player){
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public void reset(){
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public IOptionPage getGuiOptionsPage(){
-        // TODO Auto-generated method stub
         return null;
     }
 

@@ -17,9 +17,9 @@ import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.client.render.RenderRangeLines;
 import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.ItemNetworkComponents;
 import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.network.NetworkHandler;
@@ -54,8 +54,9 @@ public class TileEntitySecurityStation extends TileEntityBase implements ISidedI
     private boolean validNetwork;
 
     public TileEntitySecurityStation(){
+        super(UPGRADE_SLOT_START, 36, 37, UPGRADE_SLOT_END);
         inventory = new ItemStack[INVENTORY_SIZE];
-        setUpgradeSlots(new int[]{UPGRADE_SLOT_START, 36, 37, UPGRADE_SLOT_END});
+        addApplicableUpgrade(EnumUpgrade.ENTITY_TRACKER, EnumUpgrade.SECURITY, EnumUpgrade.RANGE);
     }
 
     @Override
@@ -80,7 +81,7 @@ public class TileEntitySecurityStation extends TileEntityBase implements ISidedI
             updateNeighbours();
         }
 
-        securityRange = Math.min(2 + getUpgrades(ItemMachineUpgrade.UPGRADE_RANGE, getUpgradeSlots()), TileEntityConstants.SECURITY_STATION_MAX_RANGE);
+        securityRange = Math.min(2 + getUpgrades(EnumUpgrade.RANGE), TileEntityConstants.SECURITY_STATION_MAX_RANGE);
 
         super.update();
 
@@ -470,11 +471,11 @@ public class TileEntitySecurityStation extends TileEntityBase implements ISidedI
     }
 
     public int getDetectionChance(){
-        return Math.min(100, 20 + 20 * getUpgrades(ItemMachineUpgrade.UPGRADE_ENTITY_TRACKER, getUpgradeSlots()));
+        return Math.min(100, 20 + 20 * getUpgrades(EnumUpgrade.ENTITY_TRACKER));
     }
 
     public int getSecurityLevel(){
-        return 1 + getUpgrades(ItemMachineUpgrade.UPGRADE_SECURITY, getUpgradeSlots());
+        return 1 + getUpgrades(EnumUpgrade.SECURITY);
     }
 
     @Override

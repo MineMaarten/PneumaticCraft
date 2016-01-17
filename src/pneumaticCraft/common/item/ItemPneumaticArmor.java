@@ -1,6 +1,8 @@
 package pneumaticCraft.common.item;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.creativetab.CreativeTabs;
@@ -17,8 +19,12 @@ import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
+import pneumaticCraft.api.client.pneumaticHelmet.IUpgradeRenderHandler;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.item.IPressurizable;
+import pneumaticCraft.api.item.IUpgradeAcceptor;
 import pneumaticCraft.client.render.pneumaticArmor.RenderCoordWireframe;
+import pneumaticCraft.client.render.pneumaticArmor.UpgradeRenderHandlerList;
 import pneumaticCraft.common.DateEventHandler;
 import pneumaticCraft.common.NBTUtil;
 import pneumaticCraft.common.config.Config;
@@ -28,7 +34,8 @@ import pneumaticCraft.lib.Textures;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
 //TODO 1.8 Thaumcraft dep @Optional.InterfaceList({@Interface(iface = "thaumcraft.api.IRepairable", modid = ModIds.THAUMCRAFT), @Interface(iface = "thaumcraft.api.IGoggles", modid = ModIds.THAUMCRAFT), @Interface(iface = "thaumcraft.api.IVisDiscountGear", modid = ModIds.THAUMCRAFT), @Interface(iface = "thaumcraft.api.nodes.IRevealer", modid = ModIds.THAUMCRAFT)})
-public class ItemPneumaticArmor extends ItemArmor implements IPressurizable, IChargingStationGUIHolderItem/*,
+public class ItemPneumaticArmor extends ItemArmor implements IPressurizable, IChargingStationGUIHolderItem,
+        IUpgradeAcceptor/*,
 IRepairable, IRevealer, IGoggles, IVisDiscountGear*/{
 
     public ItemPneumaticArmor(ItemArmor.ArmorMaterial par2EnumArmorMaterial, int renderIndex, int armorType, int maxAir){
@@ -112,11 +119,15 @@ IRepairable, IRevealer, IGoggles, IVisDiscountGear*/{
         return inventoryStacks;
     }
 
-    public static int getUpgrades(int upgradeDamage, ItemStack iStack){
+    public static int getUpgrades(EnumUpgrade upgrade, ItemStack stack){
+        return getUpgrades(Itemss.upgrades.get(upgrade), stack);
+    }
+
+    public static int getUpgrades(Item upgrade, ItemStack iStack){
         int upgrades = 0;
         ItemStack[] stacks = getUpgradeStacks(iStack);
         for(ItemStack stack : stacks) {
-            if(stack != null && stack.getItem() == Itemss.machineUpgrade && stack.getItemDamage() == upgradeDamage) {
+            if(stack != null && stack.getItem() == upgrade) {
                 upgrades += stack.stackSize;
             }
         }
@@ -162,7 +173,7 @@ IRepairable, IRevealer, IGoggles, IVisDiscountGear*/{
 
     @Override
     public float getPressure(ItemStack iStack){
-        int volume = ItemPneumaticArmor.getUpgrades(ItemMachineUpgrade.UPGRADE_VOLUME_DAMAGE, iStack) * PneumaticValues.VOLUME_VOLUME_UPGRADE + PneumaticValues.PNEUMATIC_HELMET_VOLUME;
+        int volume = ItemPneumaticArmor.getUpgrades(EnumUpgrade.VOLUME, iStack) * PneumaticValues.VOLUME_VOLUME_UPGRADE + PneumaticValues.PNEUMATIC_HELMET_VOLUME;
         int oldVolume = NBTUtil.getInteger(iStack, "volume");
         if(volume < oldVolume) {
             int currentAir = NBTUtil.getInteger(iStack, "air");
@@ -214,6 +225,22 @@ IRepairable, IRevealer, IGoggles, IVisDiscountGear*/{
             return model;*///TODO 1.8 fix
         }
         return null;
+    }
+
+    @Override
+    public Set<Item> getApplicableUpgrades(){
+        Set<Item> items = new HashSet<Item>();
+        for(IUpgradeRenderHandler handler : UpgradeRenderHandlerList.instance().upgradeRenderers) {
+            for(Item requiredItem : handler.getRequiredUpgrades()) {
+                items.add(requiredItem);
+            }
+        }
+        return items;
+    }
+
+    @Override
+    public String getName(){
+        return getUnlocalizedName() + ".name";
     }
 
     /*private boolean hasThaumcraftUpgradeAndPressure(ItemStack stack){

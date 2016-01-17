@@ -18,7 +18,7 @@ public class EntityInRangeSensor extends EntityPollSensor{
 
     @Override
     public String getSensorPath(){
-        return super.getSensorPath() + "/Within Range";
+        return "Within Range";
     }
 
     @Override

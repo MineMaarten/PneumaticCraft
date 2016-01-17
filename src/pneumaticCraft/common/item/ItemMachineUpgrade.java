@@ -1,63 +1,23 @@
 package pneumaticCraft.common.item;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.resources.I18n;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import pneumaticCraft.common.block.Blockss;
-import pneumaticCraft.common.sensor.SensorHandler;
-import pneumaticCraft.lib.ModIds;
+import pneumaticCraft.api.PneumaticRegistry;
 
 public class ItemMachineUpgrade extends ItemPneumatic{
-    public static final int UPGRADES_AMOUNT = 11;
-
-    public static final int UPGRADE_VOLUME_DAMAGE = 0;
-    public static final int UPGRADE_DISPENSER_DAMAGE = 1;
-    public static final int UPGRADE_ITEM_LIFE = 2;
-    public static final int UPGRADE_ENTITY_TRACKER = 3;
-    public static final int UPGRADE_BLOCK_TRACKER = 4;
-    public static final int UPGRADE_SPEED_DAMAGE = 5;
-    public static final int UPGRADE_SEARCH_DAMAGE = 6;
-    public static final int UPGRADE_COORDINATE_TRACKER_DAMAGE = 7;
-    public static final int UPGRADE_RANGE = 8;
-    public static final int UPGRADE_SECURITY = 9;
-    public static final int UPGRADE_THAUMCRAFT = 10;
-
-    public ItemMachineUpgrade(){
-        setHasSubtypes(true);
-    }
-
-    @Override
-    public String getUnlocalizedName(ItemStack stack){
-        return super.getUnlocalizedName(stack) + stack.getItemDamage();
-    }
-
-    @Override
-    public int getMetadata(int meta){
-        return meta;
-    }
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void getSubItems(Item par1, CreativeTabs tab, List subItems){
-        for(int i = 0; i < UPGRADES_AMOUNT; i++) {
-            if(i != UPGRADE_THAUMCRAFT || Loader.isModLoaded(ModIds.THAUMCRAFT)) subItems.add(new ItemStack(this, 1, i));
-        }
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void addInformation(ItemStack stack, EntityPlayer player, List infoList, boolean par4){
+    public void addInformation(ItemStack stack, EntityPlayer player, List<String> infoList, boolean par4){
         infoList.add("Used in:");
 
-        List<String> unlocalized = new ArrayList<String>();
+        PneumaticRegistry.getInstance().getItemRegistry().addTooltip(this, infoList);
+
+        /*List<String> unlocalized = new ArrayList<String>();
         SensorHandler.getInstance().addMachineUpgradeInfo(unlocalized, stack.getItemDamage());
         switch(stack.getItemDamage()){
             case 0:
@@ -93,34 +53,34 @@ public class ItemMachineUpgrade extends ItemPneumatic{
                  infoList.add("-" + Names.VACUUM_PUMP);
                  infoList.add("-" + Names.ASSEMBLY_CONTROLLER);
                  infoList.add("-" + Names.UV_LIGHT_BOX);*/
-                break;
-            case 8:
-                unlocalized.add(Blockss.securityStation.getUnlocalizedName());
-                unlocalized.add(Blockss.airCannon.getUnlocalizedName());
-                unlocalized.add(Itemss.pneumaticHelmet.getUnlocalizedName());
-                unlocalized.add(Blockss.universalSensor.getUnlocalizedName());
-                break;
-            case 9:
-                infoList.add("All pneumatic machines");
-                /*infoList.add("-" + Names.SECURITY_STATION);
-                infoList.add("-" + Names.PNEUMATIC_HELMET);
-                infoList.add("-" + Names.AIR_CANNON);
-                infoList.add("-" + Names.AIR_COMPRESSOR);
-                infoList.add("-" + Names.CHARGING_STATION);
-                infoList.add("-" + Names.ELEVATOR);
-                infoList.add("-" + Names.PRESSURE_CHAMBER);
-                infoList.add("-" + Names.VACUUM_PUMP);
-                infoList.add("-" + Names.ASSEMBLY_CONTROLLER);
-                infoList.add("-" + Names.UV_LIGHT_BOX);*/
-                break;
-            case 10:
-                unlocalized.add(Itemss.pneumaticHelmet.getUnlocalizedName());
-                break;
+        /*       break;
+           case 8:
+               unlocalized.add(Blockss.securityStation.getUnlocalizedName());
+               unlocalized.add(Blockss.airCannon.getUnlocalizedName());
+               unlocalized.add(Itemss.pneumaticHelmet.getUnlocalizedName());
+               unlocalized.add(Blockss.universalSensor.getUnlocalizedName());
+               break;
+           case 9:
+               infoList.add("All pneumatic machines");
+               /*infoList.add("-" + Names.SECURITY_STATION);
+               infoList.add("-" + Names.PNEUMATIC_HELMET);
+               infoList.add("-" + Names.AIR_CANNON);
+               infoList.add("-" + Names.AIR_COMPRESSOR);
+               infoList.add("-" + Names.CHARGING_STATION);
+               infoList.add("-" + Names.ELEVATOR);
+               infoList.add("-" + Names.PRESSURE_CHAMBER);
+               infoList.add("-" + Names.VACUUM_PUMP);
+               infoList.add("-" + Names.ASSEMBLY_CONTROLLER);
+               infoList.add("-" + Names.UV_LIGHT_BOX);*/
+        /*    break;
+        case 10:
+            unlocalized.add(Itemss.pneumaticHelmet.getUnlocalizedName());
+            break;
         }
 
         for(String unloc : unlocalized) {
-            infoList.add("-" + I18n.format(unloc + ".name"));
-        }
+        infoList.add("-" + I18n.format(unloc + ".name"));
+        }*/
         super.addInformation(stack, player, infoList, par4);
     }
 

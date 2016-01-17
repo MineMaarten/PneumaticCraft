@@ -1,5 +1,6 @@
 package pneumaticCraft.common.tileentity;
 
+import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -17,18 +18,18 @@ public class TileEntityPneumaticBase extends TileEntityBase implements IPneumati
     public final float dangerPressure, criticalPressure;
     public final int defaultVolume;
 
-    public TileEntityPneumaticBase(float dangerPressure, float criticalPressure, int volume){
+    public TileEntityPneumaticBase(float dangerPressure, float criticalPressure, int volume, int... upgradeSlots){
+        super(upgradeSlots);
         airHandler = PneumaticRegistry.getInstance().getAirHandlerSupplier().createAirHandler(dangerPressure, criticalPressure, volume);
+        airHandler.setUpgradeSlots(upgradeSlots);
+        for(Item upgrade : airHandler.getApplicableUpgrades()) {
+            addApplicableUpgrade(upgrade);
+        }
+
         this.dangerPressure = dangerPressure;
         this.criticalPressure = criticalPressure;
         defaultVolume = volume;
         addLuaMethods();
-    }
-
-    @Override
-    public void setUpgradeSlots(int... upgradeSlots){
-        super.setUpgradeSlots(upgradeSlots);
-        airHandler.setUpgradeSlots(upgradeSlots);
     }
 
     @Override

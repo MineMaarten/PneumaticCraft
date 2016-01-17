@@ -8,8 +8,8 @@ import java.util.List;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.common.entity.living.EntityDrone;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.tileentity.TileEntityChargingStation;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.PneumaticValues;
@@ -40,7 +40,7 @@ public class DroneGoToChargingStation extends EntityAIBase{
                         drone.addDebugEntry("gui.progWidget.chargingStation.debug.claimed", pos);
                     } else if(station.getPressure() <= PneumaticValues.DRONE_LOW_PRESSURE) {
                         drone.addDebugEntry("gui.progWidget.chargingStation.debug.notEnoughPressure", pos);
-                    } else if(station.getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) == 0) {
+                    } else if(station.getUpgrades(EnumUpgrade.DISPENSER) == 0) {
                         drone.addDebugEntry("gui.progWidget.chargingStation.debug.noDispenserUpgrades", pos);
                     } else {
                         validChargingStations.add(station);
@@ -81,7 +81,7 @@ public class DroneGoToChargingStation extends EntityAIBase{
      */
     @Override
     public boolean continueExecuting(){
-        if(curCharger.getUpgrades(ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE) == 0 || curCharger.isInvalid()) {//If our path was blocked.
+        if(curCharger.getUpgrades(EnumUpgrade.DISPENSER) == 0 || curCharger.isInvalid()) {//If our path was blocked.
             isExecuting = false;
             return false;
         } else if(!drone.getPathNavigator().isGoingToTeleport() && (drone.getNavigator().getPath() == null || drone.getNavigator().getPath().isFinished())) {

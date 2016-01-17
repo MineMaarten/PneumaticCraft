@@ -1,15 +1,20 @@
 package pneumaticCraft.common.item;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
 import pneumaticCraft.PneumaticCraft;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.common.semiblock.SemiBlockActiveProvider;
 import pneumaticCraft.common.thirdparty.ThirdPartyManager;
+import pneumaticCraft.lib.ModIds;
 import pneumaticCraft.lib.Names;
 import pneumaticCraft.lib.PneumaticValues;
 import pneumaticCraft.lib.Textures;
@@ -17,7 +22,6 @@ import pneumaticCraft.lib.Textures;
 public class Itemss{
 
     public static Item GPSTool;
-    public static Item machineUpgrade;
     public static Item ingotIronCompressed;
     public static Item pressureGauge;
     public static Item stoneBase;
@@ -59,10 +63,10 @@ public class Itemss{
     public static Item amadronTablet;
     public static Item minigun;
     public static List<Item> items = new ArrayList<Item>();
+    public static Map<EnumUpgrade, Item> upgrades = new HashMap<EnumUpgrade, Item>();
 
     public static void init(){
         GPSTool = new ItemGPSTool().setUnlocalizedName("gpsTool");
-        machineUpgrade = new ItemMachineUpgrade().setUnlocalizedName("machineUpgrade");
         ingotIronCompressed = new ItemPneumatic(Textures.ITEM_COMPRESSED_IRON_INGOT).setUnlocalizedName("ingotIronCompressed");
         pressureGauge = new ItemPneumatic(Textures.ITEM_PRESSURE_GAUGE).setUnlocalizedName("pressureGauge");
         stoneBase = new ItemPneumatic().setUnlocalizedName("stoneBase");
@@ -71,7 +75,7 @@ public class Itemss{
         plastic = new ItemPlastic().setUnlocalizedName("plastic");
         airCanister = new ItemPressurizable(Textures.ITEM_AIR_CANISTER, PneumaticValues.AIR_CANISTER_MAX_AIR, PneumaticValues.AIR_CANISTER_VOLUME).setUnlocalizedName("airCanister");
         vortexCannon = new ItemVortexCannon(Textures.ITEM_VORTEX).setUnlocalizedName("vortexCannon");
-        pneumaticCylinder = new ItemPneumatic(Textures.ITEM_CANNON_BARREL).setUnlocalizedName("pneumaticCilinder");
+        pneumaticCylinder = new ItemPneumatic(Textures.ITEM_CANNON_BARREL).setUnlocalizedName("pneumaticCylinder");
         pneumaticHelmet = new ItemPneumaticArmor(ItemArmor.ArmorMaterial.IRON, PneumaticCraft.proxy.getArmorRenderID(Textures.ARMOR_PNEUMATIC), 0, PneumaticValues.PNEUMATIC_HELMET_MAX_AIR).setUnlocalizedName("pneumaticHelmet");
         manometer = new pneumaticCraft.common.item.ItemManometer(Textures.ITEM_MANOMETER).setUnlocalizedName("manometer");
         turbineRotor = new pneumaticCraft.common.item.ItemPneumatic(Textures.ITEM_TURBINE_ROTOR).setUnlocalizedName("turbineRotor");
@@ -105,13 +109,24 @@ public class Itemss{
         minigun = new ItemMinigun(PneumaticValues.AIR_CANISTER_MAX_AIR, PneumaticValues.AIR_CANISTER_VOLUME);
 
         registerItems();
+        registerUpgrades();
 
         OreDictionary.registerOre(Names.INGOT_IRON_COMPRESSED, ingotIronCompressed);
     }
 
+    private static void registerUpgrades(){
+        for(EnumUpgrade upgrade : EnumUpgrade.values()) {
+            if(upgrade != EnumUpgrade.THAUMCRAFT || Loader.isModLoaded(ModIds.THAUMCRAFT)) {
+                String unlocalizedName = upgrade.toString().toLowerCase() + "_upgrade";
+                Item upgradeItem = new ItemMachineUpgrade().setUnlocalizedName(unlocalizedName);
+                registerItem(upgradeItem);
+                upgrades.put(upgrade, upgradeItem);
+            }
+        }
+    }
+
     private static void registerItems(){
         registerItem(GPSTool);
-        registerItem(machineUpgrade);
         registerItem(ingotIronCompressed);
         registerItem(pressureGauge);
         registerItem(stoneBase);

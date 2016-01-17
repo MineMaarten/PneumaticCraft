@@ -34,7 +34,7 @@ public class BlockPneumaticDoor extends BlockPneumaticCraftModeled{
 
     @Override
     protected BlockState createBlockState(){
-        return new BlockState(this, TOP_DOOR);
+        return new BlockState(this, TOP_DOOR, ROTATION);
     }
 
     /**
@@ -223,14 +223,14 @@ public class BlockPneumaticDoor extends BlockPneumaticCraftModeled{
             TileEntity te1 = world.getTileEntity(pos.offset(dir.rotateY()));
             if(te1 instanceof TileEntityPneumaticDoorBase) {
                 TileEntityPneumaticDoorBase door = (TileEntityPneumaticDoorBase)te1;
-                if(door.orientation == dir.rotateYCCW()) {
+                if(door.getRotation() == dir.rotateYCCW()) {
                     return door;
                 }
             }
             TileEntity te2 = world.getTileEntity(pos.offset(dir.rotateYCCW()));
             if(te2 instanceof TileEntityPneumaticDoorBase) {
                 TileEntityPneumaticDoorBase door = (TileEntityPneumaticDoorBase)te2;
-                if(door.orientation == dir.rotateY()) {
+                if(door.getRotation() == dir.rotateY()) {
                     return door;
                 }
             }

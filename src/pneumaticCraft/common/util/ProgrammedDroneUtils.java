@@ -10,9 +10,9 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.common.entity.living.EntityDrone;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
-import pneumaticCraft.common.item.Itemss;
+import pneumaticCraft.common.item.ItemRegistry;
 import pneumaticCraft.common.progwidgets.IProgWidget;
 import pneumaticCraft.common.progwidgets.ProgWidgetArea;
 import pneumaticCraft.common.progwidgets.ProgWidgetDropItem;
@@ -37,12 +37,12 @@ public class ProgrammedDroneUtils{
         NBTTagList upgradeList = new NBTTagList();
         NBTTagCompound slotEntry = new NBTTagCompound();
         slotEntry.setByte("Slot", (byte)0);
-        new ItemStack(Itemss.machineUpgrade, 64, ItemMachineUpgrade.UPGRADE_DISPENSER_DAMAGE).writeToNBT(slotEntry);
+        new ItemStack(ItemRegistry.getInstance().getUpgrade(EnumUpgrade.DISPENSER), 64).writeToNBT(slotEntry);
         upgradeList.appendTag(slotEntry);
 
         slotEntry = new NBTTagCompound();
         slotEntry.setByte("Slot", (byte)1);
-        new ItemStack(Itemss.machineUpgrade, 10, ItemMachineUpgrade.UPGRADE_SPEED_DAMAGE).writeToNBT(slotEntry);
+        new ItemStack(ItemRegistry.getInstance().getUpgrade(EnumUpgrade.SPEED), 10).writeToNBT(slotEntry);
         upgradeList.appendTag(slotEntry);
 
         NBTTagCompound inv = new NBTTagCompound();

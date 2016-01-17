@@ -1,18 +1,25 @@
 package pneumaticCraft.api.universalSensor;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
+import pneumaticCraft.common.item.Itemss;
 
 public abstract class EntityPollSensor implements IPollSensorSetting{
 
     @Override
-    public String getSensorPath(){
-        return "entityTracker";
+    public Set<Item> getRequiredUpgrades(){
+        Set<Item> upgrades = new HashSet<Item>();
+        upgrades.add(Itemss.upgrades.get(EnumUpgrade.ENTITY_TRACKER));
+        return upgrades;
     }
 
     @Override

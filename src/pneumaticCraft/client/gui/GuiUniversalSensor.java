@@ -3,12 +3,15 @@ package pneumaticCraft.client.gui;
 import java.awt.Point;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
@@ -71,9 +74,11 @@ public class GuiUniversalSensor extends GuiPneumaticContainerBase<TileEntityUniv
 
         String[] folders = te.getSensorSetting().split("/");
         if(folders.length == 1) {
-            ItemStack[] requiredStacks = SensorHandler.getInstance().getRequiredStacksFromText(folders[0]);
-            for(int i = 0; i < requiredStacks.length; i++) {
-                GuiUtils.drawItemStack(requiredStacks[i], 102 + i * 18, 20);
+            Set<Item> requiredItems = SensorHandler.getInstance().getRequiredStacksFromText(folders[0]);
+            int curX = 102;
+            for(Item requiredItem : requiredItems) {
+                GuiUtils.drawItemStack(new ItemStack(requiredItem), curX, 20);
+                curX += 18;
             }
         } else {
             fontRendererObj.drawString(folders[folders.length - 1], 102, 24, 4210752);
@@ -165,10 +170,15 @@ public class GuiUniversalSensor extends GuiPneumaticContainerBase<TileEntityUniv
             int buttonWidth = 98;
             int buttonHeight = 20;
             if(te.getSensorSetting().equals("")) {
-                ItemStack[] requiredStacks = SensorHandler.getInstance().getRequiredStacksFromText(buttonText);
+                Set<Item> requiredItems = SensorHandler.getInstance().getRequiredStacksFromText(buttonText);
                 GuiButtonSpecial button = new GuiButtonSpecial(buttonID, buttonX, buttonY, buttonWidth, buttonHeight, "");
+                ItemStack[] requiredStacks = new ItemStack[requiredItems.size()];
+                Iterator<Item> iterator = requiredItems.iterator();
+                for(int j = 0; j < requiredStacks.length; j++) {
+                    requiredStacks[j] = new ItemStack(iterator.next());
+                }
                 button.setRenderStacks(requiredStacks);
-                button.enabled = te.areGivenUpgradesInserted(requiredStacks);
+                button.enabled = te.areGivenUpgradesInserted(requiredItems);
                 buttonList.add(button);
             } else {
                 buttonList.add(new GuiButton(buttonID, buttonX, buttonY, buttonWidth, buttonHeight, buttonText));

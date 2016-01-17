@@ -9,7 +9,6 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
 import pneumaticCraft.common.config.Config;
 import pneumaticCraft.common.itemBlock.ItemBlockPneumaticCraft;
-import pneumaticCraft.common.itemBlock.ItemBlockPressureChamberWall;
 import pneumaticCraft.common.thirdparty.ThirdPartyManager;
 import pneumaticCraft.lib.Names;
 import pneumaticCraft.lib.PneumaticValues;
@@ -20,6 +19,7 @@ public class Blockss{
     public static Block airCompressor;
     public static Block airCannon;
     public static Block pressureChamberWall;
+    public static Block pressureChamberGlass;
     public static Block pressureChamberValve;
     public static Block pressureChamberInterface;
     public static Block chargingStation;
@@ -70,6 +70,7 @@ public class Blockss{
         advancedAirCompressor = new BlockAdvancedAirCompressor(Material.iron).setUnlocalizedName("advancedAirCompressor");
         airCannon = new BlockAirCannon(Material.iron).setUnlocalizedName("airCannon");
         pressureChamberWall = new BlockPressureChamberWall(Material.iron).setResistance(2000.0F).setUnlocalizedName("pressureChamberWall");
+        pressureChamberGlass = new BlockPressureChamberGlass(Material.iron).setResistance(2000.0F).setUnlocalizedName("pressureChamberGlass");
         pressureChamberValve = new BlockPressureChamberValve(Material.iron).setResistance(2000.0F).setUnlocalizedName("pressureChamberValve");
         chargingStation = new BlockChargingStation(Material.iron).setUnlocalizedName("chargingStation");
         elevatorBase = new BlockElevatorBase(Material.iron).setUnlocalizedName("elevatorBase");
@@ -120,7 +121,8 @@ public class Blockss{
         registerBlock(airCompressor);
         registerBlock(advancedAirCompressor);
         registerBlock(airCannon);
-        registerBlock(pressureChamberWall, ItemBlockPressureChamberWall.class);//TODO legacy remove item block.
+        registerBlock(pressureChamberWall);
+        registerBlock(pressureChamberGlass);
         registerBlock(pressureChamberValve);
         registerBlock(chargingStation);
         registerBlock(elevatorBase);

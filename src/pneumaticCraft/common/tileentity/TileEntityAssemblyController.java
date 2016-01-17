@@ -19,6 +19,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.item.ItemAssemblyProgram;
@@ -52,9 +53,9 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
     public boolean hasProblem;
 
     public TileEntityAssemblyController(){
-        super(PneumaticValues.DANGER_PRESSURE_ASSEMBLY_CONTROLLER, PneumaticValues.MAX_PRESSURE_ASSEMBLY_CONTROLLER, PneumaticValues.VOLUME_ASSEMBLY_CONTROLLER);
+        super(PneumaticValues.DANGER_PRESSURE_ASSEMBLY_CONTROLLER, PneumaticValues.MAX_PRESSURE_ASSEMBLY_CONTROLLER, PneumaticValues.VOLUME_ASSEMBLY_CONTROLLER, UPGRADE_SLOT_START, 2, 3, UPGRADE_SLOT_END);
         inventory = new ItemStack[INVENTORY_SIZE];
-        setUpgradeSlots(new int[]{UPGRADE_SLOT_START, 2, 3, UPGRADE_SLOT_END});
+        addApplicableUpgrade(EnumUpgrade.SPEED);
     }
 
     @Override
@@ -146,8 +147,8 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
                             goToHomePosition(platform, ioUnitImport, ioUnitExport, drill, laser);
                             displayedText = "Resetting...";
                         }
-                        if(useAir) addAir(-(int)(PneumaticValues.USAGE_ASSEMBLING * getSpeedUsageMultiplierFromUpgrades(getUpgradeSlots())));
-                        float speedMultiplier = getSpeedMultiplierFromUpgrades(getUpgradeSlots());
+                        if(useAir) addAir(-(int)(PneumaticValues.USAGE_ASSEMBLING * getSpeedUsageMultiplierFromUpgrades()));
+                        float speedMultiplier = getSpeedMultiplierFromUpgrades();
                         for(IAssemblyMachine machine : machineList) {
                             machine.setSpeed(speedMultiplier);
                         }
@@ -395,7 +396,7 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack){
         if(i > 0) {
-            return itemstack != null && itemstack.getItem() == Itemss.machineUpgrade;
+            return canInsertUpgrade(i, itemstack);
         } else {
             return itemstack != null && itemstack.getItem() == Itemss.assemblyProgram;
         }

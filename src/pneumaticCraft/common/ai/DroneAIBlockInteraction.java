@@ -12,8 +12,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.item.IPressurizable;
-import pneumaticCraft.common.item.ItemMachineUpgrade;
 import pneumaticCraft.common.item.ItemPneumaticArmor;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.NetworkHandler;
@@ -229,7 +229,7 @@ public abstract class DroneAIBlockInteraction<Widget extends ProgWidgetAreaItemB
      */
     protected void indicateToListeningPlayers(BlockPos pos){
         for(EntityPlayer player : drone.getWorld().playerEntities) {
-            if(player.getCurrentArmor(3) != null && player.getCurrentArmor(3).getItem() == Itemss.pneumaticHelmet && ItemPneumaticArmor.getUpgrades(ItemMachineUpgrade.UPGRADE_ENTITY_TRACKER, player.getCurrentArmor(3)) > 0 && ((IPressurizable)Itemss.pneumaticHelmet).getPressure(player.getCurrentArmor(3)) > 0) {
+            if(player.getCurrentArmor(3) != null && player.getCurrentArmor(3).getItem() == Itemss.pneumaticHelmet && ItemPneumaticArmor.getUpgrades(EnumUpgrade.ENTITY_TRACKER, player.getCurrentArmor(3)) > 0 && ((IPressurizable)Itemss.pneumaticHelmet).getPressure(player.getCurrentArmor(3)) > 0) {
                 NetworkHandler.sendTo(new PacketSpawnParticle(EnumParticleTypes.REDSTONE, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 0, 0, 0), (EntityPlayerMP)player);
             }
         }

@@ -24,6 +24,7 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import pneumaticCraft.api.PneumaticRegistry;
+import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.recipe.IPneumaticRecipeRegistry;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.block.tubes.ModuleRegistrator;
@@ -56,14 +57,14 @@ public class CraftingRegistrator{
         addRecipe(new ItemStack(Itemss.pressureGauge), " g ", "gig", " g ", 'g', Items.gold_ingot, 'i', Names.INGOT_IRON_COMPRESSED);
 
         // pressure chamber
-        addRecipe(new ItemStack(Blockss.pressureChamberWall, 16, 0), "iii", "i i", "iii", 'i', Names.INGOT_IRON_COMPRESSED);
-        addRecipe(new ItemStack(Blockss.pressureChamberWall, 16, 6), "iii", "igi", "iii", 'i', Names.INGOT_IRON_COMPRESSED, 'g', "blockGlass");
-        addShapelessRecipe(new ItemStack(Blockss.pressureChamberWall, 4, 6), new ItemStack(Blockss.pressureChamberWall, 1, 0), new ItemStack(Blockss.pressureChamberWall, 1, 0), new ItemStack(Blockss.pressureChamberWall, 1, 0), new ItemStack(Blockss.pressureChamberWall, 1, 0), Blocks.glass);
+        addRecipe(new ItemStack(Blockss.pressureChamberWall, 16), "iii", "i i", "iii", 'i', Names.INGOT_IRON_COMPRESSED);
+        addRecipe(new ItemStack(Blockss.pressureChamberGlass, 16), "iii", "igi", "iii", 'i', Names.INGOT_IRON_COMPRESSED, 'g', "blockGlass");
+        addShapelessRecipe(new ItemStack(Blockss.pressureChamberGlass, 4), new ItemStack(Blockss.pressureChamberWall), new ItemStack(Blockss.pressureChamberWall), new ItemStack(Blockss.pressureChamberWall), new ItemStack(Blockss.pressureChamberWall), Blocks.glass);
         addRecipe(new ItemStack(Blockss.pressureChamberValve, 16, 0), "iii", "iti", "iii", 'i', Names.INGOT_IRON_COMPRESSED, 't', new ItemStack(Blockss.pressureTube, 1, 0));
-        addShapelessRecipe(new ItemStack(Blockss.pressureChamberValve, 4, 0), new ItemStack(Blockss.pressureChamberWall, 1, 0), new ItemStack(Blockss.pressureChamberWall, 1, 0), new ItemStack(Blockss.pressureChamberWall, 1, 0), new ItemStack(Blockss.pressureChamberWall, 1, 0), new ItemStack(Blockss.pressureTube, 1, 0));
+        addShapelessRecipe(new ItemStack(Blockss.pressureChamberValve, 4, 0), new ItemStack(Blockss.pressureChamberWall, 1, 0), new ItemStack(Blockss.pressureChamberWall), new ItemStack(Blockss.pressureChamberWall), new ItemStack(Blockss.pressureChamberWall), new ItemStack(Blockss.pressureTube));
         addShapelessRecipe(new ItemStack(Blockss.pressureChamberInterface), Blockss.pressureChamberWall, Blocks.hopper);
         addShapelessRecipe(new ItemStack(Blockss.pressureChamberValve, 1, 0), Blockss.pressureChamberWall, Blockss.pressureTube);
-        addShapelessRecipe(new ItemStack(Blockss.pressureChamberWall, 1, 6), new ItemStack(Blockss.pressureChamberWall, 1, 0), Blocks.glass);
+        addShapelessRecipe(new ItemStack(Blockss.pressureChamberGlass), new ItemStack(Blockss.pressureChamberWall), Blocks.glass);
 
         //Oil related
         addRecipe(new ItemStack(Itemss.seismicSensor), " t ", "grg", "gcg", 't', Blocks.redstone_torch, 'g', "blockGlass", 'r', Items.repeater, 'c', Items.coal);
@@ -106,16 +107,16 @@ public class CraftingRegistrator{
         addRecipe(new ItemStack(Itemss.networkComponent, 1, ItemNetworkComponents.NETWORK_DATA_STORAGE), "ttt", "tct", "ttt", 't', new ItemStack(Itemss.plastic, 1, ItemPlastic.BURST_PLANT_DAMAGE), 'c', Blocks.chest);
 
         // Machine Upgrades
-        addRecipe(new ItemStack(Itemss.machineUpgrade, 1, 0), "lil", "ici", "lil", 'l', lapis, 'i', Names.INGOT_IRON_COMPRESSED, 'c', new ItemStack(Itemss.airCanister, 1, OreDictionary.WILDCARD_VALUE));
-        addRecipe(new ItemStack(Itemss.machineUpgrade, 1, 1), "lil", "idi", "lil", 'l', lapis, 'i', Items.quartz, 'd', Blocks.dispenser);
-        addRecipe(new ItemStack(Itemss.machineUpgrade, 1, 2), "lal", "aca", "lal", 'l', lapis, 'a', Items.apple, 'c', Items.clock);
-        addRecipe(new ItemStack(Itemss.machineUpgrade, 1, 3), "lbl", "bsb", "lbl", 'l', lapis, 'b', Items.bone, 's', Items.fermented_spider_eye);
-        addRecipe(new ItemStack(Itemss.machineUpgrade, 1, 4), "lwl", "wsw", "lwl", 'l', lapis, 'w', Blockss.pressureChamberWall, 's', Items.fermented_spider_eye);
-        addRecipe(new ItemStack(Itemss.machineUpgrade, 1, 5), "lsl", "scs", "lsl", 'l', lapis, 's', Items.sugar, 'c', Fluids.getBucket(Fluids.lubricant));
-        addRecipe(new ItemStack(Itemss.machineUpgrade, 1, 6), "lel", "ege", "lel", 'l', lapis, 'e', Items.ender_eye, 'g', Items.golden_carrot);
-        addRecipe(new ItemStack(Itemss.machineUpgrade, 1, 7), "lrl", "rgr", "lrl", 'l', lapis, 'r', Items.redstone, 'g', Itemss.GPSTool);
-        addRecipe(new ItemStack(Itemss.machineUpgrade, 1, 8), "lal", "aba", "lal", 'l', lapis, 'a', Items.arrow, 'b', Items.bow);
-        addRecipe(new ItemStack(Itemss.machineUpgrade, 1, 9), "lol", "obo", "lol", 'l', lapis, 'o', Blocks.obsidian, 'b', ModuleRegistrator.getModuleItem("safetyTubeModule"));
+        addRecipe(getUpgrade(EnumUpgrade.VOLUME), "lil", "ici", "lil", 'l', lapis, 'i', Names.INGOT_IRON_COMPRESSED, 'c', new ItemStack(Itemss.airCanister, 1, OreDictionary.WILDCARD_VALUE));
+        addRecipe(getUpgrade(EnumUpgrade.DISPENSER), "lil", "idi", "lil", 'l', lapis, 'i', Items.quartz, 'd', Blocks.dispenser);
+        addRecipe(getUpgrade(EnumUpgrade.ITEM_LIFE), "lal", "aca", "lal", 'l', lapis, 'a', Items.apple, 'c', Items.clock);
+        addRecipe(getUpgrade(EnumUpgrade.ENTITY_TRACKER), "lbl", "bsb", "lbl", 'l', lapis, 'b', Items.bone, 's', Items.fermented_spider_eye);
+        addRecipe(getUpgrade(EnumUpgrade.BLOCK_TRACKER), "lwl", "wsw", "lwl", 'l', lapis, 'w', Blockss.pressureChamberWall, 's', Items.fermented_spider_eye);
+        addRecipe(getUpgrade(EnumUpgrade.SPEED), "lsl", "scs", "lsl", 'l', lapis, 's', Items.sugar, 'c', Fluids.getBucket(Fluids.lubricant));
+        addRecipe(getUpgrade(EnumUpgrade.SEARCH), "lel", "ege", "lel", 'l', lapis, 'e', Items.ender_eye, 'g', Items.golden_carrot);
+        addRecipe(getUpgrade(EnumUpgrade.COORDINATE_TRACKER), "lrl", "rgr", "lrl", 'l', lapis, 'r', Items.redstone, 'g', Itemss.GPSTool);
+        addRecipe(getUpgrade(EnumUpgrade.RANGE), "lal", "aba", "lal", 'l', lapis, 'a', Items.arrow, 'b', Items.bow);
+        addRecipe(getUpgrade(EnumUpgrade.SECURITY), "lol", "obo", "lol", 'l', lapis, 'o', Blocks.obsidian, 'b', ModuleRegistrator.getModuleItem("safetyTubeModule"));
 
         addRecipe(new ItemStack(Itemss.airCanister, 1, Itemss.airCanister.getMaxDamage()), " t ", "iri", "iri", 'i', Names.INGOT_IRON_COMPRESSED, 'r', Items.redstone, 't', new ItemStack(Blockss.pressureTube, 1, 0));
 
@@ -205,6 +206,10 @@ public class CraftingRegistrator{
         addThermopneumaticProcessingPlantRecipes();
         registerAmadronOffers();
         addCoolingRecipes();
+    }
+
+    public static ItemStack getUpgrade(EnumUpgrade upgrade){
+        return new ItemStack(Itemss.upgrades.get(upgrade), 1);
     }
 
     public static void addProgrammingPuzzleRecipes(){
