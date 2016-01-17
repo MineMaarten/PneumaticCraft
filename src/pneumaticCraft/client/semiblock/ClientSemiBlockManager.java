@@ -40,8 +40,6 @@ public class ClientSemiBlockManager{
 
         GL11.glPushMatrix();
         GL11.glTranslated(-playerX, -playerY, -playerZ);
-        //  GL11.glEnable(GL11.GL_BLEND);
-        //  GL11.glEnable(GL11.GL_LIGHTING);
         RenderHelper.enableStandardItemLighting();
 
         for(Map<BlockPos, ISemiBlock> map : SemiBlockManager.getInstance(player.worldObj).getSemiBlocks().values()) {
@@ -55,8 +53,7 @@ public class ClientSemiBlockManager{
                 }
             }
         }
-        GL11.glDisable(GL11.GL_BLEND);
-        GL11.glDisable(GL11.GL_LIGHTING);
+        RenderHelper.disableStandardItemLighting();
         GL11.glPopMatrix();
     }
 
