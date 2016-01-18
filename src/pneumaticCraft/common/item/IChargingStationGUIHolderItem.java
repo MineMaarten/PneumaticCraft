@@ -2,7 +2,6 @@ package pneumaticCraft.common.item;
 
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
-
 public interface IChargingStationGUIHolderItem{
 
     /**

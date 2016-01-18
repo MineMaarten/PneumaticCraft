@@ -3,7 +3,6 @@ package pneumaticCraft.api.tileentity;
 import net.minecraft.util.EnumFacing;
 import pneumaticCraft.common.pressure.AirHandlerSupplier;
 
-
 public interface IPneumaticMachine{
 
     /**

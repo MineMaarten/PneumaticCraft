@@ -1,6 +1,5 @@
 package pneumaticCraft.common.semiblock;
 
-
 public class SemiBlockRequesterAE extends SemiBlockRequester /* TODO AE2 dep implements IMEInventoryHandler<IAEItemStack>*/{
     //IMEInventoryHandler
 

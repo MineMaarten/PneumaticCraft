@@ -1,6 +1,5 @@
 package pneumaticCraft.common.thirdparty.computercraft;
 
-
 /**
  * Used to get constant return values.
  */

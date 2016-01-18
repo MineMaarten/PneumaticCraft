@@ -1,6 +1,5 @@
 package pneumaticCraft.common.thirdparty.computercraft;
 
-
 public interface ILuaMethod{
     public String getMethodName();
 

@@ -7,7 +7,8 @@ import pneumaticCraft.common.progwidgets.ProgWidgetAreaItemBase;
 public class DroneAICustomBlockInteract extends DroneAIImExBase{
     private final ICustomBlockInteract blockInteractor;
 
-    public DroneAICustomBlockInteract(IDroneBase drone, ProgWidgetAreaItemBase widget, ICustomBlockInteract blockInteractor){
+    public DroneAICustomBlockInteract(IDroneBase drone, ProgWidgetAreaItemBase widget,
+            ICustomBlockInteract blockInteractor){
         super(drone, widget);
         this.blockInteractor = blockInteractor;
     }
