@@ -35,7 +35,7 @@ public class PressureChamberPressureEnchantHandler implements IPressureChamberRe
                     Map bookMap = EnchantmentHelper.getEnchantments(enchantedBook);
                     Iterator bookEnchantIterator = bookMap.keySet().iterator();
                     while(bookEnchantIterator.hasNext()) {
-                        Enchantment bookEnchant = Enchantment.getEnchantmentById(((Integer)bookEnchantIterator.next()).intValue()); //TODO 1.8 test
+                        Enchantment bookEnchant = Enchantment.getEnchantmentById(((Integer)bookEnchantIterator.next()).intValue());
                         if(bookEnchant.canApply(inputStack)) {
                             return new ItemStack[]{inputStack, enchantedBook};
                         }

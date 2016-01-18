@@ -17,7 +17,7 @@ public class RenderEntityRing extends Render<EntityRing>{
     @Override
     public void doRender(EntityRing ring, double par2, double par4, double par6, float var8, float par9){
         GL11.glPushMatrix();
-        GL11.glTranslatef((float)par2, (float)par4, (float)par6);//TODO 1.8 test if (instanceof) null check was necessary
+        GL11.glTranslatef((float)par2, (float)par4, (float)par6);
         if(ring.oldRing != null) {
             GL11.glColor4d(1, 1, 1, 1);
             GL11.glDisable(GL11.GL_LIGHTING);

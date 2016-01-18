@@ -104,14 +104,14 @@ public class TileEntityAssemblyController extends TileEntityPneumaticBase implem
                                     }
                                     break;
                                 case IO_UNIT_IMPORT:
-                                    if(machine instanceof TileEntityAssemblyIOUnit && ((TileEntityAssemblyIOUnit)machine).getBlockMetadata() == 0) {
+                                    if(machine instanceof TileEntityAssemblyIOUnit && ((TileEntityAssemblyIOUnit)machine).isImportUnit()) {
                                         if(ioUnitImport != null) foundDuplicateMachine = true;
                                         ioUnitImport = (TileEntityAssemblyIOUnit)machine;
                                         foundMachines[i] = true;
                                     }
                                     break;
                                 case IO_UNIT_EXPORT:
-                                    if(machine instanceof TileEntityAssemblyIOUnit && ((TileEntityAssemblyIOUnit)machine).getBlockMetadata() == 1) {
+                                    if(machine instanceof TileEntityAssemblyIOUnit && !((TileEntityAssemblyIOUnit)machine).isImportUnit()) {
                                         if(ioUnitExport != null) foundDuplicateMachine = true;
                                         ioUnitExport = (TileEntityAssemblyIOUnit)machine;
                                         foundMachines[i] = true;

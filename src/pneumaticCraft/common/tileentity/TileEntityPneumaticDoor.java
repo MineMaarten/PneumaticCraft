@@ -6,6 +6,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import pneumaticCraft.common.block.BlockPneumaticDoor;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.LazySynced;
 
@@ -21,10 +22,10 @@ public class TileEntityPneumaticDoor extends TileEntityBase{
         oldRotation = this.rotation;
         this.rotation = rotation;
         TileEntity te = null;
-        if(getBlockMetadata() < 6) {
-            te = worldObj.getTileEntity(getPos().offset(EnumFacing.UP));
-        } else {
+        if(isTopDoor()) {
             te = worldObj.getTileEntity(getPos().offset(EnumFacing.DOWN));
+        } else {
+            te = worldObj.getTileEntity(getPos().offset(EnumFacing.UP));
         }
         if(te instanceof TileEntityPneumaticDoor) {
             TileEntityPneumaticDoor door = (TileEntityPneumaticDoor)te;
@@ -35,6 +36,10 @@ public class TileEntityPneumaticDoor extends TileEntityBase{
                 // door.oldRotation = oldRotation;
             }
         }
+    }
+
+    public boolean isTopDoor(){
+        return BlockPneumaticDoor.isTopDoor(worldObj.getBlockState(getPos()));
     }
 
     @Override

@@ -53,7 +53,7 @@ public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IIn
 
     @Override
     public IAirHandler getAirHandler(EnumFacing side){
-        if(side == null || side == getInputSide()) { //TODO 1.8 test
+        if(side == null || side == getInputSide()) {
             return super.getAirHandler(side);
         } else if(side == getVacuumSide()) {
             return vacuumHandler;

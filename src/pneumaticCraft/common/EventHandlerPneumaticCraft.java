@@ -37,10 +37,12 @@ import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent.MissingMapping;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.api.block.IPneumaticWrenchable;
@@ -82,6 +84,16 @@ public class EventHandlerPneumaticCraft{
 
     private static ItemStack IRON_INGOT = new ItemStack(Items.iron_ingot);
     private static ItemStack IRON_BLOCK = new ItemStack(Blocks.iron_block);
+
+    public void missingMappings(MissingMapping event){
+        if(event.type == GameRegistry.Type.ITEM) {
+            if(event.name.equals("pneumaticcraft:machineUpgrade")) {
+                event.ignore();
+            } else if(event.name.equals("pneumaticcraft:pneumaticCilinder")) {
+                event.remap(Itemss.pneumaticCylinder);
+            }
+        }
+    }
 
     @SubscribeEvent
     public void handleIronExplosions(ExplosionEvent.Detonate event){

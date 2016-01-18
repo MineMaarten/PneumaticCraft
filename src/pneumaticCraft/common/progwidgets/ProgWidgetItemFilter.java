@@ -72,7 +72,7 @@ public class ProgWidgetItemFilter extends ProgWidget implements IVariableWidget{
         Minecraft mc = Minecraft.getMinecraft();
         GL11.glTranslatef(0.0F, 0.0F, 32.0F);
         //  zLevel = 200.0F;
-        if(itemRender == null) itemRender = Minecraft.getMinecraft().getRenderItem(); //TODO 1.8 test
+        if(itemRender == null) itemRender = Minecraft.getMinecraft().getRenderItem();
         itemRender.zLevel = 200.0F;
         FontRenderer font = null;
         if(p_146982_1_ != null) font = p_146982_1_.getItem().getFontRenderer(p_146982_1_);

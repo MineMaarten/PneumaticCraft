@@ -39,7 +39,7 @@ public class HackableTameable implements IHackableEntity{
     public void onHackFinished(Entity entity, EntityPlayer player){
         EntityTameable tameable = (EntityTameable)entity;
         if(entity.worldObj.isRemote) {
-            tameable.handleStatusUpdate((byte)7); //TODO 1.8 test
+            tameable.handleStatusUpdate((byte)7);
         } else {
             tameable.getNavigator().clearPathEntity();
             tameable.setAttackTarget((EntityLivingBase)null);

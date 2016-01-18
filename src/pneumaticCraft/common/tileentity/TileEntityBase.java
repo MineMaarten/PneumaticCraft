@@ -81,6 +81,11 @@ public class TileEntityBase extends TileEntity implements IGUIButtonSensitive, I
         return DescPacketHandler.getPacket(new PacketDescription(this));
     }
 
+    @Override
+    public BlockPos getPosition(){
+        return getPos();
+    }
+
     protected double getPacketDistance(){
         return 64;
     }
@@ -485,7 +490,6 @@ public class TileEntityBase extends TileEntity implements IGUIButtonSensitive, I
         return stack1.isItemEqual(stack2) && ItemStack.areItemStackTagsEqual(stack1, stack2) && stack1.stackSize + stack2.stackSize <= stack1.getMaxStackSize();
     }
 
-    //TODO 1.8 test if this screws obfuscation
     public IChatComponent getDisplayName(){
         IInventory inv = (IInventory)this;
         return inv.hasCustomName() ? new ChatComponentText(inv.getName()) : new ChatComponentTranslation(inv.getName(), new Object[0]);

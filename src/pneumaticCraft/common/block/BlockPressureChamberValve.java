@@ -117,19 +117,4 @@ public class BlockPressureChamberValve extends BlockPneumaticCraft implements IB
         }
     }
 
-    //TODO 1.8 look at rotation logic
-    @Override
-    public boolean rotateBlock(World world, EntityPlayer player, BlockPos pos, EnumFacing face){
-        //   if(player.isSneaking()) {
-        return super.rotateBlock(world, player, pos, face);
-        /*  } else {
-              int newMeta = (world.getBlockMetadata(x, y, pos) / 2 + 1) * 2;
-              if(newMeta == 6) newMeta = 0;
-              world.setBlockMetadataWithNotify(x, y, pos, newMeta, 3);
-              invalidateMultiBlock(world, pos);
-              TileEntityPressureChamberValve.checkIfProperlyFormed(world, pos);
-              return true;
-          }*/
-    }
-
 }

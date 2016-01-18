@@ -18,9 +18,9 @@ public interface IAirListener extends IPneumaticMachine{
      * Called when air is added to, or removed from a handler, dispersed into/from a certain direction.
      * @param handler The handler it is about, could be used to distinguish when having multiple handlers.
      * @param dir 
-     * @param airAdded The amount added. Negative when removing air.
+     * @param airTransfered The amount transfered to a connecting handler (so decreased from this block). Negative when adding air.
      */
-    public void onAirDispersion(IAirHandler handler, @Nullable EnumFacing dir, int airAdded);
+    public void onAirDispersion(IAirHandler handler, @Nullable EnumFacing dir, int airTransfered);
 
     /**
      * Method fired to get the maximum amount of air allowed to disperse to the given direction. Used in the regulator tube to prevent air from travelling.

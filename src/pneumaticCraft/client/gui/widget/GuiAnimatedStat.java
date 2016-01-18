@@ -351,7 +351,7 @@ public class GuiAnimatedStat implements IGuiAnimatedStat, IGuiWidget, IWidgetLis
                     fontRenderer.drawString(texture, renderBaseX - (leftSided ? 16 : 0), renderAffectedY, 0xFFFFFFFF);
                 }
             } else if(gui != null || !(iStack.getItem() instanceof ItemBlock)) {
-                if(itemRenderer == null) itemRenderer = Minecraft.getMinecraft().getRenderItem(); //TODO 1.8 test
+                if(itemRenderer == null) itemRenderer = Minecraft.getMinecraft().getRenderItem();
                 itemRenderer.zLevel = 1;
                 GL11.glPushMatrix();
                 GL11.glTranslated(0, 0, -50);

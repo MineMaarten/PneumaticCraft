@@ -19,7 +19,7 @@ public interface IDescSynced{
 
     public void readFromPacket(NBTTagCompound tag);
 
-    public BlockPos getPos();
+    public BlockPos getPosition();
 
     public void onDescUpdate();
 }

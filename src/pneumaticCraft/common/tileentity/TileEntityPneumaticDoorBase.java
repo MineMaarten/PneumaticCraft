@@ -124,7 +124,7 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
                                 } else {
                                     if(door != null) {
                                         if(lookedPosition.equals(new BlockPos(door.getPos().getX(), door.getPos().getY(), door.getPos().getZ()))) return true;
-                                        if(lookedPosition.equals(new BlockPos(door.getPos().getX(), door.getPos().getY() + (door.getBlockMetadata() < 6 ? 1 : -1), door.getPos().getZ()))) return true;
+                                        if(lookedPosition.equals(new BlockPos(door.getPos().getX(), door.getPos().getY() + (door.isTopDoor() ? -1 : 1), door.getPos().getZ()))) return true;
                                     }
                                 }
                             }
@@ -164,9 +164,9 @@ public class TileEntityPneumaticDoorBase extends TileEntityPneumaticBase impleme
     private TileEntityPneumaticDoor getDoor(){
         TileEntity te = worldObj.getTileEntity(getPos().offset(getRotation()).add(0, -1, 0));
         if(te instanceof TileEntityPneumaticDoor) {
-            if(getRotation().rotateY() == EnumFacing.getFront(te.getBlockMetadata()) && !((TileEntityPneumaticDoor)te).rightGoing) {
+            if(getRotation().rotateY() == getRotation() && !((TileEntityPneumaticDoor)te).rightGoing) {
                 return (TileEntityPneumaticDoor)te;
-            } else if(getRotation().rotateYCCW() == EnumFacing.getFront(te.getBlockMetadata()) && ((TileEntityPneumaticDoor)te).rightGoing) {
+            } else if(getRotation().rotateYCCW() == getRotation() && ((TileEntityPneumaticDoor)te).rightGoing) {
                 return (TileEntityPneumaticDoor)te;
             }
         }

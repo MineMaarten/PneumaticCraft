@@ -66,7 +66,7 @@ public class BlockPneumaticDoorBase extends BlockPneumaticCraftModeled{
         TileEntity teDoor = doorBase.getWorld().getTileEntity(doorBase.getPos().offset(doorBase.getRotation()));
         if(teDoor instanceof TileEntityPneumaticDoor) {
             TileEntityPneumaticDoor door = (TileEntityPneumaticDoor)teDoor;
-            if(doorBase.getRotation().rotateY() == door.getRotation() && door.rightGoing || doorBase.getRotation().rotateYCCW() == EnumFacing.getFront(door.getBlockMetadata() % 6) && !door.rightGoing) {
+            if(doorBase.getRotation().rotateY() == door.getRotation() && door.rightGoing || doorBase.getRotation().rotateYCCW() == door.getRotation() && !door.rightGoing) {
                 door.rightGoing = !door.rightGoing;
                 door.setRotation(0);
             }

@@ -15,7 +15,7 @@ import pneumaticCraft.common.tileentity.TileEntityKeroseneLamp;
 import pneumaticCraft.lib.BBConstants;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
-public class BlockKeroseneLamp extends BlockAirCompressor{
+public class BlockKeroseneLamp extends BlockPneumaticCraftModeled{
 
     public BlockKeroseneLamp(Material par2Material){
         super(par2Material);

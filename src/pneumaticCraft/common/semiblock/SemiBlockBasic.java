@@ -71,6 +71,11 @@ public class SemiBlockBasic implements ISemiBlock, IDescSynced, IGUIButtonSensit
         return new PacketDescription(this);
     }
 
+    @Override
+    public BlockPos getPosition(){
+        return getPos();
+    }
+
     protected void drop(){
         SemiBlockManager.getInstance(world).breakSemiBlock(world, pos);
     }

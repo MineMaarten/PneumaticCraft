@@ -20,6 +20,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
 import pneumaticCraft.api.tileentity.IAirHandler;
+import pneumaticCraft.common.block.BlockAirCompressor;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.network.DescSynced;
 import pneumaticCraft.common.network.GuiSynced;
@@ -44,7 +45,7 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
     public int redstoneMode = 0; // determines how the compressor responds to
                                  // redstone.
     @DescSynced
-    public boolean isActive;
+    private boolean isActive;
     @GuiSynced
     public int curFuelUsage;
 
@@ -80,7 +81,11 @@ public class TileEntityAirCompressor extends TileEntityPneumaticBase implements 
                     onFuelBurn(curFuelUsage);
                 }
             }
+            boolean wasActive = isActive;
             isActive = burnTime > curFuelUsage;
+            if(wasActive != isActive) {
+                worldObj.setBlockState(getPos(), worldObj.getBlockState(getPos()).withProperty(BlockAirCompressor.ON, isActive));
+            }
         } else if(isActive) spawnBurningParticle();
 
         super.update();

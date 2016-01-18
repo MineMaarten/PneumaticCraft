@@ -43,14 +43,6 @@ public class ItemGunAmmo extends ItemPneumatic{
         return renderPass == 0 ? super.getColorFromItemStack(itemStack, renderPass) : potion != null ? Items.potionitem.getColorFromItemStack(potion, 0) : 0x00FFFF00;
     }
 
-    /* @Override
-     * TODO 1.8 check if necessary
-     @SideOnly(Side.CLIENT)
-     public boolean requiresMultipleRenderPasses(){
-
-         return true;
-     }*/
-
     @Override
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, EntityPlayer player, List infoList, boolean extraInfo){

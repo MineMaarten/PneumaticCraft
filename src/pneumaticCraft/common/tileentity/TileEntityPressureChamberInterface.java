@@ -207,14 +207,14 @@ public class TileEntityPressureChamberInterface extends TileEntityPressureChambe
             boolean xMid = getPos().getX() != core.multiBlockX && getPos().getX() != core.multiBlockX + core.multiBlockSize - 1;
             boolean yMid = getPos().getY() != core.multiBlockY && getPos().getY() != core.multiBlockY + core.multiBlockSize - 1;
             boolean zMid = getPos().getZ() != core.multiBlockZ && getPos().getZ() != core.multiBlockZ + core.multiBlockSize - 1;
-            int meta = getBlockMetadata();
-            if(xMid && yMid && meta == 2 || xMid && zMid && meta == 0 || yMid && zMid && meta == 4) {
+            EnumFacing rotation = getRotation();
+            if(xMid && yMid && rotation == EnumFacing.NORTH || xMid && zMid && rotation == EnumFacing.DOWN || yMid && zMid && rotation == EnumFacing.WEST) {
                 if(getPos().getX() == core.multiBlockX || getPos().getY() == core.multiBlockY || getPos().getZ() == core.multiBlockZ) {
                     return EnumInterfaceMode.EXPORT;
                 } else {
                     return EnumInterfaceMode.IMPORT;
                 }
-            } else if(xMid && yMid && meta == 3 || xMid && zMid && meta == 1 || yMid && zMid && meta == 5) {
+            } else if(xMid && yMid && rotation == EnumFacing.SOUTH || xMid && zMid && rotation == EnumFacing.UP || yMid && zMid && rotation == EnumFacing.EAST) {
                 if(getPos().getX() == core.multiBlockX || getPos().getY() == core.multiBlockY || getPos().getZ() == core.multiBlockZ) {
                     return EnumInterfaceMode.IMPORT;
                 } else {

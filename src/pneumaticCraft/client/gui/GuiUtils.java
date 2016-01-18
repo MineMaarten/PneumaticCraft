@@ -29,7 +29,7 @@ public class GuiUtils{
                                                                      // degrees
     private static final double STOP_ANGLE = -60D / 180D * Math.PI;
     private static final int GAUGE_POINTS = (int)((START_ANGLE - STOP_ANGLE) / (2D * Math.PI) * CIRCLE_POINTS);
-    private static RenderItem itemRenderer = Minecraft.getMinecraft().getRenderItem(); //TODO 1.8 test
+    private static RenderItem itemRenderer = Minecraft.getMinecraft().getRenderItem();
 
     public static void drawPressureGauge(FontRenderer fontRenderer, float minPressure, float maxPressure, float dangerPressure, float minWorkingPressure, float currentPressure, int xPos, int yPos, float zLevel){
         WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();

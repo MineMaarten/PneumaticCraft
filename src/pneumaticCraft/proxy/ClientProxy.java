@@ -270,7 +270,7 @@ public class ClientProxy extends CommonProxy{
 
     @Override
     public int getArmorRenderID(String armorName){
-        return 0; //TODO 1.8 test if pneumatic helmet texture works
+        return 0;
     }
 
     @Override

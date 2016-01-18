@@ -18,7 +18,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
-import pneumaticCraft.common.NBTUtil;
 import pneumaticCraft.common.progwidgets.IProgWidget;
 import pneumaticCraft.common.progwidgets.WidgetRegistrator;
 import pneumaticCraft.lib.Names;
@@ -69,22 +68,12 @@ public class ItemProgrammingPuzzle extends ItemPneumatic{
     }
 
     public static IProgWidget getWidgetForPiece(ItemStack stack){
-        if(NBTUtil.hasTag(stack, "type")) {//TODO legacy remove
-            String type = stack.getTagCompound().getString("type");
-            for(IProgWidget widget : WidgetRegistrator.registeredWidgets) {
-                if(widget.getWidgetString().equals(type)) return widget;
-            }
-            Exception e = new IllegalArgumentException("No widget registered with the name " + type + "! This is not possible?!");
-            e.printStackTrace();
-            return null;
+        List<IProgWidget> widgets = getWidgetsForColor(stack.getItemDamage());
+        if(widgets.size() > 0) {
+            World world = PneumaticCraft.proxy.getClientWorld();
+            return widgets.get((int)(world.getTotalWorldTime() % (widgets.size() * 20) / 20));
         } else {
-            List<IProgWidget> widgets = getWidgetsForColor(stack.getItemDamage());
-            if(widgets.size() > 0) {
-                World world = PneumaticCraft.proxy.getClientWorld();
-                return widgets.get((int)(world.getTotalWorldTime() % (widgets.size() * 20) / 20));
-            } else {
-                return null;
-            }
+            return null;
         }
     }
 

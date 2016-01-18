@@ -153,9 +153,9 @@ public class GuiChargingStation extends GuiPneumaticContainerBase<TileEntityChar
             y -= (particleProgress - 0.7F) * 70;
         }
         WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
-        wr.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION); //TODO 1.8 test, and convert to point?
+        GL11.glPointSize(5);
+        wr.begin(GL11.GL_POINTS, DefaultVertexFormats.POSITION);
         wr.pos(x, y, zLevel).endVertex();
-        wr.pos(x, y + 1D, zLevel).endVertex();
         Tessellator.getInstance().draw();
     }
 }

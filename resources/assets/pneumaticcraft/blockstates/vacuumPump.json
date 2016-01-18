@@ -9,28 +9,28 @@
 		"facing": {
 			"up": {"transform": {"rotation" : {"x" : 90}}},
 			"down": {"x" : -90},
-			"east": {
+			"north": {
 				"transform": {
 					"scale": [-1, 1, 1],
 					"rotation": {"y" : 90},
 					"translation": [ 0.5, 1.5, 0.5 ]
 				}
 			},
-			"north": {
+			"west": {
 				"transform": {
 				    "scale": [-1, 1, 1],
 				    "translation": [ 0.5, 1.5, -0.5 ],
 					"rotation": {"y" : 180}
 				}
 			},
-			"west": {
+			"south": {
 				"transform": {
 				    "scale": [-1, 1, 1],
 					"translation": [ -0.5, 1.5, -0.5 ],
 					"rotation": {"y": 270}
 				}
 			},
-			"south": {
+			"east": {
 				"transform": {
                     "scale": [-1, 1, 1],
 					"translation": [ -0.5, 1.5, 0.5 ]

@@ -325,7 +325,7 @@ public class TileEntityAssemblyIOUnit extends TileEntityAssemblyRobot{
         return clawProgress == oldClawProgress && clawProgress == (shouldClawClose ? 1F : 0F);
     }
 
-    private boolean isImportUnit(){
+    public boolean isImportUnit(){
         return !exporting;
     }
 

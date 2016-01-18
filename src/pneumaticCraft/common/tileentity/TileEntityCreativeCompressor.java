@@ -10,11 +10,11 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.api.tileentity.IAirListener;
-import pneumaticCraft.common.network.DescSynced;
+import pneumaticCraft.common.network.GuiSynced;
 import pneumaticCraft.common.pressure.AirHandler;
 
 public class TileEntityCreativeCompressor extends TileEntityPneumaticBase implements IAirListener{
-    @DescSynced
+    @GuiSynced
     public float pressureSetpoint;
 
     public TileEntityCreativeCompressor(){
@@ -55,8 +55,8 @@ public class TileEntityCreativeCompressor extends TileEntityPneumaticBase implem
     }
 
     @Override
-    public void onAirDispersion(IAirHandler handler, EnumFacing dir, int airAdded){
-        addAir(-airAdded); //Keep the pressure equal.
+    public void onAirDispersion(IAirHandler handler, EnumFacing dir, int airTransfered){
+        addAir(airTransfered); //Keep the pressure equal.
     }
 
     @Override

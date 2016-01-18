@@ -6,6 +6,14 @@
         "model": "pneumaticcraft:advancedAirCompressor.obj"
     },
 	"variants": {
+	   "on":{
+           "true":{
+               "model": "pneumaticcraft:advancedAirCompressorActive.obj"
+           },
+           "false":{
+               "model": "pneumaticcraft:advancedAirCompressor.obj"
+           }
+        },
 		"facing": {
 			"up": {"transform": {"rotation" : {"x" : 90}}},
 			"down": {"x" : -90},

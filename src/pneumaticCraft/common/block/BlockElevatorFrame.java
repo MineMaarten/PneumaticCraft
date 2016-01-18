@@ -90,6 +90,11 @@ public class BlockElevatorFrame extends BlockPneumaticCraftModeled{
         // return null;
     }
 
+    @Override
+    public boolean isFullCube(){
+        return false;
+    }
+
     /**
      * Triggered whenever an entity collides with this block (enters into the block). Args: world, x, y, z, entity
      */
@@ -101,7 +106,7 @@ public class BlockElevatorFrame extends BlockPneumaticCraftModeled{
         //     entity.setPosition(entity.posX, y + blockHeight + 2, entity.posZ);
         TileEntityElevatorBase te = getElevatorTE(world, pos);
         if(te != null && te.oldExtension != te.extension) {
-            entity.setPosition(entity.posX, te.getPos().getY() + te.extension + entity.getYOffset() + entity.height + 1, entity.posZ); //TODO 1.8 test, height was ySize
+            entity.setPosition(entity.posX, te.getPos().getY() + te.extension + entity.getYOffset() + entity.height + 1, entity.posZ);
         }
         entity.fallDistance = 0;
         //}
@@ -127,16 +132,6 @@ public class BlockElevatorFrame extends BlockPneumaticCraftModeled{
         if(blockHeight > 1F) return 1F;
         return blockHeight;
     }
-
-    /*@Override TODO 1.8 fix rendering
-    public void onNeighborBlockChange(World world, int x, int y, int z, Block block){
-        int blockMeta = world.getBlockMetadata(x, y, z);
-        if(blockMeta == 0 && world.getBlock(x, y - 1, z) == Blockss.elevatorBase) {
-            world.setBlockMetadataWithNotify(x, y, z, 1, 2);
-        } else if(blockMeta == 1) {
-            world.setBlockMetadataWithNotify(x, y, z, 0, 2);
-        }
-    }*/
 
     @Override
     public void breakBlock(World world, BlockPos pos, IBlockState state){

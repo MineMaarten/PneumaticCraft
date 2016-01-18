@@ -215,7 +215,7 @@ public class RenderBlockTarget{
 
     private boolean isPlayerLookingAtTarget(){
         Vec3 vec3 = player.getLook(1.0F).normalize();
-        Vec3 vec31 = new Vec3(pos.getX() + 0.5D - player.posX, pos.getY() + 0.5D - player.posY + player.getEyeHeight(), pos.getZ() + 0.5D - player.posZ);
+        Vec3 vec31 = new Vec3(pos.getX() + 0.5D - player.posX, pos.getY() + 0.5D - player.posY - player.getEyeHeight(), pos.getZ() + 0.5D - player.posZ);
         double d0 = vec31.lengthVector();
         vec31 = vec31.normalize();
         double d1 = vec3.dotProduct(vec31);

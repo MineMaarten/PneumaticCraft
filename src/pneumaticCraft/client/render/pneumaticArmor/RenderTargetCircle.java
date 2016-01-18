@@ -48,7 +48,6 @@ public class RenderTargetCircle{
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
         GL11.glRotatef((float)renderRotationAngle, 0, 0, 1);
-        GL11.glNormal3f(0F, 1F, 0F); //TODO 1.8 test
         for(int j = 0; j < 2; j++) {
             wr.begin(GL11.GL_TRIANGLE_STRIP, DefaultVertexFormats.POSITION);
             for(int i = 0; i < PneumaticCraftUtils.circlePoints / 4; i++) {

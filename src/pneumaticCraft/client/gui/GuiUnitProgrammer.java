@@ -255,13 +255,13 @@ public class GuiUnitProgrammer extends GuiScreen{
                                         Vec3 arrowVec = new Vec3(x1 - x2, y1 - y2, 0).normalize();
                                         float arrowAngle = (float)Math.toRadians(30);
                                         float arrowSize = 5;
-                                        arrowVec = new Vec3(arrowVec.xCoord * arrowSize, arrowVec.yCoord * arrowSize, 0);
-                                        arrowVec.rotatePitch(arrowAngle); //TODO 1.8 rotateZ == rotatePitch?
+                                        arrowVec = new Vec3(arrowVec.xCoord * arrowSize, 0, arrowVec.yCoord * arrowSize);
+                                        arrowVec = arrowVec.rotateYaw(arrowAngle);
                                         GL11.glVertex3d(guiLeft + midX, guiTop + midY, zLevel);
-                                        GL11.glVertex3d(guiLeft + midX + arrowVec.xCoord, guiTop + midY + arrowVec.yCoord, zLevel);
-                                        arrowVec.rotatePitch(-2 * arrowAngle); //TODO 1.8 rotateZ == rotatePitch?
+                                        GL11.glVertex3d(guiLeft + midX + arrowVec.xCoord, guiTop + midY + arrowVec.zCoord, zLevel);
+                                        arrowVec = arrowVec.rotateYaw(-2 * arrowAngle);
                                         GL11.glVertex3d(guiLeft + midX, guiTop + midY, zLevel);
-                                        GL11.glVertex3d(guiLeft + midX + arrowVec.xCoord, guiTop + midY + arrowVec.yCoord, zLevel);
+                                        GL11.glVertex3d(guiLeft + midX + arrowVec.xCoord, guiTop + midY + arrowVec.zCoord, zLevel);
                                     }
                                 }
                             }

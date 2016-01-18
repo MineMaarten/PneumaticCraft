@@ -67,7 +67,7 @@ public class GuiAssemblyController extends GuiPneumaticContainerBase<TileEntityA
                 drillFound = true;
                 text.add(EnumChatFormatting.GREEN + "-Assembly Drill online");
             } else if(machine instanceof TileEntityAssemblyIOUnit) {
-                if(((TileEntityAssemblyIOUnit)machine).getBlockMetadata() == 0) {
+                if(((TileEntityAssemblyIOUnit)machine).isImportUnit()) {
                     IOUnitImportFound = true;
                     text.add(EnumChatFormatting.GREEN + "-Assembly IO Unit (import) online");
                 } else {

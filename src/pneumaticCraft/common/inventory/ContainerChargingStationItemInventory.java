@@ -23,7 +23,6 @@ public class ContainerChargingStationItemInventory extends ContainerPneumaticBas
         addPlayerSlots(inventoryPlayer, 84);
 
         // Add the player's armor slots to the container.
-        //TODO 1.8 test shift clicking
         for(int i = 0; i < 4; i++) {
             addSlotToContainer(new SlotPneumaticArmor(inventoryPlayer.player, inventoryPlayer, inventoryPlayer.getSizeInventory() - 1 - i, 9, 8 + i * 18, i));
         }

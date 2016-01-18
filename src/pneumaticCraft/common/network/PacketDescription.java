@@ -22,7 +22,7 @@ public class PacketDescription extends LocationIntPacket<PacketDescription>{
     public PacketDescription(){}
 
     public PacketDescription(IDescSynced te){
-        super(te.getPos());
+        super(te.getPosition());
         type = te.getSyncType();
         values = new Object[te.getDescriptionFields().size()];
         types = new byte[values.length];

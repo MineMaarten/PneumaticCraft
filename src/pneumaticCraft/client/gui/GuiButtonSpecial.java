@@ -27,7 +27,7 @@ public class GuiButtonSpecial extends GuiButton implements IGuiWidget{
     private ItemStack[] renderedStacks;
     private ResourceLocation resLoc;
     private List<String> tooltipText = new ArrayList<String>();
-    private final RenderItem itemRenderer = Minecraft.getMinecraft().getRenderItem(); //TODO 1.8 test
+    private final RenderItem itemRenderer = Minecraft.getMinecraft().getRenderItem();
     private int invisibleHoverColor;
     private boolean thisVisible = true;
     private IWidgetListener listener;
