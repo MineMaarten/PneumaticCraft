@@ -183,6 +183,8 @@ public class TileEntityLiquidCompressor extends TileEntityPneumaticBase implemen
 
     @Override
     public boolean isItemValidForSlot(int slot, ItemStack stack){
+        if(canInsertUpgrade(slot, stack)) return true;
+        if(slot < 4) return false;
         return slot == 5 ? false : stack != null && (FluidContainerRegistry.getFluidForFilledItem(stack) != null || stack.getItem() instanceof IFluidContainerItem && ((IFluidContainerItem)stack.getItem()).getFluid(stack) != null);
     }
 

@@ -11,12 +11,11 @@ public class ContainerOmnidirectionalHopper extends ContainerPneumaticBase<TileE
         super(te);
 
         // add the upgrade slots
-        addSlotToContainer(new SlotInventoryLimiting(te, 5, 23, 29));
-        addSlotToContainer(new SlotInventoryLimiting(te, 6, 41, 29));
-        addSlotToContainer(new SlotInventoryLimiting(te, 7, 23, 47));
-        addSlotToContainer(new SlotInventoryLimiting(te, 8, 41, 47));
+        addSlotToContainer(new SlotUpgrade(te, 5, 23, 29));
+        addSlotToContainer(new SlotUpgrade(te, 6, 41, 29));
+        addSlotToContainer(new SlotUpgrade(te, 7, 23, 47));
+        addSlotToContainer(new SlotUpgrade(te, 8, 41, 47));
 
-        // Add the hopper slots. TODO 1.8 test slot order shift clicking
         for(int i = 0; i < 5; i++)
             addSlotToContainer(new Slot(te, i, 68 + i * 18, 36));
 

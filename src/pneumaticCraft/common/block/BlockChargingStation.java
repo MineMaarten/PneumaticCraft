@@ -28,7 +28,8 @@ public class BlockChargingStation extends BlockPneumaticCraftModeled{
 
     @Override
     public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos){
-        if(((TileEntityChargingStation)world.getTileEntity(pos)).getUpgrades(EnumUpgrade.DISPENSER) > 0) {
+        TileEntity te = world.getTileEntity(pos);
+        if(te instanceof TileEntityChargingStation && ((TileEntityChargingStation)te).getUpgrades(EnumUpgrade.DISPENSER) > 0) {
             setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
         } else {
             setBlockBounds(BBConstants.CHARGING_STATION_MIN_POS, 0F, BBConstants.CHARGING_STATION_MIN_POS, BBConstants.CHARGING_STATION_MAX_POS, BBConstants.CHARGING_STATION_MAX_POS_TOP, BBConstants.CHARGING_STATION_MAX_POS);

@@ -83,7 +83,6 @@ public class PneumaticCraft{
 
         PneumaticRegistry.init(PneumaticCraftAPIHandler.getInstance());
         UpgradeRenderHandlerList.init();
-        SensorHandler.getInstance().init();
         Config.init(event.getSuggestedConfigurationFile());
         ThirdPartyManager.instance().index();
 
@@ -104,6 +103,7 @@ public class PneumaticCraft{
         GameRegistry.registerWorldGenerator(new WorldGeneratorPneumaticCraft(), 0);
         AchievementHandler.init();
         HeatBehaviourManager.getInstance().init();
+        SensorHandler.getInstance().init();
 
         proxy.preInit();
         tickHandler = new TickHandlerPneumaticCraft();

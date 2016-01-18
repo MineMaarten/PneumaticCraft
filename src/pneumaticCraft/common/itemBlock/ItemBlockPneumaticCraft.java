@@ -43,7 +43,6 @@ public class ItemBlockPneumaticCraft extends ItemBlock{
         for(ItemStack stack : stacks) {
             ResourceLocation resLoc = new ResourceLocation(Names.MOD_ID, getModelLocation(stack));
             ModelBakery.registerItemVariants(this, resLoc);
-            System.out.println("Registering item block texture: " + resLoc + ", damage: " + stack.getItemDamage());
             Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(this, stack.getItemDamage(), new ModelResourceLocation(resLoc, "inventory"));
         }
     }

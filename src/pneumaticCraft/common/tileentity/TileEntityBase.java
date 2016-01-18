@@ -513,7 +513,7 @@ public class TileEntityBase extends TileEntity implements IGUIButtonSensitive, I
         return null; //Is called directly from the block instead.
     }
 
-    protected boolean canInsertUpgrade(int slot, ItemStack item){
+    public boolean canInsertUpgrade(int slot, ItemStack item){
         return item != null ? canInsertUpgrade(slot, item.getItem()) : false;
     }
 

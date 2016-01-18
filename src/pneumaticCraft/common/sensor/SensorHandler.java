@@ -1,8 +1,14 @@
 package pneumaticCraft.common.sensor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import net.minecraft.client.gui.FontRenderer;
@@ -10,6 +16,7 @@ import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
@@ -45,7 +52,6 @@ import pneumaticCraft.common.sensor.pollSensors.WorldTimeSensor;
 import pneumaticCraft.common.sensor.pollSensors.WorldWeatherForecaster;
 import pneumaticCraft.common.sensor.pollSensors.entity.EntityInRangeSensor;
 import pneumaticCraft.common.tileentity.TileEntityUniversalSensor;
-import pneumaticCraft.common.util.PneumaticCraftUtils;
 
 public class SensorHandler implements ISensorRegistry{
     private static final SensorHandler INSTANCE = new SensorHandler();
@@ -77,24 +83,32 @@ public class SensorHandler implements ISensorRegistry{
         registerSensor(new PlayerHealthSensor());
     }
 
-    private final List<ISensorSetting> sensors = new ArrayList<ISensorSetting>();
-    private final List<String> sensorPaths = new ArrayList<String>();
+    private final Map<String, ISensorSetting> sensors = new LinkedHashMap<String, ISensorSetting>();
 
     public ISensorSetting getSensorFromPath(String buttonPath){
-        for(int i = 0; i < sensorPaths.size(); i++) {
-            if(sensorPaths.get(i).equals(buttonPath)) return sensors.get(i);
+        return sensors.get(buttonPath);
+    }
+
+    public List<ISensorSetting> getSensorsFromPath(String buttonPath){
+        List<ISensorSetting> matchingSensors = new ArrayList<ISensorSetting>();
+        for(Map.Entry<String, ISensorSetting> entry : sensors.entrySet()) {
+            if(entry.getKey().startsWith(buttonPath)) {
+                matchingSensors.add(entry.getValue());
+            }
         }
-        return null;
+        return matchingSensors;
     }
 
     public ISensorSetting getSensorByIndex(int index){
-        return sensors.get(index);
+        return getSensorsFromPath("").get(index);
     }
 
     public String[] getSensorNames(){
-        String[] sensorNames = new String[sensorPaths.size()];
+        String[] sensorNames = new String[sensors.size()];
+        Iterator<String> iterator = sensors.keySet().iterator();
         for(int i = 0; i < sensorNames.length; i++) {
-            sensorNames[i] = sensorPaths.get(i).substring(sensorPaths.get(i).lastIndexOf('/') + 1);
+            String sensorPath = iterator.next();
+            sensorNames[i] = sensorPath.substring(sensorPath.lastIndexOf('/') + 1);
         }
         return sensorNames;
     }
@@ -107,7 +121,7 @@ public class SensorHandler implements ISensorRegistry{
     public ISensorSetting getSensorForName(String name){
         String[] sensorNames = getSensorNames();
         for(int i = 0; i < sensorNames.length; i++) {
-            if(sensorNames[i].equals(name)) return sensors.get(i);
+            if(sensorNames[i].equals(name)) return getSensorByIndex(i);
         }
         return null;
     }
@@ -115,39 +129,34 @@ public class SensorHandler implements ISensorRegistry{
     public List<String> getUpgradeInfo(){
         List<String> text = new ArrayList<String>();
         text.add(EnumChatFormatting.GRAY + "The following combinations of upgrades are used in sensors to work:");
-        for(String sensorPath : sensorPaths) {
-            Set<Item> requiredStacks = getRequiredStacksFromText(sensorPath.split("/")[0]);
+
+        Set<Set<Item>> upgrades = new HashSet<Set<Item>>();
+        for(ISensorSetting sensor : sensors.values()) {
+            upgrades.add(sensor.getRequiredUpgrades());
+        }
+
+        for(Set<Item> requiredStacks : upgrades) {
             String upgradeTitle = "";
             for(Item stack : requiredStacks) {
-                upgradeTitle = upgradeTitle + stack.getUnlocalizedName() + " + "; //TODO 1.8 localize
+                upgradeTitle = upgradeTitle + StatCollector.translateToLocal(stack.getUnlocalizedName() + ".name") + " + ";
             }
             upgradeTitle = EnumChatFormatting.BLACK + "-" + upgradeTitle.substring(0, upgradeTitle.length() - 3).replace("Machine Upgrade: ", "");
-            if(!text.contains(upgradeTitle)) text.add(upgradeTitle);
+            text.add(upgradeTitle);
         }
         return text;
     }
 
     public Set<Item> getUniversalSensorUpgrades(){
         Set<Item> items = new HashSet<Item>();
-        for(ISensorSetting sensor : sensors) {
+        for(ISensorSetting sensor : sensors.values()) {
             items.addAll(sensor.getRequiredUpgrades());
         }
         return items;
     }
 
-    private String sortRequiredUpgrades(String path){
-        String[] requiredUpgrades = path.split("/")[0].split("_");
-        PneumaticCraftUtils.sortStringArrayAlphabetically(requiredUpgrades);
-        String newPath = "";
-        for(String upgrade : requiredUpgrades) {
-            newPath = newPath + upgrade + "_";
-        }
-        return newPath.substring(0, newPath.length() - 1) + path.replace(path.split("/")[0], "");//cut off the last '_'
-    }
-
     public String[] getDirectoriesAtLocation(String path){
         List<String> directories = new ArrayList<String>();
-        for(String sensorPath : sensorPaths) {
+        for(String sensorPath : sensors.keySet()) {
             if(sensorPath.startsWith(path) && !sensorPath.equals(path)) {
 
                 //if path equals "entityTracker/player/" and sensor path equals "entityTracker/player/speed", to directories will "speed" be added.
@@ -161,18 +170,37 @@ public class SensorHandler implements ISensorRegistry{
             }
         }
         String[] directoryArray = directories.toArray(new String[directories.size()]);
-        PneumaticCraftUtils.sortStringArrayAlphabetically(directoryArray);
+        Arrays.sort(directoryArray);
         return directoryArray;
     }
 
+    private String getUpgradePrefix(ISensorSetting sensor){
+        List<Item> upgrades = new ArrayList<Item>(sensor.getRequiredUpgrades());
+
+        Collections.sort(upgrades, new Comparator<Item>(){
+            @Override
+            public int compare(Item arg0, Item arg1){
+                return arg0.getUnlocalizedName().compareTo(arg1.getUnlocalizedName());
+            }
+        });
+
+        String ret = "";
+        for(int i = 0; i < upgrades.size(); i++) {
+            ret += upgrades.get(i).getUnlocalizedName() + (i < upgrades.size() - 1 ? "_" : "/");
+        }
+
+        return ret;
+    }
+
     public Set<Item> getRequiredStacksFromText(String text){
-        return new HashSet<Item>(); //TODO 1.8
+        List<ISensorSetting> sensors = getSensorsFromPath(text);
+        return sensors.isEmpty() ? new HashSet<Item>() : sensors.get(0).getRequiredUpgrades();
     }
 
     @Override
     public void registerSensor(ISensorSetting sensor){
-        sensors.add(sensor);
-        sensorPaths.add(sortRequiredUpgrades(sensor.getSensorPath()));
+        String path = getUpgradePrefix(sensor) + sensor.getSensorPath();
+        sensors.put(path, sensor);
     }
 
     @Override

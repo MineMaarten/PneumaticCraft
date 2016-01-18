@@ -73,7 +73,7 @@ public class GuiUniversalSensor extends GuiPneumaticContainerBase<TileEntityUniv
         fontRendererObj.drawString("Upgr.", 23, 98, 4210752);
 
         String[] folders = te.getSensorSetting().split("/");
-        if(folders.length == 1) {
+        if(folders.length == 1 && !folders[0].equals("")) {
             Set<Item> requiredItems = SensorHandler.getInstance().getRequiredStacksFromText(folders[0]);
             int curX = 102;
             for(Item requiredItem : requiredItems) {
@@ -95,7 +95,7 @@ public class GuiUniversalSensor extends GuiPneumaticContainerBase<TileEntityUniv
     protected void drawGuiContainerBackgroundLayer(float opacity, int x, int y){
         super.drawGuiContainerBackgroundLayer(opacity, x, y);
 
-        nameFilterField.drawTextBox();
+        if(nameFilterField != null) nameFilterField.drawTextBox();
 
         ISensorSetting sensor = SensorHandler.getInstance().getSensorFromPath(te.getSensorSetting());
         if(sensor != null) {

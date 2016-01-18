@@ -47,7 +47,7 @@ public class TileEntityVacuumPump extends TileEntityPneumaticBase implements IIn
 
     public TileEntityVacuumPump(){
         super(PneumaticValues.DANGER_PRESSURE_VACUUM_PUMP, PneumaticValues.MAX_PRESSURE_VACUUM_PUMP, PneumaticValues.VOLUME_VACUUM_PUMP, UPGRADE_SLOT_1, 1, 2, UPGRADE_SLOT_4);
-        vacuumHandler.setUpgradeSlots(PneumaticValues.VOLUME_VACUUM_PUMP, UPGRADE_SLOT_1, 1, 2, UPGRADE_SLOT_4);
+        vacuumHandler.setUpgradeSlots(UPGRADE_SLOT_1, 1, 2, UPGRADE_SLOT_4);
         addApplicableUpgrade(EnumUpgrade.SPEED);
     }
 

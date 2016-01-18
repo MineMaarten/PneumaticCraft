@@ -302,23 +302,6 @@ public class PneumaticCraftUtils{
         }
     }
 
-    public static void sortStringArrayAlphabetically(String[] strings){
-        int j;
-        boolean notDone = true; // will determine when the sort is finished
-        String temp;
-        while(notDone) {
-            notDone = false;
-            for(j = 0; j < strings.length - 1; j++) {
-                if(strings[j].compareToIgnoreCase(strings[j + 1]) > 0) { // ascending sort
-                    temp = strings[j];
-                    strings[j] = strings[j + 1]; // swapping
-                    strings[j + 1] = temp;
-                    notDone = true;
-                }
-            }
-        }
-    }
-
     /**
      * Sorts the stacks given alphabetically, combines them (so 2x64 will become 1x128), and adds the strings into the given string list.
      * @param textList

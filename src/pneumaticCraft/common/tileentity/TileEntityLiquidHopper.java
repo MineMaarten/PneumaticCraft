@@ -51,6 +51,11 @@ public class TileEntityLiquidHopper extends TileEntityOmnidirectionalHopper impl
     }
 
     @Override
+    public boolean isItemValidForSlot(int slot, ItemStack stack){
+        return canInsertUpgrade(slot, stack);
+    }
+
+    @Override
     protected boolean exportItem(int maxItems){
         EnumFacing dir = getRotation();
         if(tank.getFluid() != null) {

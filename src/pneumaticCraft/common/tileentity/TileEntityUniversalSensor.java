@@ -84,6 +84,7 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
         for(Item upgrade : SensorHandler.getInstance().getUniversalSensorUpgrades()) {
             addApplicableUpgrade(upgrade);
         }
+        addApplicableUpgrade(EnumUpgrade.RANGE);
     }
 
     @Override

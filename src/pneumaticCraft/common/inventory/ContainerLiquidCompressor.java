@@ -1,7 +1,6 @@
 package pneumaticCraft.common.inventory;
 
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Slot;
 import pneumaticCraft.common.tileentity.TileEntityLiquidCompressor;
 
 public class ContainerLiquidCompressor extends ContainerPneumaticBase<TileEntityLiquidCompressor>{
@@ -17,7 +16,7 @@ public class ContainerLiquidCompressor extends ContainerPneumaticBase<TileEntity
         }
 
         addSlotToContainer(new SlotFullFluidContainer(te, 4, getFluidContainerOffset(), 22));
-        addSlotToContainer(new Slot(te, 5, getFluidContainerOffset(), 55));
+        addSlotToContainer(new SlotOutput(te, 5, getFluidContainerOffset(), 55));
 
         addPlayerSlots(inventoryPlayer, 84);
     }

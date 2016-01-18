@@ -56,7 +56,7 @@ public class BlockKeroseneLamp extends BlockAirCompressor{
     @Override
     public int getLightValue(IBlockAccess world, BlockPos pos){
         TileEntityKeroseneLamp lamp = (TileEntityKeroseneLamp)world.getTileEntity(pos);
-        return lamp.getRange() > 0 ? 15 : 0;
+        return lamp != null && lamp.getRange() > 0 ? 15 : 0;
     }
 
 }

@@ -367,7 +367,8 @@ public class TileEntityPressureChamberInterface extends TileEntityPressureChambe
 
     @Override
     public boolean isItemValidForSlot(int slot, ItemStack iStack){
-        if(iStack == null) return false;
+        if(canInsertUpgrade(slot, iStack)) return true;
+        if(iStack == null || slot >= UPGRADE_SLOT_START && slot <= UPGRADE_SLOT_END) return false;
         switch(filterMode){
             case ITEM:
                 boolean filterEmpty = true;

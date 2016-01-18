@@ -408,7 +408,7 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
 
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack){
-        return i != 0 || isProgrammableAndValidForDrone(this, itemstack);
+        return i == 0 && isProgrammableAndValidForDrone(this, itemstack) || i != 0 && canInsertUpgrade(i, itemstack);
     }
 
     public static boolean isProgrammableAndValidForDrone(IDroneBase drone, ItemStack programmable){

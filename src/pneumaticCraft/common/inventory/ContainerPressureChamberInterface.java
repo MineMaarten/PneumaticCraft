@@ -18,7 +18,11 @@ public class ContainerPressureChamberInterface extends ContainerPneumaticBase<Ti
                 addSlotToContainer(new SlotInventoryLimiting(te, i * 2 + j + 1, 20 + j * 18, 26 + i * 18));
             }
         }
+
+        addPlayerSlots(inventoryPlayer, 84);
+
         // add the export filter slots
+        // Add them after the player slots so they won't be shift-clicked.
         for(int i = 0; i < 3; i++) {
             for(int j = 0; j < 3; j++) {
                 addSlotToContainer(new SlotPhantomUnstackable(te, i * 3 + j + 5, 115 + j * 18, 25 + i * 18){
@@ -29,8 +33,6 @@ public class ContainerPressureChamberInterface extends ContainerPneumaticBase<Ti
                 });
             }
         }
-
-        addPlayerSlots(inventoryPlayer, 84);
     }
 
 }

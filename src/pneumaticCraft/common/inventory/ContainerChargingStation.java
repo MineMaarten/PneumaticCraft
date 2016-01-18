@@ -1,7 +1,6 @@
 package pneumaticCraft.common.inventory;
 
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Slot;
 import pneumaticCraft.common.tileentity.TileEntityChargingStation;
 
 public class ContainerChargingStation extends ContainerPneumaticBase<TileEntityChargingStation>{
@@ -10,7 +9,7 @@ public class ContainerChargingStation extends ContainerPneumaticBase<TileEntityC
         super(te);
 
         // add the cannoned slot.
-        addSlotToContainer(new Slot(te, 0, 91, 39){
+        addSlotToContainer(new SlotInventoryLimiting(te, 0, 91, 39){
             @Override
             public int getSlotStackLimit(){
                 return 1;
@@ -24,12 +23,11 @@ public class ContainerChargingStation extends ContainerPneumaticBase<TileEntityC
             }
         }
 
-        addPlayerSlots(inventoryPlayer, 84);
-
         // Add the player's armor slots to the container.
-        //TODO 1.8 test shift clicking
         for(int i = 0; i < 4; i++) {
             addSlotToContainer(new SlotPneumaticArmor(inventoryPlayer.player, inventoryPlayer, inventoryPlayer.getSizeInventory() - 1 - i, 9, 8 + i * 18, i));
         }
+
+        addPlayerSlots(inventoryPlayer, 84);
     }
 }
