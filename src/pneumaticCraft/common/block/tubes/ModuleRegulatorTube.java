@@ -75,26 +75,27 @@ public class ModuleRegulatorTube extends TubeModuleRedstoneReceiving implements 
     }
 
     @Override
-    public IBaseModel getModel(){
-        if(model == null) {
-            /*TODO 1.8 model = new BaseModel("regulatorTubeModule.obj"){
-                 @Override
-                 public void renderStatic(float size, TileEntity te){
-                     GL11.glPushMatrix();
-                     GL11.glRotated(90, 0, -1, 0);
-                     GL11.glTranslated(10 / 16D, 24 / 16D, 0);
-                     if(renderItem) {
-                         GL11.glTranslated(1 / 16D, -1 / 16D, 3 / 16D);
-                     }
-                     float scale = 1 / 16F;
-                     GL11.glScalef(scale, scale, scale);
-                     GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-                     super.renderStatic(size, te);
-                     GL11.glPopMatrix();
+    public String getModelName(){
+        return "regulator";
+        //if(model == null) {
+        /*TODO 1.8 model = new BaseModel("regulatorTubeModule.obj"){
+             @Override
+             public void renderStatic(float size, TileEntity te){
+                 GL11.glPushMatrix();
+                 GL11.glRotated(90, 0, -1, 0);
+                 GL11.glTranslated(10 / 16D, 24 / 16D, 0);
+                 if(renderItem) {
+                     GL11.glTranslated(1 / 16D, -1 / 16D, 3 / 16D);
                  }
-             };*/
-        }
-        return model;
+                 float scale = 1 / 16F;
+                 GL11.glScalef(scale, scale, scale);
+                 GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+                 super.renderStatic(size, te);
+                 GL11.glPopMatrix();
+             }
+         };*/
+        //  }
+        ////  return model;
     }
 
     @Override

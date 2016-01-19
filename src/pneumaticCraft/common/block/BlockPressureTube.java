@@ -1,12 +1,14 @@
 package pneumaticCraft.common.block;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -77,6 +79,45 @@ public class BlockPressureTube extends BlockPneumaticCraftModeled{
     @Override
     public TileEntity createNewTileEntity(World world, int metadata){
         return new TileEntityPressureTube(dangerPressure, criticalPressure, volume);
+    }
+
+    @Override
+    protected BlockState createBlockState(){
+        return new BlockState(this, Arrays.copyOf(BlockPressureTube.CONNECTION_PROPERTIES, BlockPressureTube.CONNECTION_PROPERTIES.length));
+    }
+
+    @Override
+    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos){
+        state = super.getActualState(state, worldIn, pos);
+        TileEntityPressureTube tube = (TileEntityPressureTube)worldIn.getTileEntity(pos);
+        for(int i = 0; i < 6; i++) {
+            state = state.withProperty(CONNECTION_PROPERTIES[i], tube.sidesConnected[i]);
+        }
+
+        return state;
+    }
+
+    @Override
+    public IBlockState getStateFromMeta(int meta){
+        IBlockState state = super.getStateFromMeta(meta);
+        for(PropertyBool property : CONNECTION_PROPERTIES) {
+            state = state.withProperty(property, (meta & 1) == 1);
+            meta >>= 1;
+        }
+        return state;
+    }
+
+    @Override
+    public int getMetaFromState(IBlockState state){
+        return 0;
+        /*int meta = 0;
+        for(PropertyBool property : CONNECTION_PROPERTIES) {
+            if(state.getValue(property)) {
+                meta++;
+            }
+            meta <<= 1;
+        }
+        return meta;*/
     }
 
     @Override
@@ -269,16 +310,15 @@ public class BlockPressureTube extends BlockPneumaticCraftModeled{
         setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    //TODO 1.8 verify not necessary
-    /* @Override
-     public void onBlockAdded(World world, BlockPos pos, IBlockState state){
-         super.onBlockAdded(world, pos, state);
-         TileEntity te = world.getTileEntity(pos);
-         if(te != null && te instanceof TileEntityPressureTube) {
-             TileEntityPressureTube tePt = (TileEntityPressureTube)te;
-             tePt.updateConnections(world, x, y, z);
-         }
-     }*/
+    @Override
+    public void onBlockAdded(World world, BlockPos pos, IBlockState state){
+        super.onBlockAdded(world, pos, state);
+        TileEntity te = world.getTileEntity(pos);
+        if(te != null && te instanceof TileEntityPressureTube) {
+            TileEntityPressureTube tePt = (TileEntityPressureTube)te;
+            tePt.updateConnections();
+        }
+    }
 
     @Override
     @SideOnly(Side.CLIENT)

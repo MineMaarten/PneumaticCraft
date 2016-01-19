@@ -90,11 +90,6 @@ public class BlockElevatorFrame extends BlockPneumaticCraftModeled{
         // return null;
     }
 
-    @Override
-    public boolean isFullCube(){
-        return false;
-    }
-
     /**
      * Triggered whenever an entity collides with this block (enters into the block). Args: world, x, y, z, entity
      */

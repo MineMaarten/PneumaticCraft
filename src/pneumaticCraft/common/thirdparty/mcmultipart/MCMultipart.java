@@ -21,13 +21,18 @@ import pneumaticCraft.lib.Names;
 public class MCMultipart implements IThirdParty{
 
     public static Item pressureTube;
+    public static Item advancedPressureTube;
 
     @Override
     public void preInit(){
         MultipartRegistry.registerPart(PartPressureTube.class, "pressureTube");
+        MultipartRegistry.registerPart(PartAdvancedPressureTube.class, "advancedPressureTube");
+        MultipartRegistry.registerPartConverter(new PartConverter());
 
         pressureTube = new ItemPartPressureTube();
         GameRegistry.registerItem(pressureTube, "part.pressureTube");
+        advancedPressureTube = new ItemPartAdvancedPressureTube();
+        GameRegistry.registerItem(advancedPressureTube, "part.advancedPressureTube");
 
     }
 

@@ -3,6 +3,9 @@ package pneumaticCraft.common.block.tubes;
 import java.util.HashMap;
 
 import net.minecraft.item.Item;
+import net.minecraftforge.client.model.IFlexibleBakedModel;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.thirdparty.ModInteractionUtils;
 import pneumaticCraft.lib.Log;
@@ -10,6 +13,8 @@ import pneumaticCraft.lib.Log;
 public class ModuleRegistrator{
     public static HashMap<String, Class<? extends TubeModule>> modules = new HashMap<String, Class<? extends TubeModule>>();
     public static HashMap<String, Item> moduleItems = new HashMap<String, Item>();
+    @SideOnly(Side.CLIENT)
+    public static HashMap<Class<? extends TubeModule>, IFlexibleBakedModel> models;
 
     public static void init(){
         registerModule(ModuleSafetyValve.class);

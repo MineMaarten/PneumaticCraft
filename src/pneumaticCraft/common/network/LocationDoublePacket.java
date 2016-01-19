@@ -3,7 +3,6 @@ package pneumaticCraft.common.network;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import pneumaticCraft.lib.TileEntityConstants;
 
 /**
@@ -13,7 +12,7 @@ import pneumaticCraft.lib.TileEntityConstants;
  * @license Lesser GNU Public License v3 (http://www.gnu.org/licenses/lgpl.html)
  */
 
-public abstract class LocationDoublePacket<REQ extends IMessage> extends AbstractPacket<REQ>{
+public abstract class LocationDoublePacket<REQ extends AbstractPacket> extends AbstractPacket<REQ>{
 
     protected double x, y, z;
 

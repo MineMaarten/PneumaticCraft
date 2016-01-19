@@ -28,6 +28,7 @@ public class DescPacketHandler extends SimpleChannelInboundHandler<FMLProxyPacke
     protected void channelRead0(ChannelHandlerContext ctx, FMLProxyPacket msg) throws Exception{
         PacketDescription packet = new PacketDescription();
         packet.fromBytes(msg.payload());
+        //packet.handleClientSide(packet, PneumaticCraft.proxy.getPlayer());
         pending.add(packet);
     }
 

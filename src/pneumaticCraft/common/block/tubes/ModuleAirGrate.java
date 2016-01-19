@@ -21,7 +21,6 @@ import net.minecraft.world.World;
 
 import org.lwjgl.opengl.GL11;
 
-import pneumaticCraft.client.model.IBaseModel;
 import pneumaticCraft.client.render.RenderRangeLines;
 import pneumaticCraft.common.ai.StringFilterEntitySelector;
 import pneumaticCraft.common.tileentity.TileEntityHeatSink;
@@ -31,7 +30,6 @@ import pneumaticCraft.lib.PneumaticValues;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
 public class ModuleAirGrate extends TubeModule{
-    private final IBaseModel model = null;//TODO 1.8 new ModelAirGrate();
     private int grateRange;
     private boolean vacuum;
     public String entityFilter = "";
@@ -95,7 +93,6 @@ public class ModuleAirGrate extends TubeModule{
         double d0 = grateRange + 0.5D;
         for(Entity entity : entities) {
             if(!entity.worldObj.isRemote && entity.getDistanceSq(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D) < 0.6D && entity instanceof EntityItem && !entity.isDead) {
-                //TODO 1.8 test insertion
                 ItemStack leftover = ((EntityItem)entity).getEntityItem();
                 for(EnumFacing dir : EnumFacing.VALUES) {
                     TileEntity inv = pressureTube.world().getTileEntity(pos.offset(dir));
@@ -173,8 +170,8 @@ public class ModuleAirGrate extends TubeModule{
     }
 
     @Override
-    public IBaseModel getModel(){
-        return model;
+    public String getModelName(){
+        return "airGrate";
     }
 
     @Override
@@ -187,6 +184,8 @@ public class ModuleAirGrate extends TubeModule{
             GL11.glColor4d(1, 1, 1, 0.5);
         }
         GL11.glPopMatrix();
+        GL11.glRotated(90, 1, 0, 0);
+        GL11.glTranslated(0, 1, 1);
     }
 
     @Override

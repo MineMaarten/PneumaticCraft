@@ -18,6 +18,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import pneumaticCraft.common.ai.DroneClaimManager;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.config.AmadronOfferPeriodicConfig;
+import pneumaticCraft.common.network.AbstractPacket;
 import pneumaticCraft.common.network.DescPacketHandler;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketServerTickTime;
@@ -46,7 +47,10 @@ public class TickHandlerPneumaticCraft{
 
     @SubscribeEvent
     public void serverTick(TickEvent.ClientTickEvent event){
-        if(event.phase == TickEvent.Phase.END) DescPacketHandler.processPackets();
+        if(event.phase == TickEvent.Phase.END) {
+            DescPacketHandler.processPackets();
+            AbstractPacket.processPackets();
+        }
     }
 
     private void checkLightning(World world){

@@ -3,13 +3,10 @@ package pneumaticCraft.common.block.tubes;
 import java.util.List;
 
 import net.minecraft.util.EnumChatFormatting;
-import pneumaticCraft.client.model.IBaseModel;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.Names;
 
 public class ModuleSafetyValve extends TubeModuleRedstoneReceiving{
-    private final IBaseModel model = null;//TODO 1.8 new ModelSafetyValve();
-
     @Override
     public void update(){
         super.update();
@@ -32,8 +29,8 @@ public class ModuleSafetyValve extends TubeModuleRedstoneReceiving{
     }
 
     @Override
-    public IBaseModel getModel(){
-        return model;
+    public String getModelName(){
+        return "safetyValve";
     }
 
     @Override

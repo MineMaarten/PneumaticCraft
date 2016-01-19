@@ -8,14 +8,13 @@ public abstract class BlockPneumaticCraftModeled extends BlockPneumaticCraft{
         super(par2Material);
     }
 
-    /* @Override
-     public boolean renderAsNormalBlock(){
-         return false;
-     }*/
-
     @Override
     public boolean isOpaqueCube(){
         return false;
     }
 
+    @Override
+    public boolean isFullCube(){
+        return false;
+    }
 }

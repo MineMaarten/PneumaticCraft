@@ -4,7 +4,6 @@ import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumChatFormatting;
-import pneumaticCraft.client.model.IBaseModel;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketUpdatePressureBlock;
 import pneumaticCraft.common.tileentity.TileEntityPneumaticBase;
@@ -12,8 +11,6 @@ import pneumaticCraft.lib.Names;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
 public class ModulePressureGauge extends TubeModuleRedstoneEmitting{
-    private final IBaseModel model = null;//TODO 1.8 new ModelGauge(this);
-
     public ModulePressureGauge(){
         lowerBound = 0;
         higherBound = 7.5F;
@@ -38,8 +35,8 @@ public class ModulePressureGauge extends TubeModuleRedstoneEmitting{
     }
 
     @Override
-    public IBaseModel getModel(){
-        return model;
+    public String getModelName(){
+        return "gaugeModule";
     }
 
     @Override

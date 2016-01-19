@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
@@ -22,8 +23,17 @@ import org.lwjgl.opengl.GL11;
 
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 
+import com.google.common.base.Function;
+
 public class RenderUtils extends Render{
     public static RenderUtils INSTANCE = new RenderUtils();
+
+    public static Function<ResourceLocation, TextureAtlasSprite> TEXTURE_GETTER = new Function<ResourceLocation, TextureAtlasSprite>(){
+        @Override
+        public TextureAtlasSprite apply(ResourceLocation location){
+            return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(location.toString());
+        }
+    };
 
     private RenderUtils(){
         super(Minecraft.getMinecraft().getRenderManager());

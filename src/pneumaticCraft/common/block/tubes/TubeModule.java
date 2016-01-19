@@ -3,17 +3,25 @@ package pneumaticCraft.common.block.tubes;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
 
-import pneumaticCraft.client.model.IBaseModel;
+import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketOpenTubeModuleGui;
@@ -134,34 +142,42 @@ public abstract class TubeModule implements ISidedPart{
      */
     public abstract String getType();
 
+    @SideOnly(Side.CLIENT)
     public void renderDynamic(double x, double y, double z, float partialTicks, int renderPass, boolean itemRender){
         if(renderPass == 0) {
+            IFlexibleBakedModel model = ModuleRegistrator.models.get(getClass());
+            if(model == null) return;
+
             GL11.glPushMatrix(); // start
             // GL11.glDisable(GL11.GL_TEXTURE_2D);
             // GL11.glEnable(GL11.GL_BLEND);
             // GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
             // GL11.glColor4f(0.82F, 0.56F, 0.09F, 1.0F);
-            GL11.glTranslatef((float)x + 0.5F, (float)y + 1.5F, (float)z + 0.5F); // size
+            GL11.glTranslatef((float)x + 0.5F, (float)y - 0.5F, (float)z + 0.5F); // size
             GL11.glRotatef(0, 0.0F, 1.0F, 0.0F);
 
             GL11.glScalef(1.0F, -1F, -1F); // to make your block have a normal
                                            // positioning. comment out to see what
                                            // happens
 
-            FMLClientHandler.instance().getClient().getTextureManager().bindTexture(getModel().getModelTexture(null));
+            FMLClientHandler.instance().getClient().getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
 
             PneumaticCraftUtils.rotateMatrixByMetadata(dir.ordinal());
             renderModule();
-            getModel().renderStatic(0.0625F, null);
-            getModel().renderDynamic(0.0625F, null, partialTicks);
+            WorldRenderer worldRenderer = Tessellator.getInstance().getWorldRenderer();
+            worldRenderer.setTranslation(-getTube().pos().getX(), -getTube().pos().getY(), -getTube().pos().getZ());
+            worldRenderer.begin(7, DefaultVertexFormats.BLOCK);
+            Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelRenderer().renderModelStandard(getTube().world(), model, Blockss.pressureTube, getTube().pos(), worldRenderer, false);
+            Tessellator.getInstance().draw();
+            worldRenderer.setTranslation(0, 0, 0);
             GL11.glPopMatrix();
         }
     }
 
     protected void renderModule(){}
 
-    public abstract IBaseModel getModel();
+    public abstract String getModelName();
 
     public int getRedstoneLevel(){
         return 0;

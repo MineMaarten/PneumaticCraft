@@ -1,6 +1,7 @@
 package pneumaticCraft.common.thirdparty.mcmultipart;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
@@ -13,11 +14,13 @@ import mcmultipart.multipart.ISlottedPart;
 import mcmultipart.multipart.Multipart;
 import mcmultipart.multipart.OcclusionHelper;
 import mcmultipart.multipart.PartSlot;
+import mcmultipart.raytrace.PartMOP;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.AxisAlignedBB;
@@ -221,5 +224,22 @@ public class PartPressureTube extends Multipart implements ITickable, IPneumatic
     @Override
     public String getModelPath(){
         return Names.MOD_ID + ":" + getType();
+    }
+
+    @Override
+    public ItemStack getPickBlock(EntityPlayer player, PartMOP hit){
+        return new ItemStack(Blockss.pressureTube);
+    }
+
+    @Override
+    public List<ItemStack> getDrops(){
+        List<ItemStack> drops = new ArrayList<ItemStack>();
+        drops.add(new ItemStack(Blockss.pressureTube));
+        return drops;
+    }
+
+    @Override
+    public float getHardness(PartMOP hit){
+        return Blockss.pressureTube.getBlockHardness(null, null);
     }
 }

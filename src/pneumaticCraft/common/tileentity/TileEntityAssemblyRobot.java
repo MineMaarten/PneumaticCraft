@@ -195,8 +195,8 @@ public abstract class TileEntityAssemblyRobot extends TileEntityBase implements 
         }
         slowMode = tag.getBoolean("slowMode");
         speed = tag.getFloat("speed");
-        targetDirection[0] = EnumFacing.values()[tag.getInteger("targetDir1")];
-        targetDirection[1] = EnumFacing.values()[tag.getInteger("targetDir2")];
+        targetDirection[0] = tag.hasKey("targetDir1") ? EnumFacing.values()[tag.getInteger("targetDir1")] : null;
+        targetDirection[1] = tag.hasKey("targetDir2") ? EnumFacing.values()[tag.getInteger("targetDir2")] : null;
 
     }
 
@@ -211,9 +211,9 @@ public abstract class TileEntityAssemblyRobot extends TileEntityBase implements 
         tag.setFloat("speed", speed);
 
         if(targetDirection != null) {
-            if(targetDirection.length > 0) tag.setInteger("targetDir1", targetDirection[0].ordinal());
+            if(targetDirection[0] != null) tag.setInteger("targetDir1", targetDirection[0].ordinal());
 
-            if(targetDirection.length > 1) tag.setInteger("targetDir2", targetDirection[1].ordinal());
+            if(targetDirection[1] != null) tag.setInteger("targetDir2", targetDirection[1].ordinal());
         }
     }
 

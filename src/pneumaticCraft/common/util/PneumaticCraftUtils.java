@@ -100,12 +100,12 @@ public class PneumaticCraftUtils{
             case UP:
                 metaRotation = 0;
                 GL11.glRotated(90, 1, 0, 0);
-                GL11.glTranslated(0, -1, -1);
+                GL11.glTranslated(0, 1, 1);
                 break;
             case DOWN:
                 metaRotation = 0;
                 GL11.glRotated(-90, 1, 0, 0);
-                GL11.glTranslated(0, -1, 1);
+                GL11.glTranslated(0, 1, -1);
                 break;
             case NORTH:
                 metaRotation = 0;

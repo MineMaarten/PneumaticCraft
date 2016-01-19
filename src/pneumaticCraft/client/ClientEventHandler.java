@@ -12,14 +12,20 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderBiped;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.client.model.IFlexibleBakedModel;
+import net.minecraftforge.client.model.IModel;
+import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -33,7 +39,9 @@ import pneumaticCraft.client.gui.IGuiDrone;
 import pneumaticCraft.client.render.RenderProgressingLine;
 import pneumaticCraft.client.util.RenderUtils;
 import pneumaticCraft.common.DateEventHandler;
+import pneumaticCraft.common.block.tubes.ModuleRegistrator;
 import pneumaticCraft.common.block.tubes.ModuleRegulatorTube;
+import pneumaticCraft.common.block.tubes.TubeModule;
 import pneumaticCraft.common.config.Config;
 import pneumaticCraft.common.item.ItemMinigun;
 import pneumaticCraft.common.item.ItemProgrammingPuzzle;
@@ -41,6 +49,9 @@ import pneumaticCraft.common.item.Itemss;
 import pneumaticCraft.common.minigun.Minigun;
 import pneumaticCraft.common.progwidgets.IProgWidget;
 import pneumaticCraft.common.tileentity.TileEntityProgrammer;
+import pneumaticCraft.lib.Names;
+
+import com.google.common.collect.Maps;
 
 public class ClientEventHandler{
     public static float playerRenderPartialTick;
@@ -176,5 +187,25 @@ public class ClientEventHandler{
             }
         }
         GL11.glPopMatrix();
+    }
+
+    @SubscribeEvent
+    public void onTextureStitch(TextureStitchEvent.Pre event){
+        ModuleRegistrator.models = Maps.newHashMap();
+        for(Class<? extends TubeModule> moduleClass : ModuleRegistrator.modules.values()) {
+            try {
+                TubeModule module = moduleClass.newInstance();
+
+                OBJLoader objLoader = OBJLoader.instance;
+                IModel modelDefinition = objLoader.loadModel(new ResourceLocation(Names.MOD_ID, "models/block/modules/" + module.getModelName() + ".obj"));
+                IFlexibleBakedModel model = modelDefinition.bake(modelDefinition.getDefaultState(), DefaultVertexFormats.BLOCK, RenderUtils.TEXTURE_GETTER);
+                ModuleRegistrator.models.put(moduleClass, model);
+                for(ResourceLocation texture : modelDefinition.getTextures()) {
+                    event.map.registerSprite(texture);
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

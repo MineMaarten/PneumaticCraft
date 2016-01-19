@@ -35,7 +35,6 @@ public class ItemPneumatic extends Item{
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, EntityPlayer player, List<String> curInfo, boolean extraInfo){
         super.addInformation(stack, player, curInfo, extraInfo);
-        curInfo.addAll(PneumaticCraftUtils.convertStringIntoList(EnumChatFormatting.RED + "PneumaticCraft is highly unstable at this point! The item/block you're looking at probably does not have a texture. It is recommended only to use the mod for worldgen purposes while it is being stabilized for MC1.8.8.", 40));
         addTooltip(stack, player, curInfo);
     }
 

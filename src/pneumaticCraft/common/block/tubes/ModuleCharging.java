@@ -4,7 +4,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import pneumaticCraft.api.item.IPressurizable;
 import pneumaticCraft.api.tileentity.IAirHandler;
-import pneumaticCraft.client.model.IBaseModel;
 import pneumaticCraft.common.util.IOHelper;
 import pneumaticCraft.common.util.TileEntityCache;
 import pneumaticCraft.lib.Names;
@@ -12,7 +11,6 @@ import pneumaticCraft.lib.PneumaticValues;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
 public class ModuleCharging extends TubeModule{
-    private final IBaseModel model = null;//TODO 1.8 new ModelCharging();
     private TileEntityCache connectedInventory;
 
     @Override
@@ -21,8 +19,8 @@ public class ModuleCharging extends TubeModule{
     }
 
     @Override
-    public IBaseModel getModel(){
-        return model;
+    public String getModelName(){
+        return "charging";
     }
 
     @Override

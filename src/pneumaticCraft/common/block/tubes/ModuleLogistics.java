@@ -18,7 +18,6 @@ import net.minecraftforge.fluids.IFluidHandler;
 
 import org.lwjgl.opengl.GL11;
 
-import pneumaticCraft.client.model.IBaseModel;
 import pneumaticCraft.client.util.RenderUtils;
 import pneumaticCraft.common.ai.LogisticsManager;
 import pneumaticCraft.common.ai.LogisticsManager.LogisticsTask;
@@ -34,7 +33,6 @@ import pneumaticCraft.lib.Names;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
 
 public class ModuleLogistics extends TubeModule{
-    private static final IBaseModel model = null;////TODO 1.8 ModelLogisticsModule model = new ModelLogisticsModule();
     private SemiBlockLogistics cachedFrame;
     private int colorChannel;
     private int ticksSinceAction = -1;//client sided timer used to display the blue color when doing a logistic task.
@@ -61,7 +59,8 @@ public class ModuleLogistics extends TubeModule{
     }
 
     @Override
-    public IBaseModel getModel(){
+    public String getModelName(){
+        return "logisticsModule";
         /*TODO 1.8 if(ticksSinceAction >= 0) {
              model.base1 = model.action;
          } else if(ticksSinceNotEnoughAir >= 0) {
@@ -69,7 +68,6 @@ public class ModuleLogistics extends TubeModule{
          } else {
              model.base1 = hasPower() ? model.powered : model.notPowered;
          }*/
-        return model;
     }
 
     @Override

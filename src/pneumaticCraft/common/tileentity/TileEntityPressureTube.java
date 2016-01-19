@@ -9,7 +9,6 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -176,7 +175,7 @@ public class TileEntityPressureTube extends TileEntityPneumaticBase implements I
     @Override
     public void onNeighborTileUpdate(){
         super.onNeighborTileUpdate();
-        updateConnections(worldObj, getPos().getX(), getPos().getY(), getPos().getZ());
+        updateConnections();
         for(TubeModule module : modules) {
             if(module != null) module.onNeighborTileUpdate();
         }
@@ -185,13 +184,13 @@ public class TileEntityPressureTube extends TileEntityPneumaticBase implements I
     @Override
     public void onNeighborBlockUpdate(){
         super.onNeighborBlockUpdate();
-        updateConnections(worldObj, getPos().getX(), getPos().getY(), getPos().getZ());
+        updateConnections();
         for(TubeModule module : modules) {
             if(module != null) module.onNeighborBlockUpdate();
         }
     }
 
-    public void updateConnections(World world, int x, int y, int z){
+    public void updateConnections(){
         sidesConnected = new boolean[6];
 
         List<Pair<EnumFacing, IAirHandler>> connections = getAirHandler(null).getConnectedPneumatics();

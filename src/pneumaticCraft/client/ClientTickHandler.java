@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import pneumaticCraft.api.client.pneumaticHelmet.IUpgradeRenderHandler;
@@ -66,6 +69,16 @@ public class ClientTickHandler{
                     i--;
                 }
             }
+        }
+    }
+
+    private boolean firstTick = true;
+
+    @SubscribeEvent
+    public void onPlayerJoin(TickEvent.PlayerTickEvent event){
+        if(firstTick && event.player.worldObj.isRemote && event.player == FMLClientHandler.instance().getClientPlayerEntity()) {
+            event.player.addChatComponentMessage(new ChatComponentText(EnumChatFormatting.RED + "PneumaticCraft is unstable at this point! A few blocks/items " + EnumChatFormatting.RED + "don't have a proper model yet. THIS IS NOT A BUG. Most " + EnumChatFormatting.RED + " features should work though (regardless of how it's " + EnumChatFormatting.RED + "displayed as of now)."));
+            firstTick = false;
         }
     }
 }

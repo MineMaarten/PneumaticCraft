@@ -20,12 +20,28 @@ public class GuiCreativeCompressor extends GuiPneumaticContainerBase<TileEntityC
 
     @Override
     public void initGui(){
+        super.initGui();
         int y = height / 2 - 5;
         int x = width / 2;
         buttonList.add(new GuiButton(0, x - 90, y, 30, 20, "-1"));
         buttonList.add(new GuiButton(1, x - 58, y, 30, 20, "-0.1"));
         buttonList.add(new GuiButton(2, x + 28, y, 30, 20, "+0.1"));
         buttonList.add(new GuiButton(3, x + 60, y, 30, 20, "+1"));
+    }
+
+    @Override
+    protected Point getGaugeLocation(){
+        return null;
+    }
+
+    @Override
+    protected boolean shouldAddPressureTab(){
+        return false;
+    }
+
+    @Override
+    protected boolean shouldAddProblemTab(){
+        return false;
     }
 
     @Override

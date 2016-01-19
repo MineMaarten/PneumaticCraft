@@ -28,6 +28,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
@@ -49,6 +50,7 @@ import pneumaticCraft.client.render.pneumaticArmor.CoordTrackUpgradeHandler;
 import pneumaticCraft.client.render.pneumaticArmor.HUDHandler;
 import pneumaticCraft.client.render.pneumaticArmor.UpgradeRenderHandlerList;
 import pneumaticCraft.client.render.pneumaticArmor.entitytracker.EntityTrackHandler;
+import pneumaticCraft.client.render.tileentity.PressureTubeModuleRenderer;
 import pneumaticCraft.client.semiblock.ClientSemiBlockManager;
 import pneumaticCraft.common.CommonHUDHandler;
 import pneumaticCraft.common.HackTickHandler;
@@ -68,6 +70,7 @@ import pneumaticCraft.common.semiblock.ItemSemiBlockBase;
 import pneumaticCraft.common.thirdparty.ThirdPartyManager;
 import pneumaticCraft.common.thirdparty.igwmod.IGWSupportNotifier;
 import pneumaticCraft.common.tileentity.TileEntityPlasticMixer;
+import pneumaticCraft.common.tileentity.TileEntityPressureTube;
 import pneumaticCraft.lib.Log;
 import pneumaticCraft.lib.ModIds;
 import pneumaticCraft.lib.Names;
@@ -85,6 +88,8 @@ public class ClientProxy extends CommonProxy{
         for(Fluid fluid : Fluids.fluids) {
             ModelLoader.setBucketModelDefinition(Fluids.getBucket(fluid));
         }
+
+        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPressureTube.class, new PressureTubeModuleRenderer());
 
         MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
 
