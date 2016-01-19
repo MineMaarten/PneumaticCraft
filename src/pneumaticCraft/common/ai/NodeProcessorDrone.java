@@ -4,10 +4,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.world.pathfinder.WalkNodeProcessor;
+import net.minecraft.world.pathfinder.SwimNodeProcessor;
 import pneumaticCraft.common.entity.living.EntityDrone;
 
-public class NodeProcessorDrone extends WalkNodeProcessor{
+public class NodeProcessorDrone extends SwimNodeProcessor{
     //TODO 1.8 test if it works
     @Override
     public int findPathOptions(PathPoint[] pathOptions, Entity entityIn, PathPoint currentPoint, PathPoint targetPoint, float maxDistance){

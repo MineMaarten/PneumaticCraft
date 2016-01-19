@@ -72,6 +72,13 @@ public class TileEntityProgrammer extends TileEntityBase implements IInventory, 
     public void readFromPacket(NBTTagCompound tag){
         super.readFromPacket(tag);
         readProgWidgetsFromNBT(tag);
+        System.out.println(this + ", " + progWidgets);
+    }
+
+    @Override
+    public void invalidate(){
+        super.invalidate();
+        System.out.println("invalidating programmer");
     }
 
     @Override
@@ -491,6 +498,12 @@ public class TileEntityProgrammer extends TileEntityBase implements IInventory, 
     @Override
     public void update(){
         super.update();
+    }
+
+    @Override
+    protected void onFirstServerUpdate(){
+        super.onFirstServerUpdate();
+
     }
 
     public boolean previewArea(int widgetX, int widgetY){

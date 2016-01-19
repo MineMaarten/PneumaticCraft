@@ -37,6 +37,7 @@ import net.minecraft.network.EnumPacketDirection;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.pathfinding.PathEntity;
+import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ItemInWorldManager;
@@ -156,7 +157,6 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
     public EntityDrone(World world){
         super(world);
         setSize(0.7F, 0.35F);
-        ReflectionHelper.setPrivateValue(EntityLiving.class, this, new EntityPathNavigateDrone(this, world), "navigator", "field_70699_by");
         ReflectionHelper.setPrivateValue(EntityLiving.class, this, new DroneMoveHelper(this), "moveHelper", "field_70765_h");
         tasks.addTask(1, chargeAI = new DroneGoToChargingStation(this));
     }
@@ -165,6 +165,11 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
         this(world);
         playerUUID = player.getGameProfile().getId().toString();
         playerName = player.getName();
+    }
+
+    @Override
+    protected PathNavigate getNewNavigator(World worldIn){
+        return new EntityPathNavigateDrone(this, worldIn);
     }
 
     private void initializeFakePlayer(){

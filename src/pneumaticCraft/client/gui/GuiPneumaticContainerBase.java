@@ -66,6 +66,7 @@ IWidgetListener{
     protected GuiAnimatedStat problemTab;
     private GuiAnimatedStat redstoneTab;
     protected GuiButtonSpecial redstoneButton;
+    private boolean hasInit; //Fix for some weird race condition occuring in 1.8 where drawing is called before initGui().
 
     public GuiPneumaticContainerBase(Container par1Container, Tile te, String guiTexture){
         super(par1Container);
@@ -168,6 +169,7 @@ IWidgetListener{
                 if(upgradeText.size() > 0) addAnimatedStat("gui.tab.upgrades", Textures.GUI_UPGRADES_LOCATION, 0xFF0000FF, true).setText(upgradeText);
             }
         }
+        hasInit = true;
     }
 
     protected void addInfoTab(String info){
@@ -258,6 +260,7 @@ IWidgetListener{
 
     @Override
     public void drawScreen(int x, int y, float partialTick){
+        if(!hasInit) return;
         super.drawScreen(x, y, partialTick);
 
         List<String> tooltip = new ArrayList<String>();

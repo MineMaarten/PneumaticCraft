@@ -5,9 +5,11 @@ import java.util.List;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import pneumaticCraft.common.tileentity.TileEntityProgrammer;
@@ -28,6 +30,17 @@ public class BlockProgrammer extends BlockPneumaticCraftModeled{
     @Override
     public EnumGuiId getGuiID(){
         return EnumGuiId.PROGRAMMER;
+    }
+
+    @Override
+    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing face, float par7, float par8, float par9){
+        if(!world.isRemote) {
+            TileEntity te = world.getTileEntity(pos);
+            if(te instanceof TileEntityProgrammer) {
+                ((TileEntityProgrammer)te).sendDescriptionPacket();
+            }
+        }
+        return super.onBlockActivated(world, pos, state, player, face, par7, par8, par9);
     }
 
     @Override

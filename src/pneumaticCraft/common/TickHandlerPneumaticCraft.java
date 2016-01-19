@@ -18,6 +18,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import pneumaticCraft.common.ai.DroneClaimManager;
 import pneumaticCraft.common.block.Blockss;
 import pneumaticCraft.common.config.AmadronOfferPeriodicConfig;
+import pneumaticCraft.common.network.DescPacketHandler;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketServerTickTime;
 import pneumaticCraft.common.recipes.AmadronOfferManager;
@@ -41,6 +42,11 @@ public class TickHandlerPneumaticCraft{
                 if(event.world.getTotalWorldTime() % 600 == 0) AmadronOfferManager.getInstance().tryRestockCustomOffers();
             }
         }
+    }
+
+    @SubscribeEvent
+    public void serverTick(TickEvent.ClientTickEvent event){
+        if(event.phase == TickEvent.Phase.END) DescPacketHandler.processPackets();
     }
 
     private void checkLightning(World world){

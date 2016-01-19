@@ -55,7 +55,7 @@ public class EntityPathNavigateDrone extends PathNavigate implements IPathNaviga
         if(!pathfindingEntity.isBlockValidPathfindBlock(pos)) return null;
         PathEntity path = null;
         if(!forceTeleport || pos.equals(new BlockPos(pathfindingEntity))) {
-            path = super.getPathToPos(pos);
+            path = super.getPathToPos(pos.down());
             if(path != null) {
                 PathPoint finalPoint = path.getFinalPathPoint();
                 if(finalPoint == null || !pos.equals(new BlockPos(finalPoint.xCoord, finalPoint.yCoord, finalPoint.zCoord))) path = null;
@@ -107,7 +107,18 @@ public class EntityPathNavigateDrone extends PathNavigate implements IPathNaviga
                 pathfindingEntity.addAir(null, -10000);
             }
         } else {
-            super.onUpdateNavigation();
+            // super.onUpdateNavigation();
+            if(!noPath()) {
+                pathFollow();
+
+                if(!noPath()) {
+                    Vec3 vec32 = currentPath.getPosition(theEntity);
+
+                    if(vec32 != null) {
+                        theEntity.getMoveHelper().setMoveTo(vec32.xCoord, vec32.yCoord, vec32.zCoord, speed);
+                    }
+                }
+            }
         }
     }
 
