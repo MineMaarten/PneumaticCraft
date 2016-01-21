@@ -57,6 +57,10 @@ public class MCMultipart implements IThirdParty{
         ModelBakery.registerItemVariants(pressureTube, resLoc);
         Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(pressureTube, 0, new ModelResourceLocation(resLoc, "inventory"));
 
+        resLoc = new ResourceLocation(Names.MOD_ID, "advancedPressureTube");
+        ModelBakery.registerItemVariants(advancedPressureTube, resLoc);
+        Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(advancedPressureTube, 0, new ModelResourceLocation(resLoc, "inventory"));
+
     }
 
     private static TileMultipart getMultipartTile(IBlockAccess access, BlockPos pos){

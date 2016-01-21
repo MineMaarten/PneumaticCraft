@@ -7,45 +7,46 @@
     },
 	"variants": {
 		"facing": {
-			"up": {
+			"south": {
 			    "transform": {
 			         "scale": [-1, 1, 1],
     			     "rotation" : {"x" : -90},
     			     "translation": [ -0.5, 0.5, -1.5 ]
     			}
 			},
-			"down": {
+			"north": {
                 "transform": {
                      "scale": [-1, 1, 1],
                      "rotation" : {"x" : 90},
                      "translation": [ -0.5, -0.5, 1.5 ]
                 }
             },
-			"east": {
+			"down": {
 				"transform": {
 					"scale": [-1, 1, 1],
 					"rotation": {"y" : 90},
 					"translation": [ 0.5, 1.5, 0.5 ]
 				}
 			},
-			"north": {
+			"up": {
 				"transform": {
 				    "scale": [-1, 1, 1],
-				    "translation": [ 0.5, 1.5, -0.5 ],
-					"rotation": {"y" : 180}
+				    "translation": [ -0.5, -1.5, -0.5 ],
+					"rotation": {"x" : 180}
 				}
 			},
 			"west": {
 				"transform": {
 				    "scale": [-1, 1, 1],
-					"translation": [ -0.5, 1.5, -0.5 ],
-					"rotation": {"y": 270}
+					"translation": [ 1.5, 0.5, 0.5 ],
+					"rotation": {"z": 270}
 				}
 			},
-			"south": {
+			"east": {
 				"transform": {
                     "scale": [-1, 1, 1],
-					"translation": [ -0.5, 1.5, 0.5 ]
+                    "rotation": {"z": 90},
+					"translation": [ -1.5, -0.5, 0.5 ]
 				}
 			}
 		},

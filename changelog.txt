@@ -1,6 +1,7 @@
--Fixed most of the missing models/textures. ANIMATIONS ARE STILL WIP!
--Machines now only allow you to insert upgrades that are applicable for the machine.
--Machine Upgrades now have dynamic tooltips depending on the machines that accept them.
--Added MCMultipart support for tubes.
+-The Heat Sink orientation is now dependant on the face clicked rather than the orientation of the player.
+-Fixed a few missing localizations.
+-The Omnidirectional Hopper and the Liquid Hopper work and have a proper render now.
 
--Bugfix: All items are rendered without lighting.
+-Bugfix: Heat Sink rendering rotation is broken.
+-Bugfix: Missing textures due to casing problems.
+-Bugfix: Random crash with packet handling. (crash in the Nether)
