@@ -143,7 +143,7 @@ public class ProgWidgetCoordinateOperator extends ProgWidget implements IVariabl
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return operator.texture;
     }
 

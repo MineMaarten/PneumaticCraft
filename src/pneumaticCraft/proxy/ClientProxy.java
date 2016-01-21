@@ -19,10 +19,10 @@ import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -42,7 +42,7 @@ import pneumaticCraft.client.ClientEventHandler;
 import pneumaticCraft.client.ClientTickHandler;
 import pneumaticCraft.client.KeyHandler;
 import pneumaticCraft.client.gui.pneumaticHelmet.GuiHelmetMainScreen;
-import pneumaticCraft.client.model.IBaseModel;
+import pneumaticCraft.client.model.item.ModelProgrammingPuzzle.LoaderProgrammingPuzzle;
 import pneumaticCraft.client.render.entity.RenderDrone;
 import pneumaticCraft.client.render.entity.RenderEntityRing;
 import pneumaticCraft.client.render.entity.RenderEntityVortex;
@@ -84,6 +84,7 @@ public class ClientProxy extends CommonProxy{
     @Override
     public void preInit(){
         OBJLoader.instance.addDomain(Names.MOD_ID);
+        ModelLoaderRegistry.registerLoader(LoaderProgrammingPuzzle.instance);
 
         for(Fluid fluid : Fluids.fluids) {
             ModelLoader.setBucketModelDefinition(Fluids.getBucket(fluid));
@@ -146,48 +147,6 @@ public class ClientProxy extends CommonProxy{
 
         ThirdPartyManager.instance().clientInit();
 
-        // RenderingRegistry.registerBlockHandler(new RendererSpecialBlock());
-        /* registerBaseModelRenderer(Blockss.airCompressor, TileEntityAirCompressor.class, new ModelAirCompressor("airCompressor"));
-         registerBaseModelRenderer(Blockss.advancedAirCompressor, TileEntityAdvancedAirCompressor.class, new ModelAirCompressor("advancedAirCompressor"));
-         registerBaseModelRenderer(Blockss.assemblyController, TileEntityAssemblyController.class, new ModelAssemblyController());
-         registerBaseModelRenderer(Blockss.assemblyDrill, TileEntityAssemblyDrill.class, new ModelAssemblyDrill());
-         registerBaseModelRenderer(Blockss.assemblyIOUnit, TileEntityAssemblyIOUnit.class, new ModelAssemblyIOUnit());
-         registerBaseModelRenderer(Blockss.assemblyLaser, TileEntityAssemblyLaser.class, new ModelAssemblyLaser());
-         registerBaseModelRenderer(Blockss.assemblyPlatform, TileEntityAssemblyPlatform.class, new ModelAssemblyPlatform());
-         registerBaseModelRenderer(Blockss.chargingStation, TileEntityChargingStation.class, new ModelChargingStation());
-         registerBaseModelRenderer(Blockss.creativeCompressor, TileEntityCreativeCompressor.class, new BaseModel("creativeCompressor.obj"));
-         registerBaseModelRenderer(Blockss.electrostaticCompressor, TileEntityElectrostaticCompressor.class, new BaseModel("electrostaticCompressor.obj"));
-         registerBaseModelRenderer(Blockss.elevatorBase, TileEntityElevatorBase.class, new ModelElevatorBase());
-         registerBaseModelRenderer(Blockss.pneumaticDoor, TileEntityPneumaticDoor.class, new ModelPneumaticDoor());
-         registerBaseModelRenderer(Blockss.pneumaticDoorBase, TileEntityPneumaticDoorBase.class, new ModelPneumaticDoorBase());
-         registerBaseModelRenderer(Blockss.pressureChamberInterface, TileEntityPressureChamberInterface.class, new ModelPressureChamberInterface());
-         registerBaseModelRenderer(Blockss.securityStation, TileEntitySecurityStation.class, new ModelComputer(Textures.MODEL_SECURITY_STATION));
-         registerBaseModelRenderer(Blockss.universalSensor, TileEntityUniversalSensor.class, new ModelUniversalSensor());
-         registerBaseModelRenderer(Blockss.uvLightBox, TileEntityUVLightBox.class, new ModelUVLightBox());
-         registerBaseModelRenderer(Blockss.vacuumPump, TileEntityVacuumPump.class, new ModelVacuumPump());
-         registerBaseModelRenderer(Blockss.omnidirectionalHopper, TileEntityOmnidirectionalHopper.class, new ModelOmnidirectionalHopper(Textures.MODEL_OMNIDIRECTIONAL_HOPPER));
-         registerBaseModelRenderer(Blockss.liquidHopper, TileEntityLiquidHopper.class, new ModelLiquidHopper());
-         registerBaseModelRenderer(Blockss.programmer, TileEntityProgrammer.class, new ModelComputer(Textures.MODEL_PROGRAMMER));
-         registerBaseModelRenderer(Blockss.plasticMixer, TileEntityPlasticMixer.class, new ModelPlasticMixer());
-         registerBaseModelRenderer(Blockss.liquidCompressor, TileEntityLiquidCompressor.class, new BaseModel("liquidCompressor.obj"));
-         registerBaseModelRenderer(Blockss.advancedLiquidCompressor, TileEntityAdvancedLiquidCompressor.class, new BaseModel("liquidCompressor.obj", "advancedLiquidCompressor.png"));
-         registerBaseModelRenderer(Blockss.heatSink, TileEntityHeatSink.class, new ModelHeatSink());
-         registerBaseModelRenderer(Blockss.vortexTube, TileEntityVortexTube.class, new ModelVortexTube());
-         registerBaseModelRenderer(Blockss.thermopneumaticProcessingPlant, TileEntityThermopneumaticProcessingPlant.class, new ModelThermopneumaticProcessingPlant());
-         registerBaseModelRenderer(Blockss.refinery, TileEntityRefinery.class, new ModelRefinery());
-         registerBaseModelRenderer(Blockss.gasLift, TileEntityGasLift.class, new ModelGasLift());
-         registerBaseModelRenderer(Blockss.keroseneLamp, TileEntityKeroseneLamp.class, new ModelKeroseneLamp());
-         registerBaseModelRenderer(Blockss.sentryTurret, TileEntitySentryTurret.class, new ModelSentryTurret());
-
-         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPressureTube.class, new RenderPressureTube());
-         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityAirCannon.class, new RenderAirCannon());
-         // ClientRegistry.bindTileEntitySpecialRenderer(TileEntityElevatorBase.class, new RenderElevatorBase());
-         // ClientRegistry.bindTileEntitySpecialRenderer(TileEntityAdvancedPressureTube.class, new RenderAdvancedPressureTube());
-         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityAphorismTile.class, new RenderAphorismTile());
-         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityElevatorCaller.class, new RenderElevatorCaller());
-         // ClientRegistry.bindTileEntitySpecialRenderer(TileEntityProgrammableController.class, new RenderProgrammableController());
-         // ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySentryTurret.class, new RenderSentryTurret());*/
-
         RenderingRegistry.registerEntityRenderingHandler(EntityVortex.class, new RenderEntityVortex());
         RenderingRegistry.registerEntityRenderingHandler(EntityDrone.class, new RenderDrone(false));
         RenderingRegistry.registerEntityRenderingHandler(EntityLogisticsDrone.class, new RenderDrone(true));
@@ -198,18 +157,6 @@ public class ClientProxy extends CommonProxy{
 
         registerModuleRenderers();
         super.init();
-    }
-
-    public static void registerBaseModelRenderer(Block block, Class<? extends TileEntity> tileEntityClass, IBaseModel model){
-        /*  if(model instanceof BaseModel) {
-              ((BaseModel)model).rotatable = ((BlockPneumaticCraft)block).isRotatable();
-          }*/
-        registerBaseModelRenderer(Item.getItemFromBlock(block), tileEntityClass, model);
-    }
-
-    private static void registerBaseModelRenderer(Item item, Class<? extends TileEntity> tileEntityClass, IBaseModel model){
-        /*RenderModelBase renderer = new RenderModelBase(model);
-        ClientRegistry.bindTileEntitySpecialRenderer(tileEntityClass, renderer);*/
     }
 
     @Override

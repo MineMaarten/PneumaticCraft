@@ -20,6 +20,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -56,6 +57,7 @@ import com.google.common.collect.Maps;
 public class ClientEventHandler{
     public static float playerRenderPartialTick;
     private final RenderProgressingLine minigunFire = new RenderProgressingLine().setProgress(1);
+    private final Map<IModel, Class<? extends TubeModule>> awaitingBaking = new HashMap<IModel, Class<? extends TubeModule>>();
 
     @SubscribeEvent
     public void onItemTooltip(ItemTooltipEvent event){
@@ -191,6 +193,7 @@ public class ClientEventHandler{
 
     @SubscribeEvent
     public void onTextureStitch(TextureStitchEvent.Pre event){
+        System.out.println("Stitching...");
         ModuleRegistrator.models = Maps.newHashMap();
         for(Class<? extends TubeModule> moduleClass : ModuleRegistrator.modules.values()) {
             try {
@@ -198,14 +201,22 @@ public class ClientEventHandler{
 
                 OBJLoader objLoader = OBJLoader.instance;
                 IModel modelDefinition = objLoader.loadModel(new ResourceLocation(Names.MOD_ID, "models/block/modules/" + module.getModelName() + ".obj"));
-                IFlexibleBakedModel model = modelDefinition.bake(modelDefinition.getDefaultState(), DefaultVertexFormats.BLOCK, RenderUtils.TEXTURE_GETTER);
-                ModuleRegistrator.models.put(moduleClass, model);
+                awaitingBaking.put(modelDefinition, moduleClass);
                 for(ResourceLocation texture : modelDefinition.getTextures()) {
                     event.map.registerSprite(texture);
                 }
             } catch(Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    @SubscribeEvent
+    public void onModelBaking(ModelBakeEvent event){
+        System.out.println("Baking...");
+        for(Map.Entry<IModel, Class<? extends TubeModule>> entry : awaitingBaking.entrySet()) {
+            IFlexibleBakedModel model = entry.getKey().bake(entry.getKey().getDefaultState(), DefaultVertexFormats.BLOCK, RenderUtils.TEXTURE_GETTER);
+            ModuleRegistrator.models.put(entry.getValue(), model);
         }
     }
 }

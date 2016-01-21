@@ -16,7 +16,7 @@ public class ProgWidgetLiquidImport extends ProgWidgetInventoryBase implements I
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_LIQUID_IM;
     }
 

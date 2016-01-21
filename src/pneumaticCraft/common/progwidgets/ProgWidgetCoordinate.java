@@ -69,7 +69,7 @@ public class ProgWidgetCoordinate extends ProgWidget implements IVariableWidget{
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_COORDINATE;
     }
 

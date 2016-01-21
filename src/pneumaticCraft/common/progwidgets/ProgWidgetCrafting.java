@@ -82,7 +82,7 @@ public class ProgWidgetCrafting extends ProgWidget implements ICraftingWidget, I
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_CRAFTING;
     }
 

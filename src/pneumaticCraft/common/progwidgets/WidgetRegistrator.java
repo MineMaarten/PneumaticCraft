@@ -74,6 +74,10 @@ public class WidgetRegistrator{
         return allRegisteredWidgets.keySet();
     }
 
+    public static IProgWidget getWidgetFromName(String name){
+        return allRegisteredWidgets.get(name);
+    }
+
     public static void compileBlacklist(){
         registeredWidgets.clear();
         for(Map.Entry<String, IProgWidget> entry : allRegisteredWidgets.entrySet()) {

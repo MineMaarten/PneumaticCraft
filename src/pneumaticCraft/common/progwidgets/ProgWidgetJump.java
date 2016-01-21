@@ -104,7 +104,7 @@ public class ProgWidgetJump extends ProgWidget implements IJump{
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_JUMP;
     }
 

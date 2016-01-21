@@ -14,7 +14,7 @@ public class ProgWidgetInventoryExport extends ProgWidgetInventoryBase{
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_INV_EX;
     }
 

@@ -37,7 +37,7 @@ public class ProgWidgetWait extends ProgWidget{
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_WAIT;
     }
 

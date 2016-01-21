@@ -12,7 +12,6 @@ import org.lwjgl.opengl.GL11;
 import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.api.tileentity.IPneumaticMachine;
 import pneumaticCraft.client.ClientTickHandler;
-import pneumaticCraft.client.model.IBaseModel;
 import pneumaticCraft.client.util.RenderUtils;
 import pneumaticCraft.common.network.NetworkHandler;
 import pneumaticCraft.common.network.PacketDescriptionPacketRequest;
@@ -25,8 +24,6 @@ public class ModuleRegulatorTube extends TubeModuleRedstoneReceiving implements 
     public static boolean hasTicked;
     public static boolean inLine;
     public static boolean inverted;
-
-    private IBaseModel model;
 
     @Override
     public void renderDynamic(double x, double y, double z, float partialTicks, int renderPass, boolean itemRender){

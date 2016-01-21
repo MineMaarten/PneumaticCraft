@@ -14,7 +14,7 @@ public class ProgWidgetTeleport extends ProgWidgetGoToLocation{
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_TELEPORT;
     }
 

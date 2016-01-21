@@ -45,7 +45,7 @@ public class ProgWidgetLabel extends ProgWidget implements ILabel{
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_LABEL;
     }
 

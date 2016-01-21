@@ -16,7 +16,7 @@ public class ProgWidgetEntityExport extends ProgWidgetAreaItemBase{
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_ENTITY_EX;
     }
 

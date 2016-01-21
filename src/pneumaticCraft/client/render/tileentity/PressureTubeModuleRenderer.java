@@ -3,6 +3,7 @@ package pneumaticCraft.client.render.tileentity;
 import java.util.Arrays;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.util.MovingObjectPosition;
@@ -22,7 +23,10 @@ public class PressureTubeModuleRenderer extends TileEntitySpecialRenderer<TileEn
         GL11.glPushMatrix();
 
         FMLClientHandler.instance().getClient().getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
-        //   GlStateManager.disableLighting();
+        GlStateManager.disableLighting();
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableAlpha();
+        GlStateManager.color(1, 1, 1);
 
         GL11.glTranslatef((float)x + 0.5F, (float)y + 1.5F, (float)z + 0.5F);
         GL11.glRotatef(0, 0.0F, 1.0F, 0.0F);

@@ -71,6 +71,7 @@ public class ItemProgrammingPuzzle extends ItemPneumatic{
         List<IProgWidget> widgets = getWidgetsForColor(stack.getItemDamage());
         if(widgets.size() > 0) {
             World world = PneumaticCraft.proxy.getClientWorld();
+            if(world == null) return null;
             return widgets.get((int)(world.getTotalWorldTime() % (widgets.size() * 20) / 20));
         } else {
             return null;

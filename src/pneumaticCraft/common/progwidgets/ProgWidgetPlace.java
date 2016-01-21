@@ -63,7 +63,7 @@ public class ProgWidgetPlace extends ProgWidgetDigAndPlace implements ISidedWidg
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_PLACE;
     }
 

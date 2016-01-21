@@ -49,7 +49,7 @@ public class ProgWidgetItemInventoryCondition extends ProgWidgetCondition{
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_CONDITION_ITEM_INVENTORY;
     }
 

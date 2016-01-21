@@ -88,7 +88,7 @@ public class ProgWidgetCoordinateCondition extends ProgWidgetConditionBase{
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_CONDITION_COORDINATE;
     }
 

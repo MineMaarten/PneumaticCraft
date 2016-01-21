@@ -6,8 +6,12 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import pneumaticCraft.client.gui.GuiProgrammer;
 import pneumaticCraft.common.ai.IDroneBase;
 
@@ -25,6 +29,12 @@ public interface IProgWidget{
     public int getHeight();
 
     public void render();
+
+    public ResourceLocation getTexture();
+
+    public Pair<Double, Double> getMaxUV();
+
+    public int getTextureSize();
 
     public void getTooltip(List<String> curTooltip);
 

@@ -19,7 +19,7 @@ public class ProgWidgetDig extends ProgWidgetDigAndPlace{
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_DIG;
     }
 

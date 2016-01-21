@@ -182,7 +182,7 @@ public class DroneAILogistics extends EntityAIBase{
         }
 
         @Override
-        protected ResourceLocation getTexture(){
+        public ResourceLocation getTexture(){
             return null;
         }
 

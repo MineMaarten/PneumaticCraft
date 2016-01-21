@@ -127,7 +127,7 @@ public class ProgWidgetItemFilter extends ProgWidget implements IVariableWidget{
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_ITEM_FILTER;
     }
 

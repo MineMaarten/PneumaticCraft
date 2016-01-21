@@ -26,8 +26,8 @@ import net.minecraftforge.fml.relauncher.Side;
 
 public class NetworkHandler{
 
-    public static final SimpleNetworkWrapper INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel("PneumaticCraft");
-    public static int discriminant;
+    private static final SimpleNetworkWrapper INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel("PneumaticCraft");
+    private static int discriminant;
 
     /*
      * The integer is the ID of the message, the Side is the side this message will be handled (received) on!

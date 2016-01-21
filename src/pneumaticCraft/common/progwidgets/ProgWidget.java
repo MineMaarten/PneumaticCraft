@@ -16,13 +16,14 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.text.WordUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 import pneumaticCraft.client.gui.GuiProgrammer;
@@ -145,16 +146,40 @@ public abstract class ProgWidget implements IProgWidget{
         FMLClientHandler.instance().getClient().getTextureManager().bindTexture(getTexture());
         int width = getWidth() + (getParameters() != null && getParameters().length > 0 ? 10 : 0);
         int height = getHeight() + (hasStepOutput() ? 10 : 0);
+        Pair<Double, Double> maxUV = getMaxUV();
+        double u = maxUV.getLeft();
+        double v = maxUV.getRight();
         WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
         wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
         wr.pos(0, 0, 0).tex(0, 0).endVertex();
-        wr.pos(0, height, 0).tex(0, 1).endVertex();
-        wr.pos(width, height, 0).tex(1, 1).endVertex();
-        wr.pos(width, 0, 0).tex(1, 0).endVertex();
+        wr.pos(0, height, 0).tex(0, v).endVertex();
+        wr.pos(width, height, 0).tex(u, v).endVertex();
+        wr.pos(width, 0, 0).tex(u, 0).endVertex();
         Tessellator.getInstance().draw();
     }
 
-    protected abstract ResourceLocation getTexture();
+    @Override
+    public Pair<Double, Double> getMaxUV(){
+        int width = getWidth() + (getParameters() != null && getParameters().length > 0 ? 10 : 0);
+        int height = getHeight() + (hasStepOutput() ? 10 : 0);
+        int textureSize = getTextureSize();
+        double u = (double)width / textureSize;
+        double v = (double)height / textureSize;
+        return new ImmutablePair<Double, Double>(u, v);
+    }
+
+    @Override
+    public int getTextureSize(){
+        int width = getWidth() + (getParameters() != null && getParameters().length > 0 ? 10 : 0);
+        int height = getHeight() + (hasStepOutput() ? 10 : 0);
+        int maxSize = Math.max(width, height);
+
+        int textureSize = 1;
+        while(textureSize < maxSize) {
+            textureSize *= 2;
+        }
+        return textureSize;
+    }
 
     @Override
     public boolean hasStepOutput(){

@@ -31,7 +31,7 @@ public class ProgWidgetDroneConditionItem extends ProgWidgetDroneEvaluation impl
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_CONDITION_DRONE_ITEM_INVENTORY;
     }
 

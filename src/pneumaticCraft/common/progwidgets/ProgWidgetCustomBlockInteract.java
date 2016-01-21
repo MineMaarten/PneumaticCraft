@@ -28,7 +28,7 @@ public class ProgWidgetCustomBlockInteract extends ProgWidgetInventoryBase{
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return interactor.getTexture();
     }
 

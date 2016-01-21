@@ -19,7 +19,7 @@ public class ProgWidgetEditSign extends ProgWidgetAreaItemBase implements ISignE
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_EDIT_SIGN;
     }
 

@@ -50,7 +50,7 @@ public class ProgWidgetComment extends ProgWidgetString{
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_COMMENT;
     }
 

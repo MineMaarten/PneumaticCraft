@@ -15,7 +15,7 @@ public class ProgWidgetPickupItem extends ProgWidgetAreaItemBase{
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_PICK_ITEM;
     }
 

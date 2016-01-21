@@ -46,7 +46,7 @@ public class ProgWidgetString extends ProgWidget{
     }
 
     @Override
-    protected ResourceLocation getTexture(){
+    public ResourceLocation getTexture(){
         return Textures.PROG_WIDGET_TEXT;
     }
 
