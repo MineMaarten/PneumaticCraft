@@ -29,14 +29,16 @@ public abstract class AbstractPacket<REQ extends AbstractPacket> implements IMes
         synchronized(pending) {
             while(!pending.isEmpty()) {
                 AbstractPacket packet = pending.peek();
-                if(packet.canHandlePacketAlready(packet, PneumaticCraft.proxy.getPlayer())) {
-                    timeoutTimer = 0;
-                    packet.handleClientSide(packet, PneumaticCraft.proxy.getPlayer());
-                    pending.remove();
-                } else {
-                    timeoutTimer++;
-                    if(timeoutTimer > 40) {
+                if(packet != null) {
+                    if(packet.canHandlePacketAlready(packet, PneumaticCraft.proxy.getPlayer())) {
+                        timeoutTimer = 0;
+                        packet.handleClientSide(packet, PneumaticCraft.proxy.getPlayer());
                         pending.remove();
+                    } else {
+                        timeoutTimer++;
+                        if(timeoutTimer > 40) {
+                            pending.remove();
+                        }
                     }
                 }
             }
