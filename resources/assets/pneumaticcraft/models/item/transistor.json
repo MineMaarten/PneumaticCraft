@@ -1,7 +1,7 @@
 {
     "parent": "builtin/generated",
     "textures": {
-        "layer0": "pneumaticcraft:items/transistor"
+        "layer0": "pneumaticcraft:items/Transistor"
     },
     "display": {
         "thirdperson": {

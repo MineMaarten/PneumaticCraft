@@ -1,7 +1,7 @@
 {
     "parent": "builtin/generated",
     "textures": {
-        "layer0": "pneumaticcraft:items/printedCircuitBoard"
+        "layer0": "pneumaticcraft:items/PrintedCircuitBoard"
     },
     "display": {
         "thirdperson": {

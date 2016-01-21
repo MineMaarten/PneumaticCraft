@@ -1,7 +1,7 @@
 {
     "parent": "builtin/generated",
     "textures": {
-        "layer0": "pneumaticcraft:items/gpsTool"
+        "layer0": "pneumaticcraft:items/GPSTool"
     },
     "display": {
         "thirdperson": {
