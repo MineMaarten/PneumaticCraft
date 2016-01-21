@@ -22,6 +22,8 @@ import pneumaticCraft.common.util.IOHelper;
 public class TileEntityOmnidirectionalHopper extends TileEntityBase implements ISidedInventory, IRedstoneControlled{
     @DescSynced
     protected EnumFacing inputDir = EnumFacing.UP;
+    @DescSynced
+    protected EnumFacing outputDir = EnumFacing.UP;
     private ItemStack[] inventory = new ItemStack[getInvSize()];
     @GuiSynced
     public int redstoneMode;
@@ -40,6 +42,11 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
 
     protected int getInvSize(){
         return 9;
+    }
+
+    @Override
+    protected boolean shouldRerenderChunkOnDescUpdate(){
+        return true;
     }
 
     @Override
@@ -168,9 +175,19 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
     }
 
     @Override
+    public EnumFacing getRotation(){
+        return outputDir;
+    }
+
+    public void setRotation(EnumFacing rotation){
+        outputDir = rotation;
+    }
+
+    @Override
     public void writeToNBT(NBTTagCompound tag){
         super.writeToNBT(tag);
         tag.setInteger("inputDir", inputDir.ordinal());
+        tag.setInteger("outputDir", outputDir.ordinal());
         tag.setInteger("redstoneMode", redstoneMode);
         tag.setBoolean("leaveMaterial", leaveMaterial);
 
@@ -190,6 +207,7 @@ public class TileEntityOmnidirectionalHopper extends TileEntityBase implements I
     public void readFromNBT(NBTTagCompound tag){
         super.readFromNBT(tag);
         inputDir = EnumFacing.getFront(tag.getInteger("inputDir"));
+        outputDir = EnumFacing.getFront(tag.getInteger("outputDir"));
         redstoneMode = tag.getInteger("redstoneMode");
         leaveMaterial = tag.getBoolean("leaveMaterial");
 

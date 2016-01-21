@@ -8,6 +8,7 @@ import net.minecraft.block.material.Material;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
 import pneumaticCraft.common.config.Config;
+import pneumaticCraft.common.itemBlock.ItemBlockOmnidirectionalHopper;
 import pneumaticCraft.common.itemBlock.ItemBlockPneumaticCraft;
 import pneumaticCraft.common.thirdparty.ThirdPartyManager;
 import pneumaticCraft.lib.Names;
@@ -145,8 +146,8 @@ public class Blockss{
         registerBlock(aerialInterface);
         registerBlock(electrostaticCompressor);
         registerBlock(aphorismTile);
-        registerBlock(omnidirectionalHopper);
-        registerBlock(liquidHopper);
+        registerBlock(omnidirectionalHopper, ItemBlockOmnidirectionalHopper.class);
+        registerBlock(liquidHopper, ItemBlockOmnidirectionalHopper.class);
         registerBlock(elevatorCaller);
         registerBlock(programmer);
         registerBlock(creativeCompressor);

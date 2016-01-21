@@ -59,6 +59,9 @@ public class PressureTubeModuleRenderer extends TileEntitySpecialRenderer<TileEn
             }
         }
         GL11.glColor4d(1, 1, 1, 1);
+
+        GlStateManager.enableLighting();
+        GlStateManager.enableAlpha();
     }
 
     private void attachFakeModule(TileEntityPressureTube tile){

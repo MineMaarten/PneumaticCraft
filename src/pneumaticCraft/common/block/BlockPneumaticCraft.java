@@ -110,7 +110,7 @@ public abstract class BlockPneumaticCraft extends BlockContainer implements IPne
         }
     }
 
-    private void setRotation(World world, BlockPos pos, EnumFacing rotation){
+    protected void setRotation(World world, BlockPos pos, EnumFacing rotation){
         setRotation(world, pos, rotation, world.getBlockState(pos));
     }
 
