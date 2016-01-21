@@ -5,6 +5,8 @@ import java.util.List;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -36,6 +38,14 @@ public class BlockHeatSink extends BlockPneumaticCraftModeled{
         setBlockBoundsBasedOnState(world, pos);
         super.addCollisionBoxesToList(world, pos, state, axisalignedbb, arraylist, par7Entity);
     }
+
+    @Override
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer){
+        return super.onBlockPlaced(worldIn, pos, facing, hitX, hitY, hitZ, meta, placer).withProperty(ROTATION, facing.getOpposite());
+    }
+
+    @Override
+    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase entity, ItemStack stack){}
 
     @Override
     public boolean isRotatable(){
