@@ -119,7 +119,7 @@ public class PacketUpdateGui extends AbstractPacket<PacketUpdateGui>{
 
     @Override
     public boolean canHandlePacketAlready(PacketUpdateGui message, EntityPlayer player){
-        return player.openContainer instanceof ContainerPneumaticBase;
+        return super.canHandlePacketAlready(message, player) && player.openContainer instanceof ContainerPneumaticBase;
     }
 
     @Override

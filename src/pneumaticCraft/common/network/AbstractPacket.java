@@ -60,6 +60,6 @@ public abstract class AbstractPacket<REQ extends AbstractPacket> implements IMes
     public abstract void handleServerSide(REQ message, EntityPlayer player);
 
     public boolean canHandlePacketAlready(REQ message, EntityPlayer player){
-        return true;
+        return player != null && player.worldObj != null;
     }
 }

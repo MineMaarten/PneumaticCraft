@@ -1,7 +1,1 @@
--The Heat Sink orientation is now dependant on the face clicked rather than the orientation of the player.
--Fixed a few missing localizations.
--The Omnidirectional Hopper and the Liquid Hopper work and have a proper render now.
-
--Bugfix: Heat Sink rendering rotation is broken.
--Bugfix: Missing textures due to casing problems.
--Bugfix: Random crash with packet handling. (crash in the Nether)
+-Bugfix: (second attempt) Random crash with packet handling. (crash in the Nether)
