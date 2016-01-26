@@ -44,6 +44,10 @@ repositories {
 			name 'Amadornes'
 			url = "http://maven.amadornes.com/"
 		}
+		maven {
+			name 'Progs Maven'
+			url "http://dvs1.progwml6.com/files/maven"
+		}
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
@@ -89,7 +93,7 @@ dependencies {
 
 	compile "MCMultiPart:MCMultiPart:1.0.4:deobf"
 	compile "MCMultiPart:MCMultiPart:1.0.4:sources"
-	
+	deobfCompile "mezz.jei:jei_1.8.9:2.22.3.105"
 	
 	println("  Finished adding dependencies!")
 }
@@ -97,6 +101,7 @@ dependencies {
 minecraft {
     version = "11.15.0.1675"
     runDir = "minecraft/assets"
+	useDepAts = true
 
 	// the mappings can be changed at any time, and must be in the following format.
     // snapshot_YYYYMMDD   snapshot are built nightly.
