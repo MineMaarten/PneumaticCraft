@@ -52,14 +52,14 @@
 		},
 		"inventory": [{
           "transform": {
-            "translation": [ -0.45, 1.5, 0.45 ],
+            "translation": [ 0.4, 0.5, 0.15 ],
             "scale": [-1, 1, 1],
             "firstperson": {
-              "translation": [ 0, 0.2, 0 ],
+              "translation": [ -0.2, 0.6, 0.2 ],
               "scale": [ 1, 1, 1 ]
             },
             "thirdperson": {
-              "translation": [ 0, 0.09375, -0.171875 ],
+              "translation": [ 0, -0.09375, -0.011875 ],
               "rotation": [{ "x": 10 }, { "y": -45 }, { "z": 170 }],
               "scale": [ 0.375, 0.375, 0.375 ]
             },
@@ -67,7 +67,7 @@
               "scale": [ 1, 1, 1 ]
             },
             "gui": {
-              "translation": [ 0, 0.03, 0 ],
+              "translation": [ 0.0, 0.9, -0.3 ],
               "rotation": [{ "x": 0 }, { "y": 0 }, { "z": 0 }],
               "scale": [ 1.00, 1.00, 1.00 ]
             }

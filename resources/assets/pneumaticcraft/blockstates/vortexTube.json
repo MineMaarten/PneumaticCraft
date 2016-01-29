@@ -97,24 +97,24 @@
 		  "textures": {},
           "custom": { "flip-v": true },
           "transform": {
-            "translation": [ -0.45, -0.1, 0.45 ],
-            "scale": [ 0.0016026, 0.0016026, 0.0016026 ],
+            "translation": [ -0.2, -0.2, 0.2 ],
+            "scale": [ 0.040, 0.040, 0.040 ],
             "firstperson": {
-              "translation": [ 0, 0, 0 ],
-              "scale": [ 1, 1, 1 ]
+              "translation": [ -0.3, 0, 0.3 ],
+              "scale": [ 0.04, 0.04, 0.04 ]
             },
             "thirdperson": {
-              "translation": [ 0, 0.09375, -0.171875 ],
+              "translation": [ 0, 0.09375, -0.10 ],
               "rotation": [{ "x": 10 }, { "y": -45 }, { "z": 170 }],
-              "scale": [ 0.375, 0.375, 0.375 ]
+              "scale": [ 0.012, 0.012, 0.012 ]
             },
             "fixed": {
               "scale": [ 1, 1, 1 ]
             },
             "gui": {
-              "translation": [ 0, -0.15, -0.05 ],
+              "translation": [ -0.2, -0.20, -0.30 ],
               "rotation": [{ "x": 0 }, { "y": -90 }, { "z": 0 }],
-              "scale": [ 1.00, 1.00, 1.00 ]
+              "scale": [ 0.04, 0.04, 0.04 ]
             }
           }
         }],
