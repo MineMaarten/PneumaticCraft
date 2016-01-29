@@ -1,9 +1,16 @@
 package pneumaticCraft.common.tileentity;
 
+import java.util.Arrays;
+import java.util.List;
+
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import pneumaticCraft.api.PneumaticRegistry;
 import pneumaticCraft.api.heat.IHeatExchangerLogic;
+import pneumaticCraft.api.tileentity.IAirHandler;
 import pneumaticCraft.api.tileentity.IHeatExchanger;
 import pneumaticCraft.common.network.DescSynced;
 
@@ -14,9 +21,9 @@ public class TileEntityVortexTube extends TileEntityPneumaticBase implements IHe
     private int visualizationTimer = 60;
 
     @DescSynced
-    private boolean visualize;
+    public boolean[] sidesConnected = new boolean[6];
     @DescSynced
-    private int roll;
+    private boolean visualize;
     @DescSynced
     private int coldHeatLevel = 10, hotHeatLevel = 10;
 
@@ -53,34 +60,7 @@ public class TileEntityVortexTube extends TileEntityPneumaticBase implements IHe
 
     @Override
     public boolean isConnectedTo(EnumFacing side){
-        return getTubeDirection() == side;
-    }
-
-    public EnumFacing getTubeDirection(){
-        EnumFacing d;
-
-        switch(getRotation()){
-            case DOWN:
-            case NORTH:
-            case UP:
-                d = EnumFacing.WEST;
-                break;
-            case SOUTH:
-                d = EnumFacing.EAST;
-                break;
-            case WEST:
-                d = EnumFacing.SOUTH;
-                break;
-            case EAST:
-                d = EnumFacing.NORTH;
-                break;
-            default:
-                d = EnumFacing.SOUTH;
-        }
-        for(int i = 0; i < roll; i++) {
-            d = d.rotateAround(getRotation().getAxis()); //TODO 1.8 test
-        }
-        return d;
+        return side != getRotation() && side != getRotation().getOpposite();
     }
 
     @Override
@@ -89,14 +69,18 @@ public class TileEntityVortexTube extends TileEntityPneumaticBase implements IHe
         NBTTagCompound coldHeatTag = new NBTTagCompound();
         coldHeatExchanger.writeToNBT(coldHeatTag);
         tag.setTag("coldHeat", coldHeatTag);
-        tag.setByte("roll", (byte)roll);
+        for(int i = 0; i < 6; i++) {
+            tag.setBoolean("sideConnected" + i, sidesConnected[i]);
+        }
     }
 
     @Override
     public void readFromNBT(NBTTagCompound tag){
         super.readFromNBT(tag);
         coldHeatExchanger.readFromNBT(tag.getCompoundTag("coldHeat"));
-        roll = tag.getByte("roll");
+        for(int i = 0; i < 6; i++) {
+            sidesConnected[i] = tag.getBoolean("sideConnected" + i);
+        }
     }
 
     public int getColdHeatLevel(){
@@ -109,17 +93,6 @@ public class TileEntityVortexTube extends TileEntityPneumaticBase implements IHe
 
     public boolean shouldVisualize(){
         return visualize;
-    }
-
-    public int getRoll(){
-        return roll;
-    }
-
-    public void rotateRoll(int rotation){
-        roll += rotation;
-        if(roll > 3) roll = 0;
-        if(roll < 0) roll = 3;
-        updateNeighbours();
     }
 
     @Override
@@ -145,6 +118,25 @@ public class TileEntityVortexTube extends TileEntityPneumaticBase implements IHe
     @Override
     public void onBlockRotated(){
         visualizationTimer = 60;
+    }
+
+    @Override
+    public void onNeighborBlockUpdate(){
+        super.onNeighborBlockUpdate();
+        updateConnections();
+    }
+
+    public void updateConnections(){
+        List<Pair<EnumFacing, IAirHandler>> connections = getAirHandler(null).getConnectedPneumatics();
+        Arrays.fill(sidesConnected, false);
+        for(Pair<EnumFacing, IAirHandler> entry : connections) {
+            sidesConnected[entry.getKey().ordinal()] = true;
+        }
+    }
+
+    @Override
+    protected boolean shouldRerenderChunkOnDescUpdate(){
+        return true;
     }
 
 }

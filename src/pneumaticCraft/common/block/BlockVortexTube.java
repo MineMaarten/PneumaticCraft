@@ -1,18 +1,24 @@
 package pneumaticCraft.common.block;
 
+import java.util.Arrays;
+
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.world.World;
-import pneumaticCraft.api.tileentity.IPneumaticMachine;
-import pneumaticCraft.common.thirdparty.ModInteractionUtils;
+import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.client.model.obj.OBJModel.OBJProperty;
+import net.minecraftforge.client.model.obj.OBJModel.OBJState;
+import net.minecraftforge.common.property.ExtendedBlockState;
+import net.minecraftforge.common.property.IExtendedBlockState;
+import net.minecraftforge.common.property.IUnlistedProperty;
 import pneumaticCraft.common.tileentity.TileEntityVortexTube;
 
 public class BlockVortexTube extends BlockPneumaticCraftModeled{
+
+    private static final OBJState objState = new OBJState(Arrays.asList("Pipe"), false);
 
     protected BlockVortexTube(Material par2Material){
         super(par2Material);
@@ -34,26 +40,28 @@ public class BlockVortexTube extends BlockPneumaticCraftModeled{
     }
 
     @Override
-    protected boolean rotateCustom(World world, BlockPos pos, IBlockState state, EnumFacing side){
-        EnumFacing rotation = getRotation(world, pos);
-        if(rotation.getAxis() == side.getAxis()) {
-            TileEntityVortexTube te = (TileEntityVortexTube)world.getTileEntity(pos);
-            te.rotateRoll(rotation == side ? 1 : -1);
-            return true;
-        } else {
-            return false;
-        }
+    protected BlockState createBlockState(){
+        return new ExtendedBlockState(this, new IProperty[]{ROTATION, BlockPressureTube.DOWN, BlockPressureTube.UP, BlockPressureTube.NORTH, BlockPressureTube.SOUTH, BlockPressureTube.WEST, BlockPressureTube.EAST}, new IUnlistedProperty[]{OBJProperty.instance});
     }
 
     @Override
-    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase par5EntityLiving, ItemStack par6ItemStack){
-        super.onBlockPlacedBy(world, pos, state, par5EntityLiving, par6ItemStack);
-        TileEntityVortexTube te = (TileEntityVortexTube)world.getTileEntity(pos);
-        for(int i = 0; i < 4; i++) {
-            te.rotateRoll(1);
-            EnumFacing d = te.getTubeDirection();
-            IPneumaticMachine pneumaticMachine = ModInteractionUtils.getInstance().getMachine(world.getTileEntity(pos.offset(d)));
-            if(pneumaticMachine != null && pneumaticMachine.getAirHandler(d.getOpposite()) != null) break;
+    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos){
+        state = super.getActualState(state, worldIn, pos);
+        TileEntityVortexTube tube = (TileEntityVortexTube)worldIn.getTileEntity(pos);
+        for(int i = 0; i < 6; i++) {
+            state = state.withProperty(BlockPressureTube.CONNECTION_PROPERTIES[i], tube.sidesConnected[i]);
         }
+
+        return state;
+    }
+
+    /**
+     * FIXME doesn't work to remove the pipe obj group, as the model is part of a MultiModel which doesn't implement ISmartModel, so getExtendedState isn't called.
+     */
+    @Override
+    public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos){
+        IExtendedBlockState extended = (IExtendedBlockState)super.getExtendedState(state, world, pos);
+        extended = extended.withProperty(OBJProperty.instance, objState);
+        return extended;
     }
 }
