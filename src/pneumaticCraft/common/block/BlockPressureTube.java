@@ -311,16 +311,6 @@ public class BlockPressureTube extends BlockPneumaticCraftModeled{
     }
 
     @Override
-    public void onBlockAdded(World world, BlockPos pos, IBlockState state){
-        super.onBlockAdded(world, pos, state);
-        TileEntity te = world.getTileEntity(pos);
-        if(te != null && te instanceof TileEntityPressureTube) {
-            TileEntityPressureTube tePt = (TileEntityPressureTube)te;
-            tePt.updateConnections();
-        }
-    }
-
-    @Override
     @SideOnly(Side.CLIENT)
     /**
      * A randomly called display update to be able to add particles or other items for display

@@ -1,64 +1,204 @@
 {
     "forge_marker": 1,
     "defaults": {
-        "textures": {},
-		"custom": { "flip-v": true },
-        "model": "pneumaticcraft:vortexTube.obj"
+        "textures": {
+          "pipe": "pneumaticcraft:blocks/pressureTube",
+          "particle": "pneumaticcraft:blocks/pressureTube"
+        }
     },
 	"variants": {
 		"facing": {
-			"up": {"transform": {"rotation" : {"x" : 90}}},
-			"down": {"x" : -90},
+			"up": {
+                 "submodel":{
+                     "facing=up":{
+                        "model": "pneumaticcraft:vortexTube.obj",
+                        "textures": {},
+                        "custom": { "flip-v": true },
+                        "transform": {
+                            "rotation": {"z" : 90},
+                            "scale": [ 0.0016026, 0.0016026, 0.0016026 ],
+                            "translation": [ 0.5, -0.5, 0.5 ]
+                        }
+                     }
+                 }
+            },
+			"down": {
+                 "submodel":{
+                     "facing=down":{
+                        "model": "pneumaticcraft:vortexTube.obj",
+                        "textures": {},
+                        "custom": { "flip-v": true },
+                        "transform": {
+                            "rotation": {"z" : -90},
+                            "scale": [ 0.0016026, 0.0016026, 0.0016026 ],
+                            "translation": [ -0.5, 0.5, 0.5 ]
+                        }
+                     }
+                 }
+            },
 			"east": {
-				"transform": {
-					"scale": [ 0.0016026, 0.0016026, 0.0016026 ],
-					"translation": [ -0.5, -0.5, 0.5 ]
-				}
+			     "submodel":{
+			         "facing=east":{
+			            "model": "pneumaticcraft:vortexTube.obj",
+			            "textures": {},
+                        "custom": { "flip-v": true },
+    			        "transform": {
+                            "scale": [ 0.0016026, 0.0016026, 0.0016026 ],
+                            "translation": [ -0.5, -0.5, 0.5 ]
+                        }
+                     }
+			     }
 			},
 			"north": {
-				"transform": {
-					"scale": [ 0.0016026, 0.0016026, 0.0016026 ],
-					"translation": [ 0.5, -0.5, 0.5 ],
-					"rotation": {"y" : 90}
-				}
+			     "submodel":{
+                     "facing=north":{
+                        "model": "pneumaticcraft:vortexTube.obj",
+                        "textures": {},
+                        "custom": { "flip-v": true },
+        				"transform": {
+        					"scale": [ 0.0016026, 0.0016026, 0.0016026 ],
+        					"translation": [ 0.5, -0.5, 0.5 ],
+        					"rotation": {"y" : 90}
+        				}
+        			}
+        		}
 			},
 			"west": {
-				"transform": {
-					"scale": [ 0.0016026, 0.0016026, 0.0016026 ],
-					"translation": [ 0.5, -0.5, -0.5 ],
-					"rotation": {"y": 180}
-				}
+			     "submodel":{
+                     "facing=west":{
+                        "model": "pneumaticcraft:vortexTube.obj",
+                        "textures": {},
+                        "custom": { "flip-v": true },
+        				"transform": {
+        					"scale": [ 0.0016026, 0.0016026, 0.0016026 ],
+        					"translation": [ 0.5, -0.5, -0.5 ],
+        					"rotation": {"y": 180}
+        				}
+        			}
+        		}
 			},
 			"south": {
-				"transform": {
-					"scale": [ 0.0016026, 0.0016026, 0.0016026 ],
-					"translation": [ -0.5, -0.5, -0.5 ],
-					"rotation": {"y" : 270}
-				}
+			     "submodel":{
+                     "facing=south":{
+                        "model": "pneumaticcraft:vortexTube.obj",
+                        "textures": {},
+                        "custom": { "flip-v": true },
+        				"transform": {
+        					"scale": [ 0.0016026, 0.0016026, 0.0016026 ],
+        					"translation": [ -0.5, -0.5, -0.5 ],
+        					"rotation": {"y" : 270}
+        				}
+        			}
+        		}
 			}
 		},
 		"inventory": [{
+		  "model": "pneumaticcraft:vortexTube.obj",
+		  "textures": {},
+          "custom": { "flip-v": true },
           "transform": {
-            "translation": [ -0.45, -0.1, 0.45 ],
-            "scale": [ 0.0016026, 0.0016026, 0.0016026 ],
+            "translation": [ -0.2, -0.2, 0.2 ],
+            "scale": [ 0.040, 0.040, 0.040 ],
             "firstperson": {
-              "translation": [ 0, 0, 0 ],
-              "scale": [ 1, 1, 1 ]
+              "translation": [ -0.3, 0, 0.3 ],
+              "scale": [ 0.04, 0.04, 0.04 ]
             },
             "thirdperson": {
-              "translation": [ 0, 0.09375, -0.171875 ],
+              "translation": [ 0, 0.09375, -0.10 ],
               "rotation": [{ "x": 10 }, { "y": -45 }, { "z": 170 }],
-              "scale": [ 0.375, 0.375, 0.375 ]
+              "scale": [ 0.012, 0.012, 0.012 ]
             },
             "fixed": {
               "scale": [ 1, 1, 1 ]
             },
             "gui": {
-              "translation": [ 0, -0.15, -0.05 ],
+              "translation": [ -0.2, -0.20, -0.30 ],
               "rotation": [{ "x": 0 }, { "y": -90 }, { "z": 0 }],
-              "scale": [ 1.00, 1.00, 1.00 ]
+              "scale": [ 0.04, 0.04, 0.04 ]
             }
           }
-        }]
+        }],
+        "down": {
+          "false": {
+            "submodel": {
+              "down": {
+                "model": "pneumaticcraft:pressure_tube_disconnected",
+                "x": 180
+              }
+            }
+          },
+          "true": {
+            "submodel": {
+              "down": {
+                "model": "pneumaticcraft:pressure_tube_connected",
+                "x": 180
+              }
+            }
+          }
+        },
+        "up": {
+          "false": {
+            "submodel": {
+              "up": {
+                "model": "pneumaticcraft:pressure_tube_disconnected"
+              }
+            }
+          },
+          "true": {
+            "submodel": {
+              "up": {
+                "model": "pneumaticcraft:pressure_tube_connected"
+              }
+            }
+          }
+        },
+        "north": {
+          "false": {
+            "submodel": {
+              "north": { "model": "pneumaticcraft:pressure_tube_disconnected", "x": 90 }
+            }
+          },
+          "true": {
+            "submodel": {
+              "north": { "model": "pneumaticcraft:pressure_tube_connected", "x": 90 }
+            }
+          }
+        },
+        "south": {
+          "false": {
+            "submodel": {
+              "south": { "model": "pneumaticcraft:pressure_tube_disconnected", "x": 90, "y": 180 }
+            }
+          },
+          "true": {
+            "submodel": {
+              "south": { "model": "pneumaticcraft:pressure_tube_connected", "x": 90, "y": 180 }
+            }
+          }
+        },
+        "west": {
+          "false": {
+            "submodel": {
+              "west": { "model": "pneumaticcraft:pressure_tube_disconnected", "x": 90, "y": 270 }
+            }
+          },
+          "true": {
+            "submodel": {
+              "west": { "model": "pneumaticcraft:pressure_tube_connected", "x": 90, "y": 270 }
+            }
+          }
+        },
+        "east": {
+          "false": {
+            "submodel": {
+              "east": { "model": "pneumaticcraft:pressure_tube_disconnected", "x": 90, "y": 90 }
+            }
+          },
+          "true": {
+            "submodel": {
+              "east": { "model": "pneumaticcraft:pressure_tube_connected", "x": 90, "y": 90 }
+            }
+          }
+        }
 	}
 }
