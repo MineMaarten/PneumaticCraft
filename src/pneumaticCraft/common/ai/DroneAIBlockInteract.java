@@ -33,7 +33,7 @@ public class DroneAIBlockInteract extends DroneAIBlockInteraction{
 
     @Override
     protected boolean isValidPosition(BlockPos pos){
-        return !visitedPositions.contains(pos) && (widget.isItemFilterEmpty() || DroneAIDig.isBlockValidForFilter(drone.getWorld(), drone, pos, widget));
+        return !visitedPositions.contains(pos) && (widget.isItemFilterEmpty() || DroneAIDig.isBlockValidForFilter(drone.world(), drone, pos, widget));
     }
 
     @Override
@@ -66,7 +66,7 @@ public class DroneAIBlockInteract extends DroneAIBlockInteraction{
 
         EnumFacing faceDir = ProgWidgetPlace.getDirForSides(((ISidedWidget)widget).getSides());
         EntityPlayer player = drone.getFakePlayer();
-        World worldObj = drone.getWorld();
+        World worldObj = drone.world();
         int dx = faceDir.getFrontOffsetX();
         int dy = faceDir.getFrontOffsetY();
         int dz = faceDir.getFrontOffsetZ();

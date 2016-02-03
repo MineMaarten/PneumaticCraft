@@ -30,7 +30,7 @@ public class ProgWidgetItemInventoryCondition extends ProgWidgetCondition{
 
             @Override
             protected boolean evaluate(BlockPos pos){
-                IInventory inv = IOHelper.getInventoryForTE(drone.getWorld().getTileEntity(pos));
+                IInventory inv = IOHelper.getInventoryForTE(drone.world().getTileEntity(pos));
                 if(inv != null) {
                     int count = 0;
                     Set<Integer> accessibleSlots = PneumaticCraftUtils.getAccessibleSlotsForInventoryAndSides(inv, ((ISidedWidget)widget).getSides());

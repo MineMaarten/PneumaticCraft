@@ -58,7 +58,7 @@ public abstract class DroneAIBlockInteraction<Widget extends ProgWidgetAreaItemB
         this.widget = widget;
         order = widget instanceof IBlockOrdered ? ((IBlockOrdered)widget).getOrder() : EnumOrder.CLOSEST;
         area = widget.getCachedAreaList();
-        worldCache = ProgWidgetAreaItemBase.getCache(area, drone.getWorld());
+        worldCache = ProgWidgetAreaItemBase.getCache(area, drone.world());
         if(area.size() > 0) {
             Iterator<BlockPos> iterator = area.iterator();
             BlockPos pos = iterator.next();
@@ -133,7 +133,7 @@ public abstract class DroneAIBlockInteraction<Widget extends ProgWidgetAreaItemB
                 firstRun = false;
                 while(!shouldAbort() && searchIndex < area.size()) {
                     BlockPos pos = area.get(searchIndex);
-                    if(isYValid(pos.getY()) && !blacklist.contains(pos) && (!respectClaims() || !DroneClaimManager.getInstance(drone.getWorld()).isClaimed(pos))) {
+                    if(isYValid(pos.getY()) && !blacklist.contains(pos) && (!respectClaims() || !DroneClaimManager.getInstance(drone.world()).isClaimed(pos))) {
                         indicateToListeningPlayers(pos);
                         if(isValidPosition(pos)) {
                             curPos = pos;
@@ -142,7 +142,7 @@ public abstract class DroneAIBlockInteraction<Widget extends ProgWidgetAreaItemB
                                     if(drone.getPathNavigator().moveToXYZ(curPos.getX(), curPos.getY() + 0.5, curPos.getZ())) {
                                         searching = false;
                                         totalActions++;
-                                        if(respectClaims()) DroneClaimManager.getInstance(drone.getWorld()).claim(pos);
+                                        if(respectClaims()) DroneClaimManager.getInstance(drone.world()).claim(pos);
                                         blacklist.clear();//clear the list for next time (maybe the blocks/rights have changed by the time there will be dug again).
                                         return true;
                                     }
@@ -151,7 +151,7 @@ public abstract class DroneAIBlockInteraction<Widget extends ProgWidgetAreaItemB
                                         if(drone.getPathNavigator().moveToXYZ(curPos.getX() + dir.getFrontOffsetX(), curPos.getY() + dir.getFrontOffsetY() + 0.5, curPos.getZ() + dir.getFrontOffsetZ())) {
                                             searching = false;
                                             totalActions++;
-                                            if(respectClaims()) DroneClaimManager.getInstance(drone.getWorld()).claim(pos);
+                                            if(respectClaims()) DroneClaimManager.getInstance(drone.world()).claim(pos);
                                             blacklist.clear();//clear the list for next time (maybe the blocks/rights have changed by the time there will be dug again).
                                             return true;
                                         }
@@ -160,7 +160,7 @@ public abstract class DroneAIBlockInteraction<Widget extends ProgWidgetAreaItemB
                                 if(drone.getPathNavigator().isGoingToTeleport()) {
                                     searching = false;
                                     totalActions++;
-                                    if(respectClaims()) DroneClaimManager.getInstance(drone.getWorld()).claim(pos);
+                                    if(respectClaims()) DroneClaimManager.getInstance(drone.world()).claim(pos);
                                     blacklist.clear();//clear the list for next time (maybe the blocks/rights have changed by the time there will be dug again).
                                     return true;
                                 } else {
@@ -186,7 +186,7 @@ public abstract class DroneAIBlockInteraction<Widget extends ProgWidgetAreaItemB
             double dist = curPos != null ? PneumaticCraftUtils.distBetween(curPos.getX() + 0.5, curPos.getY() + 0.5, curPos.getZ() + 0.5, dronePos.xCoord, dronePos.yCoord, dronePos.zCoord) : 0;
             if(curPos != null) {
                 if(!moveToPositions()) return doBlockInteraction(curPos, dist);
-                if(respectClaims()) DroneClaimManager.getInstance(drone.getWorld()).claim(curPos);
+                if(respectClaims()) DroneClaimManager.getInstance(drone.world()).claim(curPos);
                 if(dist < (moveIntoBlock() ? 1 : 2)) {
                     return doBlockInteraction(curPos, dist);
                 }
@@ -228,7 +228,7 @@ public abstract class DroneAIBlockInteraction<Widget extends ProgWidgetAreaItemB
      * @param pos
      */
     protected void indicateToListeningPlayers(BlockPos pos){
-        for(EntityPlayer player : drone.getWorld().playerEntities) {
+        for(EntityPlayer player : drone.world().playerEntities) {
             if(player.getCurrentArmor(3) != null && player.getCurrentArmor(3).getItem() == Itemss.pneumaticHelmet && ItemPneumaticArmor.getUpgrades(EnumUpgrade.ENTITY_TRACKER, player.getCurrentArmor(3)) > 0 && ((IPressurizable)Itemss.pneumaticHelmet).getPressure(player.getCurrentArmor(3)) > 0) {
                 NetworkHandler.sendTo(new PacketSpawnParticle(EnumParticleTypes.REDSTONE, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 0, 0, 0), (EntityPlayerMP)player);
             }

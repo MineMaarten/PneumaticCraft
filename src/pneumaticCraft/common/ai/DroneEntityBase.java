@@ -25,7 +25,7 @@ public abstract class DroneEntityBase<Widget extends IProgWidget, E extends Enti
      */
     @Override
     public boolean shouldExecute(){
-        List<Entity> pickableItems = ((IEntityProvider)widget).getValidEntities(drone.getWorld());
+        List<Entity> pickableItems = ((IEntityProvider)widget).getValidEntities(drone.world());
 
         Collections.sort(pickableItems, new DistanceEntitySorter(drone));
         for(Entity ent : pickableItems) {

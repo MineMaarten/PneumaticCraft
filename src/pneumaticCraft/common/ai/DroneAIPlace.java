@@ -32,7 +32,7 @@ public class DroneAIPlace extends DroneAIBlockInteraction{
 
     @Override
     protected boolean isValidPosition(BlockPos pos){
-        if(drone.getWorld().isAirBlock(pos)) {
+        if(drone.world().isAirBlock(pos)) {
             boolean failedOnPlacement = false;
             for(int i = 0; i < drone.getInv().getSizeInventory(); i++) {
                 ItemStack droneStack = drone.getInv().getStackInSlot(i);
@@ -40,10 +40,10 @@ public class DroneAIPlace extends DroneAIBlockInteraction{
                     if(widget.isItemValidForFilters(droneStack)) {
                         Block placingBlock = ((ItemBlock)droneStack.getItem()).getBlock();
                         EnumFacing side = ProgWidgetPlace.getDirForSides(((ISidedWidget)widget).getSides());
-                        if(drone.getWorld().canBlockBePlaced(placingBlock, pos, false, side, drone instanceof EntityDrone ? (EntityDrone)drone : null, droneStack)) {
+                        if(drone.world().canBlockBePlaced(placingBlock, pos, false, side, drone instanceof EntityDrone ? (EntityDrone)drone : null, droneStack)) {
                             return true;
                         } else {
-                            if(drone.getWorld().canBlockBePlaced(placingBlock, pos, true, side, drone instanceof EntityDrone ? (EntityDrone)drone : null, droneStack)) {
+                            if(drone.world().canBlockBePlaced(placingBlock, pos, true, side, drone instanceof EntityDrone ? (EntityDrone)drone : null, droneStack)) {
                                 drone.addDebugEntry("gui.progWidget.place.debug.cantPlaceBlock", pos);
                             } else {
                                 drone.addDebugEntry("gui.progWidget.place.debug.entityInWay", pos);
@@ -65,17 +65,17 @@ public class DroneAIPlace extends DroneAIBlockInteraction{
             EnumFacing side = ProgWidgetPlace.getDirForSides(((ISidedWidget)widget).getSides());
             for(int i = 0; i < drone.getInv().getSizeInventory(); i++) {
                 ItemStack droneStack = drone.getInv().getStackInSlot(i);
-                if(droneStack != null && droneStack.getItem() instanceof ItemBlock && ((ItemBlock)droneStack.getItem()).getBlock().canPlaceBlockOnSide(drone.getWorld(), pos, ProgWidgetPlace.getDirForSides(((ISidedWidget)widget).getSides()))) {
+                if(droneStack != null && droneStack.getItem() instanceof ItemBlock && ((ItemBlock)droneStack.getItem()).getBlock().canPlaceBlockOnSide(drone.world(), pos, ProgWidgetPlace.getDirForSides(((ISidedWidget)widget).getSides()))) {
                     if(widget.isItemValidForFilters(droneStack)) {
                         ItemBlock itemBlock = (ItemBlock)droneStack.getItem();
                         Block block = itemBlock.getBlock();
-                        if(drone.getWorld().canBlockBePlaced(block, pos, false, side, drone instanceof EntityDrone ? (EntityDrone)drone : null, droneStack)) {
+                        if(drone.world().canBlockBePlaced(block, pos, false, side, drone instanceof EntityDrone ? (EntityDrone)drone : null, droneStack)) {
                             int newMeta = itemBlock.getMetadata(droneStack.getMetadata());
                             setFakePlayerAccordingToDir();
-                            IBlockState iblockstate1 = block.onBlockPlaced(drone.getWorld(), pos, side, side.getFrontOffsetX(), side.getFrontOffsetY(), side.getFrontOffsetZ(), newMeta, drone.getFakePlayer());
-                            if(itemBlock.placeBlockAt(droneStack, drone.getFakePlayer(), drone.getWorld(), pos, side, side.getFrontOffsetX(), side.getFrontOffsetY(), side.getFrontOffsetZ(), iblockstate1)) {
+                            IBlockState iblockstate1 = block.onBlockPlaced(drone.world(), pos, side, side.getFrontOffsetX(), side.getFrontOffsetY(), side.getFrontOffsetZ(), newMeta, drone.getFakePlayer());
+                            if(itemBlock.placeBlockAt(droneStack, drone.getFakePlayer(), drone.world(), pos, side, side.getFrontOffsetX(), side.getFrontOffsetY(), side.getFrontOffsetZ(), iblockstate1)) {
                                 drone.addAir(null, -PneumaticValues.DRONE_USAGE_PLACE);
-                                drone.getWorld().playSoundEffect(pos.getX() + 0.5F, pos.getY() + 0.5F, pos.getZ() + 0.5F, block.stepSound.getPlaceSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getFrequency() * 0.8F);
+                                drone.world().playSoundEffect(pos.getX() + 0.5F, pos.getY() + 0.5F, pos.getZ() + 0.5F, block.stepSound.getPlaceSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getFrequency() * 0.8F);
                                 if(--droneStack.stackSize <= 0) {
                                     drone.getInv().setInventorySlotContents(i, null);
                                 }

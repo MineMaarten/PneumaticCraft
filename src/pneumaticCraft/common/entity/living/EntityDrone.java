@@ -978,8 +978,8 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
         @Override
         public void addExperience(int amount){
             Vec3 pos = drone.getDronePos();
-            EntityXPOrb orb = new EntityXPOrb(drone.getWorld(), pos.xCoord, pos.yCoord, pos.zCoord, amount);
-            drone.getWorld().spawnEntityInWorld(orb);
+            EntityXPOrb orb = new EntityXPOrb(drone.world(), pos.xCoord, pos.yCoord, pos.zCoord, amount);
+            drone.world().spawnEntityInWorld(orb);
         }
 
         @Override
@@ -1146,7 +1146,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
     }
 
     @Override
-    public World getWorld(){
+    public World world(){
         return worldObj;
     }
 

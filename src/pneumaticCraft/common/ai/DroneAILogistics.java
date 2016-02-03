@@ -49,8 +49,8 @@ public class DroneAILogistics extends EntityAIBase{
 
         for(int x = minX; x < maxX + 16; x += 16) {
             for(int z = minZ; z < maxZ + 16; z += 16) {
-                Chunk chunk = drone.getWorld().getChunkFromBlockCoords(new BlockPos(x, 0, z));
-                Map<BlockPos, ISemiBlock> map = SemiBlockManager.getInstance(drone.getWorld()).getSemiBlocks().get(chunk);
+                Chunk chunk = drone.world().getChunkFromBlockCoords(new BlockPos(x, 0, z));
+                Map<BlockPos, ISemiBlock> map = SemiBlockManager.getInstance(drone.world()).getSemiBlocks().get(chunk);
                 if(map != null) {
                     for(Map.Entry<BlockPos, ISemiBlock> entry : map.entrySet()) {
                         if(entry.getValue() instanceof SemiBlockLogistics && area.contains(entry.getKey())) {

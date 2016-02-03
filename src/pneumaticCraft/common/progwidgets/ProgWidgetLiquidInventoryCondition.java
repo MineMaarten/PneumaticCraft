@@ -35,7 +35,7 @@ public class ProgWidgetLiquidInventoryCondition extends ProgWidgetCondition{
 
             @Override
             protected boolean evaluate(BlockPos pos){
-                TileEntity te = drone.getWorld().getTileEntity(pos);
+                TileEntity te = drone.world().getTileEntity(pos);
                 int count = 0;
                 if(te instanceof IFluidHandler) {
                     List<FluidStack> visitedStacks = new ArrayList<FluidStack>();
@@ -54,8 +54,8 @@ public class ProgWidgetLiquidInventoryCondition extends ProgWidgetCondition{
                         }
                     }
                 } else {
-                    Fluid fluid = FluidRegistry.lookupFluidForBlock(drone.getWorld().getBlockState(pos).getBlock());
-                    if(fluid != null && ProgWidgetLiquidFilter.isLiquidValid(fluid, widget, 1) && FluidUtils.isSourceBlock(drone.getWorld(), pos)) {
+                    Fluid fluid = FluidRegistry.lookupFluidForBlock(drone.world().getBlockState(pos).getBlock());
+                    if(fluid != null && ProgWidgetLiquidFilter.isLiquidValid(fluid, widget, 1) && FluidUtils.isSourceBlock(drone.world(), pos)) {
                         count += 1000;
                     }
                 }

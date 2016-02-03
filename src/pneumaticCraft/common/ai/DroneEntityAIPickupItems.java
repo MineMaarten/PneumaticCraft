@@ -34,7 +34,7 @@ public class DroneEntityAIPickupItems extends EntityAIBase{
      */
     @Override
     public boolean shouldExecute(){
-        List<Entity> pickableItems = itemPickupWidget.getEntitiesInArea(drone.getWorld(), new Predicate<Entity>(){
+        List<Entity> pickableItems = itemPickupWidget.getEntitiesInArea(drone.world(), new Predicate<Entity>(){
             @Override
             public boolean apply(Entity entity){
                 return entity instanceof EntityItem && entity.isEntityAlive();

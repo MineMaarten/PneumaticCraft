@@ -37,10 +37,10 @@ public class ProgWidgetBlockCondition extends ProgWidgetCondition{
 
             @Override
             protected boolean evaluate(BlockPos pos){
-                if(checkingForAir && drone.getWorld().isAirBlock(pos)) return true;
-                if(checkingForLiquids && PneumaticCraftUtils.isBlockLiquid(drone.getWorld().getBlockState(pos).getBlock())) return true;
+                if(checkingForAir && drone.world().isAirBlock(pos)) return true;
+                if(checkingForLiquids && PneumaticCraftUtils.isBlockLiquid(drone.world().getBlockState(pos).getBlock())) return true;
                 if(!checkingForAir && !checkingForLiquids || getConnectedParameters()[1] != null) {
-                    return DroneAIDig.isBlockValidForFilter(drone.getWorld(), drone, pos, widget);
+                    return DroneAIDig.isBlockValidForFilter(drone.world(), drone, pos, widget);
                 } else {
                     return false;
                 }

@@ -28,7 +28,7 @@ public class DroneEntityAIInventoryExport extends DroneAIImExBase{
     }
 
     private boolean export(BlockPos pos, boolean simulate){
-        IInventory inv = IOHelper.getInventoryForTE(drone.getWorld().getTileEntity(pos));
+        IInventory inv = IOHelper.getInventoryForTE(drone.world().getTileEntity(pos));
         if(inv != null) {
             for(int i = 0; i < drone.getInv().getSizeInventory(); i++) {
                 ItemStack droneStack = drone.getInv().getStackInSlot(i);

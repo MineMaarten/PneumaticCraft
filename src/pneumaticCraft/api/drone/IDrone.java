@@ -22,7 +22,7 @@ public interface IDrone extends IPressurizable{
      */
     public int getUpgrades(Item upgrade);
 
-    public World getWorld();
+    public World world();
 
     public IFluidTank getTank();
 

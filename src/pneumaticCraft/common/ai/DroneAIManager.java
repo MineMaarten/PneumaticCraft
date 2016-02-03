@@ -57,13 +57,13 @@ public class DroneAIManager{
     private static final int MAX_JUMP_STACK_SIZE = 100;
 
     public DroneAIManager(IDroneBase drone){
-        theProfiler = drone.getWorld().theProfiler;
+        theProfiler = drone.world().theProfiler;
         this.drone = drone;
         setWidgets(drone.getProgWidgets());
     }
 
     public DroneAIManager(IDroneBase drone, List<IProgWidget> progWidgets){
-        theProfiler = drone.getWorld().theProfiler;
+        theProfiler = drone.world().theProfiler;
         this.drone = drone;
         stopWhenEndReached = true;
         setWidgets(progWidgets);

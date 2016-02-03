@@ -49,7 +49,7 @@ public class DroneAIExternalProgram extends DroneAIBlockInteraction<ProgWidgetEx
     protected boolean isValidPosition(BlockPos pos){
         if(traversedPositions.add(pos)) {
             curSlot = 0;
-            TileEntity te = drone.getWorld().getTileEntity(pos);
+            TileEntity te = drone.world().getTileEntity(pos);
             return te instanceof IInventory;
         }
         return false;
@@ -57,7 +57,7 @@ public class DroneAIExternalProgram extends DroneAIBlockInteraction<ProgWidgetEx
 
     @Override
     protected boolean doBlockInteraction(BlockPos pos, double distToBlock){
-        IInventory inv = IOHelper.getInventoryForTE(drone.getWorld().getTileEntity(pos));
+        IInventory inv = IOHelper.getInventoryForTE(drone.world().getTileEntity(pos));
         if(inv == null) return false;
         if(curProgramTag != null) {
             if(curSlot < inv.getSizeInventory()) {

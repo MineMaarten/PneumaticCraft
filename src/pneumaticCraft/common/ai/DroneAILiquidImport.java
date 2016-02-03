@@ -35,7 +35,7 @@ public class DroneAILiquidImport extends DroneAIImExBase{
             abort();
             return false;
         } else {
-            TileEntity te = drone.getWorld().getTileEntity(pos);
+            TileEntity te = drone.world().getTileEntity(pos);
             if(te instanceof IFluidHandler) {
                 IFluidHandler tank = (IFluidHandler)te;
                 for(int i = 0; i < 6; i++) {
@@ -55,12 +55,12 @@ public class DroneAILiquidImport extends DroneAIImExBase{
                 }
                 drone.addDebugEntry("gui.progWidget.liquidImport.debug.emptiedToMax", pos);
             } else if(!((ICountWidget)widget).useCount() || getRemainingCount() >= 1000) {
-                Fluid fluid = FluidRegistry.lookupFluidForBlock(drone.getWorld().getBlockState(pos).getBlock());
-                if(fluid != null && ((ILiquidFiltered)widget).isFluidValid(fluid) && drone.getTank().fill(new FluidStack(fluid, 1000), false) == 1000 && FluidUtils.isSourceBlock(drone.getWorld(), pos)) {
+                Fluid fluid = FluidRegistry.lookupFluidForBlock(drone.world().getBlockState(pos).getBlock());
+                if(fluid != null && ((ILiquidFiltered)widget).isFluidValid(fluid) && drone.getTank().fill(new FluidStack(fluid, 1000), false) == 1000 && FluidUtils.isSourceBlock(drone.world(), pos)) {
                     if(!simulate) {
                         decreaseCount(1000);
                         drone.getTank().fill(new FluidStack(fluid, 1000), true);
-                        drone.getWorld().setBlockToAir(pos);
+                        drone.world().setBlockToAir(pos);
                     }
                     return true;
                 }

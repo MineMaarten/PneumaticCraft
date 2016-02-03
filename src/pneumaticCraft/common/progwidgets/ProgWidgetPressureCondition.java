@@ -28,7 +28,7 @@ public class ProgWidgetPressureCondition extends ProgWidgetCondition{
 
             @Override
             protected boolean evaluate(BlockPos pos){
-                TileEntity te = drone.getWorld().getTileEntity(pos);
+                TileEntity te = drone.world().getTileEntity(pos);
                 if(te instanceof IPneumaticMachine) {
                     float pressure = Float.MIN_VALUE;
                     for(EnumFacing d : EnumFacing.VALUES) {

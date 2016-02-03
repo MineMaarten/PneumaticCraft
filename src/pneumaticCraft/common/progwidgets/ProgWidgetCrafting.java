@@ -149,7 +149,7 @@ public class ProgWidgetCrafting extends ProgWidget implements ICraftingWidget, I
 
         @Override
         public boolean shouldExecute(){
-            IRecipe recipe = ProgWidgetCrafting.getRecipe(drone.getWorld(), widget);
+            IRecipe recipe = ProgWidgetCrafting.getRecipe(drone.world(), widget);
             if(recipe == null) return false;
             InventoryCrafting craftingGrid = widget.getCraftingGrid();
             for(int crafted = 0; !((ICountWidget)widget).useCount() || crafted < ((ICountWidget)widget).getCount(); crafted++) {
@@ -185,7 +185,7 @@ public class ProgWidgetCrafting extends ProgWidget implements ICraftingWidget, I
                         ItemStack stack = equivalentsList[i] == null ? null : equivalentsList[i].get(curIndexes[i]);
                         craftMatrix.setInventorySlotContents(i, stack);
                     }
-                    if(recipe.matches(craftMatrix, drone.getWorld())) {
+                    if(recipe.matches(craftMatrix, drone.world())) {
                         if(craft(recipe.getCraftingResult(craftMatrix), craftMatrix)) {
                             hasCrafted = true;
                             break;
@@ -241,8 +241,8 @@ public class ProgWidgetCrafting extends ProgWidget implements ICraftingWidget, I
                         ItemStack remainder = IOHelper.insert(drone.getInv(), itemstack2.copy(), EnumFacing.UP, false);
                         if(remainder != null) {
                             Vec3 pos = drone.getDronePos();
-                            EntityItem item = new EntityItem(drone.getWorld(), pos.xCoord, pos.yCoord, pos.zCoord, remainder);
-                            drone.getWorld().spawnEntityInWorld(item);
+                            EntityItem item = new EntityItem(drone.world(), pos.xCoord, pos.yCoord, pos.zCoord, remainder);
+                            drone.world().spawnEntityInWorld(item);
                         }
                     }
                     itemstack1.stackSize--;//As this stack references to the Drones stacks in its inventory, we can do this.
@@ -259,8 +259,8 @@ public class ProgWidgetCrafting extends ProgWidget implements ICraftingWidget, I
             ItemStack remainder = IOHelper.insert(drone.getInv(), craftedStack, EnumFacing.UP, false);
             if(remainder != null) {
                 Vec3 pos = drone.getDronePos();
-                EntityItem item = new EntityItem(drone.getWorld(), pos.xCoord, pos.yCoord, pos.zCoord, remainder);
-                drone.getWorld().spawnEntityInWorld(item);
+                EntityItem item = new EntityItem(drone.world(), pos.xCoord, pos.yCoord, pos.zCoord, remainder);
+                drone.world().spawnEntityInWorld(item);
             }
             return true;
         }

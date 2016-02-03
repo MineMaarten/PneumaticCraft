@@ -493,7 +493,7 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
     }
 
     @Override
-    public World getWorld(){
+    public World world(){
         return worldObj;
     }
 

@@ -103,13 +103,13 @@ public class ProgWidgetDropItem extends ProgWidgetInventoryBase implements IItem
                             decreaseCount(stack.stackSize);
                             drone.getInv().setInventorySlotContents(i, null);
                         }
-                        EntityItem item = new EntityItem(drone.getWorld(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, stack);
+                        EntityItem item = new EntityItem(drone.world(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, stack);
                         if(((IItemDropper)widget).dropStraight()) {
                             item.motionX = 0;
                             item.motionY = 0;
                             item.motionZ = 0;
                         }
-                        drone.getWorld().spawnEntityInWorld(item);
+                        drone.world().spawnEntityInWorld(item);
                         if(useCount() && getRemainingCount() == 0) break;
                     }
                 }

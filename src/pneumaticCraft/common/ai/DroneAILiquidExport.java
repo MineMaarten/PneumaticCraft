@@ -34,7 +34,7 @@ public class DroneAILiquidExport extends DroneAIImExBase{
             abort();
             return false;
         } else {
-            TileEntity te = drone.getWorld().getTileEntity(pos);
+            TileEntity te = drone.world().getTileEntity(pos);
             if(te instanceof IFluidHandler) {
                 IFluidHandler tank = (IFluidHandler)te;
 
@@ -58,11 +58,11 @@ public class DroneAILiquidExport extends DroneAIImExBase{
                 }
             } else if(((ILiquidExport)widget).isPlacingFluidBlocks() && (!((ICountWidget)widget).useCount() || getRemainingCount() >= 1000)) {
                 Block fluidBlock = drone.getTank().getFluid().getFluid().getBlock();
-                if(drone.getTank().getFluidAmount() >= 1000 && fluidBlock != null && drone.getWorld().isAirBlock(pos)) {
+                if(drone.getTank().getFluidAmount() >= 1000 && fluidBlock != null && drone.world().isAirBlock(pos)) {
                     if(!simulate) {
                         decreaseCount(1000);
                         drone.getTank().drain(1000, true);
-                        drone.getWorld().setBlockState(pos, fluidBlock.getDefaultState()); //TODO 1.8 test
+                        drone.world().setBlockState(pos, fluidBlock.getDefaultState()); //TODO 1.8 test
                     }
                     return true;
                 }
