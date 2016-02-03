@@ -1,8 +1,5 @@
 package pneumaticCraft.common.network;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -12,37 +9,24 @@ import pneumaticCraft.PneumaticCraft;
 
 public abstract class AbstractPacket<REQ extends AbstractPacket> implements IMessage, IMessageHandler<REQ, REQ>{
 
-    private static final Queue<AbstractPacket> pending = new LinkedList<AbstractPacket>();
-    private static int timeoutTimer;
-
     @Override
-    public REQ onMessage(REQ message, MessageContext ctx){
+    public REQ onMessage(final REQ message, final MessageContext ctx){
         if(ctx.side == Side.SERVER) {
-            handleServerSide(message, ctx.getServerHandler().playerEntity);
+            PneumaticCraft.proxy.addScheduledTask(new Runnable(){
+                @Override
+                public void run(){
+                    message.handleServerSide(message, ctx.getServerHandler().playerEntity);
+                }
+            }, ctx.side == Side.SERVER);
         } else {
-            pending.add(message);
+            PneumaticCraft.proxy.addScheduledTask(new Runnable(){
+                @Override
+                public void run(){
+                    message.handleClientSide(message, PneumaticCraft.proxy.getPlayer());
+                }
+            }, ctx.side == Side.SERVER);
         }
         return null;
-    }
-
-    public static void processPackets(){
-        synchronized(pending) {
-            while(!pending.isEmpty()) {
-                AbstractPacket packet = pending.peek();
-                if(packet != null) {
-                    if(packet.canHandlePacketAlready(packet, PneumaticCraft.proxy.getPlayer())) {
-                        timeoutTimer = 0;
-                        packet.handleClientSide(packet, PneumaticCraft.proxy.getPlayer());
-                        pending.remove();
-                    } else {
-                        timeoutTimer++;
-                        if(timeoutTimer > 40) {
-                            pending.remove();
-                        }
-                    }
-                }
-            }
-        }
     }
 
     /**

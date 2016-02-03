@@ -7,8 +7,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.util.EnumMap;
-import java.util.LinkedList;
-import java.util.Queue;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
@@ -21,39 +19,23 @@ import pneumaticCraft.PneumaticCraft;
 public class DescPacketHandler extends SimpleChannelInboundHandler<FMLProxyPacket>{
     public final static String CHANNEL = "PneumaticCraftDesc";
     private final static EnumMap<Side, FMLEmbeddedChannel> channels = NetworkRegistry.INSTANCE.newChannel(DescPacketHandler.CHANNEL, new DescPacketHandler());
-    private static final Queue<PacketDescription> pending = new LinkedList<PacketDescription>();
-    private static int timeoutTimer;
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FMLProxyPacket msg) throws Exception{
-        PacketDescription packet = new PacketDescription();
+        final PacketDescription packet = new PacketDescription();
         packet.fromBytes(msg.payload());
-        //packet.handleClientSide(packet, PneumaticCraft.proxy.getPlayer());
-        pending.add(packet);
+        PneumaticCraft.proxy.addScheduledTask(new Runnable(){
+            @Override
+            public void run(){
+                packet.handleClientSide(packet, PneumaticCraft.proxy.getPlayer());
+            }
+        }, false);
     }
 
     public static FMLProxyPacket getPacket(PacketDescription packet){
         ByteBuf buf = Unpooled.buffer();
         packet.toBytes(buf);
         return new FMLProxyPacket(new PacketBuffer(buf), CHANNEL);
-    }
-
-    public static void processPackets(){
-        synchronized(pending) {
-            while(!pending.isEmpty()) {
-                PacketDescription packet = pending.peek();
-                if(packet.getTileEntity(PneumaticCraft.proxy.getClientWorld()) != null) {
-                    timeoutTimer = 0;
-                    packet.handleClientSide(packet, PneumaticCraft.proxy.getPlayer());
-                    pending.remove();
-                } else {
-                    timeoutTimer++;
-                    if(timeoutTimer > 40) {
-                        pending.remove();
-                    }
-                }
-            }
-        }
     }
 
 }

@@ -239,4 +239,13 @@ public class ClientProxy extends CommonProxy{
     public void registerSemiBlockRenderer(ItemSemiBlockBase semiBlock){
         //TODO 1.8 MinecraftForgeClient.registerItemRenderer(semiBlock, new RenderItemSemiBlock(semiBlock.semiBlockId));
     }
+
+    @Override
+    public void addScheduledTask(Runnable runnable, boolean serverSide){
+        if(serverSide) {
+            super.addScheduledTask(runnable, serverSide);
+        } else {
+            Minecraft.getMinecraft().addScheduledTask(runnable);
+        }
+    }
 }
