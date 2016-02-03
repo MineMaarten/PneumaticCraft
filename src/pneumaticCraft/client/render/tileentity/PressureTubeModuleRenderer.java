@@ -66,7 +66,7 @@ public class PressureTubeModuleRenderer extends TileEntitySpecialRenderer<TileEn
 
     private void attachFakeModule(TileEntityPressureTube tile){
         MovingObjectPosition pos = Minecraft.getMinecraft().objectMouseOver;
-        if(pos != null && pos.getBlockPos() != null && pos.getBlockPos().equals(tile.getPos())) {
+        if(pos != null && pos.getBlockPos() != null && pos.getBlockPos().equals(tile.getPos()) && Minecraft.getMinecraft().theWorld.getTileEntity(pos.getBlockPos()) == tile) {
             ((BlockPressureTube)Blockss.pressureTube).tryPlaceModule(Minecraft.getMinecraft().thePlayer, Minecraft.getMinecraft().theWorld, tile.getPos(), pos.sideHit, true);
         }
     }
