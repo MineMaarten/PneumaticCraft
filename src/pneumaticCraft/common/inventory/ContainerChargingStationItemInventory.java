@@ -27,5 +27,7 @@ public class ContainerChargingStationItemInventory extends ContainerPneumaticBas
             addSlotToContainer(new SlotPneumaticArmor(inventoryPlayer.player, inventoryPlayer, inventoryPlayer.getSizeInventory() - 1 - i, 9, 8 + i * 18, i));
         }
 
+        addSlotToContainer(new SlotUntouchable(te, 0, -50000, -50000)); //Allows the charging stack to sync.
+
     }
 }
