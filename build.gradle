@@ -129,7 +129,9 @@ curseforge {
 		id = 224125 // my project url is http://minecraft.curseforge.com/mc-mods/59652-seretroomsmod/
 		changelog = new File('changelog.txt').text
 		releaseType = "alpha"
-		relatedProject 'in-game-wiki-mod': 'optionalLibrary'
+		relations {
+			optionalLibrary 'in-game-wiki-mod'
+		}
 
 		// the default obfuscated jar is uploaded by default
 		// artifact = project.file("some/jar/to/upload.jar")
