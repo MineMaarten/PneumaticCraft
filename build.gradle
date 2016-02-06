@@ -126,7 +126,7 @@ minecraft {
 curseforge {
     apiKey = System.getenv("minemaarten_curse")
 	project {
-		id = 224125 // my project url is http://minecraft.curseforge.com/mc-mods/59652-seretroomsmod/
+		id = "224125" // my project url is http://minecraft.curseforge.com/mc-mods/59652-seretroomsmod/
 		changelog = new File('changelog.txt').text
 		releaseType = "alpha"
 		relations {
