@@ -1,1 +1,10 @@
--Bugfix: (second attempt) Random crash with packet handling. (crash in the Nether)
+-Readded ComputerCraft+OpenComputers support.
+-GUI tabs now push away JEI items.
+
+-Bugfix: Charging Station Helmet/Drone GUI pressure isn't updated.
+-Bugfix: Etching Acid doesn't have a texture.
+-Bugfix: Crash with mods which cache the 'getSizeInventory()' from IInventories.
+-Bugfix: Crash with BetterStorage
+-Bugfix: NullPointerException with Pressure Tubes.
+-Bugfix: AbstractMethodError when placing down Programmable Controller.
+-Bugfix: Game hangs because of faulty packet handling.

@@ -834,7 +834,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
         }
     }
 
-    private int getUpgrades(EnumUpgrade upgrade){
+    public int getUpgrades(EnumUpgrade upgrade){
         return getUpgrades(Itemss.upgrades.get(upgrade));
     }
 

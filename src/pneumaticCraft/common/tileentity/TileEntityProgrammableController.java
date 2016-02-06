@@ -63,6 +63,7 @@ import pneumaticCraft.common.progwidgets.ProgWidgetEntityImport;
 import pneumaticCraft.common.progwidgets.ProgWidgetStandby;
 import pneumaticCraft.common.progwidgets.ProgWidgetSuicide;
 import pneumaticCraft.common.progwidgets.ProgWidgetTeleport;
+import pneumaticCraft.common.thirdparty.computercraft.ProgWidgetCC;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.Log;
 
@@ -96,7 +97,7 @@ public class TileEntityProgrammableController extends TileEntityPneumaticBase im
     private static final Set<Class<? extends IProgWidget>> WIDGET_BLACKLIST = new HashSet<Class<? extends IProgWidget>>();
 
     static {
-        //TODO CC dep    WIDGET_BLACKLIST.add(ProgWidgetCC.class);
+        WIDGET_BLACKLIST.add(ProgWidgetCC.class);
         WIDGET_BLACKLIST.add(ProgWidgetEntityAttack.class);
         WIDGET_BLACKLIST.add(ProgWidgetDroneConditionEntity.class);
         WIDGET_BLACKLIST.add(ProgWidgetStandby.class);

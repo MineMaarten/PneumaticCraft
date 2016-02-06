@@ -9,10 +9,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Optional;
 import pneumaticCraft.common.tileentity.TileEntityAerialInterface;
+import pneumaticCraft.lib.ModIds;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
+import dan200.computercraft.api.peripheral.IPeripheral;
+import dan200.computercraft.api.peripheral.IPeripheralProvider;
 
 public class BlockAerialInterface extends BlockPneumaticCraft{
     public BlockAerialInterface(Material par2Material){
@@ -59,9 +64,9 @@ public class BlockAerialInterface extends BlockPneumaticCraft{
      * @see dan200.computercraft.api.ComputerCraftAPI#registerPeripheralProvider(IPeripheralProvider)
      * @return a peripheral, or null if there is not a peripheral here you'd like to handle.
      */
-    /* @Override TODO Computercraft dep
-     @Optional.Method(modid = ModIds.COMPUTERCRAFT)
-     public IPeripheral getPeripheral(World world, int x, int y, int z, int side){
-         return side == 0 || side == 1 ? super.getPeripheral(world, x, y, z, side) : null;
-     }*/
+    @Override
+    @Optional.Method(modid = ModIds.COMPUTERCRAFT)
+    public IPeripheral getPeripheral(World world, BlockPos pos, EnumFacing side){
+        return side.getAxis() == Axis.Y ? super.getPeripheral(world, pos, side) : null;
+    }
 }

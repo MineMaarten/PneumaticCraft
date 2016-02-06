@@ -27,6 +27,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidContainerItem;
 import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import pneumaticCraft.api.heat.IHeatExchangerLogic;
 import pneumaticCraft.api.item.IItemRegistry.EnumUpgrade;
@@ -45,10 +46,16 @@ import pneumaticCraft.common.thirdparty.computercraft.ILuaMethod;
 import pneumaticCraft.common.thirdparty.computercraft.LuaMethod;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.common.util.TileEntityCache;
+import pneumaticCraft.lib.ModIds;
 import pneumaticCraft.lib.PneumaticValues;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.peripheral.IPeripheral;
 
-//TODO Computercraft dep @Optional.InterfaceList({@Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = ModIds.COMPUTERCRAFT)})
-public class TileEntityBase extends TileEntity implements IGUIButtonSensitive, IDescSynced, ITickable, IUpgradeAcceptor/*, IPeripheral*/{
+@Optional.InterfaceList({@Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = ModIds.COMPUTERCRAFT)})
+public class TileEntityBase extends TileEntity implements IGUIButtonSensitive, IDescSynced, ITickable,
+        IUpgradeAcceptor, IPeripheral{
     /**
      * True only the first time updateEntity invokes in a session.
      */
@@ -557,56 +564,56 @@ public class TileEntityBase extends TileEntity implements IGUIButtonSensitive, I
         }
     }
 
-    /* @Override
-     public String getType(){
-         return getBlockType().getUnlocalizedName().substring(5);
-     }
+    @Override
+    public String getType(){
+        return getBlockType().getUnlocalizedName().substring(5);
+    }
 
-     @Override
-     public String[] getMethodNames(){
-         String[] methodNames = new String[luaMethods.size()];
-         for(int i = 0; i < methodNames.length; i++) {
-             methodNames[i] = luaMethods.get(i).getMethodName();
-         }
-         return methodNames;
-     }
+    @Override
+    public String[] getMethodNames(){
+        String[] methodNames = new String[luaMethods.size()];
+        for(int i = 0; i < methodNames.length; i++) {
+            methodNames[i] = luaMethods.get(i).getMethodName();
+        }
+        return methodNames;
+    }
 
-     public List<ILuaMethod> getLuaMethods(){
-         return luaMethods;
-     }
+    public List<ILuaMethod> getLuaMethods(){
+        return luaMethods;
+    }
 
-     @Override
-     @Optional.Method(modid = ModIds.COMPUTERCRAFT)
-     public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException{
-         try {
-             return luaMethods.get(method).call(arguments);
-         } catch(Exception e) {
-             throw new LuaException(e.getMessage());
-         }
-     }
+    @Override
+    @Optional.Method(modid = ModIds.COMPUTERCRAFT)
+    public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException{
+        try {
+            return luaMethods.get(method).call(arguments);
+        } catch(Exception e) {
+            throw new LuaException(e.getMessage());
+        }
+    }
 
-     @Override
-     @Optional.Method(modid = ModIds.COMPUTERCRAFT)
-     public void attach(IComputerAccess computer){}
+    @Override
+    @Optional.Method(modid = ModIds.COMPUTERCRAFT)
+    public void attach(IComputerAccess computer){}
 
-     @Override
-     @Optional.Method(modid = ModIds.COMPUTERCRAFT)
-     public void detach(IComputerAccess computer){}
+    @Override
+    @Optional.Method(modid = ModIds.COMPUTERCRAFT)
+    public void detach(IComputerAccess computer){}
 
-     @Override
-     @Optional.Method(modid = ModIds.COMPUTERCRAFT)
-     public boolean equals(IPeripheral other){
-         if(other == null) {
-             return false;
-         }
-         if(this == other) {
-             return true;
-         }
-         if(other instanceof TileEntity) {
-             TileEntity tother = (TileEntity)other;
-             return tother.getWorldObj().equals(worldObj) && tother.getPos().getX() == getPos().getX() && tother.getPos().getY() == getPos().getY() && tother.getPos().getZ() == getPos().getZ();
-         }
+    @Override
+    @Optional.Method(modid = ModIds.COMPUTERCRAFT)
+    public boolean equals(IPeripheral other){
+        if(other == null) {
+            return false;
+        }
+        if(this == other) {
+            return true;
+        }
+        if(other instanceof TileEntity) {
+            TileEntity tother = (TileEntity)other;
+            return tother.getWorld().equals(worldObj) && tother.getPos().equals(getPos());
+        }
 
-         return false;
-     }*/
+        return false;
+    }
 }

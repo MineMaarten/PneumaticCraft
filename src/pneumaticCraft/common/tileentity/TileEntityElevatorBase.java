@@ -722,10 +722,10 @@ public class TileEntityElevatorBase extends TileEntityPneumaticBase implements I
      * COMPUTERCRAFT API
      */
 
-    /* TODO CC dep @Override
-     public String getType(){
-         return "elevator";
-     }*/
+    @Override
+    public String getType(){
+        return "elevator";
+    }
 
     @Override
     protected void addLuaMethods(){

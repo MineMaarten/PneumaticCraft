@@ -28,6 +28,7 @@ import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import pneumaticCraft.PneumaticCraft;
@@ -42,9 +43,12 @@ import pneumaticCraft.common.util.FluidUtils;
 import pneumaticCraft.common.util.PneumaticCraftUtils;
 import pneumaticCraft.lib.ModIds;
 import pneumaticCraft.proxy.CommonProxy.EnumGuiId;
+import dan200.computercraft.api.peripheral.IPeripheral;
+import dan200.computercraft.api.peripheral.IPeripheralProvider;
 
-//TODO Computercraft dep @Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheralProvider", modid = ModIds.COMPUTERCRAFT)
-public abstract class BlockPneumaticCraft extends BlockContainer implements IPneumaticWrenchable, IUpgradeAcceptor/*, IPeripheralProvider*/{
+@Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheralProvider", modid = ModIds.COMPUTERCRAFT)
+public abstract class BlockPneumaticCraft extends BlockContainer implements IPneumaticWrenchable, IUpgradeAcceptor,
+        IPeripheralProvider{
 
     public static final PropertyEnum<EnumFacing> ROTATION = PropertyEnum.<EnumFacing> create("facing", EnumFacing.class);
 
@@ -279,12 +283,12 @@ public abstract class BlockPneumaticCraft extends BlockContainer implements IPne
      * @see dan200.computercraft.api.ComputerCraftAPI#registerPeripheralProvider(IPeripheralProvider)
      * @return a peripheral, or null if there is not a peripheral here you'd like to handle.
      */
-    /*  @Override
-      @Optional.Method(modid = ModIds.COMPUTERCRAFT)
-      public IPeripheral getPeripheral(World world, int x, int y, int z, int side){
-          TileEntity te = world.getTileEntity(x, y, z);
-          return te instanceof IPeripheral ? (IPeripheral)te : null;
-      }*/
+    @Override
+    @Optional.Method(modid = ModIds.COMPUTERCRAFT)
+    public IPeripheral getPeripheral(World world, BlockPos pos, EnumFacing side){
+        TileEntity te = world.getTileEntity(pos);
+        return te instanceof IPeripheral ? (IPeripheral)te : null;
+    }
 
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, EntityPlayer player, List curInfo, boolean extraInfo){

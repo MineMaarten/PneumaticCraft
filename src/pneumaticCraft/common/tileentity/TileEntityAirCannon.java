@@ -757,10 +757,10 @@ public class TileEntityAirCannon extends TileEntityPneumaticBase implements ISid
      *  COMPUTERCRAFT API
      */
 
-    /*@Override TODO CC dep
+    @Override
     public String getType(){
         return "airCannon";
-    }*/
+    }
 
     @Override
     protected void addLuaMethods(){

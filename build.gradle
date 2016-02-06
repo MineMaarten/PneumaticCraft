@@ -55,7 +55,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 project.ext {
 	massive = "1"
     major = "13"
-    minor = "5"
+    minor = "6"
     mcVersion = "1.8.9"
 }
 
@@ -87,7 +87,7 @@ dependencies {
     //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'
     //compile 'net.industrial-craft:industrialcraft-2:2.2.504-experimental:api'
 	compile "igwmod:IGW-Mod-1.8.8:1.2.1-1:userdev"
-	//compile "li.cil.oc:OpenComputers:MC1.7.10-1.4.5.28:api"
+	compile "li.cil.oc:OpenComputers:MC1.8.9-1.5.22.5:api"
 	//compile "com.pahimar.ee3:EquivalentExchange3:1.7.10-0.3.505:dev"
 	//	compile "appeng:appliedenergistics2:rv2-stable-10:dev" Don't use the AE2 maven, as of the time of writing this it didn't work.
 

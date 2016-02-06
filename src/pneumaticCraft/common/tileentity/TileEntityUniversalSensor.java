@@ -442,10 +442,10 @@ public class TileEntityUniversalSensor extends TileEntityPneumaticBase implement
     /*
      * COMPUTERCRAFT API
      */
-    /*TODO CC dep @Override
-     public String getType(){
-         return "universalSensor";
-     }*/
+    @Override
+    public String getType(){
+        return "universalSensor";
+    }
 
     @Override
     public void addLuaMethods(){
