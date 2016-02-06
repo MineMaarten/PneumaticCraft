@@ -541,6 +541,18 @@ IWidgetListener{
           return false;
       }
     */
+
+    public List<Rectangle> getTabRectangles(){
+        List<Rectangle> rects = new ArrayList<Rectangle>();
+        for(IGuiWidget widget : widgets) {
+            if(widget instanceof IGuiAnimatedStat) {
+                IGuiAnimatedStat stat = (IGuiAnimatedStat)widget;
+                rects.add(stat.getBounds());
+            }
+        }
+        return rects;
+    }
+
     @Override
     public void onKeyTyped(IGuiWidget widget){
 

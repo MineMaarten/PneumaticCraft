@@ -5,6 +5,7 @@ import java.util.List;
 
 import mezz.jei.api.IItemRegistry;
 import mezz.jei.api.IJeiHelpers;
+import mezz.jei.api.IJeiRuntime;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.IModRegistry;
 import mezz.jei.api.IRecipeRegistry;
@@ -65,6 +66,8 @@ public class JEI implements IModPlugin{
         registry.addRecipeClickArea(GuiThermopneumaticProcessingPlant.class, 25, 20, 48, 22, new JEIThermopneumaticProcessingPlantManager(jeiHelpers).getUid());
 
         jeiHelpers.getItemBlacklist().addItemToBlacklist(new ItemStack(Blockss.droneRedstoneEmitter, 1, OreDictionary.WILDCARD_VALUE));
+
+        registry.addAdvancedGuiHandlers(new GuiTabHandler());
     }
 
     private void register(IModRegistry registry, PneumaticCraftPlugins plugin){
@@ -91,6 +94,11 @@ public class JEI implements IModPlugin{
             stacks.add(widget.getFluid());
         }
         return stacks;
+    }
+
+    @Override
+    public void onRuntimeAvailable(IJeiRuntime jeiRuntime){
+
     }
 
 }
