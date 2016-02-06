@@ -28,7 +28,7 @@ public class Fluids{
     public static final Fluid etchingAcid = new FluidPneumaticCraft("etchacid", false){
         @Override
         public int getColor(){
-            return getBlock().colorMultiplier(null, null);
+            return 0xFF000000 | getBlock().colorMultiplier(null, null);
         }
     };
     public static final Fluid plastic = new FluidPlastic("plastic");
