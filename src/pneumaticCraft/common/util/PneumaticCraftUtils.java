@@ -382,7 +382,7 @@ public class PneumaticCraftUtils{
      * @return
      */
     public static int getRedstoneLevel(World world, BlockPos pos){
-        return world.isBlockIndirectlyGettingPowered(pos);
+        return world != null ? world.isBlockIndirectlyGettingPowered(pos) : 0;
     }
 
     public static int getRedstoneLevel(World world, BlockPos pos, EnumFacing dir){
