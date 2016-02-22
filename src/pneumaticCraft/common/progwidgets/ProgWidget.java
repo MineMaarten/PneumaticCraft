@@ -198,7 +198,7 @@ public abstract class ProgWidget implements IProgWidget{
 
     @Override
     public void setParameter(int index, IProgWidget parm){
-        if(connectedParameters != null) connectedParameters[index] = parm;
+        if(connectedParameters != null && (parm == null || parm.getClass() == getParameters()[index])) connectedParameters[index] = parm;
     }
 
     @Override
