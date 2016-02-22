@@ -9,6 +9,7 @@ import net.minecraft.world.gen.ChunkProviderFlat;
 import net.minecraft.world.gen.feature.WorldGenLakes;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.IWorldGenerator;
+import pneumaticCraft.PneumaticCraft;
 import pneumaticCraft.common.config.Config;
 import pneumaticCraft.common.fluid.Fluids;
 
@@ -37,6 +38,7 @@ public class WorldGeneratorPneumaticCraft implements IWorldGenerator{
 
     public void generateSurface(World world, Random rand, int chunkX, int chunkZ){
         if(rand.nextDouble() < Config.oilGenerationChance / 100D) {
+            PneumaticCraft.instance.validateFluids(null);
             int y = rand.nextInt(rand.nextInt(128) + 8);
             new WorldGenLakes(FluidRegistry.getFluid(Fluids.oil.getName()).getBlock()).generate(world, rand, new BlockPos(chunkX + 8, y, chunkZ + 8));
         }
