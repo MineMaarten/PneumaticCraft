@@ -23,6 +23,7 @@ public class HeatBehaviourManager{
         registerBehaviour(HeatBehaviourLava.class);
         registerBehaviour(HeatBehaviourWaterVaporate.class);
         registerBehaviour(HeatBehaviourWaterSolidify.class);
+        registerBehaviour(HeatBehaviourFireTransition.class);
         registerBehaviour(HeatBehaviourHeatFrame.class);
     }
 
