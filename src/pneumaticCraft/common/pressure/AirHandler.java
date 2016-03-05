@@ -214,6 +214,8 @@ public class AirHandler implements IAirHandler{
                     int transfered = Math.min(dividedValue, maxTransfer);//cap it at the max it can have.
                     disp.setValue(disp.getValue() + transfered);
                     toBeDivided -= transfered;
+                } else {
+                    receivers--;
                 }
             }
         }

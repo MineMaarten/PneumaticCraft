@@ -55,7 +55,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 project.ext {
 	massive = "1"
     major = "13"
-    minor = "7"
+    minor = "8"
     mcVersion = "1.8.9"
 }
 

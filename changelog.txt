@@ -1,4 +1,1 @@
--Nerfed Fire as a heat source.
-
--Bugfix: Gas Lift crash.
--Bugfix: Crash with Drones when placing down piece parameters in a spot they aren't allowed to go.
+-Bugfix: Stall with pneumatic logic.
