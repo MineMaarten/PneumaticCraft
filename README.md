@@ -1,3 +1,8 @@
+=======
+A port of the mod has been created at a different repo, see https://github.com/TeamPneumatic/pnc-repressurized
+=======
+
+
 PneumaticCraft
 ==================
 
