@@ -168,7 +168,7 @@ public class EntityDrone extends EntityDroneBase implements IManoMeasurable, IIn
     }
 
     private void initializeFakePlayer(){
-        fakePlayer = new DroneFakePlayer((WorldServer)worldObj, new GameProfile(playerUUID != null ? UUID.fromString(playerUUID) : null, playerName), new FakePlayerItemInWorldManager(worldObj, fakePlayer, this), this);
+        fakePlayer = new DroneFakePlayer((WorldServer)worldObj,  new GameProfile(UUID.nameUUIDFromBytes("pneumaticcraft".getBytes()), "[PneumaticCraftDrone]"), new FakePlayerItemInWorldManager(worldObj, fakePlayer, this), this);
         fakePlayer.playerNetServerHandler = new NetHandlerPlayServer(MinecraftServer.getServer(), new NetworkManager(false), fakePlayer);
         fakePlayer.inventory = new InventoryFakePlayer(fakePlayer);
     }
