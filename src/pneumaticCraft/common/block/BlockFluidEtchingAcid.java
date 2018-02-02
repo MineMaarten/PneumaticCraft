@@ -44,5 +44,8 @@ public class BlockFluidEtchingAcid extends BlockFluidPneumaticCraft{
     }
 
     @Override
-    public void registerBlockIcons(IIconRegister par1IconRegister){}
+    public void registerBlockIcons(IIconRegister register){
+    	flowingIcon = register.registerIcon("pneumaticcraft:" + getFluid().getName() + "_flow");
+        stillIcon = register.registerIcon("pneumaticcraft:" + getFluid().getName() + "_still");
+    }
 }
